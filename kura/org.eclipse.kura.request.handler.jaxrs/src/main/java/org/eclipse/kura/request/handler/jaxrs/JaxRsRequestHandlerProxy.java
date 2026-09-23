@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,6 +14,14 @@ package org.eclipse.kura.request.handler.jaxrs;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
+import com.google.gson.Gson;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +34,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -40,16 +47,6 @@ import org.eclipse.kura.request.handler.jaxrs.consumer.RequestParameterHandler;
 import org.eclipse.kura.request.handler.jaxrs.consumer.ResponseBodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 
 public class JaxRsRequestHandlerProxy implements RequestHandler {
 
@@ -161,7 +158,8 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
 
             final Class<?> type = parameter.getType();
 
-            if (Arrays.asList(parameter.getAnnotations()).stream().map(a -> a.annotationType())
+            if (Arrays.asList(parameter.getAnnotations()).stream()
+                    .map(a -> a.annotationType())
                     .anyMatch(Context.class::equals)) {
                 handlers.add(RequestParameterHandlers.nullArgumentHandler());
             } else if (type == InputStream.class) {
@@ -169,7 +167,6 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
             } else {
                 handlers.add(RequestParameterHandlers.gsonArgumentHandler(type, gson));
             }
-
         }
 
         final RequestParameterHandler parameterHandler = RequestParameterHandlers.fromArgumentHandlers(handlers);
@@ -221,20 +218,20 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
 
     protected KuraMessage handleException(final Throwable e) {
 
-        return DefaultExceptionHandler.toKuraMessage(DefaultExceptionHandler.toWebApplicationException(e),
-                Optional.of(gson));
+        return DefaultExceptionHandler.toKuraMessage(
+                DefaultExceptionHandler.toWebApplicationException(e), Optional.of(gson));
     }
 
     @SuppressWarnings("unchecked")
     private static List<String> extractResources(final KuraMessage request) throws KuraException {
 
         try {
-            return java.util.Objects.requireNonNull((List<String>) request.getProperties().get(ARGS_KEY.value()));
+            return java.util.Objects.requireNonNull(
+                    (List<String>) request.getProperties().get(ARGS_KEY.value()));
         } catch (final Exception e) {
             logger.warn("failed to get resources from request");
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
-
     }
 
     public static class Endpoint {
@@ -266,7 +263,6 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
             Endpoint other = (Endpoint) obj;
             return method == other.method && Objects.equals(relativePath, other.relativePath);
         }
-
     }
 
     public static class MethodProxy {

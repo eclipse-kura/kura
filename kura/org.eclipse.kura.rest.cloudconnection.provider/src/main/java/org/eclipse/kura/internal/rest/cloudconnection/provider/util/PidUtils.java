@@ -16,9 +16,7 @@ import java.util.Iterator;
 
 public class PidUtils {
 
-    private PidUtils() {
-
-    }
+    private PidUtils() {}
 
     public static String getPidFilter(final Iterator<String> pids) {
         if (!pids.hasNext()) {

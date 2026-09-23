@@ -12,15 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import junit.framework.TestCase;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
 public class CommURITest extends TestCase {
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testSyntax() throws Exception {
         CommURI commUri = new CommURI.Builder("/dev/ttyUSB0").withBaudRate(4800).build();
@@ -31,5 +30,4 @@ public class CommURITest extends TestCase {
 
         assertEquals(commUri1.toString(), commUri.toString());
     }
-
 }

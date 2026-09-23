@@ -48,5 +48,4 @@ public class KeystoreInfo {
     public void setSize(int size) {
         this.size = size;
     }
-
 }

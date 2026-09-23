@@ -18,24 +18,23 @@ import static org.eclipse.kura.driver.Driver.DRIVER_PID_PROPERTY_NAME;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+
 /**
  * The Class DriverServiceImpl is an implementation of the utility API
  * {@link DriverService} to provide useful factory methods for drivers
  */
 @Component(
-    name = "org.eclipse.kura.driver.DriverService",
-    immediate = true,
-    service = { org.eclipse.kura.driver.DriverService.class })
+        name = "org.eclipse.kura.driver.DriverService",
+        immediate = true,
+        service = {org.eclipse.kura.driver.DriverService.class})
 public class DriverServiceImpl implements DriverService {
 
     private BundleContext bundleContext;
@@ -105,5 +104,4 @@ public class DriverServiceImpl implements DriverService {
     protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {
         ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
     }
-
 }

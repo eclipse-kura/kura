@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
@@ -54,8 +53,10 @@ public class DataServiceTest extends BaseCloudTests implements DataServiceListen
     static final int ALL_CONFIRMED_QOS2_TIMEOUT = 120;
     static final int DFLT_MSG_PRIORITY = 5;
     static final int HIGH_MSG_PRIORITY = 0;
-    static final String MSG_SEMATIC_TOPIC1 = "data/service/test/" + UUID.randomUUID().toString();
-    static final String MSG_SEMATIC_TOPIC2 = "data/service/test/" + UUID.randomUUID().toString();
+    static final String MSG_SEMATIC_TOPIC1 =
+            "data/service/test/" + UUID.randomUUID().toString();
+    static final String MSG_SEMATIC_TOPIC2 =
+            "data/service/test/" + UUID.randomUUID().toString();
     static final String MSG_TOPIC1 = "#account-name/#client-id/" + MSG_SEMATIC_TOPIC1;
     static final String MSG_TOPIC2 = "#account-name/#client-id/" + MSG_SEMATIC_TOPIC2;
     static final String MSG_PAYLOAD = "Lorem ipsum dolor sit amet";
@@ -220,8 +221,8 @@ public class DataServiceTest extends BaseCloudTests implements DataServiceListen
             synchronized (s_qos12MsgIds) {
                 synchronized (s_qos12HighPriorityMsgIds) {
                     logger.info("confirm check round {}", i);
-                    s_qos12HighPriorityMsgIds
-                            .forEach(element -> logger.info("To confirm s_qos12HighPriorityMsgIds: {}", element));
+                    s_qos12HighPriorityMsgIds.forEach(
+                            element -> logger.info("To confirm s_qos12HighPriorityMsgIds: {}", element));
                     s_qos12MsgIds.forEach(element -> logger.info("To confirm s_qos12MsgIds: {}", element));
                     if (!s_qos12HighPriorityMsgIds.isEmpty() && s_qos12MsgIds.isEmpty()) {
                         fail("High priority messages should be confirmed before default priority messages");

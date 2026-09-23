@@ -15,7 +15,6 @@ package org.eclipse.kura.cloudconnection.raw.mqtt.subscriber;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
@@ -24,21 +23,25 @@ import org.eclipse.kura.cloudconnecton.raw.mqtt.util.AbstractStackComponent;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions.OptionsFactory;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = RawMqttSubscriberOptions.class, factory = true)
 public class RawMqttSubscriber extends AbstractStackComponent<SubscribeOptions>
         implements CloudSubscriber, CloudSubscriberListener {
@@ -93,7 +96,6 @@ public class RawMqttSubscriber extends AbstractStackComponent<SubscribeOptions>
         if (subscribeOptions.isPresent()) {
             currentEndpoint.registerSubscriber(subscribeOptions.get(), this);
         }
-
     }
 
     private void tryUnsubscribe() {
@@ -103,7 +105,6 @@ public class RawMqttSubscriber extends AbstractStackComponent<SubscribeOptions>
         if (endpoint.isPresent()) {
             endpoint.get().unregisterSubscriber(this);
         }
-
     }
 
     @Override

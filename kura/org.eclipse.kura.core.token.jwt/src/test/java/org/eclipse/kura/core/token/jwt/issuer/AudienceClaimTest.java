@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.token.jwt.issuer;
 
 import java.util.List;
-
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.token.jwt.common.AbstractJwtScenario;
 import org.eclipse.kura.core.token.jwt.common.IssuingConfig;
@@ -75,5 +74,4 @@ public class AudienceClaimTest extends AbstractJwtScenario {
 
         whenATokenIsIssued(builder.build());
     }
-
 }

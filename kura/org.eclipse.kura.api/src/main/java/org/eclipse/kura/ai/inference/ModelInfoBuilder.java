@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -204,7 +203,7 @@ public class ModelInfoBuilder {
         if (this.outputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The output descriptors list cannot be empty");
         }
-        return new ModelInfo(this.name, this.platform, this.version, this.parameters, this.inputDescriptors,
-                this.outputDescriptors);
+        return new ModelInfo(
+                this.name, this.platform, this.version, this.parameters, this.inputDescriptors, this.outputDescriptors);
     }
 }

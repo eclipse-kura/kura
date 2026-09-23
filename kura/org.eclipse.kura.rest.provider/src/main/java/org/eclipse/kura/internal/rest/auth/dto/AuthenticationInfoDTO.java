@@ -23,8 +23,11 @@ public class AuthenticationInfoDTO {
     private final List<Integer> certificateAuthenticationPorts;
     private final String message;
 
-    public AuthenticationInfoDTO(boolean passwordAuthenticationEnabled, boolean certificateAuthenticationEnabled,
-            Set<Integer> certificateAuthenticationPorts, final String message) {
+    public AuthenticationInfoDTO(
+            boolean passwordAuthenticationEnabled,
+            boolean certificateAuthenticationEnabled,
+            Set<Integer> certificateAuthenticationPorts,
+            final String message) {
         this.passwordAuthenticationEnabled = passwordAuthenticationEnabled;
         this.certificateAuthenticationEnabled = certificateAuthenticationEnabled;
 
@@ -53,5 +56,4 @@ public class AuthenticationInfoDTO {
     public String getMessage() {
         return this.message;
     }
-
 }

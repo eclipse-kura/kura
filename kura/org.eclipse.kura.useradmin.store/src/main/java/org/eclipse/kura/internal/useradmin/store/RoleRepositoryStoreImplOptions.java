@@ -13,10 +13,14 @@
 package org.eclipse.kura.internal.useradmin.store;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Icon;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl", name = "UserAdmin Store", description = "This component provides snapshot-based persistence to the OSGi UserAdmin service.", icon = @Icon(resource = "DenaliService", size = 32))
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl",
+        name = "UserAdmin Store",
+        description = "This component provides snapshot-based persistence to the OSGi UserAdmin service.",
+        icon = @Icon(resource = "DenaliService", size = 32))
 public @interface RoleRepositoryStoreImplOptions {
 
     @AttributeDefinition(name = "Role configuration", description = "The currently defined UserAdmin Roles.")
@@ -28,9 +32,9 @@ public @interface RoleRepositoryStoreImplOptions {
     @AttributeDefinition(name = "Group configuration", description = "The currently defined UserAdmin Groups.")
     String groups_config() default "[]";
 
-    @AttributeDefinition(name = "Write Delay (milliseconds)", description = "This service defers the snapshot updates required for persisting changes made through UserAdmin APIs. The snapshot update is performed Write Delay milliseconds after the last change performed through UserAdmin APIs.")
+    @AttributeDefinition(
+            name = "Write Delay (milliseconds)",
+            description =
+                    "This service defers the snapshot updates required for persisting changes made through UserAdmin APIs. The snapshot update is performed Write Delay milliseconds after the last change performed through UserAdmin APIs.")
     long write_delay_ms() default 5000L;
-
 }
-
-

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -34,8 +33,13 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
     /** The block devices associated with the modem **/
     private final ArrayList<String> blockDevs;
 
-    public UsbModemDevice(String vendorId, String productId, String manufacturerName, String productName,
-            String usbBusNumber, String usbDevicePath) {
+    public UsbModemDevice(
+            String vendorId,
+            String productId,
+            String manufacturerName,
+            String productName,
+            String usbBusNumber,
+            String usbDevicePath) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
 
         this.ttyDevs = new ArrayList<>();
@@ -307,7 +311,6 @@ public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
             }
             return true;
         }
-
     }
 
     private class TtyDevComparator implements Comparator<TtyDev> {

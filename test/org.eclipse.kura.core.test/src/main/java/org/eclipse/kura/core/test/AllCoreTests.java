@@ -12,11 +12,13 @@
  ******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import io.moquette.broker.Server;
+import io.moquette.broker.config.FluentConfig;
+import io.moquette.broker.config.IConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
@@ -29,13 +31,17 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.moquette.broker.Server;
-import io.moquette.broker.config.FluentConfig;
-import io.moquette.broker.config.IConfig;
-
 @RunWith(Suite.class)
-@SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class,KuraExceptionMessageTest.class, ConfigurationServiceTest.class, NetUtilTest.class, NetworkServiceTest.class,
-        SystemAdminServiceTest.class })
+@SuiteClasses({
+    InventoryHandlerTest.class,
+    CommURITest.class,
+    ComponentConfigurationImplTest.class,
+    KuraExceptionMessageTest.class,
+    ConfigurationServiceTest.class,
+    NetUtilTest.class,
+    NetworkServiceTest.class,
+    SystemAdminServiceTest.class
+})
 public class AllCoreTests {
 
     private static final Logger logger = LoggerFactory.getLogger(AllCoreTests.class);
@@ -94,8 +100,8 @@ public class AllCoreTests {
 
         try {
             // update the settings
-            ComponentConfiguration mqttConfig = configService
-                    .getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
+            ComponentConfiguration mqttConfig = configService.getComponentConfiguration(
+                    "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
             Map<String, Object> mqttProps = mqttConfig.getConfigurationProperties();
 
             logger.info("Changing cloud credentials...");
@@ -118,8 +124,8 @@ public class AllCoreTests {
             mqttProps.put("client-id", clientId);
             configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", mqttProps);
 
-            ComponentConfiguration dataConfig = configService
-                    .getComponentConfiguration("org.eclipse.kura.data.DataService");
+            ComponentConfiguration dataConfig =
+                    configService.getComponentConfiguration("org.eclipse.kura.data.DataService");
             Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
             dataProps.put("connect.auto-on-startup", false);
             dataProps.put("enable.rate.limit", false);
@@ -153,7 +159,11 @@ public class AllCoreTests {
         // moquette.conf from the filesystem. Under bnd-testing the working directory is not the
         // module directory, so a file-based loader cannot find the resource; the same settings
         // (port 1883, anonymous, no persistence, 16 MiB max message) are expressed here directly.
-        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+        IConfig brokerConfig = new FluentConfig()
+                .port(1883)
+                .host("0.0.0.0")
+                .disablePersistence()
+                .build();
         brokerConfig.setProperty(IConfig.NETTY_MAX_BYTES_PROPERTY_NAME, "16777216");
         brokerConfig.setProperty(IConfig.WEB_SOCKET_PORT_PROPERTY_NAME, "8080");
 

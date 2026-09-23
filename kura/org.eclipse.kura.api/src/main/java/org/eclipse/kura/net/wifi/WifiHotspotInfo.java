@@ -1,19 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.wifi;
 
 import java.util.EnumSet;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -33,8 +32,8 @@ public class WifiHotspotInfo {
     private EnumSet<WifiSecurity> pairCiphers;
     private EnumSet<WifiSecurity> groupCiphers;
 
-    public WifiHotspotInfo(String ssid, String macAddress, int signalLevel, int channel, int frequency,
-            WifiSecurity security) {
+    public WifiHotspotInfo(
+            String ssid, String macAddress, int signalLevel, int channel, int frequency, WifiSecurity security) {
         super();
         this.ssid = ssid;
         this.macAddress = macAddress;
@@ -45,8 +44,15 @@ public class WifiHotspotInfo {
     }
 
     @SuppressWarnings("checkstyle:parameterNumber")
-    public WifiHotspotInfo(String ssid, String macAddress, int signalLevel, int channel, int frequency,
-            WifiSecurity security, EnumSet<WifiSecurity> pairCiphers, EnumSet<WifiSecurity> groupCiphers) {
+    public WifiHotspotInfo(
+            String ssid,
+            String macAddress,
+            int signalLevel,
+            int channel,
+            int frequency,
+            WifiSecurity security,
+            EnumSet<WifiSecurity> pairCiphers,
+            EnumSet<WifiSecurity> groupCiphers) {
         this(ssid, macAddress, signalLevel, channel, frequency, security);
         this.pairCiphers = pairCiphers;
         this.groupCiphers = groupCiphers;

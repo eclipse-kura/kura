@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -64,7 +64,7 @@ public enum KuraErrorCode {
     CONFIGURATION_SNAPSHOT_LOADING,
     /**
      * An internal error occurred. {0}
-     * 
+     *
      * @deprecated
      */
     @Deprecated
@@ -149,7 +149,7 @@ public enum KuraErrorCode {
     OS_COMMAND_ERROR,
     /**
      * Invalid parameter. {0}
-     * 
+     *
      * @since 1.0.8
      */
     INVALID_PARAMETER,
@@ -173,91 +173,91 @@ public enum KuraErrorCode {
     BLE_NOTIFICATION_ERROR,
     /**
      * Error during BLE connection.
-     * 
+     *
      * @since 1.3
      */
     BLE_CONNECTION_ERROR,
     /**
      * Error during BLE pairing.
-     * 
+     *
      * @since 1.3
      */
     BLE_PAIR_ERROR,
     /**
      * BLE resource not found.
-     * 
+     *
      * @since 1.3
      */
     BLE_RESOURCE_NOT_FOUND,
     /**
      * Error during BLE IO activity.
-     * 
+     *
      * @since 1.3
      */
     BLE_IO_ERROR,
     /**
      * Error executing {0} command.
-     * 
+     *
      * @since 1.3
      */
     BLE_COMMAND_ERROR,
     /**
      * Error during discovery procedure.
-     * 
+     *
      * @since 1.3
      */
     BLE_DISCOVERY_ERROR,
     /**
      * Error during device remove.
-     * 
+     *
      * @since 2.0
      */
     BLE_REMOVE_ERROR,
     /**
      * Bad request.
-     * 
+     *
      * @since 2.0
      */
     BAD_REQUEST,
     /**
      * Not found.
-     * 
+     *
      * @since 2.0
      */
     NOT_FOUND,
     /**
      * Service unavailable. {0}.
-     * 
+     *
      * @since 2.0
      */
     SERVICE_UNAVAILABLE,
     /**
      * Disconnection failed.
-     * 
+     *
      * @since 2.0
      */
     DISCONNECTION_FAILED,
     /**
      * Error during IO operation.
-     * 
+     *
      * @since 2.2
      */
     IO_ERROR,
     /**
      * Modem unsupported.
-     * 
+     *
      * @since 2.3
      */
     UNSUPPORTED_MODEM,
     /**
      * Certificate invalid.
-     * 
+     *
      * @since 2.4
      */
     INVALID_CERTIFICATE_EXCEPTION,
     /**
      * Authentication failed: {0}.
-     * 
+     *
      * @since 3.0
      */
     AUTHENTICATION_FAILED

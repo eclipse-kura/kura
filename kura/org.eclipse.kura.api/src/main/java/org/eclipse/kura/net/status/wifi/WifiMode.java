@@ -28,5 +28,4 @@ public enum WifiMode {
     MASTER,
     /** IEEE 802.11s mesh network. */
     MESH;
-
 }

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SubscriptionRecord;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SubscriptionsMap;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
@@ -41,7 +40,7 @@ public class SubscriptionsMapTest {
     public void removeSomeShouldNotReturnTopicsToUnsubscribe() {
         givenSubscriptionMapWith("t1", 0, this.subListener1);
         givenSubscriptionMapWith("t1", 0, this.subListener2);
-        
+
         whenRemoveIsCalledFor(this.subListener1);
 
         thenSubscriptionRecordsContains(new SubscriptionRecord("t1", 0));

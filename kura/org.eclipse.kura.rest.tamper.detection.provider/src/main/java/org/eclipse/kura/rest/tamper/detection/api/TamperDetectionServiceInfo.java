@@ -16,6 +16,7 @@ public class TamperDetectionServiceInfo {
 
     @SuppressWarnings("unused")
     private final String pid;
+
     @SuppressWarnings("unused")
     private final String displayName;
 

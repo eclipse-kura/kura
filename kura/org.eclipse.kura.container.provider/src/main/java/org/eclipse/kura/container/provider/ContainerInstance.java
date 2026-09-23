@@ -39,9 +39,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -63,9 +62,6 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -75,11 +71,14 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.container.provider.ContainerInstance",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.container.provider.ContainerInstance",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.configuration.ConfigurableComponent.class})
 @Designate(ocd = ContainerInstanceMetatype.class, factory = true)
 public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
@@ -110,14 +109,16 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
     private final TokenFileManager tokenFileManager = new TokenFileManager();
 
-    @Reference(name = "ContainerOrchestrationService",
+    @Reference(
+            name = "ContainerOrchestrationService",
             service = org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class,
             unbind = "-")
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
     }
 
-    @Reference(name = "PasswordStrengthVerificationService",
+    @Reference(
+            name = "PasswordStrengthVerificationService",
             service = org.eclipse.kura.identity.PasswordStrengthVerificationService.class,
             unbind = "-")
     public void setPasswordStrengthVerificationService(
@@ -125,7 +126,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
-    @Reference(name = "ContainerSignatureValidationService",
+    @Reference(
+            name = "ContainerSignatureValidationService",
             service = org.eclipse.kura.container.signature.ContainerSignatureValidationService.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -139,12 +141,15 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     public synchronized void unsetContainerSignatureValidationService(
             final ContainerSignatureValidationService containerSignatureValidationService) {
-        logger.info("Container signature validation service {} removed.",
-                containerSignatureValidationService.getClass());
+        logger.info(
+                "Container signature validation service {} removed.", containerSignatureValidationService.getClass());
         this.availableContainerSignatureValidationService.remove(containerSignatureValidationService);
     }
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public synchronized void setConfigurationService(final ConfigurationService confService) {
         this.configurationService = confService;
     }
@@ -154,7 +159,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.identityService = identityService;
     }
 
-    @Reference(name = "NetworkService",
+    @Reference(
+            name = "NetworkService",
             service = org.eclipse.kura.net.NetworkService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             unbind = "-")
@@ -201,24 +207,22 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     ValidationResult containerSignatureValidated = validateContainerImageSignature(this.currentOptions);
 
-                    logger.info("Container signature validation result for {}@{}({}) - {}",
+                    logger.info(
+                            "Container signature validation result for {}@{}({}) - {}",
                             this.currentOptions.getContainerImage(),
                             containerSignatureValidated.imageDigest().orElse("?"),
                             this.currentOptions.getContainerImageTag(),
                             containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
 
                     containerSignatureValidated.imageDigest().ifPresent(digest -> {
-
                         Map<String, Object> updatedProperties = updatePropertiesWithSignatureDigest(properties, digest);
                         this.currentOptions = new ContainerInstanceOptions(updatedProperties);
                         updateSnapshotWithSignatureDigest(updatedProperties);
-
                     });
 
                 } else {
                     logger.info("No trust anchor available. Signature validation skipped.");
                 }
-
             }
 
             if (this.currentOptions.isEnabled()) {
@@ -230,11 +234,12 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             updateState(s -> s.onConfigurationUpdated(this.currentOptions));
 
         } catch (Exception e) {
-            logger.error("Failed to create container instance. Please check configuration of container: {}. Caused by:",
-                    properties.get(ConfigurationService.KURA_SERVICE_PID), e);
+            logger.error(
+                    "Failed to create container instance. Please check configuration of container: {}. Caused by:",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID),
+                    e);
             updateState(State::onDisabled);
         }
-
     }
 
     @Deactivate
@@ -293,22 +298,30 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
         Optional<RegistryCredentials> registryCredentials = configuration.getRegistryCredentials();
 
-        for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
+        for (ContainerSignatureValidationService validationService :
+                this.availableContainerSignatureValidationService) {
             ValidationResult results = FAILED_VALIDATION;
 
             try {
                 if (registryCredentials.isPresent()) {
-                    results = validationService.verify(configuration.getContainerImage(),
-                            configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
+                    results = validationService.verify(
+                            configuration.getContainerImage(),
+                            configuration.getContainerImageTag(),
+                            trustAnchor,
+                            verifyInTransparencyLog,
                             registryCredentials.get());
                 } else {
-                    results = validationService.verify(configuration.getContainerImage(),
-                            configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+                    results = validationService.verify(
+                            configuration.getContainerImage(),
+                            configuration.getContainerImageTag(),
+                            trustAnchor,
+                            verifyInTransparencyLog);
                 }
             } catch (KuraException e) {
                 logger.warn(
                         "Error validating container signature with {}. Setting validation results as FAILED. Caused by: ",
-                        validationService.getClass(), e);
+                        validationService.getClass(),
+                        e);
             }
 
             if (results.isSignatureValid()) {
@@ -322,14 +335,18 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private synchronized void updateState(final UnaryOperator<State> update) {
         final State previous = this.state;
         final State newState = update.apply(previous);
-        logger.info("State update: {} -> {}", previous.getClass().getSimpleName(), newState.getClass().getSimpleName());
+        logger.info(
+                "State update: {} -> {}",
+                previous.getClass().getSimpleName(),
+                newState.getClass().getSimpleName());
 
         this.state = newState;
     }
 
     private Optional<ContainerInstanceDescriptor> getExistingContainerByName(final String containerName) {
         return containerOrchestrationService.listContainerDescriptors().stream()
-                .filter(c -> c.getContainerName().equals(containerName)).findAny();
+                .filter(c -> c.getContainerName().equals(containerName))
+                .findAny();
     }
 
     private interface State {
@@ -353,7 +370,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         public default State onDisabled() {
             return this;
         }
-
     }
 
     private class Disabled implements State {
@@ -389,7 +405,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             if (existingContainer.isPresent()) {
 
-                logger.info("found existing container with name {}",
+                logger.info(
+                        "found existing container with name {}",
                         newOptions.getContainerConfiguration().getContainerName());
                 if (isInstanceEnabled) {
                     return new Starting(newOptions);
@@ -404,7 +421,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 } else {
                     return new Disabled(newOptions);
                 }
-
             }
         }
     }
@@ -419,8 +435,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             this.startupFuture = ContainerInstance.this.executor.submit(() -> startMicroservice(options));
         }
 
-        private ContainerConfiguration getContainerConfigurationWithCredentials(
-                final ContainerInstanceOptions options) throws KuraException {
+        private ContainerConfiguration getContainerConfigurationWithCredentials(final ContainerInstanceOptions options)
+                throws KuraException {
             ContainerConfiguration baseConfig = options.getContainerConfiguration();
 
             final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
@@ -440,19 +456,26 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 final Map<String, String> volumes = new HashMap<>(baseConfig.getContainerVolumes());
                 volumes.put(tokenFile.toAbsolutePath().toString(), CONTAINER_TOKEN_PATH + READ_ONLY_VOLUME_SUFFIX);
 
-                return ContainerConfiguration.builder().setContainerName(baseConfig.getContainerName())
+                return ContainerConfiguration.builder()
+                        .setContainerName(baseConfig.getContainerName())
                         .setImageConfiguration(baseConfig.getImageConfiguration())
-                        .setContainerPorts(baseConfig.getContainerPorts()).setEnvVars(envVars)
+                        .setContainerPorts(baseConfig.getContainerPorts())
+                        .setEnvVars(envVars)
                         .setVolumes(volumes)
                         .setPrivilegedMode(baseConfig.isContainerPrivileged())
                         .setDeviceList(baseConfig.getContainerDevices())
                         .setFrameworkManaged(baseConfig.isFrameworkManaged())
                         .setLoggingType(baseConfig.getContainerLoggingType())
                         .setContainerNetowrkConfiguration(baseConfig.getContainerNetworkConfiguration())
-                        .setLoggerParameters(baseConfig.getLoggerParameters()).setEntryPoint(baseConfig.getEntryPoint())
-                        .setRestartOnFailure(baseConfig.getRestartOnFailure()).setMemory(baseConfig.getMemory())
-                        .setCpus(baseConfig.getCpus()).setGpus(baseConfig.getGpus()).setRuntime(baseConfig.getRuntime())
-                        .setEnforcementDigest(baseConfig.getEnforcementDigest()).build();
+                        .setLoggerParameters(baseConfig.getLoggerParameters())
+                        .setEntryPoint(baseConfig.getEntryPoint())
+                        .setRestartOnFailure(baseConfig.getRestartOnFailure())
+                        .setMemory(baseConfig.getMemory())
+                        .setCpus(baseConfig.getCpus())
+                        .setGpus(baseConfig.getGpus())
+                        .setRuntime(baseConfig.getRuntime())
+                        .setEnforcementDigest(baseConfig.getEnforcementDigest())
+                        .build();
             }
 
             return baseConfig;
@@ -463,23 +486,27 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 try {
                     cleanupTemporaryIdentity();
 
-                    final Set<Permission> permissions = options.getContainerPermissions().stream().map(Permission::new)
+                    final Set<Permission> permissions = options.getContainerPermissions().stream()
+                            .map(Permission::new)
                             .collect(Collectors.toSet());
 
                     // Generate password as char[] to minimize exposure
-                    final char[] password = PasswordGenerator
-                            .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements());
+                    final char[] password = PasswordGenerator.generatePassword(
+                            passwordStrengthVerificationService.getPasswordStrengthRequirements());
 
-                    final String identityName = createTemporaryIdentityWithValidName(options, permissions,
-                            new String(password));
+                    final String identityName =
+                            createTemporaryIdentityWithValidName(options, permissions, new String(password));
 
                     // Store identity name and a copy of the password for env injection
                     ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
                     ContainerInstance.this.currentTemporaryPassword.set(Arrays.copyOf(password, password.length));
                     Arrays.fill(password, '\0');
 
-                    logger.info("Created temporary identity {} for container {} with {} permissions", identityName,
-                            options.getContainerName(), permissions.size());
+                    logger.info(
+                            "Created temporary identity {} for container {} with {} permissions",
+                            identityName,
+                            options.getContainerName(),
+                            permissions.size());
 
                 } catch (KuraException e) {
                     logger.error("Failed to create temporary identity for container {}", options.getContainerName(), e);
@@ -489,8 +516,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
         }
 
-        private String createTemporaryIdentityWithValidName(final ContainerInstanceOptions options,
-                final Set<Permission> permissions, final String password) throws KuraException {
+        private String createTemporaryIdentityWithValidName(
+                final ContainerInstanceOptions options, final Set<Permission> permissions, final String password)
+                throws KuraException {
 
             final String baseIdentityName = sanitizeContainerIdentityName(options.getContainerName());
 
@@ -498,11 +526,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 final String candidateName = buildIdentityNameCandidate(baseIdentityName, attempt);
 
                 try {
-                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(false, true,
-                            Optional.of(password.toCharArray()), Optional.empty());
+                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(
+                            false, true, Optional.of(password.toCharArray()), Optional.empty());
                     final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
-                    final IdentityConfiguration configuration = new IdentityConfiguration(candidateName,
-                            Arrays.asList(passwordConfiguration, assignedPermissions));
+                    final IdentityConfiguration configuration = new IdentityConfiguration(
+                            candidateName, Arrays.asList(passwordConfiguration, assignedPermissions));
 
                     ContainerInstance.this.identityService.createTemporaryIdentity(candidateName, Duration.ofDays(365));
                     ContainerInstance.this.identityService.updateIdentityConfiguration(configuration);
@@ -515,7 +543,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 }
             }
 
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
+            throw new KuraException(
+                    KuraErrorCode.INTERNAL_ERROR,
                     "Unable to generate a valid temporary identity name for container " + options.getContainerName());
         }
 
@@ -575,8 +604,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             final String message = e.getMessage();
-            return message != null && (message.contains("Identity name") || message.contains("identity with name")
-                    || message.contains("already exists"));
+            return message != null
+                    && (message.contains("Identity name")
+                            || message.contains("identity with name")
+                            || message.contains("already exists"));
         }
 
         @Override
@@ -613,8 +644,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             this.startupFuture.cancel(true);
 
             try {
-                final Optional<ContainerInstanceDescriptor> existingInstance = getExistingContainerByName(
-                        this.options.getContainerName());
+                final Optional<ContainerInstanceDescriptor> existingInstance =
+                        getExistingContainerByName(this.options.getContainerName());
 
                 if (existingInstance.isPresent()) {
                     return new Created(this.options, existingInstance.get().getContainerId()).onDisabled();
@@ -641,14 +672,17 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             try {
                 containerConfiguration = getContainerConfigurationWithCredentials(options);
             } catch (final KuraException e) {
-                logger.error("Failed to prepare the credential token file for container {}, aborting startup",
-                        options.getContainerName(), e);
+                logger.error(
+                        "Failed to prepare the credential token file for container {}, aborting startup",
+                        options.getContainerName(),
+                        e);
                 updateState(State::onStartupFailure);
                 return;
             }
 
             int retries = 0;
-            while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
+            while ((unlimitedRetries || retries < maxRetries)
+                    && !Thread.currentThread().isInterrupted()) {
                 try {
                     logger.info("Tentative number: {}", retries);
 
@@ -656,8 +690,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                         Thread.sleep(retryInterval);
                     }
 
-                    final String containerId = ContainerInstance.this.containerOrchestrationService
-                            .startContainer(containerConfiguration);
+                    final String containerId =
+                            ContainerInstance.this.containerOrchestrationService.startContainer(containerConfiguration);
                     updateState(s -> s.onContainerReady(containerId));
 
                     return;
@@ -689,8 +723,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             try {
                 existing = getExistingContainerByName(options.getContainerName());
             } catch (final Exception e) {
-                logger.warn("Failed to look up existing container {} for credential refresh",
-                        options.getContainerName(), e);
+                logger.warn(
+                        "Failed to look up existing container {} for credential refresh",
+                        options.getContainerName(),
+                        e);
                 return;
             }
 
@@ -699,28 +735,30 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             final String containerId = existing.get().getContainerId();
-            logger.info("Deleting stale container {} to apply refreshed identity credentials on restart",
+            logger.info(
+                    "Deleting stale container {} to apply refreshed identity credentials on restart",
                     options.getContainerName());
 
             try {
                 ContainerInstance.this.containerOrchestrationService.stopContainer(containerId);
             } catch (final Exception e) {
-                logger.warn("Failed to stop stale container {} during credential refresh",
-                        options.getContainerName(), e);
+                logger.warn(
+                        "Failed to stop stale container {} during credential refresh", options.getContainerName(), e);
             }
 
             try {
                 ContainerInstance.this.containerOrchestrationService.deleteContainer(containerId);
             } catch (final Exception e) {
-                logger.warn("Failed to delete stale container {} during credential refresh",
-                        options.getContainerName(), e);
+                logger.warn(
+                        "Failed to delete stale container {} during credential refresh", options.getContainerName(), e);
             }
         }
 
         private String buildRestBaseUrl(ContainerInstanceOptions options) {
             boolean useHttps = isHttpsEnabled();
             String protocol = useHttps ? "https" : "http";
-            String host = getHostAddressForNetworkMode(options.getContainerNetworkingMode().orElse("bridge"));
+            String host = getHostAddressForNetworkMode(
+                    options.getContainerNetworkingMode().orElse("bridge"));
             String formattedHost = formatHostForUrl(host);
             int port = getRestServicePort(useHttps);
 
@@ -753,8 +791,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             try {
-                ComponentConfiguration config = ContainerInstance.this.configurationService
-                        .getComponentConfiguration("org.eclipse.kura.http.server.manager.HttpService");
+                ComponentConfiguration config = ContainerInstance.this.configurationService.getComponentConfiguration(
+                        "org.eclipse.kura.http.server.manager.HttpService");
 
                 return extractPortFromConfig(config, useHttps).orElse(defaultPort);
             } catch (KuraException e) {
@@ -787,8 +825,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             try {
-                ComponentConfiguration config = ContainerInstance.this.configurationService
-                        .getComponentConfiguration("org.eclipse.kura.http.server.manager.HttpService");
+                ComponentConfiguration config = ContainerInstance.this.configurationService.getComponentConfiguration(
+                        "org.eclipse.kura.http.server.manager.HttpService");
 
                 if (config != null && config.getConfigurationProperties() != null) {
                     Map<String, Object> properties = config.getConfigurationProperties();
@@ -910,7 +948,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             return candidate != null ? candidate.getHostAddress() : null;
-
         }
 
         private String getHostPrimaryIpAddress() {
@@ -948,7 +985,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             return result;
-
         }
 
         private boolean isValidNetworkInterface(NetworkInterface nif) throws SocketException {
@@ -958,7 +994,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         private boolean isValidAddress(InetAddress adr, NetworkInterface nif) throws SocketException {
             return adr != null && !adr.isLoopbackAddress() && (nif.isPointToPoint() || !adr.isLinkLocalAddress());
         }
-
     }
 
     private class Created implements State {
@@ -1007,16 +1042,14 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             deleteContainer();
             return new Disabled(this.options);
         }
-
     }
 
-    private Map<String, Object> updatePropertiesWithSignatureDigest(Map<String, Object> oldProperties,
-            String enforcementDigest) {
+    private Map<String, Object> updatePropertiesWithSignatureDigest(
+            Map<String, Object> oldProperties, String enforcementDigest) {
 
         Map<String, Object> updatedProperties = new HashMap<>(oldProperties);
         updatedProperties.put("container.signature.enforcement.digest", enforcementDigest);
         return updatedProperties;
-
     }
 
     private void updateSnapshotWithSignatureDigest(Map<String, Object> properties) {
@@ -1025,8 +1058,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             this.configurationService.updateConfiguration(
                     (String) properties.get(ConfigurationService.KURA_SERVICE_PID), properties, true);
         } catch (KuraException ex) {
-            logger.error("Impossible to update snapshot for pid {} due to {}",
-                    properties.get(ConfigurationService.KURA_SERVICE_PID), ex.getMessage());
+            logger.error(
+                    "Impossible to update snapshot for pid {} due to {}",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID),
+                    ex.getMessage());
         }
     }
 
@@ -1051,5 +1086,4 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             Arrays.fill(password, '\0');
         }
     }
-
 }

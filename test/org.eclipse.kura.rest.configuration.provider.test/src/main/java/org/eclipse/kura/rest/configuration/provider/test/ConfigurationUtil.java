@@ -16,7 +16,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
@@ -26,8 +25,7 @@ import org.eclipse.kura.configuration.metatype.Scalar;
 
 public class ConfigurationUtil {
 
-    private ConfigurationUtil() {
-    }
+    private ConfigurationUtil() {}
 
     public static AdBuilder adBuilder(final String id, final Scalar type) {
         return new AdBuilder(id, type);
@@ -162,7 +160,6 @@ public class ConfigurationUtil {
                 public boolean isRequired() {
                     return isRequired;
                 }
-
             };
         }
     }
@@ -202,7 +199,6 @@ public class ConfigurationUtil {
                 public BigInteger getSize() {
                     return size;
                 }
-
             });
             return this;
         }
@@ -239,7 +235,6 @@ public class ConfigurationUtil {
                 public String getId() {
                     return id;
                 }
-
             };
         }
     }

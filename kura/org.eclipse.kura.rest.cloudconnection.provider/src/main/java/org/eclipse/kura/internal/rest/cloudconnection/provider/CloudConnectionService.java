@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
@@ -79,7 +78,8 @@ public class CloudConnectionService {
     private static final String CLOUD_PUBLISHER = CloudPublisher.class.getName();
     private static final String CLOUD_SUBSCRIBER = CloudSubscriber.class.getName();
 
-    private final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+    private final BundleContext bundleContext =
+            FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
     private final ConfigurationService configurationService;
 
@@ -92,7 +92,6 @@ public class CloudConnectionService {
         final List<CloudEndpointInstance> result = new ArrayList<>();
 
         withAllCloudConnectionFactories(service -> {
-
             final String factoryPid = service.getFactoryPid();
             if (factoryPid == null) {
                 return;
@@ -109,7 +108,6 @@ public class CloudConnectionService {
 
                 result.add(cloudConnectionEntry);
             }
-
         });
 
         return result;
@@ -161,7 +159,6 @@ public class CloudConnectionService {
         Set<ComponentConfiguration> resultSet = new HashSet<>();
 
         withAllCloudConnectionFactories(factory -> {
-
             Set<String> managedCloudConnectionPids = factory.getManagedCloudConnectionPids();
 
             for (String cloudConnectionPid : managedCloudConnectionPids) {
@@ -169,12 +166,11 @@ public class CloudConnectionService {
 
                 pids.stream().filter(stackComponentsPids::contains).forEach(result::add);
             }
-
         });
 
         for (String stackConfigurationPid : result) {
-            ComponentConfiguration componetConfiguration = this.configurationService
-                    .getComponentConfiguration(stackConfigurationPid);
+            ComponentConfiguration componetConfiguration =
+                    this.configurationService.getComponentConfiguration(stackConfigurationPid);
             if (componetConfiguration != null) {
                 resultSet.add(componetConfiguration);
             }
@@ -184,7 +180,9 @@ public class CloudConnectionService {
     }
 
     public void createCloudEndpointFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
-        if (factoryPid == null || factoryPid.trim().isEmpty() || cloudServicePid == null
+        if (factoryPid == null
+                || factoryPid.trim().isEmpty()
+                || cloudServicePid == null
                 || cloudServicePid.trim().isEmpty()) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -204,7 +202,9 @@ public class CloudConnectionService {
     }
 
     public void deleteCloudEndpointFromFactory(String factoryPid, String cloudEndpointPid) throws KuraException {
-        if (factoryPid == null || factoryPid.trim().isEmpty() || cloudEndpointPid == null
+        if (factoryPid == null
+                || factoryPid.trim().isEmpty()
+                || cloudEndpointPid == null
                 || cloudEndpointPid.trim().isEmpty()) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -229,20 +229,18 @@ public class CloudConnectionService {
         final List<CloudConnectionFactoryInfo> cloudConnectionFactoryPids = new ArrayList<>();
 
         withAllCloudConnectionFactoryRefs((ref, ctx) -> {
-
             try {
                 final CloudConnectionFactory service = wrap(ctx.getService(ref));
                 String defaultPid = (String) ref.getProperty(KURA_UI_CSF_PID_DEFAULT);
                 String pidRegex = (String) ref.getProperty(KURA_UI_CSF_PID_REGEX);
 
-                CloudConnectionFactoryInfo cloudConnectionFactoryInfoDTO = new CloudConnectionFactoryInfo(
-                        service.getFactoryPid(), defaultPid, pidRegex);
+                CloudConnectionFactoryInfo cloudConnectionFactoryInfoDTO =
+                        new CloudConnectionFactoryInfo(service.getFactoryPid(), defaultPid, pidRegex);
 
                 cloudConnectionFactoryPids.add(cloudConnectionFactoryInfoDTO);
             } finally {
                 ctx.ungetService(ref);
             }
-
         });
 
         final List<PubSubFactoryInfo> pubSubFactories = getPubSubFactories();
@@ -253,17 +251,24 @@ public class CloudConnectionService {
     public void createPubSubInstance(final String pid, final String factoryPid, final String cloudEndpointPid)
             throws KuraException {
 
-        if (pid == null || pid.trim().isEmpty() //
-                || factoryPid == null || factoryPid.trim().isEmpty() //
-                || cloudEndpointPid == null || cloudEndpointPid.trim().isEmpty()) {
+        if (pid == null
+                || pid.trim().isEmpty() //
+                || factoryPid == null
+                || factoryPid.trim().isEmpty() //
+                || cloudEndpointPid == null
+                || cloudEndpointPid.trim().isEmpty()) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
         requireIsPubSubFactory(factoryPid);
 
         ServiceUtil.applyToServiceOptionally(this.bundleContext, ConfigurationService.class, cs -> {
-            cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
-                    CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid), true);
+            cs.createFactoryConfiguration(
+                    factoryPid,
+                    pid,
+                    Collections.singletonMap(
+                            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid),
+                    true);
 
             return null;
         });
@@ -296,8 +301,8 @@ public class CloudConnectionService {
         return result;
     }
 
-    public void updateStackComponentConfiguration(List<ComponentConfigurationDTO> componentConfigurations,
-            boolean takeSnapshot) throws KuraException {
+    public void updateStackComponentConfiguration(
+            List<ComponentConfigurationDTO> componentConfigurations, boolean takeSnapshot) throws KuraException {
 
         for (ComponentConfigurationDTO componentConfig : componentConfigurations) {
             if (!(isPubSub(componentConfig.getPid()) || isComponentManagedByFactory(componentConfig.getPid()))) {
@@ -306,15 +311,14 @@ public class CloudConnectionService {
         }
 
         updateComponentConfigurations(componentConfigurations, takeSnapshot);
-
     }
 
-    private void updateComponentConfigurations(List<ComponentConfigurationDTO> componentConfigurations,
-            boolean takeSnapshot) throws KuraException {
+    private void updateComponentConfigurations(
+            List<ComponentConfigurationDTO> componentConfigurations, boolean takeSnapshot) throws KuraException {
 
         List<ComponentConfiguration> configs = componentConfigurations.stream()
-                .map(cc -> new ComponentConfigurationImpl(cc.getPid(), null,
-                        DTOUtil.dtosToConfigurationProperties(cc.getProperties())))
+                .map(cc -> new ComponentConfigurationImpl(
+                        cc.getPid(), null, DTOUtil.dtosToConfigurationProperties(cc.getProperties())))
                 .collect(Collectors.toList());
 
         this.configurationService.updateConfigurations(configs, takeSnapshot);
@@ -352,14 +356,19 @@ public class CloudConnectionService {
 
     private List<PubSubFactoryInfo> getPubSubFactories() throws KuraException {
 
-        return ServiceUtil.applyToServiceOptionally(this.bundleContext, ServiceComponentRuntime.class, scr ->
-
-        scr.getComponentDescriptionDTOs().stream().map(this::pubSubFactoryToInfo).filter(Objects::nonNull)
-                .collect(Collectors.toList()));
+        return ServiceUtil.applyToServiceOptionally(
+                this.bundleContext,
+                ServiceComponentRuntime.class,
+                scr -> scr.getComponentDescriptionDTOs().stream()
+                        .map(this::pubSubFactoryToInfo)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
     }
 
     private void requireIsPubSubFactory(final String factoryPid) throws KuraException {
-        final boolean isPubSub = ServiceUtil.applyToServiceOptionally(this.bundleContext, ServiceComponentRuntime.class,
+        final boolean isPubSub = ServiceUtil.applyToServiceOptionally(
+                this.bundleContext,
+                ServiceComponentRuntime.class,
                 scr -> scr.getComponentDescriptionDTOs().stream().anyMatch(c -> {
                     final Map<String, Object> properties = c.properties;
 
@@ -396,12 +405,13 @@ public class CloudConnectionService {
         if (!(ccsfFactoryPid instanceof String)) {
             logger.warn(
                     "component {} defines a CloudPublisher or CloudSubscriber but does not specify the {} property, ignoring it",
-                    component.name, ccsfFactoryPidPropName);
+                    component.name,
+                    ccsfFactoryPidPropName);
             return null;
         }
 
-        return new PubSubFactoryInfo(factoryPid, (String) ccsfFactoryPid, (String) defaultFactoryPid,
-                (String) defaultFactoryPidRegex);
+        return new PubSubFactoryInfo(
+                factoryPid, (String) ccsfFactoryPid, (String) defaultFactoryPid, (String) defaultFactoryPidRegex);
     }
 
     /**
@@ -421,15 +431,18 @@ public class CloudConnectionService {
 
         ServiceUtil.withAllServices(this.bundleContext, null, filter, service -> {
             if (service instanceof CloudConnectionManager) {
-                cloudEndpointInstance
-                        .setState(((CloudConnectionManager) service).isConnected() ? CloudConnectionState.CONNECTED
+                cloudEndpointInstance.setState(
+                        ((CloudConnectionManager) service).isConnected()
+                                ? CloudConnectionState.CONNECTED
                                 : CloudConnectionState.DISCONNECTED);
                 cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
             } else if (service instanceof CloudEndpoint) {
                 cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_ENDPOINT);
             } else if (service instanceof CloudService) {
-                cloudEndpointInstance.setState(((CloudService) service).isConnected() ? CloudConnectionState.CONNECTED
-                        : CloudConnectionState.DISCONNECTED);
+                cloudEndpointInstance.setState(
+                        ((CloudService) service).isConnected()
+                                ? CloudConnectionState.CONNECTED
+                                : CloudConnectionState.DISCONNECTED);
                 cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
             }
         });
@@ -442,8 +455,8 @@ public class CloudConnectionService {
 
     private void withAllCloudConnectionFactories(final ServiceConsumer<CloudConnectionFactory> consumer)
             throws KuraException {
-        ServiceUtil.withAllServices(this.bundleContext, CLOUD_CONNECTION_FACTORY_FILTER,
-                o -> consumer.consume(wrap(o)));
+        ServiceUtil.withAllServices(
+                this.bundleContext, CLOUD_CONNECTION_FACTORY_FILTER, o -> consumer.consume(wrap(o)));
     }
 
     private CloudConnectionFactory wrap(final Object o) {
@@ -490,8 +503,10 @@ public class CloudConnectionService {
         Class<?> clazz = (type == CloudPubSubType.PUBLISHER) ? CloudPublisher.class : CloudSubscriber.class;
 
         try {
-            this.bundleContext.getServiceReferences(clazz, null).stream().map(ref -> pubSubRefToDTO(ref, type))
-                    .filter(Objects::nonNull).forEach(result::add);
+            this.bundleContext.getServiceReferences(clazz, null).stream()
+                    .map(ref -> pubSubRefToDTO(ref, type))
+                    .filter(Objects::nonNull)
+                    .forEach(result::add);
 
             return result;
         } catch (InvalidSyntaxException e) {
@@ -510,7 +525,5 @@ public class CloudConnectionService {
         final String kuraServicePid = (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
 
         return new PubSubInstance((String) ccsPid, kuraServicePid, (String) factoryPid, type);
-
     }
-
 }

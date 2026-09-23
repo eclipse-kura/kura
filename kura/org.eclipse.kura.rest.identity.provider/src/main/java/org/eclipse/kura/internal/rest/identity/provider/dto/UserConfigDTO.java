@@ -26,5 +26,4 @@ public class UserConfigDTO {
     public void setUserConfig(Set<UserDTO> userConfig) {
         this.userConfig = userConfig;
     }
-
 }

@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +22,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Event;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -44,9 +44,6 @@ import org.eclipse.kura.container.orchestration.provider.impl.enforcement.Allowl
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.model.Event;
-
 public class EnforcementSecurityTest {
 
     private static final String IMAGE_NAME = "nginx";
@@ -58,11 +55,15 @@ public class EnforcementSecurityTest {
     private static final String REGISTRY_PASSWORD = "test1";
 
     private static final String EMPTY_ALLOWLIST_CONTENT = "";
-    private static final String FILLED_ALLOWLIST_CONTENT_NO_SPACE = "sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da\nsha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
-    private static final String FILLED_ALLOWLIST_CONTENT_WITH_SPACES = " sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da \n sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
+    private static final String FILLED_ALLOWLIST_CONTENT_NO_SPACE =
+            "sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da\nsha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
+    private static final String FILLED_ALLOWLIST_CONTENT_WITH_SPACES =
+            " sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da \n sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
 
-    private static final String CORRECT_DIGEST = "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
-    private static final String WRONG_DIGEST = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
+    private static final String CORRECT_DIGEST =
+            "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
+    private static final String WRONG_DIGEST =
+            "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
     private ContainerOrchestrationServiceImpl mockedContainerOrchestrationImpl;
@@ -78,8 +79,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldAllowStartingWithCorrectAllowlistContent() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE,
-                CORRECT_DIGEST);
+        givenMockedContainerOrchestrationServiceWith(
+                CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenMockedDockerClient();
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
 
@@ -92,8 +93,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldAllowStartingWithCorrectAllowlistContentWithSpaces() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE,
-                CORRECT_DIGEST);
+        givenMockedContainerOrchestrationServiceWith(
+                CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenMockedDockerClient();
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_WITH_SPACES);
 
@@ -106,8 +107,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldNotAllowStartingWithEmptyAllowlistContent() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE,
-                CORRECT_DIGEST);
+        givenMockedContainerOrchestrationServiceWith(
+                CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenMockedDockerClient();
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
@@ -120,8 +121,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldNotAllowStartingWithWrongContainerDigest() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE,
-                WRONG_DIGEST);
+        givenMockedContainerOrchestrationServiceWith(
+                CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE, WRONG_DIGEST);
         givenMockedDockerClient();
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
 
@@ -134,8 +135,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldStopAndDeleteContainerWithWrongDigestAndActiveState() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE,
-                CORRECT_DIGEST);
+        givenMockedContainerOrchestrationServiceWith(
+                CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenMockedDockerClient();
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
@@ -148,8 +149,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldOnlyDeleteContainerWithWrongDigestAndFailedState() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.FAILED,
-                CORRECT_DIGEST);
+        givenMockedContainerOrchestrationServiceWith(
+                CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.FAILED, CORRECT_DIGEST);
         givenMockedDockerClient();
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
@@ -165,32 +166,45 @@ public class EnforcementSecurityTest {
 
     ContainerInstanceDescriptor containerInstanceDescriptor;
 
-    private void givenMockedContainerOrchestrationServiceWith(String containerId, String containerName,
-            String imageName, ContainerState containerState, String digest) throws KuraException, InterruptedException {
+    private void givenMockedContainerOrchestrationServiceWith(
+            String containerId, String containerName, String imageName, ContainerState containerState, String digest)
+            throws KuraException, InterruptedException {
 
         this.mockedContainerOrchestrationImpl = spy(new ContainerOrchestrationServiceImpl());
 
-        this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
-                .setContainerName(containerName).setContainerImage(imageName).setContainerState(containerState).build();
+        this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder()
+                .setContainerID(containerId)
+                .setContainerName(containerName)
+                .setContainerImage(imageName)
+                .setContainerState(containerState)
+                .build();
         List<ContainerInstanceDescriptor> containerDescriptors = new ArrayList<>();
         containerDescriptors.add(containerInstanceDescriptor);
 
-        ImageConfiguration imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(imageName)
-                .setImageTag("latest").setImageDownloadTimeoutSeconds(0)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+        ImageConfiguration imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(imageName)
+                .setImageTag("latest")
+                .setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
 
-        this.containerConfig = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
-                .setImageConfiguration(imageConfig).setVolumes(Collections.singletonMap("test", "~/test/test"))
+        this.containerConfig = ContainerConfiguration.builder()
+                .setContainerName(CONTAINER_NAME)
+                .setImageConfiguration(imageConfig)
+                .setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
-                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
+                .setEnvVars(Arrays.asList("test=test", "test2=test2"))
+                .build();
 
-        doReturn(containerDescriptors).when(this.mockedContainerOrchestrationImpl).listContainerDescriptors();
+        doReturn(containerDescriptors)
+                .when(this.mockedContainerOrchestrationImpl)
+                .listContainerDescriptors();
         doNothing().when(this.mockedContainerOrchestrationImpl).pullImage(any(ImageConfiguration.class));
         doNothing().when(this.mockedContainerOrchestrationImpl).stopContainer(anyString());
         doNothing().when(this.mockedContainerOrchestrationImpl).deleteContainer(anyString());
-        doReturn(new HashSet<>(Arrays.asList(digest))).when(this.mockedContainerOrchestrationImpl)
+        doReturn(new HashSet<>(Arrays.asList(digest)))
+                .when(this.mockedContainerOrchestrationImpl)
                 .getImageDigestsByContainerId(containerId);
     }
 
@@ -200,8 +214,8 @@ public class EnforcementSecurityTest {
     }
 
     private void givenAllowlistEnforcement(String rawAllowlistContent) {
-        this.allowlistEnforcementMonitor = new AllowlistEnforcementMonitor(rawAllowlistContent,
-                this.mockedContainerOrchestrationImpl);
+        this.allowlistEnforcementMonitor =
+                new AllowlistEnforcementMonitor(rawAllowlistContent, this.mockedContainerOrchestrationImpl);
     }
 
     /*

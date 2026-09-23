@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.net;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
@@ -39,7 +38,7 @@ public interface NetworkService {
 
     /**
      * Returns the overall state of the networking subsystem
-     * 
+     *
      * @deprecated since 2.3
      */
     @Deprecated
@@ -47,7 +46,7 @@ public interface NetworkService {
 
     /**
      * Returns the state of a specific network interface
-     * 
+     *
      * @deprecated since 2.3
      */
     @Deprecated
@@ -101,7 +100,7 @@ public interface NetworkService {
 
     /**
      * Given an interface name (e.g. 'ppp0'), look up the associated usb port
-     * 
+     *
      * @param the
      *            name of the ppp interface (i.e. ppp0)
      * @return a string representing the usb port of the modem (i.e. 1-2.3)
@@ -110,7 +109,7 @@ public interface NetworkService {
 
     /**
      * Given a modem device, look up the associated ppp interface name
-     * 
+     *
      * @param modemDevice
      * @return the name of the ppp interface
      * @throws KuraException
@@ -119,24 +118,24 @@ public interface NetworkService {
 
     /**
      * Given a usb path, look up the associated ppp interface name
-     * 
+     *
      * @param usbPath
      *                a string representing the usb port (i.e. 1-2.3)
      * @return the name of the ppp interface
      * @throws KuraException
-     * 
+     *
      * @since 2.3
      */
     public String getModemPppInterfaceName(String usbPath);
 
     /**
      * Given a usb path, look up the associated modem device
-     * 
+     *
      * @param usbPath
      *                a string representing the usb port (i.e. 1-2.3)
      * @return the {@link ModemDevice} attached to the specified usb port
      * @throws KuraException
-     * 
+     *
      * @since 2.3
      */
     public Optional<ModemDevice> getModemDevice(String usbPath);
@@ -144,10 +143,10 @@ public interface NetworkService {
     /**
      * Return the {@link UsbNetDevice} associated to the given network interface
      * name, if any.
-     * 
+     *
      * @param interfaceName the name of the network interface
      * @return an optional {@link UsbNetDevice}
-     * 
+     *
      * @since 2.4
      */
     public Optional<UsbNetDevice> getUsbNetDevice(String interfaceName);

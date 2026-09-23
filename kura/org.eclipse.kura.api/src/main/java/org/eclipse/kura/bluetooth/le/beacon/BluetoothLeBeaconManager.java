@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -35,8 +35,8 @@ public interface BluetoothLeBeaconManager<T extends BluetoothLeBeacon> {
      *            the decoder used to parse the data acquired by the scanner
      * @return BluetoothLeBeaconScanner
      */
-    public BluetoothLeBeaconScanner<T> newBeaconScanner(BluetoothLeAdapter adapter,
-            BluetoothLeBeaconDecoder<T> decoder);
+    public BluetoothLeBeaconScanner<T> newBeaconScanner(
+            BluetoothLeAdapter adapter, BluetoothLeBeaconDecoder<T> decoder);
 
     /**
      * Instantiate a new advertiser for beacons.
@@ -48,8 +48,9 @@ public interface BluetoothLeBeaconManager<T extends BluetoothLeBeacon> {
      * @return BluetoothLeBeaconAdvertiser
      * @throws KuraBluetoothBeaconAdvertiserNotAvailable
      */
-    public BluetoothLeBeaconAdvertiser<T> newBeaconAdvertiser(BluetoothLeAdapter adapter,
-            BluetoothLeBeaconEncoder<T> encoder) throws KuraBluetoothBeaconAdvertiserNotAvailable;
+    public BluetoothLeBeaconAdvertiser<T> newBeaconAdvertiser(
+            BluetoothLeAdapter adapter, BluetoothLeBeaconEncoder<T> encoder)
+            throws KuraBluetoothBeaconAdvertiserNotAvailable;
 
     /**
      * Delete the given scanner.

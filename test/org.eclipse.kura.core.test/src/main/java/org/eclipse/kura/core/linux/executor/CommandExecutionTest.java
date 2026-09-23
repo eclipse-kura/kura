@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
-
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
@@ -46,8 +45,8 @@ public class CommandExecutionTest {
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getExecutors() {
-        return Arrays.asList(new UnprivilegedExecutorServiceImpl(mock(SystemService.class)),
-                new PrivilegedExecutorServiceImpl());
+        return Arrays.asList(
+                new UnprivilegedExecutorServiceImpl(mock(SystemService.class)), new PrivilegedExecutorServiceImpl());
     }
 
     private Command command;
@@ -103,13 +102,17 @@ public class CommandExecutionTest {
         when(euMock.executePrivileged(this.command)).thenReturn(cs);
         when(euMock.executeUnprivileged(this.command)).thenReturn(cs);
         doAnswer(invocation -> {
-            this.callback.accept(cs);
-            return null;
-        }).when(euMock).executePrivileged(this.command, this.callback);
+                    this.callback.accept(cs);
+                    return null;
+                })
+                .when(euMock)
+                .executePrivileged(this.command, this.callback);
         doAnswer(invocation -> {
-            this.callback.accept(cs);
-            return null;
-        }).when(euMock).executeUnprivileged(this.command, this.callback);
+                    this.callback.accept(cs);
+                    return null;
+                })
+                .when(euMock)
+                .executeUnprivileged(this.command, this.callback);
         try {
             TestUtil.setFieldValue(executor, "executorUtil", euMock);
         } catch (NoSuchFieldException e) {
@@ -136,8 +139,8 @@ public class CommandExecutionTest {
     }
 
     private void thenReturnErrorMessage(String expectedErrorMessage) {
-        assertEquals(expectedErrorMessage,
+        assertEquals(
+                expectedErrorMessage,
                 new String(((ByteArrayOutputStream) this.status.getErrorStream()).toByteArray(), Charsets.UTF_8));
     }
-
 }

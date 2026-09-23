@@ -1,16 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.binary;
 
 import java.util.Arrays;
@@ -43,13 +42,27 @@ public final class BinaryDataTypes {
     public static final BinaryData<java.lang.Double> DOUBLE_LE = new Double(Endianness.LITTLE_ENDIAN);
     public static final BinaryData<java.lang.Double> DOUBLE_BE = new Double(Endianness.BIG_ENDIAN);
 
-    public static final List<String> NAMES = Collections.unmodifiableList(
-            Arrays.asList("UINT8", "INT8", "UINT16_LE", "UINT16_BE", "INT16_LE", "INT16_BE", "UINT32_LE", "UINT32_BE",
-                    "INT32_LE", "INT32_BE", "INT64_LE", "INT64_BE", "FLOAT_LE", "FLOAT_BE", "DOUBLE_LE", "DOUBLE_BE"));
+    public static final List<String> NAMES = Collections.unmodifiableList(Arrays.asList(
+            "UINT8",
+            "INT8",
+            "UINT16_LE",
+            "UINT16_BE",
+            "INT16_LE",
+            "INT16_BE",
+            "UINT32_LE",
+            "UINT32_BE",
+            "INT32_LE",
+            "INT32_BE",
+            "INT64_LE",
+            "INT64_BE",
+            "FLOAT_LE",
+            "FLOAT_BE",
+            "DOUBLE_LE",
+            "DOUBLE_BE"));
 
-    public static final List<BinaryData<?>> VALUES = Collections
-            .unmodifiableList(Arrays.asList(UINT8, INT8, UINT16_LE, UINT16_BE, INT16_LE, INT16_BE, UINT32_LE, UINT32_BE,
-                    INT32_LE, INT32_BE, INT64_LE, INT64_BE, FLOAT_LE, FLOAT_BE, DOUBLE_LE, DOUBLE_BE));
+    public static final List<BinaryData<?>> VALUES = Collections.unmodifiableList(Arrays.asList(
+            UINT8, INT8, UINT16_LE, UINT16_BE, INT16_LE, INT16_BE, UINT32_LE, UINT32_BE, INT32_LE, INT32_BE, INT64_LE,
+            INT64_BE, FLOAT_LE, FLOAT_BE, DOUBLE_LE, DOUBLE_BE));
 
     public static BinaryData<?> parse(String s) {
         for (int i = 0; i < NAMES.size(); i++) {
@@ -60,6 +73,5 @@ public final class BinaryDataTypes {
         throw new IllegalArgumentException();
     }
 
-    private BinaryDataTypes() {
-    }
+    private BinaryDataTypes() {}
 }

@@ -51,11 +51,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
@@ -77,8 +75,10 @@ public class FilesystemKeystoreServiceImplTest {
     private static final String KEY_RANDOMIZE_PASSWORD = "randomize.password";
 
     private static final String STORE_PATH = Paths.get("target", "key.store").toString();
-    private static final String NEW_STORE_PATH = Paths.get("target", "newKey.store").toString();
-    private static final String UPDATED_NEW_STORE_PATH = Paths.get("target", "updatedNewKey.store").toString();
+    private static final String NEW_STORE_PATH =
+            Paths.get("target", "newKey.store").toString();
+    private static final String UPDATED_NEW_STORE_PATH =
+            Paths.get("target", "updatedNewKey.store").toString();
     private static final String STORE_PASS = "pass";
 
     private KeyStore store;
@@ -89,8 +89,9 @@ public class FilesystemKeystoreServiceImplTest {
     }
 
     @Before
-    public void setupDefaultKeystore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-            IOException, NoSuchProviderException {
+    public void setupDefaultKeystore()
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
+                    NoSuchProviderException {
 
         // create a new keystore each time the tests should run
 
@@ -107,7 +108,7 @@ public class FilesystemKeystoreServiceImplTest {
         Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
         is.close();
 
-        Certificate[] chain = { certificate };
+        Certificate[] chain = {certificate};
 
         this.store.setKeyEntry(DEFAULT_KEY_ALIAS, key, STORE_PASS.toCharArray(), chain);
 
@@ -155,7 +156,6 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         assertTrue(new File(NEW_STORE_PATH).isFile());
-
     }
 
     @Test
@@ -510,7 +510,7 @@ public class FilesystemKeystoreServiceImplTest {
         Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
         is.close();
 
-        Certificate[] chain = { certificate };
+        Certificate[] chain = {certificate};
 
         PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(key, chain);
 
@@ -814,7 +814,8 @@ public class FilesystemKeystoreServiceImplTest {
         assertNotNull(((PrivateKeyEntry) entry).getPrivateKey());
         assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
         assertEquals("DSA", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
-        assertEquals("DSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
+        assertEquals(
+                "DSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
     }
 
     @Test
@@ -838,7 +839,11 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.createKeyPair("alias", "EC", new ECGenParameterSpec("prime256v1"), "SHA256WithECDSA",
+        keystoreService.createKeyPair(
+                "alias",
+                "EC",
+                new ECGenParameterSpec("prime256v1"),
+                "SHA256WithECDSA",
                 "CN=Kura, OU=IoT, O=Eclipse, C=US");
 
         Entry entry = keystoreService.getEntry("alias");
@@ -847,7 +852,8 @@ public class FilesystemKeystoreServiceImplTest {
         assertNotNull(((PrivateKeyEntry) entry).getPrivateKey());
         assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
         assertEquals("EC", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
-        assertEquals("EC", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
+        assertEquals(
+                "EC", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
     }
 
     @Test
@@ -871,8 +877,12 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.createKeyPair("alias", "RSA", new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4),
-                "SHA256WithRSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+        keystoreService.createKeyPair(
+                "alias",
+                "RSA",
+                new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4),
+                "SHA256WithRSA",
+                "CN=Kura, OU=IoT, O=Eclipse, C=US");
 
         Entry entry = keystoreService.getEntry("alias");
         assertNotNull(entry);
@@ -880,7 +890,8 @@ public class FilesystemKeystoreServiceImplTest {
         assertNotNull(((PrivateKeyEntry) entry).getPrivateKey());
         assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
         assertEquals("RSA", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
-        assertEquals("RSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
+        assertEquals(
+                "RSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -1026,10 +1037,9 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {
+        try (InputStream tsReadStream = new FileInputStream(STORE_PATH); ) {
             this.store.load(tsReadStream, STORE_PASS.toCharArray());
         }
-
     }
 
     @Test
@@ -1053,7 +1063,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         keystoreService.updated(properties);
 
-        try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {
+        try (InputStream tsReadStream = new FileInputStream(STORE_PATH); ) {
             this.store.load(tsReadStream, STORE_PASS.toCharArray());
         }
 
@@ -1206,8 +1216,8 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.updated(properties);
 
         assertKeystoreIsLoadable(STORE_PATH, "foo");
-        Mockito.verify(cryptoService).setKeyStorePassword(Mockito.eq(STORE_PATH),
-                AdditionalMatchers.aryEq("foo".toCharArray()));
+        Mockito.verify(cryptoService)
+                .setKeyStorePassword(Mockito.eq(STORE_PATH), AdditionalMatchers.aryEq("foo".toCharArray()));
     }
 
     private void assertKeystoreIsLoadable(final String path, final String password)
@@ -1231,5 +1241,4 @@ public class FilesystemKeystoreServiceImplTest {
 
         return ks;
     }
-
 }

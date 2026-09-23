@@ -18,15 +18,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.github.dockerjava.api.DockerClient;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.github.dockerjava.api.DockerClient;
 
 public class ContainerOrchestrationServiceImplFailureTest {
 

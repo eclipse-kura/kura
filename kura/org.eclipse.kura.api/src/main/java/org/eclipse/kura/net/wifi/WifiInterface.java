@@ -14,7 +14,6 @@ package org.eclipse.kura.net.wifi;
 
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.kura.net.NetInterface;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -81,5 +80,4 @@ public interface WifiInterface<T extends WifiInterfaceAddress> extends NetInterf
      */
     @Override
     public List<T> getNetInterfaceAddresses();
-
 }

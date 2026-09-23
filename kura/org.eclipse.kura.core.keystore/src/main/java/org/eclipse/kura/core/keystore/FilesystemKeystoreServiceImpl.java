@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -45,9 +44,6 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -55,14 +51,18 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.security.keystore.KeystoreService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "kura.ui.factory.hide=true",
-        "kura.ui.service.hide=true" })
+        name = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
+        immediate = false,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.security.keystore.KeystoreService.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {"kura.ui.factory.hide=true", "kura.ui.service.hide=true"})
 @Designate(ocd = FilesystemKeystoreServiceImplOptions.class, factory = true)
 public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
 
@@ -92,7 +92,10 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
         this.cryptoService = cryptoService;
     }
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -133,8 +136,8 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is updating!", properties.get(KURA_SERVICE_PID));
-        FilesystemKeystoreServiceOptions newOptions = new FilesystemKeystoreServiceOptions(properties,
-                this.cryptoService);
+        FilesystemKeystoreServiceOptions newOptions =
+                new FilesystemKeystoreServiceOptions(properties, this.cryptoService);
 
         if (!this.keystoreServiceOptions.equals(newOptions)) {
             logger.info("Perform update...");
@@ -146,7 +149,6 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
             }
 
             this.keystoreServiceOptions = new FilesystemKeystoreServiceOptions(properties, this.cryptoService);
-
         }
 
         super.updated(properties);
@@ -157,7 +159,9 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     @Override
     @Deactivate
     public void deactivate() {
-        logger.info("Bundle {} is deactivating!", this.keystoreServiceOptions.getProperties().get(KURA_SERVICE_PID));
+        logger.info(
+                "Bundle {} is deactivating!",
+                this.keystoreServiceOptions.getProperties().get(KURA_SERVICE_PID));
 
         if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
 
@@ -172,7 +176,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     @Override
     protected void saveKeystore(KeystoreInstance ks)
             throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-        try (FileOutputStream tsOutStream = new FileOutputStream(this.keystoreServiceOptions.getKeystorePath());) {
+        try (FileOutputStream tsOutStream = new FileOutputStream(this.keystoreServiceOptions.getKeystorePath()); ) {
             ks.getKeystore().store(tsOutStream, ks.getPassword());
         }
     }
@@ -215,7 +219,10 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
         File fKeyStore = new File(keystorePath);
         if (!fKeyStore.createNewFile()) {
             logger.error("Keystore file already exists at location {}", keystorePath);
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "keystore.path", keystorePath,
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                    "keystore.path",
+                    keystorePath,
                     "file already exists");
         }
 
@@ -254,7 +261,8 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
         try {
             final KeystoreInstance keystore = loadKeystore(this.keystoreServiceOptions);
 
-            char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
+            char[] newPassword =
+                    new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
 
             setKeystorePassword(keystore, newPassword);
 
@@ -285,23 +293,31 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
         props.put(FilesystemKeystoreServiceOptions.KEY_RANDOMIZE_PASSWORD, false);
 
         this.selfUpdaterAttempts = 0;
-        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
-            try {
-                if (this.componentContext.getServiceReference() != null
-                        && this.configurationService.getComponentConfiguration(pid) != null
-                        && this.configurationService.getComponentConfiguration(pid).getDefinition() != null) {
-                    this.configurationService.updateConfiguration(pid, props);
-                    throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING,
-                            "Updated. The task will be terminated.");
-                } else if (this.selfUpdaterAttempts++ % SELF_UPDATER_LOG_EVERY == 0) {
-                    logger.info(
-                            "Waiting for ConfigurationService to register keystore pid {} before persisting the randomized password...",
-                            pid);
-                }
-            } catch (KuraException e) {
-                logger.warn("Cannot get/update configuration for pid: {}", pid, e);
-            }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        if (this.componentContext.getServiceReference() != null
+                                && this.configurationService.getComponentConfiguration(pid) != null
+                                && this.configurationService
+                                                .getComponentConfiguration(pid)
+                                                .getDefinition()
+                                        != null) {
+                            this.configurationService.updateConfiguration(pid, props);
+                            throw new KuraRuntimeException(
+                                    KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING,
+                                    "Updated. The task will be terminated.");
+                        } else if (this.selfUpdaterAttempts++ % SELF_UPDATER_LOG_EVERY == 0) {
+                            logger.info(
+                                    "Waiting for ConfigurationService to register keystore pid {} before persisting the randomized password...",
+                                    pid);
+                        }
+                    } catch (KuraException e) {
+                        logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+                    }
+                },
+                1000,
+                1000,
+                TimeUnit.MILLISECONDS);
     }
 
     private synchronized void setKeystorePassword(KeystoreInstance ks, char[] password) {
@@ -310,7 +326,10 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
             saveKeystore(ks, password);
 
             this.cryptoService.setKeyStorePassword(((KeystoreInstanceImpl) ks).path, password);
-        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | UnrecoverableEntryException
+        } catch (NoSuchAlgorithmException
+                | CertificateException
+                | KeyStoreException
+                | UnrecoverableEntryException
                 | IOException e) {
             logger.warn("Failed to change keystore password");
         } catch (KuraException e) {
@@ -386,7 +405,6 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
             }
 
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "Failed to get the KeyStore");
-
         }
     }
 
@@ -411,6 +429,5 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
         public char[] getPassword() {
             return password;
         }
-
     }
 }

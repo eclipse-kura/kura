@@ -40,5 +40,4 @@ import org.osgi.annotation.versioning.ConsumerType;
  * <br>
  */
 @ConsumerType
-public interface ConfigurableComponent {
-}
+public interface ConfigurableComponent {}

@@ -14,7 +14,6 @@ package org.eclipse.kura.ai.inference;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

@@ -9,15 +9,13 @@
  *
  * Contributors:
  *  Eurotech
- *  Red Hat Inc 
+ *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.emulator.usb;
 
 import java.util.Collections;
 import java.util.List;
-
 import javax.usb.UsbServices;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.usb.UsbBlockDevice;
 import org.eclipse.kura.usb.UsbDevice;
@@ -25,23 +23,21 @@ import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
 import org.osgi.service.component.ComponentContext;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+
 @Component(
-    name = "org.eclipse.kura.usb.UsbService",
-    immediate = true,
-    service = { org.eclipse.kura.usb.UsbService.class })
+        name = "org.eclipse.kura.usb.UsbService",
+        immediate = true,
+        service = {org.eclipse.kura.usb.UsbService.class})
 public class UsbServiceImpl implements UsbService {
 
     @Activate
-    protected void activate(ComponentContext componentContext) {
-    }
+    protected void activate(ComponentContext componentContext) {}
 
     @Deactivate
-    protected void deactivate(ComponentContext componentContext) {
-    }
+    protected void deactivate(ComponentContext componentContext) {}
 
     @Override
     public UsbServices getUsbServices() throws KuraException {
@@ -67,5 +63,4 @@ public class UsbServiceImpl implements UsbService {
     public List<UsbTtyDevice> getUsbTtyDevices() {
         return Collections.emptyList();
     }
-
 }

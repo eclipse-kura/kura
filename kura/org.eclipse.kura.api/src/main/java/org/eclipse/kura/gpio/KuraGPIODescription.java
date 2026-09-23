@@ -34,13 +34,14 @@ public class KuraGPIODescription {
         if (properties == null) {
             throw new IllegalArgumentException("Properties map cannot be null");
         }
-        if (!properties.containsKey(DISPLAY_NAME_PROPERTY) || properties.get(DISPLAY_NAME_PROPERTY).isEmpty()) {
+        if (!properties.containsKey(DISPLAY_NAME_PROPERTY)
+                || properties.get(DISPLAY_NAME_PROPERTY).isEmpty()) {
             throw new IllegalArgumentException("Missing mandatory property: " + DISPLAY_NAME_PROPERTY);
         }
 
         this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
     }
-    
+
     public Map<String, String> getProperties() {
         return this.properties;
     }
@@ -70,5 +71,4 @@ public class KuraGPIODescription {
     public String toString() {
         return "KuraGPIODescription [properties=" + this.properties + "]";
     }
-
 }

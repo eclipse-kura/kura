@@ -108,5 +108,4 @@ public class KeystoreChangeReloadTest extends AbstractJwtScenario {
                 .subject(TEST_IDENTITY) //
                 .signedWith(TestKeys.rsaPrivateKey(SIGNER_KEY));
     }
-
 }

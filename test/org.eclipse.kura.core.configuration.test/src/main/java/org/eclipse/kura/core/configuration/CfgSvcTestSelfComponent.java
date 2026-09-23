@@ -17,7 +17,6 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -65,7 +64,5 @@ public class CfgSvcTestSelfComponent implements SelfConfiguringComponent {
         return tocd;
     }
 
-    public void updated(Map<String, Object> properties) {
-
-    }
+    public void updated(Map<String, Object> properties) {}
 }

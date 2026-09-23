@@ -16,6 +16,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import jakarta.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,9 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
-import jakarta.ws.rs.core.Response.Status;
-
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
@@ -50,9 +50,6 @@ import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
 
 @RunWith(Parameterized.class)
 public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
@@ -104,7 +101,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnListOfFilteredServices() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byInterface",
                 ServiceListeningTestConstants.COMPLETE_POST_BODY);
 
         thenRequestSucceeds();
@@ -115,7 +114,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnErrorMessageWhenRequestBodyIsNull() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byInterface",
                 ServiceListeningTestConstants.NULL_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -126,7 +127,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnErrorMessageWhenRequestBodyIsEmpty() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byInterface",
                 ServiceListeningTestConstants.EMPTY_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -137,7 +140,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnErrorMessageWhenRequestBodyHasNullField() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byInterface",
                 ServiceListeningTestConstants.NULL_FIELD_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -148,7 +153,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnErrorMessageWhenRequestBodyHasEmptyField() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byInterface",
                 ServiceListeningTestConstants.EMPTY_FIELD_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -160,8 +167,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenBasicCredentials(Optional.of("admin:admin"));
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
-                "{\"name\":\"foo\",\"value\":\"bar\"}");
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{\"name\":\"foo\",\"value\":\"bar\"}");
 
         thenRequestSucceeds();
         thenResponseContainsPid("foo");
@@ -170,11 +177,11 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldSupportPropertyMatchFilterWithArray() {
         givenBasicCredentials(Optional.of("admin:admin"));
-        givenRegisteredService(TestInterface.class, "foo",
-                Collections.singletonMap("foo", new String[] { "bar", "baz" }));
+        givenRegisteredService(
+                TestInterface.class, "foo", Collections.singletonMap("foo", new String[] {"bar", "baz"}));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
-                "{\"name\":\"foo\",\"value\":\"bar\"}");
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{\"name\":\"foo\",\"value\":\"bar\"}");
 
         thenRequestSucceeds();
         thenResponseContainsPid("foo");
@@ -202,7 +209,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byProperty",
                 "{\"not\": {\"name\":\"foo\",\"value\":\"bar\"} }");
 
         thenRequestSucceeds();
@@ -217,7 +226,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byProperty",
                 "{\"and\": [ {\"name\":\"foo\",\"value\":\"bar\"}, {\"name\":\"kura.service.pid\",\"value\":\"foo\"} ] }");
 
         thenRequestSucceeds();
@@ -234,7 +245,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byProperty",
                 "{\"or\": [ {\"name\":\"fooo\" }, {\"name\":\"foo\",\"value\":\"bar\"} ] }");
 
         thenRequestSucceeds();
@@ -251,7 +264,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(OtherTestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/satisfyingReference",
                 "{\"pid\": \"org.eclipse.kura.internal.rest.service.listing.provider.test.TargetFilterTestService\","
                         + " \"referenceName\": \"TestInterface\" }");
 
@@ -276,7 +291,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportListingFactorysPidByInterface() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/factoryPids/byInterface",
                 "{\"interfaceNames\":[\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"]}");
 
         thenRequestSucceeds();
@@ -288,7 +305,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportListingFactoryPidsSpecifyingMultipleInterfaces() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byInterface",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/factoryPids/byInterface",
                 "{\"interfaceNames\":[\"org.eclipse.kura.configuration.ConfigurableComponent\", \"org.eclipse.kura.internal.rest.service.listing.provider.test.OtherTestInterface\"]}");
 
         thenRequestSucceeds();
@@ -300,7 +319,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportListingFactoryPidsByProperty() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/factoryPids/byProperty",
                 "{\"name\": \"testProperty\", \"value\": \"testValue\"}");
 
         thenRequestSucceeds();
@@ -312,7 +333,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportListingFactoryPidsByPropertyOfArrayType() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/factoryPids/byProperty",
                 "{\"name\": \"testProperty\", \"value\": \"value2\"}");
 
         thenRequestSucceeds();
@@ -324,7 +347,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportListingFactoryPidsByPropertyAndObjectClass() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/factoryPids/byProperty",
                 "{\"and\": [ {\"name\":\"objectClass\", \"value\":\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"}, {\"name\":\"testProperty\",\"value\": \"testValue\"} ] }");
 
         thenRequestSucceeds();
@@ -345,7 +370,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRejectFilterWithSpacesInPropertyName() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byProperty",
                 "{\"name\": \" testProperty \", \"value\": \"value2\"}");
 
         thenResponseCodeIs(400);
@@ -355,7 +382,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRejectFilterWithMultipleTypes() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/byProperty",
                 "{\"and\": [], \"name\": \" testProperty \", \"value\": \"value2\"}");
 
         thenResponseCodeIs(400);
@@ -365,7 +394,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRejectReferenceWithoutPid() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/satisfyingReference",
                 "{ \"referenceName\": \"TestInterface\" }");
 
         thenResponseCodeIs(400);
@@ -375,7 +406,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRejectReferenceWithEmptyPid() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/satisfyingReference",
                 "{ \"pid\": \"\", \"referenceName\": \"TestInterface\" }");
 
         thenResponseCodeIs(400);
@@ -385,8 +418,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRejectReferenceWithoutReferenceName() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
-                "{ \"pid\": \"foo\" }");
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference", "{ \"pid\": \"foo\" }");
 
         thenResponseCodeIs(400);
     }
@@ -395,7 +428,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRejectReferenceWithEmptyReferenceName() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/servicePids/satisfyingReference",
                 "{ \"pid\": \"foo\", \"referenceName\": \"\" }");
 
         thenResponseCodeIs(400);
@@ -410,7 +445,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         final UserAdmin userAdmin;
 
         try {
-            userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            userAdmin =
+                    ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail("failed to track UserAdmin");
             return;
@@ -431,7 +467,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         }
 
         for (final String role : roles) {
-            getRoleOrCreateOne(userAdmin, "kura.permission." + role, Group.class).addMember(user);
+            getRoleOrCreateOne(userAdmin, "kura.permission." + role, Group.class)
+                    .addMember(user);
         }
     }
 
@@ -441,11 +478,12 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private <T> void givenRegisteredService(final Class<T> clazz, final String pid,
-            final Map<String, Object> properties) {
+    private <T> void givenRegisteredService(
+            final Class<T> clazz, final String pid, final Map<String, Object> properties) {
 
         final T testService = Mockito.mock(clazz);
-        BundleContext context = FrameworkUtil.getBundle(ServiceListingEndpointsTest.class).getBundleContext();
+        BundleContext context =
+                FrameworkUtil.getBundle(ServiceListingEndpointsTest.class).getBundleContext();
         final Dictionary<String, Object> dict = new Hashtable<>();
         dict.put("kura.service.pid", pid);
 

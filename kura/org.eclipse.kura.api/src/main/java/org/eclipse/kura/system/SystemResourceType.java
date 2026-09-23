@@ -19,7 +19,6 @@ package org.eclipse.kura.system;
  * @since 2.2
  */
 public enum SystemResourceType {
-
     BUNDLE,
     DP,
     RPM,

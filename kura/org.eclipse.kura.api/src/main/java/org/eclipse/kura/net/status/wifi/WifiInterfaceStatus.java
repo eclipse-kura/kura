@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.osgi.annotation.versioning.ProviderType;
@@ -132,8 +131,14 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(this.activeWifiAccessPoint, this.availableWifiAccessPoints,
-                this.capabilities, this.countryCode, this.mode, this.channels);
+        result = prime * result
+                + Objects.hash(
+                        this.activeWifiAccessPoint,
+                        this.availableWifiAccessPoints,
+                        this.capabilities,
+                        this.countryCode,
+                        this.mode,
+                        this.channels);
         return result;
     }
 
@@ -149,8 +154,8 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
         return Objects.equals(this.activeWifiAccessPoint, other.activeWifiAccessPoint)
                 && Objects.equals(this.availableWifiAccessPoints, other.availableWifiAccessPoints)
                 && Objects.equals(this.capabilities, other.capabilities)
-                && Objects.equals(this.countryCode, other.countryCode) && this.mode == other.mode
+                && Objects.equals(this.countryCode, other.countryCode)
+                && this.mode == other.mode
                 && Objects.equals(this.channels, other.channels);
     }
-
 }

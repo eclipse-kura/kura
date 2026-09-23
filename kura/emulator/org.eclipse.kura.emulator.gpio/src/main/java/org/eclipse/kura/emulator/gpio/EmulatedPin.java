@@ -15,7 +15,6 @@ package org.eclipse.kura.emulator.gpio;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIODescription;
 import org.eclipse.kura.gpio.KuraGPIODeviceException;
@@ -32,7 +31,7 @@ public class EmulatedPin implements KuraGPIOPin {
 
     private static final Logger logger = LoggerFactory.getLogger(EmulatedPin.class);
     private static final String UNKNOWN = "unknown";
-    
+
     private boolean internalValue = false;
     private String pinName = null;
     private int pinController = -1;
@@ -55,7 +54,7 @@ public class EmulatedPin implements KuraGPIOPin {
         this.pinController = pinIndex / 1000;
         this.pinLine = pinIndex % 1000;
     }
-    
+
     public EmulatedPin(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
         super();
         this.pinName = pinName;
@@ -80,8 +79,12 @@ public class EmulatedPin implements KuraGPIOPin {
     public void setValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
         this.internalValue = active;
 
-        logger.debug("Emulated GPIO Pin {}:{}:{} changed to {}",
-                this.pinName, this.pinController, this.pinLine, active ? "on" : "off");
+        logger.debug(
+                "Emulated GPIO Pin {}:{}:{} changed to {}",
+                this.pinName,
+                this.pinController,
+                this.pinLine,
+                active ? "on" : "off");
     }
 
     @Override
@@ -150,8 +153,9 @@ public class EmulatedPin implements KuraGPIOPin {
         properties.put("controller", Integer.toString(this.pinController));
         properties.put("line", Integer.toString(this.pinLine));
         properties.put("name", this.pinName);
-        properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, this.pinName + ":" + this.pinController + ":" + this.pinLine);
+        properties.put(
+                KuraGPIODescription.DISPLAY_NAME_PROPERTY,
+                this.pinName + ":" + this.pinController + ":" + this.pinLine);
         return new KuraGPIODescription(properties);
     }
-
 }

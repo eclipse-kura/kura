@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
@@ -108,9 +107,13 @@ public class ReservedClaimsTest extends AbstractJwtScenario {
             final Exception failure = this.failuresByClaim.get(reservedClaim);
 
             assertNotNull("the reserved claim '" + reservedClaim + "' was not rejected", failure);
-            assertTrue("the reserved claim '" + reservedClaim + "' was rejected with "
-                    + failure.getClass().getName() + " instead of a KuraException", failure instanceof KuraException);
-            assertEquals("wrong error code for the reserved claim '" + reservedClaim + "'", KuraErrorCode.BAD_REQUEST,
+            assertTrue(
+                    "the reserved claim '" + reservedClaim + "' was rejected with "
+                            + failure.getClass().getName() + " instead of a KuraException",
+                    failure instanceof KuraException);
+            assertEquals(
+                    "wrong error code for the reserved claim '" + reservedClaim + "'",
+                    KuraErrorCode.BAD_REQUEST,
                     ((KuraException) failure).getCode());
         }
     }
@@ -123,9 +126,9 @@ public class ReservedClaimsTest extends AbstractJwtScenario {
         for (final String reservedClaim : RESERVED_CLAIMS) {
             final String message = this.failuresByClaim.get(reservedClaim).getMessage();
 
-            assertTrue("the rejection message '" + message + "' does not name the claim '" + reservedClaim + "'",
+            assertTrue(
+                    "the rejection message '" + message + "' does not name the claim '" + reservedClaim + "'",
                     message.contains("'" + reservedClaim + "'"));
         }
     }
-
 }

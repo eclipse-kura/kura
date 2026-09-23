@@ -18,7 +18,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Test;
 
 public class ClockServiceConfigRetryIntervalTest {
@@ -79,5 +78,4 @@ public class ClockServiceConfigRetryIntervalTest {
     private void thenMaxRetriesIs(int expected) {
         assertEquals(expected, this.config.getNtpMaxRetries());
     }
-
 }

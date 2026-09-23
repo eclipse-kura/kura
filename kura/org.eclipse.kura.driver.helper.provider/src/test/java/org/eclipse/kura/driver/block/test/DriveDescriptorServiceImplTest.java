@@ -22,7 +22,6 @@ import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.ChannelDescriptor;
@@ -53,8 +52,8 @@ public class DriveDescriptorServiceImplTest {
         String factoryPid = "factoryPid";
 
         DriverDescriptorService driverDescriptorService = new DriverDescriptorServiceImpl();
-        DriverDescriptor driverDescriptor = (DriverDescriptor) TestUtil.invokePrivate(driverDescriptorService,
-                "newDriverDescriptor", kuraServicePid, factoryPid, driver);
+        DriverDescriptor driverDescriptor = (DriverDescriptor) TestUtil.invokePrivate(
+                driverDescriptorService, "newDriverDescriptor", kuraServicePid, factoryPid, driver);
 
         assertEquals(kuraServicePid, driverDescriptor.getPid());
         assertEquals(factoryPid, driverDescriptor.getFactoryPid());
@@ -75,15 +74,14 @@ public class DriveDescriptorServiceImplTest {
 
         assertNotNull(result);
         assertEquals(false, result.isPresent());
-
     }
 
     @Test
     public void testGetDriverDescriptorMatchingPid() throws NoSuchFieldException {
         ServiceReference<Driver> driverSr = mock(ServiceReference.class);
 
-        DriverDescriptorService driverDescriptorService = getDriverDescriptorServiceImplOneElementDriverServiceReferenceArray(
-                driverSr);
+        DriverDescriptorService driverDescriptorService =
+                getDriverDescriptorServiceImplOneElementDriverServiceReferenceArray(driverSr);
 
         BundleContext context = mock(BundleContext.class);
         TestUtil.setFieldValue(driverDescriptorService, "bundleContext", context);
@@ -128,8 +126,8 @@ public class DriveDescriptorServiceImplTest {
     public void testListDriverDescrptorOneDriver() throws NoSuchFieldException {
         ServiceReference<Driver> driverSr = mock(ServiceReference.class);
 
-        DriverDescriptorService driverService = getDriverDescriptorServiceImplOneElementDriverServiceReferenceArray(
-                driverSr);
+        DriverDescriptorService driverService =
+                getDriverDescriptorServiceImplOneElementDriverServiceReferenceArray(driverSr);
         BundleContext context = mock(BundleContext.class);
         TestUtil.setFieldValue(driverService, "bundleContext", context);
 
@@ -170,8 +168,7 @@ public class DriveDescriptorServiceImplTest {
             }
 
             @Override
-            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {
-            }
+            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {}
         };
     }
 
@@ -187,9 +184,7 @@ public class DriveDescriptorServiceImplTest {
             }
 
             @Override
-            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {
-            }
+            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {}
         };
     }
-
 }

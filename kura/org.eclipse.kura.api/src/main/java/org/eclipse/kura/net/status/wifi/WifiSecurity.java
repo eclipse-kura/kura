@@ -46,5 +46,4 @@ public enum WifiSecurity {
     KEY_MGMT_OWE_TM,
     /** Supports WPA3 Enterprise Suite-B 192 bit mode */
     KEY_MGMT_EAP_SUITE_B_192;
-
 }

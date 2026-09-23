@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory;
@@ -63,21 +62,25 @@ public class SparkplugCloudConnectionFactoryTest {
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint-test",
                 new ExpectedPropertiesBuilder()
-                    .withProperty("DataService.target",
-                        "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService-test)")
-                    .withProperty(CloudConnectionFactory.KURA_CLOUD_CONNECTION_FACTORY_PID,
-                        "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory")
-                    .withProperty("DataTransportService.target",
-                        "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport-test)")
-                    .build(),
+                        .withProperty(
+                                "DataService.target",
+                                "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService-test)")
+                        .withProperty(
+                                CloudConnectionFactory.KURA_CLOUD_CONNECTION_FACTORY_PID,
+                                "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory")
+                        .withProperty(
+                                "DataTransportService.target",
+                                "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport-test)")
+                        .build(),
                 false);
         thenFactoryComponentIsCreated(
                 "org.eclipse.kura.data.DataService",
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService-test",
                 new ExpectedPropertiesBuilder()
-                    .withProperty("DataTransportService.target",
-                        "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport-test)")
-                    .build(),
+                        .withProperty(
+                                "DataTransportService.target",
+                                "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport-test)")
+                        .build(),
                 false);
         thenFactoryComponentIsCreated(
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport",
@@ -85,7 +88,7 @@ public class SparkplugCloudConnectionFactoryTest {
                 null,
                 true);
     }
-    
+
     @Test
     public void shouldCreateCloudStackComponentsWithoutSuffix() throws KuraException {
         whenCreateConfiguration("org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint");
@@ -94,21 +97,25 @@ public class SparkplugCloudConnectionFactoryTest {
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
                 new ExpectedPropertiesBuilder()
-                    .withProperty("DataService.target",
-                        "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService)")
-                    .withProperty(CloudConnectionFactory.KURA_CLOUD_CONNECTION_FACTORY_PID,
-                        "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory")
-                    .withProperty("DataTransportService.target",
-                            "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport)")
-                    .build(),
+                        .withProperty(
+                                "DataService.target",
+                                "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService)")
+                        .withProperty(
+                                CloudConnectionFactory.KURA_CLOUD_CONNECTION_FACTORY_PID,
+                                "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory")
+                        .withProperty(
+                                "DataTransportService.target",
+                                "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport)")
+                        .build(),
                 false);
         thenFactoryComponentIsCreated(
                 "org.eclipse.kura.data.DataService",
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService",
                 new ExpectedPropertiesBuilder()
-                    .withProperty("DataTransportService.target",
-                        "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport)")
-                    .build(),
+                        .withProperty(
+                                "DataTransportService.target",
+                                "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport)")
+                        .build(),
                 false);
         thenFactoryComponentIsCreated(
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport",
@@ -148,8 +155,8 @@ public class SparkplugCloudConnectionFactoryTest {
 
         thenFactoryComponentIsDeleted(
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint-test", false);
-        thenFactoryComponentIsDeleted("org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService-test",
-                false);
+        thenFactoryComponentIsDeleted(
+                "org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService-test", false);
         thenFactoryComponentIsDeleted(
                 "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport-test", true);
     }
@@ -196,13 +203,18 @@ public class SparkplugCloudConnectionFactoryTest {
 
     private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
         assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+        assertEquals(
+                expectedException.getName(), this.occurredException.getClass().getName());
     }
 
-    private void thenFactoryComponentIsCreated(String expectedFactoryPid, String expectedPid,
-            Map<String, Object> expectedProperties, boolean expectedTakeSnapshot) throws KuraException {
-        verify(this.configuratioServiceMock, times(1)).createFactoryConfiguration(expectedFactoryPid, expectedPid,
-                expectedProperties, expectedTakeSnapshot);
+    private void thenFactoryComponentIsCreated(
+            String expectedFactoryPid,
+            String expectedPid,
+            Map<String, Object> expectedProperties,
+            boolean expectedTakeSnapshot)
+            throws KuraException {
+        verify(this.configuratioServiceMock, times(1))
+                .createFactoryConfiguration(expectedFactoryPid, expectedPid, expectedProperties, expectedTakeSnapshot);
     }
 
     private void thenReturnedStackComponentPidsContain(String expectedPid) {
@@ -223,18 +235,16 @@ public class SparkplugCloudConnectionFactoryTest {
     }
 
     private class ExpectedPropertiesBuilder {
-        
+
         private Map<String, Object> properties = new HashMap<>();
 
         public ExpectedPropertiesBuilder withProperty(String key, Object value) {
             this.properties.put(key, value);
             return this;
         }
-        
+
         public Map<String, Object> build() {
             return this.properties;
         }
-        
     }
-
 }

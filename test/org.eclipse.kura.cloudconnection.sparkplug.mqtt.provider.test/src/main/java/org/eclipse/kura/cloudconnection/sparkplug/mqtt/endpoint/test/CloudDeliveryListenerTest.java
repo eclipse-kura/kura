@@ -53,5 +53,4 @@ public class CloudDeliveryListenerTest extends StepsCollection {
     private void thenCloudDeliveryListenerNotifiedOnMessageConfirmed(String expectedMessageId, int expectedTimes) {
         verify(this.cloudDeliveryListener, times(expectedTimes)).onMessageConfirmed(expectedMessageId);
     }
-
 }

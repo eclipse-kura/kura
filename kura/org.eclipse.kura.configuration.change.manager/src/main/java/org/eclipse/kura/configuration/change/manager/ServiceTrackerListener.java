@@ -15,5 +15,4 @@ package org.eclipse.kura.configuration.change.manager;
 public interface ServiceTrackerListener {
 
     public void onConfigurationChanged(String pid);
-
 }

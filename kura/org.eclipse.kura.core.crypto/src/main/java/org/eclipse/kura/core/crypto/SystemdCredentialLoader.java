@@ -29,7 +29,9 @@ public class SystemdCredentialLoader {
     }
 
     public static Optional<SystemdCredentialLoader> fromEnv() {
-        return Optional.ofNullable(System.getenv(CREDENTIALS_DIRECTORY_ENV)).map(File::new).filter(File::isDirectory)
+        return Optional.ofNullable(System.getenv(CREDENTIALS_DIRECTORY_ENV))
+                .map(File::new)
+                .filter(File::isDirectory)
                 .map(SystemdCredentialLoader::new);
     }
 
@@ -52,5 +54,4 @@ public class SystemdCredentialLoader {
             return Optional.of(out.toByteArray());
         }
     }
-
 }

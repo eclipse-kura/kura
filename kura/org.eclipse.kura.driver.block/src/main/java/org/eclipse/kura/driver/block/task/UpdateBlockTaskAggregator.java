@@ -1,16 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.task;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.driver.block.Block;
 import org.eclipse.kura.driver.block.BlockFactory;
 import org.eclipse.kura.driver.block.ProhibitedBlock;
@@ -74,25 +72,29 @@ public class UpdateBlockTaskAggregator extends BlockTaskAggregator {
      * @throws IllegalArgumentException
      *             if any task in {@link Mode#READ} is found in the input task list
      */
-    public UpdateBlockTaskAggregator(List<Block> tasks, BlockFactory<ToplevelBlockTask> readTaskFactory,
+    public UpdateBlockTaskAggregator(
+            List<Block> tasks,
+            BlockFactory<ToplevelBlockTask> readTaskFactory,
             BlockFactory<ToplevelBlockTask> writeTaskFactory) {
         super(tasks, writeTaskFactory);
         requireNonNull(readTaskFactory, "Read tasks factory cannot be null");
         this.readTaskAggregator = createReadTaskAggregator(tasks, readTaskFactory);
     }
 
-    private static BlockTaskAggregator createReadTaskAggregator(List<Block> tasks,
-            BlockFactory<ToplevelBlockTask> readTaskFactory) {
-        ArrayList<Block> updateTasks = tasks.stream().filter(block -> {
-            if (!(block instanceof BlockTask)) {
-                return false;
-            }
-            BlockTask task = (BlockTask) block;
-            if (task.getMode() == Mode.READ) {
-                throw new IllegalArgumentException("Read task are not supported by UpdateBlockTaskAggregator");
-            }
-            return task.getMode() == Mode.UPDATE;
-        }).collect(Collectors.toCollection(ArrayList::new));
+    private static BlockTaskAggregator createReadTaskAggregator(
+            List<Block> tasks, BlockFactory<ToplevelBlockTask> readTaskFactory) {
+        ArrayList<Block> updateTasks = tasks.stream()
+                .filter(block -> {
+                    if (!(block instanceof BlockTask)) {
+                        return false;
+                    }
+                    BlockTask task = (BlockTask) block;
+                    if (task.getMode() == Mode.READ) {
+                        throw new IllegalArgumentException("Read task are not supported by UpdateBlockTaskAggregator");
+                    }
+                    return task.getMode() == Mode.UPDATE;
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
         return new BlockTaskAggregator(updateTasks, readTaskFactory);
     }
 

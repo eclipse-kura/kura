@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Map;
-
 import org.apache.commons.io.output.NullOutputStream;
 
 /**
@@ -40,7 +39,7 @@ import org.apache.commons.io.output.NullOutputStream;
  * <li>executeInAShell : a flag that indicates if the command should be executed in a shell/terminal. Default is
  * false.</li>
  * </ul>
- * 
+ *
  * @since 2.2
  *
  */
@@ -180,5 +179,4 @@ public class Command {
         }
         return true;
     }
-
 }

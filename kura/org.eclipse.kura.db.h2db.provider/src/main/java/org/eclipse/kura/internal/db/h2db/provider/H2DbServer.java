@@ -14,23 +14,22 @@ package org.eclipse.kura.internal.db.h2db.provider;
 
 import java.sql.SQLException;
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.h2.tools.Server;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.core.db.H2DbServer",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.core.db.H2DbServer",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.configuration.ConfigurableComponent.class})
 @Designate(ocd = H2DbServerMetatype.class, factory = true)
 public class H2DbServer implements ConfigurableComponent {
 
@@ -70,20 +69,21 @@ public class H2DbServer implements ConfigurableComponent {
         if (configuration.isServerEnabled()) {
             try {
                 logger.info("Starting DB server...");
-                final String[] commandline = configuration.getServerCommandLine().split(" ");
+                final String[] commandline =
+                        configuration.getServerCommandLine().split(" ");
                 logger.debug("Server type: {}, commandline: {}", configuration.getServerType(), commandline);
                 switch (configuration.getServerType()) {
-                case TCP:
-                    newServer = Server.createTcpServer(commandline);
-                    break;
-                case WEB:
-                    newServer = Server.createWebServer(commandline);
-                    break;
-                case PG:
-                    newServer = Server.createPgServer(commandline);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown server type");
+                    case TCP:
+                        newServer = Server.createTcpServer(commandline);
+                        break;
+                    case WEB:
+                        newServer = Server.createWebServer(commandline);
+                        break;
+                    case PG:
+                        newServer = Server.createPgServer(commandline);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown server type");
                 }
                 newServer.start();
                 this.server = newServer;

@@ -23,10 +23,8 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.KeyManager;
 import javax.security.auth.x500.X500Principal;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -117,7 +115,7 @@ public interface KeystoreService {
      *             accessed
      * @throws IllegalArgumentException
      *             if algorithm or provider is null
-     * 
+     *
      * @since 2.8
      */
     public List<KeyManager> getKeyManagers(String algorithm, String provider) throws KuraException;
@@ -152,8 +150,14 @@ public interface KeystoreService {
      * @throws IllegalArgumentException
      *             if one of the arguments is null or empty
      */
-    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes,
-            SecureRandom secureRandom) throws KuraException;
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            int keySize,
+            String signatureAlgorithm,
+            String attributes,
+            SecureRandom secureRandom)
+            throws KuraException;
 
     /**
      * Creates and persists a new keypair in the managed keystore using the specified alias.
@@ -178,8 +182,14 @@ public interface KeystoreService {
      *
      * @since 2.4
      */
-    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
-            String signatureAlgorithm, String attributes, SecureRandom secureRandom) throws KuraException;
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm,
+            String attributes,
+            SecureRandom secureRandom)
+            throws KuraException;
 
     /**
      * Creates and persists a new keypair in the managed keystore using the specified alias.
@@ -201,8 +211,13 @@ public interface KeystoreService {
      *             if one of the arguments is null or empty
      * @since 2.4
      */
-    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
-            String signatureAlgorithm, String attributes) throws KuraException;
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm,
+            String attributes)
+            throws KuraException;
 
     /**
      * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
@@ -277,5 +292,4 @@ public interface KeystoreService {
      * @since 2.4
      */
     public void addCRL(X509CRL crl) throws KuraException;
-
 }

@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.test;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -22,7 +21,6 @@ import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
 import org.eclipse.kura.driver.binary.BinaryData;
 import org.eclipse.kura.driver.binary.BinaryDataTypes;
 import org.eclipse.kura.driver.binary.Buffer;
@@ -40,61 +38,63 @@ public class BinaryDataTest {
 
     @Test
     public void shouldSupportUInt8() {
-        testReadWrite(BinaryDataTypes.UINT8, (endianness, size) -> new byte[] { (byte) 0xab }, 171);
+        testReadWrite(BinaryDataTypes.UINT8, (endianness, size) -> new byte[] {(byte) 0xab}, 171);
     }
 
     @Test
     public void shouldSupportUInt16() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4 };
+        final byte[] testBuf = new byte[] {(byte) 0xa3, (byte) 0xc4};
         testReadWrite(BinaryDataTypes.UINT16_LE, (endianness, size) -> testBuf, (Integer) 0xc4a3);
         testReadWrite(BinaryDataTypes.UINT16_BE, (endianness, size) -> testBuf, (Integer) 0xa3c4);
     }
 
     @Test
     public void shouldSupportUInt32() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83 };
+        final byte[] testBuf = new byte[] {(byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83};
         testReadWrite(BinaryDataTypes.UINT32_LE, (endianness, size) -> testBuf, 0x8345c4a3L);
         testReadWrite(BinaryDataTypes.UINT32_BE, (endianness, size) -> testBuf, 0xa3c44583L);
     }
 
     @Test
     public void shouldSupportInt8() {
-        testReadWrite(BinaryDataTypes.INT8, (endianness, size) -> new byte[] { (byte) 0xab }, -85);
+        testReadWrite(BinaryDataTypes.INT8, (endianness, size) -> new byte[] {(byte) 0xab}, -85);
     }
 
     @Test
     public void shouldSupportInt16() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4 };
+        final byte[] testBuf = new byte[] {(byte) 0xa3, (byte) 0xc4};
         testReadWrite(BinaryDataTypes.INT16_LE, (endianness, size) -> testBuf, -15197);
         testReadWrite(BinaryDataTypes.INT16_BE, (endianness, size) -> testBuf, -23612);
     }
 
     @Test
     public void shouldSupportInt32() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83 };
+        final byte[] testBuf = new byte[] {(byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83};
         testReadWrite(BinaryDataTypes.INT32_LE, (endianness, size) -> testBuf, -2092579677);
         testReadWrite(BinaryDataTypes.INT32_BE, (endianness, size) -> testBuf, -1547418237);
     }
 
     @Test
     public void shouldSupportInt64() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83, (byte) 0xa3,
-                (byte) 0xc4, (byte) 0x45, (byte) 0x83 };
+        final byte[] testBuf = new byte[] {
+            (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83, (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83
+        };
         testReadWrite(BinaryDataTypes.INT64_LE, (endianness, size) -> testBuf, -8987561274786855773L);
         testReadWrite(BinaryDataTypes.INT64_BE, (endianness, size) -> testBuf, -6646110718401428093L);
     }
 
     @Test
     public void shouldSupportFloat() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83 };
+        final byte[] testBuf = new byte[] {(byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83};
         testReadWrite(BinaryDataTypes.FLOAT_LE, (endianness, size) -> testBuf, (float) -5.8118825e-37);
         testReadWrite(BinaryDataTypes.FLOAT_BE, (endianness, size) -> testBuf, (float) -2.1279802e-17);
     }
 
     @Test
     public void shouldSupportDouble() {
-        final byte[] testBuf = new byte[] { (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83, (byte) 0xa3,
-                (byte) 0xc4, (byte) 0x45, (byte) 0x83 };
+        final byte[] testBuf = new byte[] {
+            (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83, (byte) 0xa3, (byte) 0xc4, (byte) 0x45, (byte) 0x83
+        };
         testReadWrite(BinaryDataTypes.DOUBLE_LE, (endianness, size) -> testBuf, -6.816715214851188e-293);
         testReadWrite(BinaryDataTypes.DOUBLE_BE, (endianness, size) -> testBuf, -2.178907098281569e-136);
     }
@@ -165,11 +165,12 @@ public class BinaryDataTest {
 
     @Test
     public void shouldSupportUnsignedInteger() {
-        final byte[] testBuf = new byte[] { 1, 2, 3, 4 };
+        final byte[] testBuf = new byte[] {1, 2, 3, 4};
         testRead(new UnsignedIntegerLE(32, 0), (endiannes, size) -> testBuf, BigInteger.valueOf(67305985));
 
-        final byte[] testBuf2 = new byte[] { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
-                (byte) 0xAA, (byte) 0xAA, (byte) 0xAA };
+        final byte[] testBuf2 = new byte[] {
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA
+        };
         testRead(new UnsignedIntegerLE(3, 0), (endiannes, size) -> testBuf2, BigInteger.valueOf(2));
         testRead(new UnsignedIntegerLE(3, 3), (endiannes, size) -> testBuf2, BigInteger.valueOf(5));
         testRead(new UnsignedIntegerLE(6, 2), (endiannes, size) -> testBuf2, BigInteger.valueOf(42));
@@ -180,9 +181,9 @@ public class BinaryDataTest {
 
     @Test
     public void shouldSupportByteArray() {
-        final byte[] testBuf = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+        final byte[] testBuf = new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
         testRead(new ByteArray(testBuf.length), (size, endianness) -> testBuf, testBuf, Assert::assertArrayEquals);
-        testRead(new ByteArray(4), (size, endianness) -> testBuf, new byte[] { 1, 2, 3, 4 }, Assert::assertArrayEquals);
+        testRead(new ByteArray(4), (size, endianness) -> testBuf, new byte[] {1, 2, 3, 4}, Assert::assertArrayEquals);
         testRead(new ByteArray(40), (size, endianness) -> testBuf, testBuf, Assert::assertArrayEquals);
     }
 
@@ -245,10 +246,12 @@ public class BinaryDataTest {
 
     @Test
     public void shouldSupportStringData() {
-        testAdapterRead(a -> new StringData(a, StandardCharsets.US_ASCII), new byte[] { 0x74, 0x65, 0x73, 0x74 },
-                "test");
-        testAdapterWrite(a -> new StringData(a, StandardCharsets.US_ASCII), "test",
-                new byte[] { 0x74, 0x65, 0x73, 0x74 }, Assert::assertArrayEquals);
+        testAdapterRead(a -> new StringData(a, StandardCharsets.US_ASCII), new byte[] {0x74, 0x65, 0x73, 0x74}, "test");
+        testAdapterWrite(
+                a -> new StringData(a, StandardCharsets.US_ASCII),
+                "test",
+                new byte[] {0x74, 0x65, 0x73, 0x74},
+                Assert::assertArrayEquals);
     }
 
     @Test
@@ -355,24 +358,30 @@ public class BinaryDataTest {
         return result;
     }
 
-    private <T> void testRead(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
-            T expectedValue) {
+    private <T> void testRead(
+            BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider, T expectedValue) {
         testRead(data, bufferProvider, expectedValue, Assert::assertEquals);
     }
 
-    private <T> void testRead(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
-            T expectedValue, final BiConsumer<T, T> validator) {
+    private <T> void testRead(
+            BinaryData<T> data,
+            BiFunction<Endianness, Integer, byte[]> bufferProvider,
+            T expectedValue,
+            final BiConsumer<T, T> validator) {
         ByteArrayBuffer testBuf = new ByteArrayBuffer(bufferProvider.apply(data.getEndianness(), data.getSize()));
         validator.accept(expectedValue, data.read(testBuf, 0));
     }
 
-    private <T> void testReadWrite(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
-            T expectedValue) {
+    private <T> void testReadWrite(
+            BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider, T expectedValue) {
         testReadWrite(data, bufferProvider, expectedValue, Assert::assertEquals);
     }
 
-    private <T> void testReadWrite(BinaryData<T> data, BiFunction<Endianness, Integer, byte[]> bufferProvider,
-            T expectedValue, final BiConsumer<T, T> readValidator) {
+    private <T> void testReadWrite(
+            BinaryData<T> data,
+            BiFunction<Endianness, Integer, byte[]> bufferProvider,
+            T expectedValue,
+            final BiConsumer<T, T> readValidator) {
         ByteArrayBuffer testBuf = new ByteArrayBuffer(bufferProvider.apply(data.getEndianness(), data.getSize()));
         readValidator.accept(expectedValue, data.read(testBuf, 0));
         ByteArrayBuffer writeBuf = new ByteArrayBuffer(new byte[data.getSize()]);
@@ -380,26 +389,32 @@ public class BinaryDataTest {
         assertArrayEquals(testBuf.getBackingArray(), writeBuf.getBackingArray());
     }
 
-    private <T, U> void testAdapterRead(final Function<BinaryData<T>, BinaryData<U>> supplier, final T suppliedValue,
-            final U expectedValue) {
+    private <T, U> void testAdapterRead(
+            final Function<BinaryData<T>, BinaryData<U>> supplier, final T suppliedValue, final U expectedValue) {
         testAdapterRead(supplier, suppliedValue, expectedValue, Assert::assertEquals);
     }
 
-    private <T, U> void testAdapterWrite(final Function<BinaryData<T>, BinaryData<U>> supplier, final U writtenValue,
-            final T forwardedValue) {
+    private <T, U> void testAdapterWrite(
+            final Function<BinaryData<T>, BinaryData<U>> supplier, final U writtenValue, final T forwardedValue) {
         testAdapterWrite(supplier, writtenValue, forwardedValue, Assert::assertEquals);
     }
 
-    private <T, U> void testAdapterRead(final Function<BinaryData<T>, BinaryData<U>> supplier, final T suppliedValue,
-            final U expectedValue, final BiConsumer<U, U> validator) {
+    private <T, U> void testAdapterRead(
+            final Function<BinaryData<T>, BinaryData<U>> supplier,
+            final T suppliedValue,
+            final U expectedValue,
+            final BiConsumer<U, U> validator) {
         final AdapterHelper<T> helper = new AdapterHelper<>(suppliedValue);
         final BinaryData<U> underTest = supplier.apply(helper);
         helper.assertIsWrapper(underTest);
         validator.accept(expectedValue, underTest.read(new ByteArrayBuffer(new byte[0]), 0));
     }
 
-    private <T, U> void testAdapterWrite(final Function<BinaryData<T>, BinaryData<U>> supplier, final U writtenValue,
-            final T forwardedValue, final BiConsumer<T, T> validator) {
+    private <T, U> void testAdapterWrite(
+            final Function<BinaryData<T>, BinaryData<U>> supplier,
+            final U writtenValue,
+            final T forwardedValue,
+            final BiConsumer<T, T> validator) {
         @SuppressWarnings("unchecked")
         final AdapterHelper<T> helper = new AdapterHelper<>((Class<T>) forwardedValue.getClass());
         final BinaryData<U> underTest = supplier.apply(helper);
@@ -465,5 +480,4 @@ public class BinaryDataTest {
             assertEquals(getSize(), wrapper.getSize());
         }
     }
-
 }

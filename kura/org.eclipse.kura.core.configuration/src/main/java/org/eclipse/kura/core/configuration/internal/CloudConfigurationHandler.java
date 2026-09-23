@@ -25,7 +25,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
@@ -47,26 +46,27 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @deprecated Please switch to CONF-V2 and corresponding REST APIs
  *             (https://eclipse-kura.github.io/kura/docs-release-5.6/references/rest-apis/rest-configuration-service-v2/)
  */
 @Deprecated
 @Component(
-    name = "org.eclipse.kura.core.configuration.CloudConfigurationHandler",
-    service = {})
+        name = "org.eclipse.kura.core.configuration.CloudConfigurationHandler",
+        service = {})
 public class CloudConfigurationHandler implements RequestHandler {
 
     private static final String EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE = "Expected one resource but found none";
 
-    private static final String EXPECTED_AT_MOST_TWO_RESOURCES_BUT_FOUND_MESSAGE = "Expected at most two resource(s) but found {}";
+    private static final String EXPECTED_AT_MOST_TWO_RESOURCES_BUT_FOUND_MESSAGE =
+            "Expected at most two resource(s) but found {}";
 
     private static final String CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE = "Cannot find resource with name: {}";
 
@@ -91,7 +91,8 @@ public class CloudConfigurationHandler implements RequestHandler {
 
     private ScheduledExecutorService executor;
 
-    @Reference(name = "ConfigurationService",
+    @Reference(
+            name = "ConfigurationService",
             service = org.eclipse.kura.configuration.ConfigurationService.class,
             unbind = "unsetConfigurationService")
     protected void setConfigurationService(ConfigurationService configurationService) {
@@ -102,7 +103,10 @@ public class CloudConfigurationHandler implements RequestHandler {
         this.configurationService = null;
     }
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     protected void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -111,7 +115,8 @@ public class CloudConfigurationHandler implements RequestHandler {
         this.systemService = null;
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -120,7 +125,10 @@ public class CloudConfigurationHandler implements RequestHandler {
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -128,7 +136,10 @@ public class CloudConfigurationHandler implements RequestHandler {
         try {
             requestHandlerRegistry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -228,8 +239,8 @@ public class CloudConfigurationHandler implements RequestHandler {
 
         if (snapshotId != null) {
             long sid = Long.parseLong(snapshotId);
-            XmlComponentConfigurations xmlConfigs = ((ConfigurationServiceImpl) this.configurationService)
-                    .loadEncryptedSnapshotFileContent(sid);
+            XmlComponentConfigurations xmlConfigs =
+                    ((ConfigurationServiceImpl) this.configurationService).loadEncryptedSnapshotFileContent(sid);
             //
             // marshall the response
 
@@ -332,7 +343,8 @@ public class CloudConfigurationHandler implements RequestHandler {
         Set<String> componentPids = this.configurationService.getConfigurableComponentPids();
         if (pidsToIgnore != null) {
             Set<String> filteredComponentPids = componentPids.stream()
-                    .filter(((Predicate<String>) pidsToIgnore::contains).negate()).collect(Collectors.toSet());
+                    .filter(((Predicate<String>) pidsToIgnore::contains).negate())
+                    .collect(Collectors.toSet());
             filteredComponentPids.forEach(componentPid -> {
                 ComponentConfiguration cc;
                 try {
@@ -351,9 +363,12 @@ public class CloudConfigurationHandler implements RequestHandler {
                         logger.error("null OCD for ComponentConfiguration PID {}", cc.getPid());
                         return;
                     }
-                    if (cc.getDefinition().getId() == null || cc.getDefinition().getId().isEmpty()) {
+                    if (cc.getDefinition().getId() == null
+                            || cc.getDefinition().getId().isEmpty()) {
 
-                        logger.error("null or empty OCD ID for ComponentConfiguration PID {}. OCD ID: {}", cc.getPid(),
+                        logger.error(
+                                "null or empty OCD ID for ComponentConfiguration PID {}. OCD ID: {}",
+                                cc.getPid(),
                                 cc.getDefinition().getId());
                         return;
                     }
@@ -361,7 +376,6 @@ public class CloudConfigurationHandler implements RequestHandler {
                 } catch (KuraException e) {
                     // Nothing needed here
                 }
-
             });
         }
         return configs;
@@ -394,7 +408,9 @@ public class CloudConfigurationHandler implements RequestHandler {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        this.executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, this.configurationService), 1000,
+        this.executor.schedule(
+                new UpdateConfigurationsCallable(pid, xmlConfigs, this.configurationService),
+                1000,
                 TimeUnit.MILLISECONDS);
 
         return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -472,14 +488,14 @@ public class CloudConfigurationHandler implements RequestHandler {
     }
 
     private ServiceReference<Marshaller>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        String filterString =
+                String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
     }
 
     private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        String filterString =
+                String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
     }
 
@@ -538,8 +554,8 @@ class UpdateConfigurationsCallable implements Callable<Void> {
     private final ConfigurationService configurationService;
     private final AuditContext auditContext;
 
-    public UpdateConfigurationsCallable(String pid, XmlComponentConfigurations xmlConfigurations,
-            ConfigurationService configurationService) {
+    public UpdateConfigurationsCallable(
+            String pid, XmlComponentConfigurations xmlConfigurations, ConfigurationService configurationService) {
         this.pid = pid;
         this.xmlConfigurations = xmlConfigurations;
         this.configurationService = configurationService;
@@ -554,9 +570,8 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         //
         // update the configuration
         try (final Scope scope = AuditContext.openScope(this.auditContext)) {
-            List<ComponentConfiguration> configImpls = this.xmlConfigurations != null
-                    ? this.xmlConfigurations.getConfigurations()
-                    : null;
+            List<ComponentConfiguration> configImpls =
+                    this.xmlConfigurations != null ? this.xmlConfigurations.getConfigurations() : null;
             if (configImpls == null) {
                 return null;
             }

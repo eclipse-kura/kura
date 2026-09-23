@@ -16,7 +16,6 @@ package org.eclipse.kura.net.wifi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.NetConfig;
 import org.osgi.annotation.versioning.ProviderType;
@@ -75,7 +74,7 @@ public class WifiConfig implements NetConfig {
     private String wifiCountryCode;
 
     public WifiConfig() {
-        this(WifiMode.UNKNOWN, "", new int[] { 1 }, WifiSecurity.NONE, "", "b", null);
+        this(WifiMode.UNKNOWN, "", new int[] {1}, WifiSecurity.NONE, "", "b", null);
     }
 
     /**
@@ -84,8 +83,15 @@ public class WifiConfig implements NetConfig {
      */
     @SuppressWarnings("checkstyle:parameterNumber")
     @Deprecated
-    public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
-            boolean broadcast, WifiBgscan bgscan) {
+    public WifiConfig(
+            WifiMode mode,
+            String ssid,
+            int[] channels,
+            WifiSecurity security,
+            String passkey,
+            String hwMode,
+            boolean broadcast,
+            WifiBgscan bgscan) {
         this(mode, ssid, channels, security, passkey, hwMode, bgscan);
     }
 
@@ -107,7 +113,13 @@ public class WifiConfig implements NetConfig {
      * @param bgscan
      *            the background scan
      */
-    public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
+    public WifiConfig(
+            WifiMode mode,
+            String ssid,
+            int[] channels,
+            WifiSecurity security,
+            String passkey,
+            String hwMode,
             WifiBgscan bgscan) {
         this.mode = mode;
         this.ssid = ssid;
@@ -353,7 +365,9 @@ public class WifiConfig implements NetConfig {
 
         WifiConfig other = (WifiConfig) obj;
 
-        if (!compare(this.mode, other.mode) || !compare(this.ssid, other.ssid) || !compare(this.driver, other.driver)
+        if (!compare(this.mode, other.mode)
+                || !compare(this.ssid, other.ssid)
+                || !compare(this.driver, other.driver)
                 || !Arrays.equals(this.channels, other.channels)) {
             return false;
         }

@@ -15,7 +15,6 @@ package org.eclipse.kura.security.token;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -96,15 +95,14 @@ public interface VerificationProof {
 
     /**
      * Returns the claims of the verified token.
-     * 
+     *
      * <p>
      * Depending on the implementation, the returned map may or may not contain the claims that can be accessed by the
      * other methods of this interface, like {@link VerificationProof#getTokenID()} or
      * {@link VerificationProof#getExpiresAt()}.
-     * 
+     *
      * @return a map of the verified claims, cannot be {@code null}, can be empty. Map keys cannot be {@code null}, nor
      *         empty, nor whitespace-only {@link String}. Supported claim values depend on the implementation
      */
     public Map<String, Object> getClaims();
-
 }

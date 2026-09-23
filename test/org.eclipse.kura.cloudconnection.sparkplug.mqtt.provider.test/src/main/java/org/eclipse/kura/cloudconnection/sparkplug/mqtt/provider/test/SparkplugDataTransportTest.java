@@ -22,11 +22,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugBProtobufPayloadBuilder;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
@@ -44,10 +46,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * Payloads are already tested in unit tests, not verifying them here
@@ -275,8 +273,15 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
      * Given
      */
 
-    private void givenUpdated(String groupId, String nodeId, String primaryHostId, String serverUris, String clientId,
-            String username, int keepAlive, int connectionTimeoutSec) {
+    private void givenUpdated(
+            String groupId,
+            String nodeId,
+            String primaryHostId,
+            String serverUris,
+            String clientId,
+            String username,
+            int keepAlive,
+            int connectionTimeoutSec) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(SparkplugDataTransportOptions.KEY_GROUP_ID, groupId);
         properties.put(SparkplugDataTransportOptions.KEY_NODE_ID, nodeId);
@@ -337,11 +342,11 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         givenDisconnect(quiesceTimeout);
     }
 
-    private void whenPrimaryHostRequestsRebirth(String groupId, String nodeId, boolean isRebirthRequested,
-            long timestamp) throws MqttException {
+    private void whenPrimaryHostRequestsRebirth(
+            String groupId, String nodeId, boolean isRebirthRequested, long timestamp) throws MqttException {
         SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
-        payloadBuilder.withMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME, isRebirthRequested,
-                DataType.Boolean, timestamp);
+        payloadBuilder.withMetric(
+                SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME, isRebirthRequested, DataType.Boolean, timestamp);
         payloadBuilder.withTimestamp(timestamp);
 
         client.publish(SparkplugTopics.getNodeCommandTopic(groupId, nodeId), payloadBuilder.build(), 0, false);
@@ -376,29 +381,32 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     private void thenListenerNotifiedOnMessageArrived(String topic) {
-        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onMessageArrived(eq(topic), any(byte[].class),
-                anyInt(), anyBoolean());
+        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1))
+                .onMessageArrived(eq(topic), any(byte[].class), anyInt(), anyBoolean());
     }
 
-    private void thenMessageDeliveredOnce(String expectedTopic, int expectedQos, boolean expectedRetained,
-            long expectedBdSeq) throws Exception {
+    private void thenMessageDeliveredOnce(
+            String expectedTopic, int expectedQos, boolean expectedRetained, long expectedBdSeq) throws Exception {
         thenMessageDelivered(expectedTopic, expectedQos, expectedRetained, expectedBdSeq, 1);
     }
 
-    private void thenMessageDeliveredTwice(String expectedTopic, int expectedQos, boolean expectedRetained,
-            long expectedBdSeq) throws Exception {
+    private void thenMessageDeliveredTwice(
+            String expectedTopic, int expectedQos, boolean expectedRetained, long expectedBdSeq) throws Exception {
         thenMessageDelivered(expectedTopic, expectedQos, expectedRetained, expectedBdSeq, 2);
     }
 
-    private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained,
-            long expectedBdSeq, int expectedTimes) throws Exception {
-        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).times(expectedTimes)).messageArrived(eq(expectedTopic),
-                argThat((MqttMessage message) -> isMessageMatching(message, expectedQos, expectedRetained,
-                        expectedBdSeq)));
+    private void thenMessageDelivered(
+            String expectedTopic, int expectedQos, boolean expectedRetained, long expectedBdSeq, int expectedTimes)
+            throws Exception {
+        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).times(expectedTimes))
+                .messageArrived(
+                        eq(expectedTopic),
+                        argThat((MqttMessage message) ->
+                                isMessageMatching(message, expectedQos, expectedRetained, expectedBdSeq)));
     }
 
-    private static boolean isMessageMatching(MqttMessage message, int expectedQos, boolean expectedRetained,
-            long expectedBdSeq) {
+    private static boolean isMessageMatching(
+            MqttMessage message, int expectedQos, boolean expectedRetained, long expectedBdSeq) {
         if (message.getQos() != expectedQos) {
             return false;
         }
@@ -427,5 +435,4 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
             return false;
         }
     }
-
 }

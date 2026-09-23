@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -55,9 +54,6 @@ import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.DeleteDbFiles;
 import org.osgi.service.component.ComponentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -65,18 +61,27 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.core.db.H2DbService",
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+        name = "org.eclipse.kura.core.db.H2DbService",
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.db.BaseDbService.class,
             org.eclipse.kura.db.H2DbService.class,
             org.eclipse.kura.message.store.provider.MessageStoreProvider.class,
             org.eclipse.kura.wire.store.provider.WireRecordStoreProvider.class,
-            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class })
+            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class
+        })
 @Designate(ocd = H2DbServiceMetatype.class, factory = true)
-public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireRecordStoreProvider,
-        ConfigurableComponent, QueryableWireRecordStoreProvider {
+public class H2DbServiceImpl
+        implements H2DbService,
+                MessageStoreProvider,
+                WireRecordStoreProvider,
+                ConfigurableComponent,
+                QueryableWireRecordStoreProvider {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
     private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
@@ -117,8 +122,8 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
 
     private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
-    private final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>());
+    private final ThreadPoolExecutor executorService =
+            new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
     // ----------------------------------------------------------------
     //
@@ -126,7 +131,10 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     //
     // ----------------------------------------------------------------
 
-    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "unsetCryptoService")
+    @Reference(
+            name = "CryptoService",
+            service = org.eclipse.kura.crypto.CryptoService.class,
+            unbind = "unsetCryptoService")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -259,7 +267,6 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
             }
             throw new IllegalStateException(e);
         }
-
     }
 
     @Override
@@ -423,8 +430,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
 
     private void syncWithExecutor() {
         try {
-            this.executor.submit(() -> {
-            }).get();
+            this.executor.submit(() -> {}).get();
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
@@ -567,8 +573,8 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         if (delaySeconds <= 0) {
             return;
         }
-        this.checkpointTask = this.executor.scheduleWithFixedDelay(new CheckpointTask(), delaySeconds, delaySeconds,
-                TimeUnit.SECONDS);
+        this.checkpointTask = this.executor.scheduleWithFixedDelay(
+                new CheckpointTask(), delaySeconds, delaySeconds, TimeUnit.SECONDS);
     }
 
     private void stopCheckpointTask() {
@@ -584,8 +590,8 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         if (delayMinutes <= 0) {
             return;
         }
-        this.checkpointTask = this.executor.scheduleWithFixedDelay(new DefragTask(config), delayMinutes, delayMinutes,
-                TimeUnit.MINUTES);
+        this.checkpointTask = this.executor.scheduleWithFixedDelay(
+                new DefragTask(config), delayMinutes, delayMinutes, TimeUnit.MINUTES);
     }
 
     private void stopDefragTask() {
@@ -676,13 +682,10 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     @Override
     public void addListener(ConnectionListener listener) {
         this.listenerManager.add(listener);
-
     }
 
     @Override
     public void removeListener(ConnectionListener listener) {
         this.listenerManager.remove(listener);
-
     }
-
 }

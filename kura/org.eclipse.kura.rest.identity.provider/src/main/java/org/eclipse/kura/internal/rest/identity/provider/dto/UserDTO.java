@@ -24,12 +24,14 @@ public class UserDTO {
     private Set<String> permissions;
     private String password;
 
-    public UserDTO() {
+    public UserDTO() {}
 
-    }
-
-    public UserDTO(final String userName, final Set<String> permissions, final boolean passwordAuthEnabled,
-            final boolean passwordChangeNeeded, final String password) {
+    public UserDTO(
+            final String userName,
+            final Set<String> permissions,
+            final boolean passwordAuthEnabled,
+            final boolean passwordChangeNeeded,
+            final String password) {
 
         this.userName = userName;
         this.passwordAuthEnabled = passwordAuthEnabled;
@@ -38,11 +40,13 @@ public class UserDTO {
         this.password = password;
     }
 
-    public UserDTO(final String userName, final Set<String> permissions, final boolean passwordAuthEnabled,
+    public UserDTO(
+            final String userName,
+            final Set<String> permissions,
+            final boolean passwordAuthEnabled,
             final boolean passwordChangeNeeded) {
 
         this(userName, permissions, passwordAuthEnabled, passwordChangeNeeded, null);
-
     }
 
     public String getUserName() {
@@ -101,5 +105,4 @@ public class UserDTO {
         UserDTO other = (UserDTO) obj;
         return Objects.equals(this.userName, other.userName);
     }
-
 }

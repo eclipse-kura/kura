@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -14,7 +14,6 @@
 package org.eclipse.kura.net.modem;
 
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.net.NetConfig;
@@ -61,7 +60,7 @@ public interface CellularModem {
      *
      * @return IMSI number, null if not known
      * @throws KuraException
-     * 
+     *
      * @deprecated since 2.4. Use {@link getMobileSubscriberIdentity(boolean
      *             recompute)} instead.
      */
@@ -73,7 +72,7 @@ public interface CellularModem {
      *
      * @return ICCID, "N/A" if not applicable
      * @throws KuraException
-     * 
+     *
      * @deprecated since 2.4. Use {@link getIntegratedCirquitCardId(boolean
      *             recompute)} instead.
      */
@@ -117,7 +116,7 @@ public interface CellularModem {
      *
      * @throws KuraException
      * @return signal strength
-     * 
+     *
      * @deprecated since 2.4. Use {@link getSignalStrength(boolean recompute)}
      *             instead.
      */
@@ -129,7 +128,7 @@ public interface CellularModem {
      *
      * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
-     * 
+     *
      * @deprecated since 2.4. Use {@link getRegistrationStatus(boolean recompute)}
      *             instead.
      */
@@ -246,22 +245,22 @@ public interface CellularModem {
 
     /**
      * Return the firmware version of the modem module
-     * 
+     *
      * @return a string representing the firmware version
-     * 
+     *
      * @since 2.3
      */
     public String getFirmwareVersion() throws KuraException;
 
     /**
      * Reports signal strength in dBm
-     * 
+     *
      * @param recompute:
      *                   if true the value is recomputed. Otherwise, a cached value
      *                   is returned
      * @return an integer representing the rssi
      * @throws KuraException
-     * 
+     *
      * @since 2.4
      */
     public int getSignalStrength(boolean recompute) throws KuraException;
@@ -274,7 +273,7 @@ public interface CellularModem {
      *                   is returned
      * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
-     * 
+     *
      * @since 2.4
      */
     public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException;
@@ -287,7 +286,7 @@ public interface CellularModem {
      *                   is returned
      * @return IMSI number, null if not known
      * @throws KuraException
-     * 
+     *
      * @since 2.4
      */
     public String getMobileSubscriberIdentity(boolean recompute) throws KuraException;
@@ -300,7 +299,7 @@ public interface CellularModem {
      *                   is returned
      * @return ICCID, "N/A" if not applicable
      * @throws KuraException
-     * 
+     *
      * @since 2.4
      */
     public String getIntegratedCirquitCardId(boolean recompute) throws KuraException;

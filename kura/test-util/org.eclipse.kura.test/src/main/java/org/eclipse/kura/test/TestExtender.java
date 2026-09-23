@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -118,7 +117,8 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
                 URL e = (URL) entrs.nextElement();
                 String file = e.getFile();
 
-                String className = file.replaceAll("/", ".").replaceAll(".class", "").replaceFirst(".", "");
+                String className =
+                        file.replaceAll("/", ".").replaceAll(".class", "").replaceFirst(".", "");
                 if (className.startsWith("bin.src.main.java.")) {
                     className = className.substring(18);
                 } else if (className.startsWith("targetes.")) {
@@ -203,8 +203,8 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
                             this.reportWriter.flush();
                         } catch (Exception ex) {
                             logger.error("Method : [ " + className + "." + method.getName() + " ] FAIL", ex);
-                            this.reportWriter = new BufferedWriter(
-                                    new FileWriter(new File(KURA_TEST_REPORT_FILENAME), true));
+                            this.reportWriter =
+                                    new BufferedWriter(new FileWriter(new File(KURA_TEST_REPORT_FILENAME), true));
                             this.reportWriter.write("Method : [ " + className + "." + method.getName() + " ] FAIL\n");
                             this.reportWriter.flush();
                         }

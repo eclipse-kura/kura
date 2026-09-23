@@ -15,7 +15,6 @@ package org.eclipse.kura.cloudconnection.raw.mqtt.publisher;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
@@ -26,21 +25,25 @@ import org.eclipse.kura.cloudconnecton.raw.mqtt.util.AbstractStackComponent;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions.OptionsFactory;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = RawMqttPublisherOptions.class, factory = true)
 public class RawMqttPublisher extends AbstractStackComponent<PublishOptions>
         implements CloudPublisher, CloudDeliveryListener {
@@ -104,5 +107,4 @@ public class RawMqttPublisher extends AbstractStackComponent<PublishOptions>
     protected OptionsFactory<PublishOptions> getOptionsFactory() {
         return PublishOptions::new;
     }
-
 }

@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.rest.tamper.detection.api.TamperDetectionServiceInfo;
@@ -34,13 +33,14 @@ public class TamperDetectionRemoteService {
     private static final Logger logger = LoggerFactory.getLogger(TamperDetectionRemoteService.class);
     private final Map<String, TamperDetectionService> tamperDetectionServices = new ConcurrentHashMap<>();
 
-    @Reference(name = "TamperDetectionService",
+    @Reference(
+            name = "TamperDetectionService",
             service = TamperDetectionService.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetTamperDetectionService")
-    public void setTamperDetectionService(final TamperDetectionService tamperDetectionService,
-            final Map<String, Object> properties) {
+    public void setTamperDetectionService(
+            final TamperDetectionService tamperDetectionService, final Map<String, Object> properties) {
         final Optional<String> pid = getPid(properties);
 
         if (pid.isPresent()) {
@@ -48,17 +48,17 @@ public class TamperDetectionRemoteService {
         } else {
             logger.warn("Tamper detection service must set either service.pid or kura.service.pid");
         }
-
     }
 
-    public void unsetTamperDetectionService(final TamperDetectionService tamperDetectionService,
-            final Map<String, Object> properties) {
+    public void unsetTamperDetectionService(
+            final TamperDetectionService tamperDetectionService, final Map<String, Object> properties) {
         getPid(properties).ifPresent(this.tamperDetectionServices::remove);
     }
 
     protected List<TamperDetectionServiceInfo> listTamperDetectionServicesInternal() {
         return tamperDetectionServices.entrySet().stream()
-                .map(e -> new TamperDetectionServiceInfo(e.getKey(), e.getValue().getDisplayName()))
+                .map(e ->
+                        new TamperDetectionServiceInfo(e.getKey(), e.getValue().getDisplayName()))
                 .collect(Collectors.toList());
     }
 

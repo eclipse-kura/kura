@@ -16,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
@@ -33,7 +32,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, //
+@Component(
+        immediate = true, //
         name = "org.eclipse.kura.executor.PrivilegedExecutorService")
 public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService {
 

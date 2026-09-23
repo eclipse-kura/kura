@@ -14,27 +14,27 @@ package org.eclipse.kura.emulator.clock;
 
 import java.util.Date;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.EventAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.clock.ClockService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.clock.ClockService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class
+        })
 @Designate(ocd = ClockServiceOptions.class)
 public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
@@ -42,8 +42,10 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
+
     @SuppressWarnings("unused")
     private EventAdmin eventAdmin;
+
     @SuppressWarnings("unused")
     private Map<String, Object> properties;
 

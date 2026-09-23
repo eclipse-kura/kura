@@ -55,11 +55,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -196,7 +194,6 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to set the entry " + alias);
         }
-
     }
 
     @Override
@@ -251,8 +248,8 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
             return Arrays.asList(kmf.getKeyManagers());
         } catch (GeneralSecurityException e) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST, e,
-                    "Failed to get the key managers for algorithm " + algorithm);
+            throw new KuraException(
+                    KuraErrorCode.BAD_REQUEST, e, "Failed to get the key managers for algorithm " + algorithm);
         }
     }
 
@@ -271,7 +268,9 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
             return Arrays.asList(kmf.getKeyManagers());
         } catch (GeneralSecurityException e) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST, e,
+            throw new KuraException(
+                    KuraErrorCode.BAD_REQUEST,
+                    e,
                     "Failed to get the key managers for algorithm " + algorithm + " and provider " + provider);
         }
     }
@@ -283,10 +282,21 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
     }
 
     @Override
-    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes,
-            SecureRandom secureRandom) throws KuraException {
-        if (isNull(algorithm) || algorithm.trim().isEmpty() || isNull(secureRandom) || isNull(alias)
-                || isNull(attributes) || attributes.trim().isEmpty() || isNull(signatureAlgorithm)
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            int keySize,
+            String signatureAlgorithm,
+            String attributes,
+            SecureRandom secureRandom)
+            throws KuraException {
+        if (isNull(algorithm)
+                || algorithm.trim().isEmpty()
+                || isNull(secureRandom)
+                || isNull(alias)
+                || isNull(attributes)
+                || attributes.trim().isEmpty()
+                || isNull(signatureAlgorithm)
                 || signatureAlgorithm.trim().isEmpty()) {
             throw new IllegalArgumentException("Parameters cannot be null or empty!");
         }
@@ -295,8 +305,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm, "BC");
             keyGen.initialize(keySize, secureRandom);
             keyPair = keyGen.generateKeyPair();
-            setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
-                    generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
+            setEntry(
+                    alias,
+                    new PrivateKeyEntry(
+                            keyPair.getPrivate(), generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
             logger.error("Error occured. Exception: {}.", e.getClass());
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -304,12 +316,24 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
     }
 
     @Override
-    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
-            String signatureAlgorithm, String attributes, SecureRandom secureRandom) throws KuraException {
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm,
+            String attributes,
+            SecureRandom secureRandom)
+            throws KuraException {
 
-        if (isNull(algorithm) || algorithm.trim().isEmpty() || isNull(secureRandom) || isNull(alias)
-                || isNull(attributes) || attributes.trim().isEmpty() || isNull(signatureAlgorithm)
-                || signatureAlgorithm.trim().isEmpty() || isNull(algorithmParameter)) {
+        if (isNull(algorithm)
+                || algorithm.trim().isEmpty()
+                || isNull(secureRandom)
+                || isNull(alias)
+                || isNull(attributes)
+                || attributes.trim().isEmpty()
+                || isNull(signatureAlgorithm)
+                || signatureAlgorithm.trim().isEmpty()
+                || isNull(algorithmParameter)) {
             throw new IllegalArgumentException("Parameters cannot be null or empty!");
         }
         KeyPair keyPair;
@@ -317,31 +341,41 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm, "BC");
             keyGen.initialize(algorithmParameter, secureRandom);
             keyPair = keyGen.generateKeyPair();
-            setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
-                    generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
+            setEntry(
+                    alias,
+                    new PrivateKeyEntry(
+                            keyPair.getPrivate(), generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
-
     }
 
     @Override
-    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
-            String signatureAlgorithm, String attributes) throws KuraException {
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm,
+            String attributes)
+            throws KuraException {
         createKeyPair(alias, algorithm, algorithmParameter, signatureAlgorithm, attributes, new SecureRandom());
-
     }
 
     @Override
     public String getCSR(KeyPair keypair, X500Principal principal, String signerAlg) throws KuraException {
 
-        if (isNull(principal) || isNull(keypair) || isNull(signerAlg) || signerAlg.trim().isEmpty()) {
+        if (isNull(principal)
+                || isNull(keypair)
+                || isNull(signerAlg)
+                || signerAlg.trim().isEmpty()) {
             throw new IllegalArgumentException(NULL_INPUT_PARAMS_MESSAGE);
         }
 
-        try (StringWriter str = new StringWriter(); JcaPEMWriter pemWriter = new JcaPEMWriter(str);) {
+        try (StringWriter str = new StringWriter();
+                JcaPEMWriter pemWriter = new JcaPEMWriter(str); ) {
             ContentSigner signer = new JcaContentSignerBuilder(signerAlg).build(keypair.getPrivate());
-            PKCS10CertificationRequest csr = getCSRAsPKCS10Builder(keypair, principal).build(signer);
+            PKCS10CertificationRequest csr =
+                    getCSRAsPKCS10Builder(keypair, principal).build(signer);
 
             PemObject pemCSR = new PemObject(PEM_CERTIFICATE_REQUEST_TYPE, csr.getEncoded());
 
@@ -357,7 +391,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     @Override
     public String getCSR(String alias, X500Principal principal, String signerAlg) throws KuraException {
-        if (isNull(principal) || isNull(alias) || alias.trim().isEmpty() || isNull(signerAlg)
+        if (isNull(principal)
+                || isNull(alias)
+                || alias.trim().isEmpty()
+                || isNull(signerAlg)
                 || signerAlg.trim().isEmpty()) {
             throw new IllegalArgumentException(NULL_INPUT_PARAMS_MESSAGE);
         }
@@ -380,7 +417,6 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             throw new IllegalArgumentException(NULL_INPUT_PARAMS_MESSAGE);
         }
         return new JcaPKCS10CertificationRequestBuilder(principal, keyPair.getPublic());
-
     }
 
     @Override
@@ -403,7 +439,6 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         } else {
             return new ArrayList<>(currentCRLManager.get().getCrls());
         }
-
     }
 
     @Override
@@ -447,14 +482,16 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         calendar.add(Calendar.YEAR, 1);
         Date endDate = calendar.getTime();
 
-        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName, certSerialNumber, startDate,
-                endDate, dnName, subjectPublicKeyInfo);
-        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(bcProvider)
+        SubjectPublicKeyInfo subjectPublicKeyInfo =
+                SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
+                dnName, certSerialNumber, startDate, endDate, dnName, subjectPublicKeyInfo);
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm)
+                .setProvider(bcProvider)
                 .build(keyPair.getPrivate());
         X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
 
-        return new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(certificateHolder) };
+        return new X509Certificate[] {new JcaX509CertificateConverter().getCertificate(certificateHolder)};
     }
 
     protected Optional<X509Certificate> extractCertificate(final Entry entry) {
@@ -470,7 +507,6 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         } else {
             return Optional.of((X509Certificate) certificate);
         }
-
     }
 
     protected boolean tryAddToCrlManagement(final Entry entry) {
@@ -501,8 +537,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         if (this.crlManagerOptions.isCrlManagementEnabled()) {
 
             final CRLManager currentCRLManager = new CRLManager(
-                    this.crlManagerOptions.getStoreFile().orElseGet(() -> new File(getCrlStorePath())), 5000,
-                    newCRLManagerOptions.getCrlCheckIntervalMs(), newCRLManagerOptions.getCrlUpdateIntervalMs(),
+                    this.crlManagerOptions.getStoreFile().orElseGet(() -> new File(getCrlStorePath())),
+                    5000,
+                    newCRLManagerOptions.getCrlCheckIntervalMs(),
+                    newCRLManagerOptions.getCrlUpdateIntervalMs(),
                     getCRLVerifier(newCRLManagerOptions));
 
             currentCRLManager.setListener(Optional.of(this::postChangedEvent));
@@ -575,5 +613,4 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             return false;
         }
     }
-
 }

@@ -14,17 +14,15 @@ package org.eclipse.kura.core.test.hw;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
+import junit.framework.TestCase;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.io.ConnectionFactory;
 
-import junit.framework.TestCase;
-
 public class CommTest extends TestCase {
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1); // initialize with number of dependencies
     private static ConnectionFactory connectionFactory;
     // private static String SERIAL_PORT_NAME ="/dev/tty.PL2303-00001004";
     private static String SERIAL_PORT_NAME = "/dev/ttyUSB0";
@@ -46,7 +44,7 @@ public class CommTest extends TestCase {
         dependencyLatch.countDown();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(CommTest.connectionFactory);

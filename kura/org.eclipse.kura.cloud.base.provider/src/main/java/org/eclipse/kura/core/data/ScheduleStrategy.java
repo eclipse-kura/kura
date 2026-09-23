@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -21,7 +21,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-
 import org.eclipse.kura.message.store.StoredMessage;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -42,16 +41,26 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     private Optional<ScheduledFuture<?>> timeout = Optional.empty();
     private DataServiceOptions dataServiceOptions;
 
-    public ScheduleStrategy(final CronExpression expression, DataServiceOptions dataServiceOptions,
+    public ScheduleStrategy(
+            final CronExpression expression,
+            DataServiceOptions dataServiceOptions,
             final ConnectionManager connectionManager) {
-        this(expression, dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, connectionManager,
+        this(
+                expression,
+                dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000,
+                connectionManager,
                 Executors.newSingleThreadScheduledExecutor(),
-                Date::new, dataServiceOptions);
+                Date::new,
+                dataServiceOptions);
     }
 
-    public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
-            final ConnectionManager connectionManager, final ScheduledExecutorService executor,
-            final Supplier<Date> currentTimeProvider, DataServiceOptions dataServiceOptions) {
+    public ScheduleStrategy(
+            final CronExpression expression,
+            final long disconnectTimeoutMs,
+            final ConnectionManager connectionManager,
+            final ScheduledExecutorService executor,
+            final Supplier<Date> currentTimeProvider,
+            DataServiceOptions dataServiceOptions) {
         this.expression = expression;
         this.disconnectTimeoutMs = disconnectTimeoutMs;
         this.connectionManager = connectionManager;
@@ -136,7 +145,6 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
             return this;
         }
-
     }
 
     private class AwaitConnect implements State {
@@ -161,7 +169,6 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         public State onConnectionEstablished() {
             return new AwaitDisconnectTime();
         }
-
     }
 
     private class AwaitDisconnectTime implements State {
@@ -217,8 +224,8 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     private void rescheduleTimeout(final long timeoutMs) {
         cancelTimeout();
 
-        this.timeout = Optional.of(executor.schedule(() -> updateState(State::onTimeout), timeoutMs,
-                TimeUnit.MILLISECONDS));
+        this.timeout =
+                Optional.of(executor.schedule(() -> updateState(State::onTimeout), timeoutMs, TimeUnit.MILLISECONDS));
     }
 
     private void cancelTimeout() {
@@ -239,7 +246,9 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         final State nextState = transitionFunction.apply(this.state);
 
         if (nextState != this.state) {
-            logger.info("State change: {} -> {}", state.getClass().getSimpleName(),
+            logger.info(
+                    "State change: {} -> {}",
+                    state.getClass().getSimpleName(),
                     nextState.getClass().getSimpleName());
             currentFuture.ifPresent(c -> c.cancel(false));
 
@@ -272,9 +281,7 @@ public class ScheduleStrategy implements AutoConnectStrategy {
             }
 
             this.previousTimestamp = OptionalLong.of(now);
-
         }
-
     }
 
     @Override
@@ -331,5 +338,4 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority) {
         this.updateState(c -> this.state.onPublish(topic, payload, qos, retain, priority));
     }
-
 }

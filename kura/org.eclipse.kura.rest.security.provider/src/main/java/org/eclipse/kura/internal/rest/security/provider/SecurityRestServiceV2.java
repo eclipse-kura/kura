@@ -12,6 +12,11 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,28 +26,22 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
-import org.osgi.service.component.annotations.Component;
 @Path("security/v2")
 @Component(
-    name = "org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
-    immediate = true,
-    service = { org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
-        "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
+        immediate = true,
+        service = {org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2.class},
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
+            "osgi.jakartars.resource=true"
+        })
 public class SecurityRestServiceV2 extends AbstractRestSecurityService {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityRestServiceV2.class);
@@ -102,8 +101,8 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
 
     private String readSecurityPolicyString(InputStream securityPolicyInputStream) {
         if (securityPolicyInputStream == null) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                    "Security Policy cannot be null or empty");
+            throw DefaultExceptionHandler.buildWebApplicationException(
+                    Status.BAD_REQUEST, "Security Policy cannot be null or empty");
         }
         int bytesRead;
         int totalBytesRead = 0;
@@ -113,8 +112,8 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
             while ((bytesRead = securityPolicyInputStream.read(data, 0, data.length)) != -1) {
                 totalBytesRead += bytesRead;
                 if (totalBytesRead > 1024 * 1024) {
-                    throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                            "Security policy too large");
+                    throw DefaultExceptionHandler.buildWebApplicationException(
+                            Status.BAD_REQUEST, "Security policy too large");
                 }
                 buffer.write(data, 0, bytesRead);
             }
@@ -123,8 +122,8 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
         if (buffer.size() == 0) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                    "Security Policy cannot be null or empty");
+            throw DefaultExceptionHandler.buildWebApplicationException(
+                    Status.BAD_REQUEST, "Security Policy cannot be null or empty");
         }
         CharBuffer charBuffer = getCharBuffer(buffer);
         return charBuffer.toString();
@@ -136,10 +135,9 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
         try {
             charBuffer = decoder.decode(ByteBuffer.wrap(buffer.toByteArray()));
         } catch (CharacterCodingException e) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                    "Security Policy must be UTF-8 encoded");
+            throw DefaultExceptionHandler.buildWebApplicationException(
+                    Status.BAD_REQUEST, "Security Policy must be UTF-8 encoded");
         }
         return charBuffer;
     }
-
 }

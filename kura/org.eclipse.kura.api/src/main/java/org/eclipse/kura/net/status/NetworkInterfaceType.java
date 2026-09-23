@@ -88,5 +88,4 @@ public enum NetworkInterfaceType {
     VRF,
     /** The device is a loopback device. */
     LOOPBACK;
-
 }

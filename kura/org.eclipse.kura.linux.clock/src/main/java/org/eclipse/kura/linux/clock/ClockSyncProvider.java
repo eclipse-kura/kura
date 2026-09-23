@@ -14,18 +14,17 @@ package org.eclipse.kura.linux.clock;
 
 import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.eclipse.kura.KuraException;
 
 public interface ClockSyncProvider {
 
-    public void init(ClockServiceConfig clockServiceConfig, ScheduledExecutorService scheduler,
-            ClockSyncListener listener) throws KuraException;
+    public void init(
+            ClockServiceConfig clockServiceConfig, ScheduledExecutorService scheduler, ClockSyncListener listener)
+            throws KuraException;
 
     public void start() throws KuraException;
 
     public void stop() throws KuraException;
 
     public Date getLastSync();
-
 }

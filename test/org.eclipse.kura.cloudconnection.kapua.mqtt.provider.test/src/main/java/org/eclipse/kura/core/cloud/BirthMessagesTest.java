@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -352,7 +351,8 @@ public class BirthMessagesTest {
             StringWriter sw = new StringWriter();
             this.occurredException.printStackTrace(new PrintWriter(sw));
 
-            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+            errorMessage = String.format(
+                    "No exception expected, \"%s\" found. Caused by: %s",
                     this.occurredException.getClass().getName(), sw.toString());
         }
 
@@ -365,18 +365,18 @@ public class BirthMessagesTest {
 
     private void thenBirthIsPublishedAfter(long delayMillis, String expectedTopic) throws KuraException {
         verify(this.dataService, after(delayMillis).never()).publish(eq(expectedTopic), any(), eq(0), eq(false), eq(0));
-        verify(this.dataService, after(delayMillis + SLACK_DELAY).times(1)).publish(eq(expectedTopic), any(), eq(1),
-                eq(false), eq(0));
+        verify(this.dataService, after(delayMillis + SLACK_DELAY).times(1))
+                .publish(eq(expectedTopic), any(), eq(1), eq(false), eq(0));
     }
 
     private void thenBirthIsPublishedImmediately(String expectedTopic) throws KuraException {
-        verify(this.dataService, timeout(SLACK_DELAY).times(1)).publish(eq(expectedTopic), any(), eq(1), eq(false),
-                eq(0));
+        verify(this.dataService, timeout(SLACK_DELAY).times(1))
+                .publish(eq(expectedTopic), any(), eq(1), eq(false), eq(0));
     }
 
     private void thenDisconnectIsPublishedImmediately(String expectedTopic) throws KuraException {
-        verify(this.dataService, timeout(SLACK_DELAY).times(1)).publish(eq(expectedTopic), any(), eq(0), eq(false),
-                eq(0));
+        verify(this.dataService, timeout(SLACK_DELAY).times(1))
+                .publish(eq(expectedTopic), any(), eq(0), eq(false), eq(0));
     }
 
     /*
@@ -462,8 +462,9 @@ public class BirthMessagesTest {
 
         ServiceRegistration registration = mock(ServiceRegistration.class);
         BundleContext bundleContext = mock(BundleContext.class);
-        when(bundleContext.registerService(ArgumentMatchers.anyString(), ArgumentMatchers.any(),
-                ArgumentMatchers.any(Dictionary.class))).thenReturn(registration);
+        when(bundleContext.registerService(
+                        ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(Dictionary.class)))
+                .thenReturn(registration);
 
         ComponentContext componentContext = mock(ComponentContext.class);
         when(componentContext.getProperties()).thenReturn(componentContextProperties);
@@ -471,5 +472,4 @@ public class BirthMessagesTest {
 
         return componentContext;
     }
-
 }

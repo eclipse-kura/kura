@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.util.configuration.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +31,11 @@ public class CRLManagerOptions {
 
     private static final Property<Boolean> CRL_MANAGEMENT_ENABLED = new Property<>("crl.management.enabled", true);
     private static final Property<Long> CRL_UPDATE_INTERVAL = new Property<>("crl.update.interval", 1L);
-    private static final Property<String> CRL_UPDATE_INTERVAL_TIME_UNIT = new Property<>(
-            "crl.update.interval.time.unit", TimeUnit.DAYS.name());
+    private static final Property<String> CRL_UPDATE_INTERVAL_TIME_UNIT =
+            new Property<>("crl.update.interval.time.unit", TimeUnit.DAYS.name());
     private static final Property<Long> CRL_CHECK_INTERVAL = new Property<>("crl.check.interval", 5L);
-    private static final Property<String> CRL_CHECK_INTERVAL_TIME_UNIT = new Property<>("crl.check.interval.time.unit",
-            TimeUnit.MINUTES.name());
+    private static final Property<String> CRL_CHECK_INTERVAL_TIME_UNIT =
+            new Property<>("crl.check.interval.time.unit", TimeUnit.MINUTES.name());
     private static final Property<String[]> CRL_URLS = new Property<>("crl.urls", new String[0]);
     private static final Property<String> CRL_STORE_PATH = new Property<>("crl.store.path", String.class);
     private static final Property<Boolean> CRL_VERIFICATION_ENABLED = new Property<>("verify.crl", true);
@@ -52,7 +51,10 @@ public class CRLManagerOptions {
         this.crlUpdateIntervalMs = extractInterval(properties, CRL_UPDATE_INTERVAL, CRL_UPDATE_INTERVAL_TIME_UNIT);
         this.crlCheckIntervalMs = extractInterval(properties, CRL_CHECK_INTERVAL, CRL_CHECK_INTERVAL_TIME_UNIT);
         this.crlURIs = extractCrlURIs(properties);
-        this.crlStore = CRL_STORE_PATH.getOptional(properties).filter(s -> !s.trim().isEmpty()).map(File::new);
+        this.crlStore = CRL_STORE_PATH
+                .getOptional(properties)
+                .filter(s -> !s.trim().isEmpty())
+                .map(File::new);
         this.verifyCRL = CRL_VERIFICATION_ENABLED.get(properties);
     }
 
@@ -80,7 +82,9 @@ public class CRLManagerOptions {
         return this.verifyCRL;
     }
 
-    private static long extractInterval(final Map<String, Object> properties, final Property<Long> valueProperty,
+    private static long extractInterval(
+            final Map<String, Object> properties,
+            final Property<Long> valueProperty,
             final Property<String> timeUnitProperty) {
         final long updateInterval = valueProperty.get(properties);
         final TimeUnit timeUnit = TimeUnit.valueOf(timeUnitProperty.get(properties));
@@ -110,8 +114,13 @@ public class CRLManagerOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.crlCheckIntervalMs, this.crlManagementEnabled, this.crlStore,
-                this.crlURIs, this.crlUpdateIntervalMs, this.verifyCRL);
+        return Objects.hash(
+                this.crlCheckIntervalMs,
+                this.crlManagementEnabled,
+                this.crlStore,
+                this.crlURIs,
+                this.crlUpdateIntervalMs,
+                this.verifyCRL);
     }
 
     @Override
@@ -125,8 +134,9 @@ public class CRLManagerOptions {
         CRLManagerOptions other = (CRLManagerOptions) obj;
         return this.crlCheckIntervalMs == other.crlCheckIntervalMs
                 && this.crlManagementEnabled == other.crlManagementEnabled
-                && Objects.equals(this.crlStore, other.crlStore) && Objects.equals(this.crlURIs, other.crlURIs)
-                && this.crlUpdateIntervalMs == other.crlUpdateIntervalMs && this.verifyCRL == other.verifyCRL;
+                && Objects.equals(this.crlStore, other.crlStore)
+                && Objects.equals(this.crlURIs, other.crlURIs)
+                && this.crlUpdateIntervalMs == other.crlUpdateIntervalMs
+                && this.verifyCRL == other.verifyCRL;
     }
-
 }

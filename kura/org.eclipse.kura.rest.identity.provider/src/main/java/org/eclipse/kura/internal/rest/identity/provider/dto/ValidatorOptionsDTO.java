@@ -19,8 +19,11 @@ public class ValidatorOptionsDTO {
     private final boolean passwordRequireSpecialChars;
     private final boolean passwordRequireBothCases;
 
-    public ValidatorOptionsDTO(int passwordMinimumLength, boolean passwordRequireDigits,
-            boolean passwordRequireBothCases, boolean passwordRequireSpecialChars) {
+    public ValidatorOptionsDTO(
+            int passwordMinimumLength,
+            boolean passwordRequireDigits,
+            boolean passwordRequireBothCases,
+            boolean passwordRequireSpecialChars) {
 
         this.passwordMinimumLength = passwordMinimumLength;
         this.passwordRequireDigits = passwordRequireDigits;
@@ -43,5 +46,4 @@ public class ValidatorOptionsDTO {
     public boolean isPasswordRequireBothCases() {
         return this.passwordRequireBothCases;
     }
-
 }

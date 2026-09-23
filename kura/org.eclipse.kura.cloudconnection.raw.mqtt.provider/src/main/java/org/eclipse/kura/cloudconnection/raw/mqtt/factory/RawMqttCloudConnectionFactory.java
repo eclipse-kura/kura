@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
@@ -29,39 +28,45 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory",
-    service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
-    property = {
-        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint",
-        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint(\\-[a-zA-Z0-9]+)?$"})
+        name = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory",
+        service = {org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class},
+        property = {
+            "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint",
+            "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint(\\-[a-zA-Z0-9]+)?$"
+        })
 public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
 
-    private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory";
+    private static final String FACTORY_PID =
+            "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory";
 
     // The following constants must match the factory component definitions
-    private static final String CLOUD_ENDPOINT_FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint";
+    private static final String CLOUD_ENDPOINT_FACTORY_PID =
+            "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint";
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
-    private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint";
     private static final String DATA_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.DataService";
-    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.MqttDataTransport";
+    private static final String DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.cloudconnection.raw.mqtt.MqttDataTransport";
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
 
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
-    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN = Pattern
-            .compile("^org\\.eclipse\\.kura\\.cloudconnection\\.raw\\.mqtt\\.CloudEndpoint(-[a-zA-Z0-9]+)?$");
+    private static final Pattern MANAGED_CLOUD_SERVICE_PID_PATTERN =
+            Pattern.compile("^org\\.eclipse\\.kura\\.cloudconnection\\.raw\\.mqtt\\.CloudEndpoint(-[a-zA-Z0-9]+)?$");
 
     private ConfigurationService configurationService;
 
-    @Reference(name = "ConfigurationService",
+    @Reference(
+            name = "ConfigurationService",
             service = org.eclipse.kura.configuration.ConfigurationService.class,
             unbind = "unsetConfigurationService")
     protected void setConfigurationService(ConfigurationService configurationService) {
@@ -101,20 +106,20 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
             cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
             cloudServiceProperties.put(KURA_CLOUD_CONNECTION_FACTORY_PID, FACTORY_PID);
 
-            this.configurationService.createFactoryConfiguration(CLOUD_ENDPOINT_FACTORY_PID, pid,
-                    cloudServiceProperties, false);
+            this.configurationService.createFactoryConfiguration(
+                    CLOUD_ENDPOINT_FACTORY_PID, pid, cloudServiceProperties, false);
 
             // create the DataService layer and set the selective dependency on the DataTransportService PID
             Map<String, Object> dataServiceProperties = new HashMap<>();
             name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
             dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
-            this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid,
-                    dataServiceProperties, false);
+            this.configurationService.createFactoryConfiguration(
+                    DATA_SERVICE_FACTORY_PID, dataServicePid, dataServiceProperties, false);
 
             // create the DataTransportService layer and take a snapshot
-            this.configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID,
-                    dataTransportServicePid, null, true);
+            this.configurationService.createFactoryConfiguration(
+                    DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, null, true);
         } else {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
         }
@@ -171,19 +176,25 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
     @Override
     public Set<String> getManagedCloudConnectionPids() throws KuraException {
 
-        final BundleContext context = FrameworkUtil.getBundle(RawMqttCloudConnectionFactory.class).getBundleContext();
+        final BundleContext context =
+                FrameworkUtil.getBundle(RawMqttCloudConnectionFactory.class).getBundleContext();
 
         try {
-            return context.getServiceReferences(CloudEndpoint.class, null).stream().filter(ref -> {
-                final Object kuraServicePid = ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
+            return context.getServiceReferences(CloudEndpoint.class, null).stream()
+                    .filter(ref -> {
+                        final Object kuraServicePid = ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
 
-                if (!(kuraServicePid instanceof String)) {
-                    return false;
-                }
+                        if (!(kuraServicePid instanceof String)) {
+                            return false;
+                        }
 
-                return MANAGED_CLOUD_SERVICE_PID_PATTERN.matcher((String) kuraServicePid).matches()
-                        && FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID));
-            }).map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).collect(Collectors.toSet());
+                        return MANAGED_CLOUD_SERVICE_PID_PATTERN
+                                        .matcher((String) kuraServicePid)
+                                        .matches()
+                                && FACTORY_PID.equals(ref.getProperty(KURA_CLOUD_CONNECTION_FACTORY_PID));
+                    })
+                    .map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID))
+                    .collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e);
         }

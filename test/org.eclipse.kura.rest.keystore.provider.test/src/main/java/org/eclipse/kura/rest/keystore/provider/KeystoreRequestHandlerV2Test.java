@@ -15,6 +15,9 @@ package org.eclipse.kura.rest.keystore.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -52,10 +54,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
 
 @RunWith(Parameterized.class)
 public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
@@ -112,7 +110,9 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
     @Test
     public void shouldRejectRequestObjectWithoutPid() {
 
-        whenRequestIsPerformed(new MethodSpec("POST"), privateKeyRespurceURI,
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                privateKeyRespurceURI,
                 "{\"alias\":\"foo\",\"privateKey\":\"bar\",\"certificateChain\":[\"foo\"]}");
         thenResponseCodeIs(400);
     }
@@ -120,7 +120,9 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
     @Test
     public void shouldRejectRequestObjectWithoutAlias() {
 
-        whenRequestIsPerformed(new MethodSpec("POST"), privateKeyRespurceURI,
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                privateKeyRespurceURI,
                 "{\"keystoreServicePid\":\"foo\",\"privateKey\":\"bar\",\"certificateChain\":[\"foo\"]}");
         thenResponseCodeIs(400);
     }
@@ -128,7 +130,9 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
     @Test
     public void shouldRejectRequestObjectWithoutCertificateChain() {
 
-        whenRequestIsPerformed(new MethodSpec("POST"), privateKeyRespurceURI,
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                privateKeyRespurceURI,
                 "{\"keystoreServicePid\":\"foo\",\"alias\":\"bar\",\"privateKey\":\"bar\"}");
         thenResponseCodeIs(400);
     }
@@ -136,8 +140,8 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
     @Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(
-                new Object[] { new RestTransport("keystores/v2"), "/entries/privatekey" },
-                new Object[] { new MqttTransport("KEYS-V2"), "/keystores/entries/privatekey" });
+                new Object[] {new RestTransport("keystores/v2"), "/entries/privatekey"},
+                new Object[] {new MqttTransport("KEYS-V2"), "/keystores/entries/privatekey"});
     }
 
     public KeystoreRequestHandlerV2Test(final Transport transport, final String privateKeyRespurceURI) {
@@ -162,11 +166,14 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
             final Path dir = Files.createTempDirectory(null);
             final String keystorePath = dir.toFile().getAbsolutePath() + "/" + System.currentTimeMillis() + ".ks";
 
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
-            final KeystoreService keystoreService = ServiceUtil
-                    .createFactoryConfiguration(configurationService, KeystoreService.class, pid,
+            final KeystoreService keystoreService = ServiceUtil.createFactoryConfiguration(
+                            configurationService,
+                            KeystoreService.class,
+                            pid,
                             "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
                             Collections.singletonMap("keystore.path", keystorePath))
                     .get(30, TimeUnit.SECONDS);
@@ -192,8 +199,8 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
         givenKeyPair(caCN, leafCN, true);
     }
 
-    private void givenKeyPairInKeystore(final String keystorePid, final String alias, final String caCN,
-            final String leafCN) {
+    private void givenKeyPairInKeystore(
+            final String keystorePid, final String alias, final String caCN, final String leafCN) {
         givenKeyPair(caCN, leafCN);
 
         storeCurrentKeyPair(keystorePid, alias);
@@ -201,8 +208,8 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
 
     private void givenKeyPair(final String caCN, final String leafCN, final boolean includeCA) {
         try {
-            this.testCA = new TestCA(
-                    CertificateCreationOptions.builder(new X500Name("cn=" + caCN + ", dc=bar.com")).build());
+            this.testCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=" + caCN + ", dc=bar.com"))
+                    .build());
 
             this.leafKeyPair = TestCA.generateKeyPair();
 
@@ -210,7 +217,8 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
             this.leafKeyPem = privateKeyToPEMString(this.leafKeyPair.getPrivate());
 
             final X509Certificate leafCert = testCA.createAndSignCertificate(
-                    CertificateCreationOptions.builder(new X500Name("cn=" + leafCN + ", dc=bar.com")).build(),
+                    CertificateCreationOptions.builder(new X500Name("cn=" + leafCN + ", dc=bar.com"))
+                            .build(),
                     this.leafKeyPair);
 
             this.certificateChain.clear();
@@ -231,7 +239,8 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
     private void givenNewLeafCert(final String leafCN) {
         try {
             final X509Certificate leafCert = this.testCA.createAndSignCertificate(
-                    CertificateCreationOptions.builder(new X500Name("cn=" + leafCN + ", dc=bar.com")).build(),
+                    CertificateCreationOptions.builder(new X500Name("cn=" + leafCN + ", dc=bar.com"))
+                            .build(),
                     this.leafKeyPair);
 
             this.certificateChain.set(0, leafCert);
@@ -243,15 +252,17 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
 
     private void storeCurrentKeyPair(final String keystorePid, final String alias) {
         try {
-            this.createdKeystoreServices.get(keystorePid).setEntry(alias,
-                    new PrivateKeyEntry(this.leafKey, this.certificateChain.toArray(new X509Certificate[0])));
+            this.createdKeystoreServices
+                    .get(keystorePid)
+                    .setEntry(
+                            alias,
+                            new PrivateKeyEntry(this.leafKey, this.certificateChain.toArray(new X509Certificate[0])));
         } catch (final Exception e) {
             fail("cannot store certificate chain");
         }
     }
 
-    private void whenKeyPairIsUploaded(final String keystorePid, final String alias,
-            final boolean includePrivateKey) {
+    private void whenKeyPairIsUploaded(final String keystorePid, final String alias, final boolean includePrivateKey) {
         final JsonObject object = Json.object();
         if (includePrivateKey) {
             object.add("privateKey", this.leafKeyPem);
@@ -266,14 +277,13 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
         object.add("keystoreServicePid", keystorePid);
         object.add("alias", alias);
 
-        whenRequestIsPerformed(new MethodSpec("POST"), privateKeyRespurceURI,
-                object.toString());
+        whenRequestIsPerformed(new MethodSpec("POST"), privateKeyRespurceURI, object.toString());
     }
 
     private void thenKeystoreEntryEqualsCurrentKeyPair(final String pid, final String alias) {
         try {
-            final PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) this.createdKeystoreServices.get(pid)
-                    .getEntry(alias);
+            final PrivateKeyEntry privateKeyEntry =
+                    (PrivateKeyEntry) this.createdKeystoreServices.get(pid).getEntry(alias);
 
             assertEquals(this.leafKeyPem, privateKeyToPEMString(privateKeyEntry.getPrivateKey()));
 
@@ -292,11 +302,13 @@ public class KeystoreRequestHandlerV2Test extends AbstractRequestHandlerTest {
     @After
     public void cleanupKeystoreServices() {
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             for (final String pid : createdKeystoreServices.keySet()) {
-                ServiceUtil.deleteFactoryConfiguration(configurationService, pid).get(30, TimeUnit.SECONDS);
+                ServiceUtil.deleteFactoryConfiguration(configurationService, pid)
+                        .get(30, TimeUnit.SECONDS);
             }
         } catch (Exception e) {
             fail("failed to delete test keystore");

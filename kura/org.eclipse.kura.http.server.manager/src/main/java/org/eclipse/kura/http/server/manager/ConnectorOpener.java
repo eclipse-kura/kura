@@ -13,7 +13,6 @@
 package org.eclipse.kura.http.server.manager;
 
 import java.io.IOException;
-
 import org.eclipse.jetty.server.ServerConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,7 @@ final class ConnectorOpener {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorOpener.class);
 
-    private ConnectorOpener() {
-    }
+    private ConnectorOpener() {}
 
     static void open(final ServerConnector connector, final int attempts, final long retryDelayMillis)
             throws IOException {
@@ -40,8 +38,12 @@ final class ConnectorOpener {
             } catch (final IOException e) {
                 failure = e;
                 if (attempt < attempts) {
-                    logger.warn("Unable to open {}, retrying in {} ms (attempt {} of {})", connector, retryDelayMillis,
-                            attempt, attempts);
+                    logger.warn(
+                            "Unable to open {}, retrying in {} ms (attempt {} of {})",
+                            connector,
+                            retryDelayMillis,
+                            attempt,
+                            attempts);
                     sleep(retryDelayMillis, e);
                 }
             }

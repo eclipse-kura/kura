@@ -19,23 +19,22 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.system.SystemAdminService;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.system.SystemAdminService",
-    immediate = true,
-    service = { org.eclipse.kura.system.SystemAdminService.class })
+        name = "org.eclipse.kura.system.SystemAdminService",
+        immediate = true,
+        service = {org.eclipse.kura.system.SystemAdminService.class})
 public class SystemAdminServiceImpl extends SuperSystemService implements SystemAdminService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemAdminServiceImpl.class);
@@ -47,6 +46,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
+
     private CommandExecutorService executorService;
 
     // ----------------------------------------------------------------
@@ -55,7 +55,8 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
     //
     // ----------------------------------------------------------------
 
-    @Reference(name = "PrivilegedExecutorService",
+    @Reference(
+            name = "PrivilegedExecutorService",
             service = org.eclipse.kura.executor.PrivilegedExecutorService.class,
             unbind = "unsetExecutorService")
     public void setExecutorService(CommandExecutorService executorService) {
@@ -146,7 +147,9 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
                 String lastBootupSysCmd = runSystemCommand("sysctl -n kern.boottime", false, this.executorService);
 
                 if (!lastBootupSysCmd.isEmpty()) {
-                    String[] uptimePairs = lastBootupSysCmd.substring(1, lastBootupSysCmd.indexOf("}")).replace(" ", "")
+                    String[] uptimePairs = lastBootupSysCmd
+                            .substring(1, lastBootupSysCmd.indexOf("}"))
+                            .replace(" ", "")
                             .split(",");
                     String[] uptimeSeconds = uptimePairs[0].split("=");
                     uptime = System.currentTimeMillis() - (long) (Double.parseDouble(uptimeSeconds[1]));
@@ -163,9 +166,9 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
     @Override
     public void reboot() {
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
-            executeCommand(new String[] { "reboot" });
+            executeCommand(new String[] {"reboot"});
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            executeCommand(new String[] { "shutdown", "-r" });
+            executeCommand(new String[] {"shutdown", "-r"});
         } else {
             logger.error("Unsupported OS for reboot()");
         }
@@ -174,7 +177,7 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
     @Override
     public void sync() {
         if (OS_LINUX.equals(getOsName()) || OS_MAC_OSX.equals(getOsName())) {
-            executeCommand(new String[] { "sync" });
+            executeCommand(new String[] {"sync"});
         } else {
             logger.error("Unsupported OS for sync()");
         }

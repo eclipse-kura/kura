@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.List;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The extended properties are organized in named groups, as specified by the {@link ExtendedPropertyGroup}
  * interface.
  * The number of returned groups, their names and contained property keys and values are not specified by Kura APIs.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.2
  */
@@ -38,7 +37,7 @@ public class ExtendedProperties {
 
     /**
      * Creates a new {@link ExtendedProperties} instance.
-     * 
+     *
      * @param version
      *            the version
      * @param groups
@@ -55,7 +54,7 @@ public class ExtendedProperties {
 
     /**
      * Returns the version
-     * 
+     *
      * @return the version
      */
     public String getVersion() {
@@ -64,7 +63,7 @@ public class ExtendedProperties {
 
     /**
      * Returns the property group list
-     * 
+     *
      * @return the property group list
      */
     public List<ExtendedPropertyGroup> getPropertyGroups() {

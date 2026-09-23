@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.token.jwt.lifecycle;
 
 import java.time.Duration;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
@@ -117,5 +116,4 @@ public class DeactivationTest extends AbstractJwtScenario {
                 .subject(TEST_IDENTITY) //
                 .signedWith(TestKeys.rsaPrivateKey(SIGNER_KEY));
     }
-
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,8 @@ public class RebootCauseFileWriter {
     }
 
     private void writeFile(File file, long timestamp, String rebootCause) throws IOException {
-        try (FileOutputStream out = new FileOutputStream(file); PrintStream writer = new PrintStream(out)) {
+        try (FileOutputStream out = new FileOutputStream(file);
+                PrintStream writer = new PrintStream(out)) {
             writer.println(timestamp);
             writer.println(rebootCause);
             writer.flush();

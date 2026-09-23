@@ -20,6 +20,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -40,9 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
@@ -61,10 +62,6 @@ import org.eclipse.kura.security.keystore.KeystoreService;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 public class KeystoreServiceRequestHandlerTest {
 
     private static final String ENTRIES_RESOURCE = "entries";
@@ -74,8 +71,10 @@ public class KeystoreServiceRequestHandlerTest {
     private static final String KEYPAIR_RESOURCE = "keypair";
     private final String EMPTY_KEYSTORE_1 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"JKS\",\"size\":0}]";
     private final String EMPTY_KEYSTORE_2 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"PKCS12\",\"size\":0}]";
-    private final String KEYSTORE_ENTRY = "[{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":1618387348000,\"expirationDate\":1626163348000,\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"type\":\"TRUSTED_CERTIFICATE\",\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\"}]";
-    private final String KEYSTORE_ENTRY_WITH_CERT = "{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":1618387348000,\"expirationDate\":1626163348000,\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"certificate\":\"-----BEGIN CERTIFICATE-----\\nMIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\\nbmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\\nVQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\\nMB4XDTIxMDQxNDA4MDIyOFoXDTIxMDcxMzA4MDIyOFowbDEQMA4GA1UEBhMHVW5r\\nbm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\\nChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\\nASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJSWJDxu8UNC4JGOgK31WCvz\\nNKy2ONH+jTVKnBY7Ckb1hljJY0sKO55aG1HNDfkev2lJTsPIz0nJjNsqBvB1flvf\\nr6XVCxdN0yxvU5g9SpRxE/iiPX0Qt7463OfzyKW97haJrrhF005RHYNcORMY/Phj\\nhFDnZhtAwpbQLzq2UuIZ7okJsx0IgRbjH71ZZuvYCqG7Ct/bp1D7w3tT7gTbIKYH\\nppQyG9rJDEh9+cr9Hyk8Gz7aAbPT/wMH+/vXDjH2j/M1Tmed0ajuGCJumaTQ4eHs\\n9xW3B3ugycb6e7Osl/4ESRO5RQL1k2GBONv10OrKDoZ5b66xwSJmC/w3BRWQ1cMC\\nAwEAAaMhMB8wHQYDVR0OBBYEFPospETb5HNeD/DmS9mwt+v/AYq/MA0GCSqGSIb3\\nDQEBCwUAA4IBAQBxMe1xQVQKt36A5qVlEZyxI9eb6eQRlYzorOgP2tFaOsvDPpRI\\nCALhPmxgQl/5QvKFfCXKoxWj1Spg4sF6fJp6jhSjLpmChS9lf5fRaWS20/pxIddM\\n10diq3r6HxLKSxCYK7Pf5scOeZquvwfo8Kxye01bvCMFf1s1K3ZEZszk5Oo2MnWU\\nU22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq\\nnDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O\\n44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\\n-----END CERTIFICATE-----\",\"type\":\"TRUSTED_CERTIFICATE\",\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\"}";
+    private final String KEYSTORE_ENTRY =
+            "[{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":1618387348000,\"expirationDate\":1626163348000,\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"type\":\"TRUSTED_CERTIFICATE\",\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\"}]";
+    private final String KEYSTORE_ENTRY_WITH_CERT =
+            "{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":1618387348000,\"expirationDate\":1626163348000,\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"certificate\":\"-----BEGIN CERTIFICATE-----\\nMIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\\nbmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\\nVQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\\nMB4XDTIxMDQxNDA4MDIyOFoXDTIxMDcxMzA4MDIyOFowbDEQMA4GA1UEBhMHVW5r\\nbm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\\nChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\\nASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJSWJDxu8UNC4JGOgK31WCvz\\nNKy2ONH+jTVKnBY7Ckb1hljJY0sKO55aG1HNDfkev2lJTsPIz0nJjNsqBvB1flvf\\nr6XVCxdN0yxvU5g9SpRxE/iiPX0Qt7463OfzyKW97haJrrhF005RHYNcORMY/Phj\\nhFDnZhtAwpbQLzq2UuIZ7okJsx0IgRbjH71ZZuvYCqG7Ct/bp1D7w3tT7gTbIKYH\\nppQyG9rJDEh9+cr9Hyk8Gz7aAbPT/wMH+/vXDjH2j/M1Tmed0ajuGCJumaTQ4eHs\\n9xW3B3ugycb6e7Osl/4ESRO5RQL1k2GBONv10OrKDoZ5b66xwSJmC/w3BRWQ1cMC\\nAwEAAaMhMB8wHQYDVR0OBBYEFPospETb5HNeD/DmS9mwt+v/AYq/MA0GCSqGSIb3\\nDQEBCwUAA4IBAQBxMe1xQVQKt36A5qVlEZyxI9eb6eQRlYzorOgP2tFaOsvDPpRI\\nCALhPmxgQl/5QvKFfCXKoxWj1Spg4sF6fJp6jhSjLpmChS9lf5fRaWS20/pxIddM\\n10diq3r6HxLKSxCYK7Pf5scOeZquvwfo8Kxye01bvCMFf1s1K3ZEZszk5Oo2MnWU\\nU22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq\\nnDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O\\n44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\\n-----END CERTIFICATE-----\",\"type\":\"TRUSTED_CERTIFICATE\",\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\"}";
     private final String KEYSTORE_ENTRY_ARRAY_WITH_CERT = "[" + this.KEYSTORE_ENTRY_WITH_CERT + "]";
     private final String CERTIFICATE = "-----BEGIN CERTIFICATE-----\n"
             + "MIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
@@ -100,8 +99,8 @@ public class KeystoreServiceRequestHandlerTest {
     private final String JSON_MESSAGE_PUT_CERT = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n"
             + "   \"alias\":\"myCertTest99\",\n" + "   \"type\":\"TRUSTED_CERTIFICATE\",\n" + "   \"certificate\":\""
             + this.CERTIFICATE + "\n" + "}";
-    private final String JSON_MESSAGE_DEL = "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n"
-            + "    \"alias\" : \"mycerttestec\"\n" + "}";
+    private final String JSON_MESSAGE_DEL =
+            "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n" + "    \"alias\" : \"mycerttestec\"\n" + "}";
     private final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n"
             + "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCCcZ1Nu9AVYKJd\n"
             + "p6gcdObxCiofeOVbJv3Ws19JVa6PGTSgREFy5c97/k+SsSBhHAFp1n3738E2gdxD\n"
@@ -130,25 +129,26 @@ public class KeystoreServiceRequestHandlerTest {
             + "BpbrbOZsUDjMjojyQYL4Ll9rLohk+Pq73xXJjtTRIXZVXJg27pEEqzcVB4o9vgli\n" + "yzOqhyTKM9JP7Uda6Fv6DA==\n"
             + "-----END PRIVATE KEY-----";
     private final String[] CERTIFICATE_CHAIN = {
-            "-----BEGIN CERTIFICATE-----\n" + "MIIDdzCCAl+gAwIBAgIED3hXJjANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
-                    + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
-                    + "VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\n"
-                    + "MB4XDTIxMDQxMzA4MTQxOVoXDTIxMDcxMjA4MTQxOVowbDEQMA4GA1UEBhMHVW5r\n"
-                    + "bm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\n"
-                    + "ChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\n"
-                    + "ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIJxnU270BVgol2nqBx05vEK\n"
-                    + "Kh945Vsm/dazX0lVro8ZNKBEQXLlz3v+T5KxIGEcAWnWffvfwTaB3ENq5+0qmZXd\n"
-                    + "ln3esRBD4NvvU+LIWWsQS1wMT//XgQfaNocEiCHGpaaC9a7R7ylxri7GeY44kA8J\n"
-                    + "ps1gsuzimdOH3Emf4H4x3P7802P8LsFXndbacByx1WqluYuN8KsNJ3+GB6XwCgBt\n"
-                    + "2OJEaRgeSC8S7O2PHTWk7aIYCCmRy2KB3EX/KDDA47Fw8BLD/nlmNISAxnHs8zLE\n"
-                    + "SIgvuOC39yAbrxCGVDed5h8n1x36Au+fWDV/Cwa0anDcyHd2CzoNCSvwcxBbRukC\n"
-                    + "AwEAAaMhMB8wHQYDVR0OBBYEFCXFCTq9DDNw6jr0nE2VHw+6wqG0MA0GCSqGSIb3\n"
-                    + "DQEBCwUAA4IBAQAjsKeIU0vf7vaOhUAMV60eP54kr6koiWBjhCxyKXQ+MECTFntn\n"
-                    + "L459+uTFOCyoytWYjbe9ph79ossTWTCUUPCx9ZSaVdrpK5TyzXI+KBBWqGcLHxqc\n"
-                    + "1jvU7zKLVf9oKGfhugnFvmj2EqC2vsrQPiG+p1RDfiLI9BqmhoDzBWzjZDdB6xt6\n"
-                    + "PMAqecHfS24TzyWi8T4gLctcpSN22Aa394ky7sgBJPAQHWe7VWhRB0bVTZntwRsQ\n"
-                    + "pEraINImKSw+m7MF/75s151yjKOzQxPZufl91oYyQMXoqX2fi0EUWo1oLm1x01dN\n"
-                    + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----" };
+        "-----BEGIN CERTIFICATE-----\n" + "MIIDdzCCAl+gAwIBAgIED3hXJjANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
+                + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
+                + "VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\n"
+                + "MB4XDTIxMDQxMzA4MTQxOVoXDTIxMDcxMjA4MTQxOVowbDEQMA4GA1UEBhMHVW5r\n"
+                + "bm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\n"
+                + "ChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\n"
+                + "ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIJxnU270BVgol2nqBx05vEK\n"
+                + "Kh945Vsm/dazX0lVro8ZNKBEQXLlz3v+T5KxIGEcAWnWffvfwTaB3ENq5+0qmZXd\n"
+                + "ln3esRBD4NvvU+LIWWsQS1wMT//XgQfaNocEiCHGpaaC9a7R7ylxri7GeY44kA8J\n"
+                + "ps1gsuzimdOH3Emf4H4x3P7802P8LsFXndbacByx1WqluYuN8KsNJ3+GB6XwCgBt\n"
+                + "2OJEaRgeSC8S7O2PHTWk7aIYCCmRy2KB3EX/KDDA47Fw8BLD/nlmNISAxnHs8zLE\n"
+                + "SIgvuOC39yAbrxCGVDed5h8n1x36Au+fWDV/Cwa0anDcyHd2CzoNCSvwcxBbRukC\n"
+                + "AwEAAaMhMB8wHQYDVR0OBBYEFCXFCTq9DDNw6jr0nE2VHw+6wqG0MA0GCSqGSIb3\n"
+                + "DQEBCwUAA4IBAQAjsKeIU0vf7vaOhUAMV60eP54kr6koiWBjhCxyKXQ+MECTFntn\n"
+                + "L459+uTFOCyoytWYjbe9ph79ossTWTCUUPCx9ZSaVdrpK5TyzXI+KBBWqGcLHxqc\n"
+                + "1jvU7zKLVf9oKGfhugnFvmj2EqC2vsrQPiG+p1RDfiLI9BqmhoDzBWzjZDdB6xt6\n"
+                + "PMAqecHfS24TzyWi8T4gLctcpSN22Aa394ky7sgBJPAQHWe7VWhRB0bVTZntwRsQ\n"
+                + "pEraINImKSw+m7MF/75s151yjKOzQxPZufl91oYyQMXoqX2fi0EUWo1oLm1x01dN\n"
+                + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----"
+    };
     private final String JSON_MESSAGE_PUT_KEY = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n"
             + "   \"alias\":\"myPrivateKey\",\n" + "   \"type\":\"PRIVATE_KEY\",\n" + "   \"privateKey\" : \""
             + this.PRIVATE_KEY + ",\n" + "   \"certificateChain\":[\"" + this.CERTIFICATE_CHAIN + "\"]\n" + "}";
@@ -159,11 +159,11 @@ public class KeystoreServiceRequestHandlerTest {
     private final String JSON_MESSAGE_GET_CSR = "{\n" + "    \"keystoreServicePid\":\"MyKeystore\",\n"
             + "    \"alias\":\"alias\",\n" + "    \"algorithm\" : \"SHA256withRSA\",\n"
             + "    \"attributes\" : \"CN=Kura, OU=IoT, O=Eclipse, C=US\"\n" + "}";
-    private final String JSON_MESSAGE_GET_KEYS_BY_KEYSTORE = "{\n" + "    \"keystoreServicePid\":\"MyKeystore\"\n"
-            + "}";
+    private final String JSON_MESSAGE_GET_KEYS_BY_KEYSTORE =
+            "{\n" + "    \"keystoreServicePid\":\"MyKeystore\"\n" + "}";
     private final String JSON_MESSAGE_GET_KEYS_BY_ALIAS = "{\n" + "    \"alias\":\"alias\"\n" + "}";
-    private final String JSON_MESSAGE_GET_KEYS_BY_KEYSTORE_ALIAS = "{\n"
-            + "    \"keystoreServicePid\":\"MyKeystore\", \n" + "    \"alias\":\"alias\"\n" + "}";
+    private final String JSON_MESSAGE_GET_KEYS_BY_KEYSTORE_ALIAS =
+            "{\n" + "    \"keystoreServicePid\":\"MyKeystore\", \n" + "    \"alias\":\"alias\"\n" + "}";
 
     @Test(expected = KuraException.class)
     public void doGetTestNoResources() throws KuraException {
@@ -235,7 +235,8 @@ public class KeystoreServiceRequestHandlerTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
         certs.put("alias", new KeyStore.TrustedCertificateEntry(cert));
@@ -279,7 +280,8 @@ public class KeystoreServiceRequestHandlerTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
         certs.put("alias", new KeyStore.TrustedCertificateEntry(cert));
@@ -318,7 +320,8 @@ public class KeystoreServiceRequestHandlerTest {
         String response = responseBody(resPayload);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
 
-        JsonArray expectedJson = new JsonParser().parse(this.KEYSTORE_ENTRY_ARRAY_WITH_CERT).getAsJsonArray();
+        JsonArray expectedJson =
+                new JsonParser().parse(this.KEYSTORE_ENTRY_ARRAY_WITH_CERT).getAsJsonArray();
         JsonArray receivedJson = new JsonParser().parse(response).getAsJsonArray();
 
         assertEquals(expectedJson, receivedJson);
@@ -332,7 +335,8 @@ public class KeystoreServiceRequestHandlerTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         when(ksMock.getKeyStore()).thenReturn(ks);
         when(ksMock.getEntry("alias")).thenReturn(new KeyStore.TrustedCertificateEntry(cert));
@@ -374,7 +378,8 @@ public class KeystoreServiceRequestHandlerTest {
 
         String response = responseBody(resPayload);
 
-        JsonArray expectedJson = new JsonParser().parse(this.KEYSTORE_ENTRY_ARRAY_WITH_CERT).getAsJsonArray();
+        JsonArray expectedJson =
+                new JsonParser().parse(this.KEYSTORE_ENTRY_ARRAY_WITH_CERT).getAsJsonArray();
         JsonArray receivedJson = new JsonParser().parse(response).getAsJsonArray();
 
         assertEquals(expectedJson, receivedJson);
@@ -388,7 +393,8 @@ public class KeystoreServiceRequestHandlerTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         when(ksMock.getKeyStore()).thenReturn(ks);
         when(ksMock.getEntry("alias")).thenReturn(new KeyStore.TrustedCertificateEntry(cert));
@@ -426,7 +432,8 @@ public class KeystoreServiceRequestHandlerTest {
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
 
-        JsonObject expectedJson = new JsonParser().parse(this.KEYSTORE_ENTRY_WITH_CERT).getAsJsonObject();
+        JsonObject expectedJson =
+                new JsonParser().parse(this.KEYSTORE_ENTRY_WITH_CERT).getAsJsonObject();
         JsonObject receivedJson = new JsonParser().parse(response).getAsJsonObject();
 
         assertEquals(expectedJson, receivedJson);
@@ -571,7 +578,8 @@ public class KeystoreServiceRequestHandlerTest {
         when(ksMock.getKeyStore()).thenReturn(ks);
         when(ksMock.getEntry("alias")).thenReturn(createPrivateKey("alias", this.PRIVATE_KEY, this.CERTIFICATE_CHAIN));
         String csrString = "-----BEGIN CERTIFICATE REQUEST-----";
-        when(ksMock.getCSR(any(String.class), any(X500Principal.class), any(String.class))).thenReturn(csrString);
+        when(ksMock.getCSR(any(String.class), any(X500Principal.class), any(String.class)))
+                .thenReturn(csrString);
 
         KeystoreServiceRequestHandlerV1 keystoreRH = new KeystoreServiceRequestHandlerV1() {
 
@@ -657,7 +665,9 @@ public class KeystoreServiceRequestHandlerTest {
         PEMParser pemParser = new PEMParser(new StringReader(privateKey));
         Object object = pemParser.readObject();
         pemParser.close();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC").setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter()
+                .setProvider("BC")
+                .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
         PrivateKey privkey = null;
         if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
             privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
@@ -670,7 +680,8 @@ public class KeystoreServiceRequestHandlerTest {
         List<X509Certificate> certificateChain = new ArrayList<>();
         for (String publicKey : publicKeys) {
             ByteArrayInputStream is = new ByteArrayInputStream(publicKey.getBytes());
-            certificateChain.add((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is));
+            certificateChain.add(
+                    (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is));
         }
         return certificateChain.toArray(new X509Certificate[0]);
     }

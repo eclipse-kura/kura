@@ -17,7 +17,6 @@ package org.eclipse.kura.net.status.modem;
  *
  */
 public enum ESimStatus {
-
     UNKNOWN,
     NO_PROFILES,
     WITH_PROFILES;

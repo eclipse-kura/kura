@@ -13,7 +13,6 @@
 package org.eclipse.kura.util.validation;
 
 import java.util.Map;
-
 import org.eclipse.kura.util.configuration.Property;
 
 public class ValidatorOptions {
@@ -33,7 +32,10 @@ public class ValidatorOptions {
     private final Property<Boolean> newPassRequireSpecialChars = new Property<>(NEW_PASSW_REQUIRE_SPECIAL_CHARS, false);
     private final Property<Boolean> newPassRequireBothCases = new Property<>(NEW_PASSW_REQUIRE_BOTH_CASES, false);
 
-    public ValidatorOptions(int passwordMinimumLength, boolean passwordRequireDigits, boolean passwordRequireBothCases,
+    public ValidatorOptions(
+            int passwordMinimumLength,
+            boolean passwordRequireDigits,
+            boolean passwordRequireBothCases,
             boolean passwordRequireSpecialChars) {
 
         this.passwordMinimumLength = passwordMinimumLength;
@@ -66,5 +68,4 @@ public class ValidatorOptions {
     public boolean isPasswordRequireSpecialChars() {
         return this.passwordRequireSpecialChars;
     }
-
 }

@@ -24,5 +24,4 @@ public class CloudEndpointPidRequest {
     public String getCloudEndpointPid() {
         return this.cloudEndpointPid;
     }
-
 }

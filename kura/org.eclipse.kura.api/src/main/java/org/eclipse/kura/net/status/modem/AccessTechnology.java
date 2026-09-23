@@ -18,7 +18,6 @@ package org.eclipse.kura.net.status.modem;
  *
  */
 public enum AccessTechnology {
-
     UNKNOWN,
     POTS,
     GSM,

@@ -13,7 +13,6 @@
 package org.eclipse.kura.gpio;
 
 import java.io.IOException;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -150,7 +149,7 @@ public interface KuraGPIOPin {
      * @return true if the pin has been previously opened for use.
      */
     public boolean isOpen();
-    
+
     /**
      *
      * @return the {@link KuraGPIODescription} associated with this pin.

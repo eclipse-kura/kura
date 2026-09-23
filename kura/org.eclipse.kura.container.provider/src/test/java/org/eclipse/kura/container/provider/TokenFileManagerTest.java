@@ -29,7 +29,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraException;
 import org.junit.After;
 import org.junit.Assume;
@@ -87,8 +86,8 @@ public class TokenFileManagerTest {
 
         thenPathMatchesTokenLayout(firstTokenFile);
         thenPathMatchesTokenLayout(this.tokenFile);
-        assertNotEquals("Each token should get a unique directory", firstTokenFile.getParent(),
-                this.tokenFile.getParent());
+        assertNotEquals(
+                "Each token should get a unique directory", firstTokenFile.getParent(), this.tokenFile.getParent());
     }
 
     @Test
@@ -107,26 +106,27 @@ public class TokenFileManagerTest {
 
         whenTokenIsWritten();
 
-        final Set<PosixFilePermission> ownerAll = EnumSet.of(PosixFilePermission.OWNER_READ,
-                PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE);
+        final Set<PosixFilePermission> ownerAll = EnumSet.of(
+                PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE);
 
         final Path uuidDirectory = this.tokenFile.getParent();
         assertEquals("UUID directory should be owner-only", ownerAll, Files.getPosixFilePermissions(uuidDirectory));
 
         final Path tokensRoot = uuidDirectory.getParent();
-        assertEquals("kura-tokens directory should be owner-only", ownerAll,
-                Files.getPosixFilePermissions(tokensRoot));
+        assertEquals("kura-tokens directory should be owner-only", ownerAll, Files.getPosixFilePermissions(tokensRoot));
     }
 
     @Test
     public void failsFastWhenBaseDirectoryDoesNotExist() {
-        final String missingBase = Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "missing").toString();
+        final String missingBase =
+                Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "missing").toString();
         System.setProperty(TMPFS_BASE_PROPERTY, missingBase);
 
         whenTokenWriteIsAttempted();
 
         assertTrue("A KuraException should be thrown", this.writeException != null);
-        assertTrue("The error message should contain the missing path",
+        assertTrue(
+                "The error message should contain the missing path",
                 this.writeException.getMessage().contains(missingBase));
     }
 
@@ -168,7 +168,8 @@ public class TokenFileManagerTest {
      */
 
     private void givenPosixFileSystem() {
-        Assume.assumeTrue("POSIX permissions are not supported on this platform",
+        Assume.assumeTrue(
+                "POSIX permissions are not supported on this platform",
                 FileSystems.getDefault().supportedFileAttributeViews().contains("posix"));
     }
 
@@ -187,17 +188,27 @@ public class TokenFileManagerTest {
 
     private void thenTokenFileContent(final String expectedContent) throws Exception {
         assertTrue("Token file should exist", Files.exists(this.tokenFile));
-        assertEquals("Unexpected token file content", expectedContent,
+        assertEquals(
+                "Unexpected token file content",
+                expectedContent,
                 new String(Files.readAllBytes(this.tokenFile), StandardCharsets.UTF_8));
     }
 
     private void thenPathMatchesTokenLayout(final Path path) {
-        final Path relative = Paths.get(this.tmpfsBase.getRoot().getAbsolutePath()).relativize(path);
+        final Path relative =
+                Paths.get(this.tmpfsBase.getRoot().getAbsolutePath()).relativize(path);
 
         assertEquals("Unexpected path depth", 3, relative.getNameCount());
-        assertEquals("Unexpected tokens directory", "kura-tokens", relative.getName(0).toString());
-        assertTrue("Directory name should be a UUID", Pattern
-                .matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", relative.getName(1).toString()));
-        assertEquals("Unexpected token file name", "kura-token", relative.getName(2).toString());
+        assertEquals(
+                "Unexpected tokens directory",
+                "kura-tokens",
+                relative.getName(0).toString());
+        assertTrue(
+                "Directory name should be a UUID",
+                Pattern.matches(
+                        "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                        relative.getName(1).toString()));
+        assertEquals(
+                "Unexpected token file name", "kura-token", relative.getName(2).toString());
     }
 }

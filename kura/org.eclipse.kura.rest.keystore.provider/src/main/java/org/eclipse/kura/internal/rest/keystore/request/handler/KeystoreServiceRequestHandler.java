@@ -16,10 +16,11 @@ package org.eclipse.kura.internal.rest.keystore.request.handler;
 import static java.util.Objects.isNull;
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Function;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -46,9 +47,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class KeystoreServiceRequestHandler extends KeystoreRemoteService implements RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRequestHandler.class);
@@ -73,7 +71,8 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
         this.appId = appId;
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -82,7 +81,9 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
         try {
             requestHandlerRegistry.registerRequestHandler(this.appId, this);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", this.appId,
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    this.appId,
                     requestHandlerRegistry.getClass().getName());
         }
     }
@@ -91,7 +92,9 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
         try {
             requestHandlerRegistry.unregister(this.appId);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", this.appId,
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    this.appId,
                     requestHandlerRegistry.getClass().getName());
         }
     }
@@ -114,11 +117,14 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
 
         if (resourcePath.size() == 1 && resourcePath.get(0).equals(KEYSTORES)) {
             return jsonResponse(listKeystoresInternal());
-        } else if (resourcePath.size() == 2 && resourcePath.get(0).equals(KEYSTORES)
+        } else if (resourcePath.size() == 2
+                && resourcePath.get(0).equals(KEYSTORES)
                 && resourcePath.get(1).equals(ENTRIES)) {
             return doGetEntries(reqPayload);
-        } else if (resourcePath.size() == 3 && resourcePath.get(0).equals(KEYSTORES)
-                && resourcePath.get(1).equals(ENTRIES) && resourcePath.get(2).equals(ENTRY)) {
+        } else if (resourcePath.size() == 3
+                && resourcePath.get(0).equals(KEYSTORES)
+                && resourcePath.get(1).equals(ENTRIES)
+                && resourcePath.get(2).equals(ENTRY)) {
             EntryInfo request = unmarshal(new String(reqPayload.getBody(), StandardCharsets.UTF_8), EntryInfo.class);
             String keystoreServicePid = request.getKeystoreServicePid();
             String keyAlias = request.getAlias();
@@ -153,8 +159,11 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
         final List<String> resourcePath = extractResourcePath(reqMessage);
         KuraPayload reqPayload = reqMessage.getPayload();
 
-        if (resourcePath.size() != 3 || reqPayload.getBody() == null || reqPayload.getBody().length == 0
-                || !resourcePath.get(0).equals(KEYSTORES) || !resourcePath.get(1).equals(ENTRIES)) {
+        if (resourcePath.size() != 3
+                || reqPayload.getBody() == null
+                || reqPayload.getBody().length == 0
+                || !resourcePath.get(0).equals(KEYSTORES)
+                || !resourcePath.get(1).equals(ENTRIES)) {
             logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -189,7 +198,9 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
         final List<String> resourcePath = extractResourcePath(reqMessage);
         KuraPayload reqPayload = reqMessage.getPayload();
 
-        if (resourcePath.size() != 2 || reqPayload.getBody() == null || reqPayload.getBody().length == 0
+        if (resourcePath.size() != 2
+                || reqPayload.getBody() == null
+                || reqPayload.getBody().length == 0
                 || !resourcePath.get(0).equals(KEYSTORES)) {
             logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -228,8 +239,8 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
     }
 
     private ServiceReference<Unmarshaller>[] getJsonUnmarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
+        String filterString =
+                String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.json.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
     }
 

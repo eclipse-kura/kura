@@ -46,5 +46,4 @@ public class TrustedCertificateWriteRequest extends CertificateInfo implements V
         }
         return result;
     }
-
 }

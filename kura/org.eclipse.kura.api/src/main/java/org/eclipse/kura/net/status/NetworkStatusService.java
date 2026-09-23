@@ -15,7 +15,6 @@ package org.eclipse.kura.net.status;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -49,7 +48,7 @@ public interface NetworkStatusService {
      * identifier is typically the interface name. For the modems, instead,
      * it is the usb or pci path.
      * If the interface doesn't exist, an Empty value is returned.
-     * 
+     *
      * @param interfaceId
      *            the identifier of the network interface
      * @param recompute
@@ -61,7 +60,6 @@ public interface NetworkStatusService {
      *             when an error occurs while retrieving the status of the
      *             given interface
      */
-
     public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceId, boolean recompute)
             throws KuraException;
 
@@ -73,5 +71,4 @@ public interface NetworkStatusService {
      * @return a list containing the network interface identifiers
      */
     public List<String> getInterfaceIds() throws KuraException;
-
 }

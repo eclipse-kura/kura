@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -41,8 +40,8 @@ public class CollectionsUtil {
      * known to be passwords from a previous typed representation; it applies only to the properties the given OCD
      * does not describe, which is the case as long as the metatype of the component has not been tracked.
      */
-    public static Map<String, Object> dictionaryToMap(Dictionary<String, Object> dictionary, OCD ocd,
-            Set<String> knownPasswordProperties) {
+    public static Map<String, Object> dictionaryToMap(
+            Dictionary<String, Object> dictionary, OCD ocd, Set<String> knownPasswordProperties) {
         if (dictionary == null) {
             return null;
         }

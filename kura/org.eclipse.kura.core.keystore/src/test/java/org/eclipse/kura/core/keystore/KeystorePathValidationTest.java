@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Test;
 
@@ -80,7 +79,8 @@ public class KeystorePathValidationTest {
 
     private void whenOptionsAreCreated() {
         try {
-            this.options = Optional.of(new FilesystemKeystoreServiceOptions(this.properties, mock(CryptoService.class)));
+            this.options =
+                    Optional.of(new FilesystemKeystoreServiceOptions(this.properties, mock(CryptoService.class)));
         } catch (final Exception e) {
             this.exception = Optional.of(e);
         }

@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.KuraCertificateEntry;
 import org.eclipse.kura.core.testutil.TestUtil;
@@ -297,5 +296,4 @@ public class CertificatesManagerTest {
 
         return mockService;
     }
-
 }

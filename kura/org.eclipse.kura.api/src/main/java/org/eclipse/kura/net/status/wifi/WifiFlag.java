@@ -14,7 +14,7 @@ package org.eclipse.kura.net.status.wifi;
 
 /**
  * Flags describing the capabilities of an Access Point.
- * 
+ *
  * @since 2.8
  */
 public enum WifiFlag {
@@ -28,5 +28,4 @@ public enum WifiFlag {
     WPS_PBC,
     /** Supports PIN based WPS */
     WPS_PIN;
-
 }

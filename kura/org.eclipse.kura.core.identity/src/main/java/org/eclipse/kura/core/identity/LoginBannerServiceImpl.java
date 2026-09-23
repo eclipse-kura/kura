@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.identity.LoginBannerService;
 import org.osgi.service.component.annotations.Activate;
@@ -25,8 +24,11 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 
-@Component(immediate = true, name = LoginBannerServiceOptions.PID, //
-        configurationPolicy = ConfigurationPolicy.REQUIRE, property = "kura.ui.service.hide:Boolean=true")
+@Component(
+        immediate = true,
+        name = LoginBannerServiceOptions.PID, //
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = "kura.ui.service.hide:Boolean=true")
 @Designate(ocd = LoginBannerServiceOptions.class)
 public class LoginBannerServiceImpl implements LoginBannerService, ConfigurableComponent {
 
@@ -63,5 +65,4 @@ public class LoginBannerServiceImpl implements LoginBannerService, ConfigurableC
             return Optional.empty();
         }
     }
-
 }

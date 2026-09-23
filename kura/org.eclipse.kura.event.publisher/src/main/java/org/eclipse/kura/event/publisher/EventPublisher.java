@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
@@ -40,24 +39,28 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.event.publisher.helper.CloudEndpointServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.event.publisher.EventPublisher",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.event.publisher.EventPublisher",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = EventPublisherMetatype.class, factory = true)
 public class EventPublisher
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
@@ -95,7 +98,7 @@ public class EventPublisher
     @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("Updating ConfigurationChangePublisher...");
-        
+
         this.options = new EventPublisherOptions(properties);
         this.cloudHelper = new CloudEndpointServiceHelper(this.bundleContext, this.options.getCloudEndpointPid());
 
@@ -177,8 +180,8 @@ public class EventPublisher
 
     @Override
     public void onMessageConfirmed(String messageId) {
-        this.cloudDeliveryListeners
-                .forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
+        this.cloudDeliveryListeners.forEach(
+                listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
     }
 
     private String fillAppTopicPlaceholders(String appTopic, KuraMessage message) {

@@ -13,7 +13,6 @@
 package org.eclipse.kura.core.identity;
 
 import java.util.Objects;
-
 import org.eclipse.kura.identity.PasswordHash;
 
 public class PasswordHashImpl implements PasswordHash {
@@ -46,5 +45,4 @@ public class PasswordHashImpl implements PasswordHash {
     public String toString() {
         return this.hash;
     }
-
 }

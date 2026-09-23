@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -37,26 +36,30 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = CloudSubscriberMetatype.class, factory = true)
 public class CloudSubscriberImpl
         implements CloudSubscriber, ConfigurableComponent, CloudConnectionListener, CloudSubscriberListener {
@@ -75,7 +78,8 @@ public class CloudSubscriberImpl
                 subscriptionProps.put(APP_ID.name(), CloudSubscriberImpl.this.cloudSubscriberOptions.getAppId());
                 subscriptionProps.put(APP_TOPIC.name(), CloudSubscriberImpl.this.cloudSubscriberOptions.getAppTopic());
                 subscriptionProps.put(QOS.name(), CloudSubscriberImpl.this.cloudSubscriberOptions.getQos());
-                subscriptionProps.put(CONTROL.name(),
+                subscriptionProps.put(
+                        CONTROL.name(),
                         MessageType.CONTROL.equals(CloudSubscriberImpl.this.cloudSubscriberOptions.getMessageType()));
 
                 CloudSubscriberImpl.this.cloudService.registerSubscriber(subscriptionProps, CloudSubscriberImpl.this);
@@ -89,8 +93,8 @@ public class CloudSubscriberImpl
         }
 
         @Override
-        public void removedService(final ServiceReference<CloudConnectionManager> reference,
-                final CloudConnectionManager service) {
+        public void removedService(
+                final ServiceReference<CloudConnectionManager> reference, final CloudConnectionManager service) {
 
             CloudSubscriberImpl.this.cloudService.unregisterSubscriber(CloudSubscriberImpl.this);
             CloudSubscriberImpl.this.cloudService.unregisterCloudConnectionListener(CloudSubscriberImpl.this);
@@ -98,8 +102,8 @@ public class CloudSubscriberImpl
         }
 
         @Override
-        public void modifiedService(ServiceReference<CloudConnectionManager> reference,
-                CloudConnectionManager service) {
+        public void modifiedService(
+                ServiceReference<CloudConnectionManager> reference, CloudConnectionManager service) {
             // Not needed
         }
     }
@@ -158,8 +162,9 @@ public class CloudSubscriberImpl
 
     private void initCloudServiceTracking() {
         String selectedCloudServicePid = this.cloudSubscriberOptions.getCloudServicePid();
-        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
-                CloudConnectionManager.class.getName(), selectedCloudServicePid);
+        String filterString = String.format(
+                "(&(%s=%s)(kura.service.pid=%s))",
+                Constants.OBJECTCLASS, CloudConnectionManager.class.getName(), selectedCloudServicePid);
         Filter filter = null;
         try {
             filter = this.bundleContext.createFilter(filterString);

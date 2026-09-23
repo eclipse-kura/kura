@@ -17,7 +17,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
@@ -28,8 +27,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectTooShortPassword() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 5, "new.password.require.digits", true,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                5,
+                "new.password.require.digits",
+                true,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidated("As#1");
 
@@ -38,8 +44,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldAcceptPasswordLongEnough() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordIsValidated("abcd");
 
@@ -48,8 +61,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectPasswordWithoutDigits() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", true,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                true,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidated("Abc#");
 
@@ -58,8 +78,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectPasswordEqualsToIdentityName() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidatedAgainstIdentityName("Admin", "Admin");
 
@@ -68,8 +95,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectPasswordEqualsToIdentityNameDifferentCase() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidatedAgainstIdentityName("Admin", "AdMIn");
 
@@ -78,8 +112,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldAcceptPasswordWithDigits() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordIsValidated("abc1");
 
@@ -88,8 +129,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectPasswordWithoutSpecialCharacters() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", true,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                true,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidated("Abc1");
 
@@ -98,8 +146,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldAcceptPasswordWitSpecialCharacters() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordIsValidated("abc@");
 
@@ -108,8 +163,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectPasswordWithoutBothCases() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", true,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                true,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidated("ab#1");
 
@@ -118,8 +180,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldAcceptPasswordWithBothCases() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidated("aBcD");
 
@@ -128,8 +197,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldAcceptPasswordSatisfyingAllRequirements() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 4, "new.password.require.digits", true,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                4,
+                "new.password.require.digits",
+                true,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordIsValidated("aBcD1#");
 
@@ -138,8 +214,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnMinimumPasswordLength() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordRequirementsAreObtained();
 
@@ -149,8 +232,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnRequireDigitsTrue() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", true,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                true,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordRequirementsAreObtained();
 
@@ -160,8 +250,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnRequireDigitsFalse() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordRequirementsAreObtained();
 
@@ -171,8 +268,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnRequireSpecialCharactersTrue() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", true, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                true,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordRequirementsAreObtained();
 
@@ -182,8 +286,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnRequireSpecialCharactersFalse() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordRequirementsAreObtained();
 
@@ -193,8 +304,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnRequireBothCasesTrue() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", true);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                true);
 
         whenPasswordRequirementsAreObtained();
 
@@ -204,8 +322,15 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldReturnRequireBothCasesFalse() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
         whenPasswordRequirementsAreObtained();
 
@@ -222,8 +347,8 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
         super();
         try {
 
-            this.passwordStrengthVerificationService = ServiceUtil
-                    .trackService(PasswordStrengthVerificationService.class, Optional.empty())
+            this.passwordStrengthVerificationService = ServiceUtil.trackService(
+                            PasswordStrengthVerificationService.class, Optional.empty())
                     .get(30, TimeUnit.SECONDS);
 
         } catch (final Exception e) {
@@ -257,8 +382,8 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
     }
 
     private void thenMinimumPasswordLengthIs(final int length) {
-        assertEquals(Optional.of(length),
-                this.requirements.map(PasswordStrengthRequirements::getPasswordMinimumLength));
+        assertEquals(
+                Optional.of(length), this.requirements.map(PasswordStrengthRequirements::getPasswordMinimumLength));
     }
 
     private void thenDigitsAreRequired(final boolean required) {
@@ -266,8 +391,8 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
     }
 
     private void thenSpecialCharactersAreRequired(final boolean required) {
-        assertEquals(Optional.of(required),
-                this.requirements.map(PasswordStrengthRequirements::specialCharactersRequired));
+        assertEquals(
+                Optional.of(required), this.requirements.map(PasswordStrengthRequirements::specialCharactersRequired));
     }
 
     private void thenBothCasesAreRequired(final boolean required) {
@@ -281,5 +406,4 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
     private void thenExceptionIsThrown(final Class<? extends Exception> claszz) {
         assertEquals(Optional.of(claszz), this.exception.map(Object::getClass));
     }
-
 }

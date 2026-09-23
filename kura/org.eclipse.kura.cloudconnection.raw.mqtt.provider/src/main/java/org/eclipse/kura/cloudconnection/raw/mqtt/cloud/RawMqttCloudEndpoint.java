@@ -21,7 +21,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
 import org.eclipse.kura.KuraErrorCode;
@@ -44,28 +43,28 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+        name = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+        immediate = false,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
-            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
-    property = {
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide:Boolean=true" })
+            org.eclipse.kura.cloudconnection.CloudEndpoint.class
+        },
+        property = {"kura.ui.service.hide:Boolean=true", "kura.ui.factory.hide:Boolean=true"})
 @Designate(ocd = RawMqttCloudEndpointOptions.class, factory = true)
 public class RawMqttCloudEndpoint
         implements CloudEndpoint, CloudConnectionManager, DataServiceListener, ConfigurableComponent {
@@ -172,8 +171,8 @@ public class RawMqttCloudEndpoint
 
         final int qos = options.getQos().getValue();
 
-        final int id = this.dataService.publish(options.getTopic(), body, qos, options.getRetain(),
-                options.getPriority());
+        final int id =
+                this.dataService.publish(options.getTopic(), body, qos, options.getRetain(), options.getPriority());
 
         if (qos == 0) {
             return null;
@@ -183,8 +182,8 @@ public class RawMqttCloudEndpoint
     }
 
     @Override
-    public synchronized void registerSubscriber(final Map<String, Object> subscriptionProperties,
-            final CloudSubscriberListener cloudSubscriberListener) {
+    public synchronized void registerSubscriber(
+            final Map<String, Object> subscriptionProperties, final CloudSubscriberListener cloudSubscriberListener) {
 
         final SubscribeOptions subscribeOptions;
 
@@ -197,11 +196,11 @@ public class RawMqttCloudEndpoint
         registerSubscriber(subscribeOptions, cloudSubscriberListener);
     }
 
-    public synchronized void registerSubscriber(final SubscribeOptions subscribeOptions,
-            final CloudSubscriberListener cloudSubscriberListener) {
+    public synchronized void registerSubscriber(
+            final SubscribeOptions subscribeOptions, final CloudSubscriberListener cloudSubscriberListener) {
 
-        final Set<CloudSubscriberListener> listeners = this.subscribers.computeIfAbsent(subscribeOptions,
-                e -> new CopyOnWriteArraySet<>());
+        final Set<CloudSubscriberListener> listeners =
+                this.subscribers.computeIfAbsent(subscribeOptions, e -> new CopyOnWriteArraySet<>());
 
         listeners.add(cloudSubscriberListener);
 
@@ -213,7 +212,6 @@ public class RawMqttCloudEndpoint
         final Set<SubscribeOptions> toUnsubscribe = new HashSet<>();
 
         this.subscribers.entrySet().removeIf(e -> {
-
             final Set<CloudSubscriberListener> listeners = e.getValue();
 
             listeners.remove(cloudSubscriberListener);
@@ -227,7 +225,6 @@ public class RawMqttCloudEndpoint
         });
 
         toUnsubscribe.forEach(this::unsubscribe);
-
     }
 
     @Override
@@ -300,10 +297,11 @@ public class RawMqttCloudEndpoint
 
     private void postConnectionStateChangeEvent(final boolean isConnected) {
 
-        final Map<String, Object> eventProperties = Collections.singletonMap("cloud.service.pid",
-                (String) this.componentContext.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
+        final Map<String, Object> eventProperties = Collections.singletonMap("cloud.service.pid", (String)
+                this.componentContext.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 
-        final Event event = isConnected ? new CloudConnectionEstablishedEvent(eventProperties)
+        final Event event = isConnected
+                ? new CloudConnectionEstablishedEvent(eventProperties)
                 : new CloudConnectionLostEvent(eventProperties);
         this.eventAdmin.postEvent(event);
     }

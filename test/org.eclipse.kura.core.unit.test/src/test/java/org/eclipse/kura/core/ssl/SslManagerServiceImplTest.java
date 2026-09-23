@@ -44,11 +44,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.security.auth.x500.X500Principal;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
@@ -152,8 +150,8 @@ public class SslManagerServiceImplTest {
 
         SSLSocketFactory factory = svc.getSSLSocketFactory();
 
-        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> sslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertNotNull(factory);
         assertEquals(1, sslContexts.size());
@@ -161,8 +159,8 @@ public class SslManagerServiceImplTest {
 
         svc.updated(properties);
 
-        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
         assertNotNull(updatedSslContexts);
         assertEquals(0, updatedSslContexts.size());
     }
@@ -174,8 +172,7 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslServiceListener listener = () -> {
-        };
+        SslServiceListener listener = () -> {};
 
         ComponentContext ccMock = mock(ComponentContext.class);
 
@@ -196,8 +193,8 @@ public class SslManagerServiceImplTest {
 
         SSLSocketFactory factory = svc.getSSLSocketFactory();
 
-        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> sslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertNotNull(factory);
         assertEquals(1, sslContexts.size());
@@ -205,8 +202,8 @@ public class SslManagerServiceImplTest {
 
         svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
 
-        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertEquals(0, updatedSslContexts.size());
     }
@@ -218,8 +215,7 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslServiceListener listener = () -> {
-        };
+        SslServiceListener listener = () -> {};
 
         ComponentContext ccMock = mock(ComponentContext.class);
 
@@ -240,8 +236,8 @@ public class SslManagerServiceImplTest {
 
         SSLSocketFactory factory = svc.getSSLSocketFactory();
 
-        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> sslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertNotNull(factory);
         assertEquals(1, sslContexts.size());
@@ -249,8 +245,8 @@ public class SslManagerServiceImplTest {
 
         svc.unsetKeystoreService(keystoreService);
 
-        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertEquals(0, updatedSslContexts.size());
     }
@@ -262,8 +258,7 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslServiceListener listener = () -> {
-        };
+        SslServiceListener listener = () -> {};
 
         ComponentContext ccMock = mock(ComponentContext.class);
 
@@ -284,8 +279,8 @@ public class SslManagerServiceImplTest {
 
         SSLSocketFactory factory = svc.getSSLSocketFactory();
 
-        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> sslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertNotNull(factory);
         assertEquals(1, sslContexts.size());
@@ -293,8 +288,8 @@ public class SslManagerServiceImplTest {
 
         svc.handleEvent(new KeystoreChangedEvent("foo"));
 
-        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
-                .getFieldValue(svc, "sslContexts");
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts =
+                (Map<ConnectionSslOptions, SSLContext>) TestUtil.getFieldValue(svc, "sslContexts");
 
         assertEquals(0, updatedSslContexts.size());
     }
@@ -347,7 +342,7 @@ public class SslManagerServiceImplTest {
         Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
         is.close();
 
-        Certificate[] chain = { certificate };
+        Certificate[] chain = {certificate};
 
         String alias = "kuraTestAlias";
         svc.installPrivateKey(alias, (PrivateKey) key, STORE_PASS.toCharArray(), chain);
@@ -367,8 +362,8 @@ public class SslManagerServiceImplTest {
 
         svc.installPrivateKey("secondKey", (PrivateKey) key, STORE_PASS.toCharArray(), chain);
 
-        KeyStore ks = (KeyStore) TestUtil.invokePrivate(svc, "getKeyStore", STORE_PATH, STORE_PASS.toCharArray(),
-                alias);
+        KeyStore ks =
+                (KeyStore) TestUtil.invokePrivate(svc, "getKeyStore", STORE_PATH, STORE_PASS.toCharArray(), alias);
 
         assertNotNull(ks);
         assertTrue(ks.containsAlias(alias));

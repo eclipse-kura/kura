@@ -15,7 +15,6 @@
 package org.eclipse.kura.core.configuration.internal;
 
 import java.util.Map;
-
 import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
@@ -94,7 +93,8 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle> {
                     // check if this component is a factory
                     boolean isFactory = false;
                     Designate designate = ComponentUtil.getDesignate(metadata, metatypePid);
-                    if (designate.getFactoryPid() != null && !designate.getFactoryPid().isEmpty()) {
+                    if (designate.getFactoryPid() != null
+                            && !designate.getFactoryPid().isEmpty()) {
                         isFactory = true;
                         metatypePid = designate.getFactoryPid();
                     }

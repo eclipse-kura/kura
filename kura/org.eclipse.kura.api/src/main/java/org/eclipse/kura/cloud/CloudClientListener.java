@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -22,7 +22,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * The Arrived method signatures are differentiated based on whether the incoming messages have been
  * published to a data topic (by default accountName/#) or a control topic (by default $EDC/accountName/#).
  *
- * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.listener.CloudConnectionListener} and 
+ * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.listener.CloudConnectionListener} and
  * {@link org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener} instead
  */
 @ConsumerType

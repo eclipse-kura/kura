@@ -14,7 +14,6 @@ package org.eclipse.kura.core.status;
 
 import java.io.IOException;
 import java.util.Objects;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.gpio.GPIOService;
@@ -50,11 +49,17 @@ public class GpioLedManager implements LedManager {
         final KuraGPIOPin notificationLED;
 
         if (identifier instanceof GpioTerminal) {
-            notificationLED = this.gpioService.getPinByTerminal(((GpioTerminal) identifier).getNumber(),
-                    KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
+            notificationLED = this.gpioService.getPinByTerminal(
+                    ((GpioTerminal) identifier).getNumber(),
+                    KuraGPIODirection.OUTPUT,
+                    KuraGPIOMode.OUTPUT_OPEN_DRAIN,
+                    KuraGPIOTrigger.NONE);
         } else {
-            notificationLED = this.gpioService.getPinByName(((GpioName) identifier).getName(), KuraGPIODirection.OUTPUT,
-                    KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
+            notificationLED = this.gpioService.getPinByName(
+                    ((GpioName) identifier).getName(),
+                    KuraGPIODirection.OUTPUT,
+                    KuraGPIOMode.OUTPUT_OPEN_DRAIN,
+                    KuraGPIOTrigger.NONE);
         }
 
         try {
@@ -73,8 +78,7 @@ public class GpioLedManager implements LedManager {
         }
     }
 
-    public interface GpioIdentifier {
-    }
+    public interface GpioIdentifier {}
 
     public static class GpioTerminal implements GpioIdentifier {
 
@@ -109,7 +113,6 @@ public class GpioLedManager implements LedManager {
             GpioTerminal other = (GpioTerminal) obj;
             return number == other.number;
         }
-
     }
 
     public static class GpioName implements GpioIdentifier {
@@ -145,7 +148,5 @@ public class GpioLedManager implements LedManager {
             GpioName other = (GpioName) obj;
             return Objects.equals(name, other.name);
         }
-
     }
-
 }

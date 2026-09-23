@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.junit.Test;
@@ -128,7 +127,6 @@ public class ContainerInstanceOptionsTest {
         whenIsEnabled();
 
         thenEnabledStateIs(false);
-
     }
 
     @Test
@@ -141,7 +139,6 @@ public class ContainerInstanceOptionsTest {
         whenIsEnabled();
 
         thenEnabledStateIs(true);
-
     }
 
     @Test
@@ -153,7 +150,6 @@ public class ContainerInstanceOptionsTest {
         whenGetImage();
 
         thenImage(DEFAULT_IMAGE);
-
     }
 
     @Test
@@ -177,7 +173,6 @@ public class ContainerInstanceOptionsTest {
         whenGetImageTag();
 
         thenImageTag(DEFAULT_IMAGE_TAG);
-
     }
 
     @Test
@@ -201,7 +196,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerName();
 
         thenContainerName(DEFAULT_CONTAINER_NAME);
-
     }
 
     @Test
@@ -225,7 +219,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerEnv();
 
         thenContainerEnvIsEmpty();
-
     }
 
     @Test
@@ -249,7 +242,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerVolume();
 
         thenContainerVolumeIsEmpty();
-
     }
 
     @Test
@@ -273,7 +265,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerDevice();
 
         thenContainerDeviceIsEmpty();
-
     }
 
     @Test
@@ -297,7 +288,6 @@ public class ContainerInstanceOptionsTest {
         whenGetPrivilegedMode();
 
         thenPrivilegedMode(DEFAULT_CCONTAINER_PRIVILEGED);
-
     }
 
     @Test
@@ -321,7 +311,6 @@ public class ContainerInstanceOptionsTest {
         whenGetImageDownloadRetries();
 
         thenImageDownloadRetries(DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRIES);
-
     }
 
     @Test
@@ -345,7 +334,6 @@ public class ContainerInstanceOptionsTest {
         whenGetRegistryURL();
 
         thenRegistryURL(DEFAULT_REGISTRY_URL);
-
     }
 
     @Test
@@ -369,7 +357,6 @@ public class ContainerInstanceOptionsTest {
         whenGetIsUnlimitedRetries();
 
         thenIsFalse(this.unlimitedRetries);
-
     }
 
     @Test
@@ -393,7 +380,6 @@ public class ContainerInstanceOptionsTest {
         whenGetImageDownloadRetryInterval();
 
         thenImageDownloadRetryInterval(DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL);
-
     }
 
     @Test
@@ -417,7 +403,6 @@ public class ContainerInstanceOptionsTest {
         whenGetRegistryUsername();
 
         thenRegistryUsername(DEFAULT_REGISTRY_USERNAME);
-
     }
 
     @Test
@@ -441,7 +426,6 @@ public class ContainerInstanceOptionsTest {
         whenGetRegistryPassword();
 
         thenRegistryPassword(DEFAULT_REGISTRY_PASSWORD);
-
     }
 
     @Test
@@ -465,7 +449,6 @@ public class ContainerInstanceOptionsTest {
         whenGetImageDownloadTimeout();
 
         thenImageDownloadTimeout(DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
-
     }
 
     @Test
@@ -493,7 +476,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerPortsExternal();
 
         thenPortResult(portResult);
-
     }
 
     @Test
@@ -509,7 +491,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerPortsExternal();
 
         thenPortResult(portResult);
-
     }
 
     @Test
@@ -525,7 +506,6 @@ public class ContainerInstanceOptionsTest {
         whenGetContainerPortsExternal();
 
         thenPortResult(portResult);
-
     }
 
     @Test
@@ -792,8 +772,8 @@ public class ContainerInstanceOptionsTest {
         this.properties.put(CONTAINER_PORTS_EXTERNAL, DEFAULT_PORTS_EXTERNAL);
         this.properties.put(CONTAINER_PORTS_INTERNAL, DEFAULT_PORTS_INTERNAL);
         this.properties.put(CONTAINER_ENV, DEFAULT_CONTAINER_ENV);
-        this.properties.put(CONTAINER_VOLUME,
-                DEFAULT_CONTAINER_PATH_FILE_PATH + ":" + DEFAULT_CONTAINER_PATH_DESTINATION);
+        this.properties.put(
+                CONTAINER_VOLUME, DEFAULT_CONTAINER_PATH_FILE_PATH + ":" + DEFAULT_CONTAINER_PATH_DESTINATION);
         this.properties.put(CONTAINER_DEVICE, DEFAULT_CONTAINER_DEVICE);
         this.properties.put(CONTAINER_LOGGING_TYPE, DEFAULT_CONTAINER_LOGGING_TYPE);
         this.properties.put(CONTAINER_LOGGER_PARAMETERS, DEFAULT_CONTAINER_LOGGER_PARAMETERS);
@@ -991,20 +971,20 @@ public class ContainerInstanceOptionsTest {
     }
 
     private void whenGetRegistryURL() {
-        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials) this.cgdso
-                .getRegistryCredentials().get();
+        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials)
+                this.cgdso.getRegistryCredentials().get();
         this.registryURL = registryCredentials.getUrl();
     }
 
     private void whenGetRegistryUsername() {
-        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials) this.cgdso
-                .getRegistryCredentials().get();
+        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials)
+                this.cgdso.getRegistryCredentials().get();
         this.registryUsername = registryCredentials.getUsername();
     }
 
     private void whenGetRegistryPassword() {
-        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials) this.cgdso
-                .getRegistryCredentials().get();
+        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials)
+                this.cgdso.getRegistryCredentials().get();
         this.registryPassword = new String(registryCredentials.getPassword().getPassword());
     }
 

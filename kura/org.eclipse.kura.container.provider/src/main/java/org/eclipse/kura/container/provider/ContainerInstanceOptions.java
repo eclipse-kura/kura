@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration.ContainerConfigurationBuilder;
@@ -49,35 +48,36 @@ public class ContainerInstanceOptions {
     private static final Property<String> CONTAINER_VOLUME = new Property<>("container.volume", "");
     private static final Property<String> CONTAINER_DEVICE = new Property<>("container.device", "");
     private static final Property<Boolean> CONTAINER_PRIVILEGED = new Property<>("container.privileged", false);
-    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRIES = new Property<>(
-            "container.image.download.retries", 5);
-    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = new Property<>(
-            "container.image.download.interval", 30000);
-    private static final Property<String> CONTAINER_LOGGER_PARAMETERS = new Property<>("container.loggerParameters",
-            "");
+    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRIES =
+            new Property<>("container.image.download.retries", 5);
+    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL =
+            new Property<>("container.image.download.interval", 30000);
+    private static final Property<String> CONTAINER_LOGGER_PARAMETERS =
+            new Property<>("container.loggerParameters", "");
     private static final Property<String> CONTAINER_LOGGING_TYPE = new Property<>("container.loggingType", "default");
     private static final Property<String> REGISTRY_URL = new Property<>("registry.hostname", "");
     private static final Property<String> REGISTRY_USERNAME = new Property<>("registry.username", "");
     private static final Property<String> REGISTRY_PASSWORD = new Property<>("registry.password", "");
-    private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>("container.image.download.timeout",
-            500);
+    private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT =
+            new Property<>("container.image.download.timeout", 500);
     private static final Property<String> CONTAINER_NETWORKING_MODE = new Property<>("container.networkMode", "");
     private static final Property<String> CONTAINER_ENTRY_POINT = new Property<>("container.entrypoint", "");
-    private static final Property<Boolean> CONTAINER_RESTART_FAILURE = new Property<>("container.restart.onfailure",
-            false);
+    private static final Property<Boolean> CONTAINER_RESTART_FAILURE =
+            new Property<>("container.restart.onfailure", false);
     private static final Property<String> CONTAINER_MEMORY = new Property<>("container.memory", "");
     private static final Property<Float> CONTAINER_CPUS = new Property<>("container.cpus", 1F);
     private static final Property<String> CONTAINER_GPUS = new Property<>("container.gpus", "all");
     private static final Property<String> CONTAINER_RUNTIME = new Property<>("container.runtime", "");
 
-    private static final Property<String> SIGNATURE_TRUST_ANCHOR = new Property<>("container.signature.trust.anchor",
-            "");
-    private static final Property<Boolean> SIGNATURE_VERIFY_TLOG = new Property<>(
-            "container.signature.verify.transparency.log", true);
-    private static final Property<String> ENFORCEMENT_DIGEST = new Property<>("container.signature.enforcement.digest",
-            "");
-    
-    private static final Property<Boolean> IDENTITY_INTEGRATION_ENABLED = new Property<>("container.identity.enabled", false);
+    private static final Property<String> SIGNATURE_TRUST_ANCHOR =
+            new Property<>("container.signature.trust.anchor", "");
+    private static final Property<Boolean> SIGNATURE_VERIFY_TLOG =
+            new Property<>("container.signature.verify.transparency.log", true);
+    private static final Property<String> ENFORCEMENT_DIGEST =
+            new Property<>("container.signature.enforcement.digest", "");
+
+    private static final Property<Boolean> IDENTITY_INTEGRATION_ENABLED =
+            new Property<>("container.identity.enabled", false);
     private static final Property<String> CONTAINER_PERMISSIONS = new Property<>("container.permissions", "");
 
     private boolean enabled;
@@ -112,7 +112,7 @@ public class ContainerInstanceOptions {
     private final Boolean signatureVerifyTransparencyLog;
 
     private final Optional<String> enforcementDigest;
-    
+
     private final boolean identityIntegrationEnabled;
     private final List<String> containerPermissions;
 
@@ -234,20 +234,20 @@ public class ContainerInstanceOptions {
             String stringValue = value.get().trim();
             long result = 0;
             switch (stringValue.charAt(stringValue.length() - 1)) {
-            case 'b':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
-                break;
-            case 'k':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
-                break;
-            case 'm':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
-                break;
-            case 'g':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
-                break;
-            default:
-                result = Long.parseLong(stringValue);
+                case 'b':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                    break;
+                case 'k':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                    break;
+                case 'm':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                    break;
+                case 'g':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                    break;
+                default:
+                    result = Long.parseLong(stringValue);
             }
             return Optional.of(result);
         } else {
@@ -333,8 +333,8 @@ public class ContainerInstanceOptions {
 
     public Optional<RegistryCredentials> getRegistryCredentials() {
         if (this.registryUsername.isPresent() && this.registryPassword.isPresent()) {
-            return Optional.of(new PasswordRegistryCredentials(this.registryURL, this.registryUsername.get(),
-                    new Password(this.registryPassword.get())));
+            return Optional.of(new PasswordRegistryCredentials(
+                    this.registryURL, this.registryUsername.get(), new Password(this.registryPassword.get())));
         }
 
         return Optional.empty();
@@ -346,7 +346,8 @@ public class ContainerInstanceOptions {
 
     private ContainerNetworkConfiguration buildContainerNetworkConfig() {
         return new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
-                .setNetworkMode(getContainerNetworkingMode()).build();
+                .setNetworkMode(getContainerNetworkingMode())
+                .build();
     }
 
     public List<String> getEntryPoint() {
@@ -390,9 +391,12 @@ public class ContainerInstanceOptions {
     }
 
     private ImageConfiguration buildImageConfig() {
-        return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
+        return new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(this.image)
+                .setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
-                .setRegistryCredentials(getRegistryCredentials()).build();
+                .setRegistryCredentials(getRegistryCredentials())
+                .build();
     }
 
     private ContainerConfigurationBuilder buildPortConfig(ContainerConfigurationBuilder cc) {
@@ -412,14 +416,25 @@ public class ContainerInstanceOptions {
     }
 
     public ContainerConfiguration getContainerConfiguration() {
-        return buildPortConfig(ContainerConfiguration.builder()).setContainerName(getContainerName())
-                .setImageConfiguration(buildImageConfig()).setEnvVars(getContainerEnvList())
-                .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
-                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
+        return buildPortConfig(ContainerConfiguration.builder())
+                .setContainerName(getContainerName())
+                .setImageConfiguration(buildImageConfig())
+                .setEnvVars(getContainerEnvList())
+                .setVolumes(getContainerVolumeList())
+                .setPrivilegedMode(this.privilegedMode)
+                .setDeviceList(getContainerDeviceList())
+                .setFrameworkManaged(true)
+                .setLoggingType(getLoggingType())
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
-                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
-                .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
-                .setRuntime(getRuntime()).setEnforcementDigest(getEnforcementDigest()).build();
+                .setLoggerParameters(getLoggerParameters())
+                .setEntryPoint(getEntryPoint())
+                .setRestartOnFailure(getRestartOnFailure())
+                .setMemory(getMemory())
+                .setCpus(getCpus())
+                .setGpus(getGpus())
+                .setRuntime(getRuntime())
+                .setEnforcementDigest(getEnforcementDigest())
+                .build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -441,15 +456,15 @@ public class ContainerInstanceOptions {
             for (String portToken : ports.trim().replace(" ", "").split(",")) {
                 if (portToken.split(":").length > 1) {
                     switch (portToken.split(":")[1].toUpperCase().trim()) {
-                    case "UDP":
-                        tempArray.add(PortInternetProtocol.UDP);
-                        break;
-                    case "SCTP":
-                        tempArray.add(PortInternetProtocol.SCTP);
-                        break;
-                    default:
-                        tempArray.add(PortInternetProtocol.TCP);
-                        break;
+                        case "UDP":
+                            tempArray.add(PortInternetProtocol.UDP);
+                            break;
+                        case "SCTP":
+                            tempArray.add(PortInternetProtocol.SCTP);
+                            break;
+                        default:
+                            tempArray.add(PortInternetProtocol.TCP);
+                            break;
                     }
                 } else {
                     // if setting is not used add TCP by default.
@@ -463,12 +478,39 @@ public class ContainerInstanceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(containerCpus, containerDevice, containerEntryPoint, containerEnv, containerGpus,
-                containerLoggerType, containerLoggingParameters, containerMemory, containerName,
-                containerNetworkingMode, containerPermissions, containerPortProtocol, containerRuntime, containerVolumeString,
-                containerVolumes, enabled, enforcementDigest, externalPorts, identityIntegrationEnabled, image, imageDownloadTimeout, imageTag,
-                internalPorts, maxDownloadRetries, privilegedMode, registryPassword, registryURL, registryUsername,
-                restartOnFailure, retryInterval, signatureTrustAnchor, signatureVerifyTransparencyLog);
+        return Objects.hash(
+                containerCpus,
+                containerDevice,
+                containerEntryPoint,
+                containerEnv,
+                containerGpus,
+                containerLoggerType,
+                containerLoggingParameters,
+                containerMemory,
+                containerName,
+                containerNetworkingMode,
+                containerPermissions,
+                containerPortProtocol,
+                containerRuntime,
+                containerVolumeString,
+                containerVolumes,
+                enabled,
+                enforcementDigest,
+                externalPorts,
+                identityIntegrationEnabled,
+                image,
+                imageDownloadTimeout,
+                imageTag,
+                internalPorts,
+                maxDownloadRetries,
+                privilegedMode,
+                registryPassword,
+                registryURL,
+                registryUsername,
+                restartOnFailure,
+                retryInterval,
+                signatureTrustAnchor,
+                signatureVerifyTransparencyLog);
     }
 
     @Override
@@ -496,20 +538,24 @@ public class ContainerInstanceOptions {
                 && Objects.equals(containerPermissions, other.containerPermissions)
                 && Objects.equals(containerPortProtocol, other.containerPortProtocol)
                 && Objects.equals(containerVolumeString, other.containerVolumeString)
-                && Objects.equals(containerVolumes, other.containerVolumes) && enabled == other.enabled
+                && Objects.equals(containerVolumes, other.containerVolumes)
+                && enabled == other.enabled
                 && Objects.equals(enforcementDigest, other.enforcementDigest)
-                && Objects.equals(externalPorts, other.externalPorts) 
+                && Objects.equals(externalPorts, other.externalPorts)
                 && identityIntegrationEnabled == other.identityIntegrationEnabled
                 && Objects.equals(image, other.image)
-                && imageDownloadTimeout == other.imageDownloadTimeout && Objects.equals(imageTag, other.imageTag)
-                && Objects.equals(internalPorts, other.internalPorts) && maxDownloadRetries == other.maxDownloadRetries
-                && privilegedMode == other.privilegedMode && Objects.equals(registryPassword, other.registryPassword)
+                && imageDownloadTimeout == other.imageDownloadTimeout
+                && Objects.equals(imageTag, other.imageTag)
+                && Objects.equals(internalPorts, other.internalPorts)
+                && maxDownloadRetries == other.maxDownloadRetries
+                && privilegedMode == other.privilegedMode
+                && Objects.equals(registryPassword, other.registryPassword)
                 && Objects.equals(registryURL, other.registryURL)
                 && Objects.equals(registryUsername, other.registryUsername)
-                && restartOnFailure == other.restartOnFailure && retryInterval == other.retryInterval
+                && restartOnFailure == other.restartOnFailure
+                && retryInterval == other.retryInterval
                 && Objects.equals(containerRuntime, other.containerRuntime)
                 && Objects.equals(signatureTrustAnchor, other.signatureTrustAnchor)
                 && Objects.equals(signatureVerifyTransparencyLog, other.signatureVerifyTransparencyLog);
     }
-
 }

@@ -43,5 +43,4 @@ public enum NetworkInterfaceState {
     DEACTIVATING,
     /** The device is in a failure state following an attempt to activate it. */
     FAILED;
-
 }

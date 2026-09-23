@@ -15,8 +15,6 @@ package org.eclipse.kura.internal.rest.keystore.provider;
 import static java.util.Objects.isNull;
 import static org.eclipse.kura.rest.utils.Validable.validate;
 
-import java.util.List;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -26,7 +24,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
+import java.util.List;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.internal.rest.keystore.request.CsrReadRequest;
 import org.eclipse.kura.internal.rest.keystore.request.EntryRequest;
@@ -67,8 +65,8 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EntryInfo> getEntries(@QueryParam("keystoreServicePid") String keystoreServicePid,
-            @QueryParam("alias") String alias) {
+    public List<EntryInfo> getEntries(
+            @QueryParam("keystoreServicePid") String keystoreServicePid, @QueryParam("alias") String alias) {
         if (isNull(keystoreServicePid) && isNull(alias)) {
             return getKeysInternal();
         } else if (!isNull(keystoreServicePid)) {
@@ -82,8 +80,8 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries/entry")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
-    public EntryInfo getEntry(@QueryParam("keystoreServicePid") String keystoreServicePid,
-            @QueryParam("alias") String alias) {
+    public EntryInfo getEntry(
+            @QueryParam("keystoreServicePid") String keystoreServicePid, @QueryParam("alias") String alias) {
         return getKeyInternal(keystoreServicePid, alias);
     }
 
@@ -123,5 +121,4 @@ public class KeystoreRestService extends KeystoreRemoteService {
         validate(deleteRequest, BAD_DELETE_REQUEST_ERROR_MESSAGE);
         deleteKeyEntryInternal(deleteRequest.getKeystoreServicePid(), deleteRequest.getAlias());
     }
-
 }

@@ -1,19 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.dhcp;
 
 import java.util.List;
-
 import org.eclipse.kura.net.IP6Address;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -44,8 +43,14 @@ public class DhcpServerCfgIP6 extends DhcpServerCfgIP<IP6Address> {
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
-    public DhcpServerCfgIP6(IP6Address subnet, IP6Address subnetMask, short prefix, IP6Address routerAddress,
-            IP6Address rangeStart, IP6Address rangeEnd, List<IP6Address> dnsServers) {
+    public DhcpServerCfgIP6(
+            IP6Address subnet,
+            IP6Address subnetMask,
+            short prefix,
+            IP6Address routerAddress,
+            IP6Address rangeStart,
+            IP6Address rangeEnd,
+            List<IP6Address> dnsServers) {
         super(subnet, subnetMask, prefix, routerAddress, rangeStart, rangeEnd, dnsServers);
     }
 

@@ -14,7 +14,6 @@ package org.eclipse.kura.core.token.jwt;
 
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
@@ -58,5 +57,4 @@ public final class KeystoreTracker {
     public Optional<KeystoreService> get() {
         return this.keystoreService;
     }
-
 }

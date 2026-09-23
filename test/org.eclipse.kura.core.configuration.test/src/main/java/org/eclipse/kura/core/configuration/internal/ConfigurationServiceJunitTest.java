@@ -36,9 +36,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraErrorCode;
@@ -88,7 +87,7 @@ public class ConfigurationServiceJunitTest {
     public void testGetFactoryComponentPids() throws KuraException {
         // test that the returned PIDs are the same as in the service and that they cannot be modified
 
-        String[] expectedPIDs = { "pid1", "pid2", "pid3" };
+        String[] expectedPIDs = {"pid1", "pid2", "pid3"};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
@@ -227,16 +226,22 @@ public class ConfigurationServiceJunitTest {
         when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(cfgMock2);
 
         doAnswer(invocation -> {
-            Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+                    Dictionary<String, Object> dict =
+                            (Dictionary<String, Object>) invocation.getArguments()[0];
 
-            assertNotNull(dict);
+                    assertNotNull(dict);
 
-            assertEquals("one element in properties list - pid", 1, dict.size());
+                    assertEquals("one element in properties list - pid", 1, dict.size());
 
-            assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
+                    assertEquals(
+                            "expected configuration update PID",
+                            pid,
+                            dict.elements().nextElement());
 
-            return null;
-        }).when(cfgMock2).update((Dictionary<String, Object>) any());
+                    return null;
+                })
+                .when(cfgMock2)
+                .update((Dictionary<String, Object>) any());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
 
@@ -276,17 +281,20 @@ public class ConfigurationServiceJunitTest {
         properties.put("key2", "val2");
 
         Mockito.doAnswer(invocation -> {
-            Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+                    Dictionary<String, Object> dict =
+                            (Dictionary<String, Object>) invocation.getArguments()[0];
 
-            assertNotNull(dict);
+                    assertNotNull(dict);
 
-            assertEquals("3 elements in properties list", 3, dict.size());
+                    assertEquals("3 elements in properties list", 3, dict.size());
 
-            assertEquals("additional key", "val1", dict.get("key1"));
-            assertEquals("additional key", "val2", dict.get("key2"));
+                    assertEquals("additional key", "val1", dict.get("key1"));
+                    assertEquals("additional key", "val2", dict.get("key2"));
 
-            return null;
-        }).when(cfgMock2).update((Dictionary<String, Object>) ArgumentMatchers.any());
+                    return null;
+                })
+                .when(cfgMock2)
+                .update((Dictionary<String, Object>) ArgumentMatchers.any());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
 
@@ -303,7 +311,7 @@ public class ConfigurationServiceJunitTest {
         final boolean takeSnapshot = true;
         final String caPid = "caPid";
 
-        final boolean[] snapshots = { false };
+        final boolean[] snapshots = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -396,8 +404,8 @@ public class ConfigurationServiceJunitTest {
         }
     }
 
-    private Configuration prepareConfigForDeleteFactoryConfigTests(final String configPid,
-            final String configFactoryPid) {
+    private Configuration prepareConfigForDeleteFactoryConfigTests(
+            final String configPid, final String configFactoryPid) {
         if (configPid == null) {
             return null;
         }
@@ -422,7 +430,7 @@ public class ConfigurationServiceJunitTest {
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
 
         if (config != null) {
-            when(configAdminMock.listConfigurations(any())).thenReturn(new Configuration[] { config });
+            when(configAdminMock.listConfigurations(any())).thenReturn(new Configuration[] {config});
         }
 
         return configAdminMock;
@@ -471,7 +479,7 @@ public class ConfigurationServiceJunitTest {
         final String servicePid = "spid";
         final boolean takeSnapshot = true;
 
-        final boolean[] snapshots = { false };
+        final boolean[] snapshots = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -521,7 +529,7 @@ public class ConfigurationServiceJunitTest {
     public void testGetConfigurableComponentPids() throws NoSuchFieldException {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        String[] expectedPIDs = { "pid1", "pid2", "pid3" };
+        String[] expectedPIDs = {"pid1", "pid2", "pid3"};
 
         Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         s.addAll(Arrays.asList(expectedPIDs));
@@ -805,13 +813,14 @@ public class ConfigurationServiceJunitTest {
         final String pid = "pid";
         final Map<String, Object> properties = new HashMap<>();
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             @Override
-            public synchronized void updateConfiguration(String pidToUpdate,
-                    java.util.Map<String, Object> propertiesToUpdate, boolean takeSnapshot) throws KuraException {
+            public synchronized void updateConfiguration(
+                    String pidToUpdate, java.util.Map<String, Object> propertiesToUpdate, boolean takeSnapshot)
+                    throws KuraException {
 
                 calls[0] = true;
 
@@ -832,13 +841,13 @@ public class ConfigurationServiceJunitTest {
         final String pid = "pid";
         final Map<String, Object> propertiesToUpdate = new HashMap<>();
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             @Override
-            public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate,
-                    boolean takeSnapshot) throws KuraException {
+            public synchronized void updateConfigurations(
+                    List<ComponentConfiguration> configsToUpdate, boolean takeSnapshot) throws KuraException {
 
                 calls[0] = true;
 
@@ -864,13 +873,13 @@ public class ConfigurationServiceJunitTest {
 
         final List<ComponentConfiguration> configs = new ArrayList<>();
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             @Override
-            public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate,
-                    boolean takeSnapshot) throws KuraException {
+            public synchronized void updateConfigurations(
+                    List<ComponentConfiguration> configsToUpdate, boolean takeSnapshot) throws KuraException {
 
                 calls[0] = true;
 
@@ -1079,7 +1088,7 @@ public class ConfigurationServiceJunitTest {
     @Test
     public void testGetSnapshotPasswordDecryptionException() throws KuraException {
         // test password decryption failure - log only
-        final boolean[] calls = { false, false };
+        final boolean[] calls = {false, false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -1126,7 +1135,7 @@ public class ConfigurationServiceJunitTest {
     public void testGetSnapshot() throws KuraException {
         // test successful run
 
-        final boolean[] calls = { false, false };
+        final boolean[] calls = {false, false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -1278,9 +1287,10 @@ public class ConfigurationServiceJunitTest {
         cs.setCryptoService(cryptoServiceMock);
 
         // ensure the proper file is read
-        when(cryptoServiceMock.aesDecryptingStream((InputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, InputStream.class);
-        });
+        when(cryptoServiceMock.aesDecryptingStream((InputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, InputStream.class);
+                });
 
         XmlComponentConfigurations configurations = cs.loadEncryptedSnapshotFileContent(snapshotID);
 
@@ -1292,12 +1302,18 @@ public class ConfigurationServiceJunitTest {
 
         assertNotNull("configurations object is returned", configurations);
         assertNotNull("configurations list is returned", configurations.getConfigurations());
-        assertEquals("configurations list is not empty", 1, configurations.getConfigurations().size());
+        assertEquals(
+                "configurations list is not empty",
+                1,
+                configurations.getConfigurations().size());
 
         ComponentConfiguration cfg1 = configurations.getConfigurations().get(0);
         assertEquals("correct snapshot", "123", cfg1.getPid());
         assertNotNull("configuration properties map is returned", cfg1.getConfigurationProperties());
-        assertEquals("configuration properties map is not empty", 1, cfg1.getConfigurationProperties().size());
+        assertEquals(
+                "configuration properties map is not empty",
+                1,
+                cfg1.getConfigurationProperties().size());
     }
 
     @Test
@@ -1314,8 +1330,8 @@ public class ConfigurationServiceJunitTest {
             }
         };
 
-        List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
-                "loadLatestSnapshotConfigurations");
+        List<ComponentConfigurationImpl> result =
+                (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs, "loadLatestSnapshotConfigurations");
 
         assertTrue("empty result", result.isEmpty());
     }
@@ -1334,8 +1350,8 @@ public class ConfigurationServiceJunitTest {
             }
         };
 
-        List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
-                "loadLatestSnapshotConfigurations");
+        List<ComponentConfigurationImpl> result =
+                (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs, "loadLatestSnapshotConfigurations");
 
         assertTrue("empty result", result.isEmpty());
     }
@@ -1348,7 +1364,7 @@ public class ConfigurationServiceJunitTest {
         snapshotList.add(123L);
         snapshotList.add(1234L);
 
-        final boolean[] calls = { false, false };
+        final boolean[] calls = {false, false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -1368,8 +1384,8 @@ public class ConfigurationServiceJunitTest {
             }
         };
 
-        List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
-                "loadLatestSnapshotConfigurations");
+        List<ComponentConfigurationImpl> result =
+                (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs, "loadLatestSnapshotConfigurations");
 
         assertNull("null result", result);
 
@@ -1389,7 +1405,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfiguration> configurations = new ArrayList<>();
         xmlComponentConfigurations.setConfigurations(configurations);
 
-        final boolean[] calls = { false, false };
+        final boolean[] calls = {false, false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -1409,8 +1425,8 @@ public class ConfigurationServiceJunitTest {
             }
         };
 
-        List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
-                "loadLatestSnapshotConfigurations");
+        List<ComponentConfigurationImpl> result =
+                (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs, "loadLatestSnapshotConfigurations");
 
         assertNotNull("xml config not null", result);
 
@@ -1442,7 +1458,7 @@ public class ConfigurationServiceJunitTest {
         f2.createNewFile();
         f2.deleteOnExit();
 
-        final int[] calls = { 0, 0 };
+        final int[] calls = {0, 0};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -1463,8 +1479,8 @@ public class ConfigurationServiceJunitTest {
             }
         };
 
-        List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
-                "loadLatestSnapshotConfigurations");
+        List<ComponentConfigurationImpl> result =
+                (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs, "loadLatestSnapshotConfigurations");
 
         assertTrue("xml config empty", result.isEmpty());
 
@@ -1558,9 +1574,10 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
@@ -1657,9 +1674,10 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         try {
             TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
@@ -1717,9 +1735,10 @@ public class ConfigurationServiceJunitTest {
 
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
@@ -2011,9 +2030,10 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2091,9 +2111,10 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2175,9 +2196,10 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2279,8 +2301,9 @@ public class ConfigurationServiceJunitTest {
 
         final List<ComponentConfiguration> loadedSnapshot = configurationService.getSnapshot(0);
 
-        assertEquals(expectedConfig.get("prop"), loadedSnapshot.get(0).getConfigurationProperties().get("prop"));
-
+        assertEquals(
+                expectedConfig.get("prop"),
+                loadedSnapshot.get(0).getConfigurationProperties().get("prop"));
     }
 
     @Test
@@ -2370,7 +2393,7 @@ public class ConfigurationServiceJunitTest {
         String pid = "123";
         Tocd ocd = null;
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -2409,7 +2432,7 @@ public class ConfigurationServiceJunitTest {
         final String pid = "123";
         Tocd ocd = null;
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -2434,16 +2457,22 @@ public class ConfigurationServiceJunitTest {
         when(cfgMock.getProperties()).thenReturn(null);
 
         Mockito.doAnswer(invocation -> {
-            Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+                    Dictionary<String, Object> dict =
+                            (Dictionary<String, Object>) invocation.getArguments()[0];
 
-            assertNotNull(dict);
+                    assertNotNull(dict);
 
-            assertEquals("one element in properties list - pid", 1, dict.size());
+                    assertEquals("one element in properties list - pid", 1, dict.size());
 
-            assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
+                    assertEquals(
+                            "expected configuration update PID",
+                            pid,
+                            dict.elements().nextElement());
 
-            return null;
-        }).when(cfgMock).update((Dictionary<String, ?>) any());
+                    return null;
+                })
+                .when(cfgMock)
+                .update((Dictionary<String, ?>) any());
 
         TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
 
@@ -2617,7 +2646,7 @@ public class ConfigurationServiceJunitTest {
     public void testRollbackNoPids() throws KuraException {
         // test rollback with no available shapshots - failure
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
         final Set<Long> pids = new HashSet<>();
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
@@ -2645,7 +2674,7 @@ public class ConfigurationServiceJunitTest {
     public void testRollbackOnePid() throws KuraException {
         // test rollback with one available shapshot - failure
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
         final Set<Long> pids = new HashSet<>();
         pids.add(123L);
 
@@ -2673,7 +2702,7 @@ public class ConfigurationServiceJunitTest {
     @Test
     public void testRollbackTwoPids() throws KuraException {
         // test rollback with 2 pids - OK
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
         final long pid = 123;
         final Set<Long> pids = new HashSet<>();
         pids.add(pid);
@@ -2703,7 +2732,7 @@ public class ConfigurationServiceJunitTest {
     public void testRollback() throws KuraException {
         // test rollback with more than 2 pids
 
-        final boolean[] calls = { false };
+        final boolean[] calls = {false};
         final long pid = 123;
         final Set<Long> pids = new HashSet<>();
         pids.add(121L);
@@ -2860,13 +2889,15 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.aesDecryptingStream((InputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, InputStream.class);
-        });
+        when(cryptoServiceMock.aesDecryptingStream((InputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, InputStream.class);
+                });
 
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2893,7 +2924,7 @@ public class ConfigurationServiceJunitTest {
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);
 
         ServiceReference svcRefMock = mock(ServiceReference.class);
-        ServiceReference[] svcReferences = { svcRefMock };
+        ServiceReference[] svcReferences = {svcRefMock};
         when(bundleCtxMock.getServiceReferences((String) null, null)).thenReturn(svcReferences);
 
         String ppid = pid;
@@ -2984,7 +3015,7 @@ public class ConfigurationServiceJunitTest {
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);
 
         ServiceReference svcRefMock = mock(ServiceReference.class);
-        ServiceReference[] svcReferences = { svcRefMock };
+        ServiceReference[] svcReferences = {svcRefMock};
         when(bundleCtxMock.getServiceReferences((String) null, null)).thenReturn(svcReferences);
 
         String ppid = pid;
@@ -3035,8 +3066,11 @@ public class ConfigurationServiceJunitTest {
         return result;
     }
 
-    private OCDService createMockConfigurationServiceForOCDTests(List<String> registeredFactories,
-            List<Tocd> registeredOcds, List<ComponentDescriptionDTO> registeredComponents) throws KuraException {
+    private OCDService createMockConfigurationServiceForOCDTests(
+            List<String> registeredFactories,
+            List<Tocd> registeredOcds,
+            List<ComponentDescriptionDTO> registeredComponents)
+            throws KuraException {
 
         assertEquals(registeredFactories.size(), registeredOcds.size());
         ServiceComponentRuntime scrService = mock(ServiceComponentRuntime.class);
@@ -3057,8 +3091,8 @@ public class ConfigurationServiceJunitTest {
 
     @Test
     public void testShouldReturnEmptyFactoryOCDList() throws KuraException {
-        final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
-                Arrays.asList());
+        final OCDService ocdService =
+                createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(), Arrays.asList());
         final List<ComponentConfiguration> configs = ocdService.getFactoryComponentOCDs();
         assertTrue(configs.isEmpty());
     }
@@ -3068,19 +3102,28 @@ public class ConfigurationServiceJunitTest {
         final Tocd ocd1 = mock(Tocd.class);
         final Tocd ocd2 = mock(Tocd.class);
         final Tocd ocd3 = mock(Tocd.class);
-        final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList("foo", "bar", "baz"),
-                Arrays.asList(ocd1, ocd2, ocd3), Arrays.asList());
+        final OCDService ocdService = createMockConfigurationServiceForOCDTests(
+                Arrays.asList("foo", "bar", "baz"), Arrays.asList(ocd1, ocd2, ocd3), Arrays.asList());
         final List<ComponentConfiguration> configs = ocdService.getFactoryComponentOCDs();
         assertEquals(3, configs.size());
-        assertTrue(configs.stream().filter(config -> isOCDFor(config, "foo", ocd1)).findAny().isPresent());
-        assertTrue(configs.stream().filter(config -> isOCDFor(config, "bar", ocd2)).findAny().isPresent());
-        assertTrue(configs.stream().filter(config -> isOCDFor(config, "baz", ocd3)).findAny().isPresent());
+        assertTrue(configs.stream()
+                .filter(config -> isOCDFor(config, "foo", ocd1))
+                .findAny()
+                .isPresent());
+        assertTrue(configs.stream()
+                .filter(config -> isOCDFor(config, "bar", ocd2))
+                .findAny()
+                .isPresent());
+        assertTrue(configs.stream()
+                .filter(config -> isOCDFor(config, "baz", ocd3))
+                .findAny()
+                .isPresent());
     }
 
     @Test
     public void testShouldReturnNullFactoryOCD() throws KuraException {
-        final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
-                Arrays.asList());
+        final OCDService ocdService =
+                createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(), Arrays.asList());
         assertNull(ocdService.getFactoryComponentOCD("bar"));
         assertNull(ocdService.getFactoryComponentOCD(null));
     }
@@ -3090,8 +3133,8 @@ public class ConfigurationServiceJunitTest {
         final Tocd ocd1 = mock(Tocd.class);
         final Tocd ocd2 = mock(Tocd.class);
         final Tocd ocd3 = mock(Tocd.class);
-        final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList("foo", "bar", "baz"),
-                Arrays.asList(ocd1, ocd2, ocd3), Arrays.asList());
+        final OCDService ocdService = createMockConfigurationServiceForOCDTests(
+                Arrays.asList("foo", "bar", "baz"), Arrays.asList(ocd1, ocd2, ocd3), Arrays.asList());
         assertTrue(isOCDFor(ocdService.getFactoryComponentOCD("foo"), "foo", ocd1));
         assertTrue(isOCDFor(ocdService.getFactoryComponentOCD("bar"), "bar", ocd2));
         assertTrue(isOCDFor(ocdService.getFactoryComponentOCD("baz"), "baz", ocd3));
@@ -3101,8 +3144,8 @@ public class ConfigurationServiceJunitTest {
 
     @Test
     public void testShouldReturnEmptyFactoryOCDListForServiceProvider() throws KuraException {
-        final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
-                Arrays.asList());
+        final OCDService ocdService =
+                createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(), Arrays.asList());
         assertTrue(ocdService.getServiceProviderOCDs(new Class<?>[0]).isEmpty());
         assertTrue(ocdService.getServiceProviderOCDs(String.class).isEmpty());
     }
@@ -3120,27 +3163,37 @@ public class ConfigurationServiceJunitTest {
         final ComponentDescriptionDTO comp4 = createMockComponent("other");
 
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(
-                Arrays.asList("foo", "bar", "baz", "other"), Arrays.asList(fooOcd, barOcd, bazOcd, otherOcd),
+                Arrays.asList("foo", "bar", "baz", "other"),
+                Arrays.asList(fooOcd, barOcd, bazOcd, otherOcd),
                 Arrays.asList(comp1, comp2, comp3, comp4));
 
         assertTrue(ocdService.getServiceProviderOCDs(new Class<?>[0]).isEmpty());
 
         final List<ComponentConfiguration> implementingString = ocdService.getServiceProviderOCDs(String.class);
         assertEquals(1, implementingString.size());
-        assertTrue(implementingString.stream().filter(config -> isOCDFor(config, "foo", fooOcd)).findAny().isPresent());
+        assertTrue(implementingString.stream()
+                .filter(config -> isOCDFor(config, "foo", fooOcd))
+                .findAny()
+                .isPresent());
 
-        final List<ComponentConfiguration> implementingStringOrInteger = ocdService.getServiceProviderOCDs(String.class,
-                Integer.class);
+        final List<ComponentConfiguration> implementingStringOrInteger =
+                ocdService.getServiceProviderOCDs(String.class, Integer.class);
         assertEquals(2, implementingStringOrInteger.size());
-        assertTrue(implementingStringOrInteger.stream().filter(config -> isOCDFor(config, "foo", fooOcd)).findAny()
+        assertTrue(implementingStringOrInteger.stream()
+                .filter(config -> isOCDFor(config, "foo", fooOcd))
+                .findAny()
                 .isPresent());
-        assertTrue(implementingStringOrInteger.stream().filter(config -> isOCDFor(config, "baz", bazOcd)).findAny()
+        assertTrue(implementingStringOrInteger.stream()
+                .filter(config -> isOCDFor(config, "baz", bazOcd))
+                .findAny()
                 .isPresent());
 
-        final List<ComponentConfiguration> implementingLongOrBoolean = ocdService.getServiceProviderOCDs(Long.class,
-                Boolean.class);
+        final List<ComponentConfiguration> implementingLongOrBoolean =
+                ocdService.getServiceProviderOCDs(Long.class, Boolean.class);
         assertEquals(1, implementingLongOrBoolean.size());
-        assertTrue(implementingLongOrBoolean.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny()
+        assertTrue(implementingLongOrBoolean.stream()
+                .filter(config -> isOCDFor(config, "bar", barOcd))
+                .findAny()
                 .isPresent());
 
         final List<ComponentConfiguration> implementingBoolean = ocdService.getServiceProviderOCDs(Boolean.class);
@@ -3148,38 +3201,47 @@ public class ConfigurationServiceJunitTest {
 
         final List<ComponentConfiguration> implementingLong = ocdService.getServiceProviderOCDs(Long.class);
         assertEquals(1, implementingLong.size());
-        assertTrue(implementingLong.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny().isPresent());
+        assertTrue(implementingLong.stream()
+                .filter(config -> isOCDFor(config, "bar", barOcd))
+                .findAny()
+                .isPresent());
 
         final List<ComponentConfiguration> implementingDouble = ocdService.getServiceProviderOCDs(Double.class);
         assertEquals(2, implementingDouble.size());
-        assertTrue(implementingDouble.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny().isPresent());
-        assertTrue(implementingDouble.stream().filter(config -> isOCDFor(config, "baz", bazOcd)).findAny().isPresent());
+        assertTrue(implementingDouble.stream()
+                .filter(config -> isOCDFor(config, "bar", barOcd))
+                .findAny()
+                .isPresent());
+        assertTrue(implementingDouble.stream()
+                .filter(config -> isOCDFor(config, "baz", bazOcd))
+                .findAny()
+                .isPresent());
     }
 
     @Test
     public void testWriteSnapshotFilePermissions() throws Throwable {
         // Test that snapshot files are created with secure 600 permissions (owner read/write only)
-        
+
         long sid = 424L;
         XmlComponentConfigurations cfg = prepareSnapshot();
         final String dir = "snapshotDirPermissions";
-        
+
         File d1 = new File(dir);
         d1.mkdirs();
         d1.deleteOnExit();
-        
+
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
             @Override
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             @Override
             protected <T> T unmarshal(InputStream xmlStream, Class<T> clazz) throws KuraException {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 return xmlMarshaller.unmarshal(xmlStream, clazz);
             }
-            
+
             @Override
             protected void marshal(OutputStream outStream, Object object) {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
@@ -3190,77 +3252,84 @@ public class ConfigurationServiceJunitTest {
                 }
             }
         };
-        
+
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
-        
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
-        
+
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
+
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
-        
+
         // Execute the writeSnapshot method
         TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
-        
+
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         f1.deleteOnExit();
         assertTrue("snapshot file was created", f1.exists());
-        
+
         try {
             // Verify file permissions are set to 600 (owner read/write only) on POSIX systems
             Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(f1.toPath());
             Set<PosixFilePermission> expectedPerms = PosixFilePermissions.fromString("rw-------");
-            
+
             assertEquals("File permissions should be 600 (owner read/write only)", expectedPerms, permissions);
-            
+
             // Verify that group and others don't have any permissions
             assertFalse("Group should not have read permission", permissions.contains(PosixFilePermission.GROUP_READ));
-            assertFalse("Group should not have write permission", permissions.contains(PosixFilePermission.GROUP_WRITE));
-            assertFalse("Others should not have read permission", permissions.contains(PosixFilePermission.OTHERS_READ));
-            assertFalse("Others should not have write permission", permissions.contains(PosixFilePermission.OTHERS_WRITE));
-            
+            assertFalse(
+                    "Group should not have write permission", permissions.contains(PosixFilePermission.GROUP_WRITE));
+            assertFalse(
+                    "Others should not have read permission", permissions.contains(PosixFilePermission.OTHERS_READ));
+            assertFalse(
+                    "Others should not have write permission", permissions.contains(PosixFilePermission.OTHERS_WRITE));
+
             // Verify that owner has both read and write permissions
             assertTrue("Owner should have read permission", permissions.contains(PosixFilePermission.OWNER_READ));
             assertTrue("Owner should have write permission", permissions.contains(PosixFilePermission.OWNER_WRITE));
-            assertFalse("Owner should not have execute permission", permissions.contains(PosixFilePermission.OWNER_EXECUTE));
-            
+            assertFalse(
+                    "Owner should not have execute permission",
+                    permissions.contains(PosixFilePermission.OWNER_EXECUTE));
+
         } catch (UnsupportedOperationException e) {
             // This test is running on a non-POSIX filesystem (like Windows)
             // In this case, we can't test the permissions, but we can verify the file was created
-            System.out.println("POSIX file permissions not supported on this filesystem - skipping permission verification");
+            System.out.println(
+                    "POSIX file permissions not supported on this filesystem - skipping permission verification");
         }
-        
+
         f1.delete();
         d1.delete();
     }
-    
+
     @Test
     public void testWriteSnapshotNonPosixFilesystem() throws Throwable {
         // Test behavior on non-POSIX filesystems where setPosixFilePermissions is not supported
-        
+
         long sid = 525L;
         XmlComponentConfigurations cfg = prepareSnapshot();
         final String dir = "snapshotDirNonPosix";
-        
+
         File d1 = new File(dir);
         d1.mkdirs();
         d1.deleteOnExit();
-        
+
         // Mock ConfigurationServiceImpl to simulate non-POSIX filesystem behavior
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
             @Override
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             @Override
             protected <T> T unmarshal(InputStream xmlStream, Class<T> clazz) throws KuraException {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 return xmlMarshaller.unmarshal(xmlStream, clazz);
             }
-            
+
             @Override
             protected void marshal(OutputStream outStream, Object object) {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
@@ -3271,27 +3340,28 @@ public class ConfigurationServiceJunitTest {
                 }
             }
         };
-        
+
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
-        
-        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
-            return answer.getArgument(0, OutputStream.class);
-        });
-        
+
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any()))
+                .thenAnswer(answer -> {
+                    return answer.getArgument(0, OutputStream.class);
+                });
+
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
-        
+
         // Execute the writeSnapshot method - should not throw exception even on non-POSIX systems
         TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
-        
+
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         f1.deleteOnExit();
         assertTrue("snapshot file was created", f1.exists());
-        
+
         // On non-POSIX systems, the method should complete successfully even if permissions can't be set
         // We can't easily mock the UnsupportedOperationException here, but this test verifies the method completes
-        
+
         f1.delete();
         d1.delete();
     }

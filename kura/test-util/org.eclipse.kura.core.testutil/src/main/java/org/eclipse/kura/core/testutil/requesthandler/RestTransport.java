@@ -33,10 +33,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -81,20 +79,21 @@ public class RestTransport implements Transport {
             final ConfigurationService configurationService = trackService(ConfigurationService.class);
             Map<String, Object> restServiceConfiguration = initialRestServiceConfiguration();
 
-            ServiceUtil
-                    .trackService(ConfigurableComponent.class,
+            ServiceUtil.trackService(
+                            ConfigurableComponent.class,
                             Optional.of("(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"))
                     .get(1, TimeUnit.MINUTES);
 
-            ServiceUtil
-                    .updateComponentConfiguration(configurationService,
-                            "org.eclipse.kura.internal.rest.provider.RestService", restServiceConfiguration)
+            ServiceUtil.updateComponentConfiguration(
+                            configurationService,
+                            "org.eclipse.kura.internal.rest.provider.RestService",
+                            restServiceConfiguration)
                     .get(30, TimeUnit.SECONDS);
 
             waitPortOpen("localhost", 8080, 3, TimeUnit.MINUTES);
 
-            ServiceUtil
-                    .trackService(ConfigurableComponent.class,
+            ServiceUtil.trackService(
+                            ConfigurableComponent.class,
                             Optional.of("(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"))
                     .get(1, TimeUnit.MINUTES);
 
@@ -156,7 +155,9 @@ public class RestTransport implements Transport {
 
     private static boolean isJerseyNotReady(final Response response) {
         return response.getStatus() == 503
-                && response.getBody().filter(b -> b.contains(JERSEY_NOT_READY_MESSAGE)).isPresent();
+                && response.getBody()
+                        .filter(b -> b.contains(JERSEY_NOT_READY_MESSAGE))
+                        .isPresent();
     }
 
     public static void waitPortOpen(final String host, final int port, final long timeout, final TimeUnit timeoutUnit)
@@ -182,8 +183,8 @@ public class RestTransport implements Transport {
         throw new IllegalStateException("Port " + port + "not open");
     }
 
-    public static void waitPortClosed(final String host, final int port, final long timeout,
-            final TimeUnit timeoutUnit) throws InterruptedException {
+    public static void waitPortClosed(final String host, final int port, final long timeout, final TimeUnit timeoutUnit)
+            throws InterruptedException {
         final long now = System.nanoTime();
 
         while (System.nanoTime() - now < timeoutUnit.toNanos(timeout)) {
@@ -221,8 +222,8 @@ public class RestTransport implements Transport {
         return runRequest(this.baseURL, relativeUri, method, requestBody);
     }
 
-    public Response runRequest(final String urlPrefix, final String relativeUri, final MethodSpec method,
-            final String requestBody) {
+    public Response runRequest(
+            final String urlPrefix, final String relativeUri, final MethodSpec method, final String requestBody) {
         final HttpURLConnection connection;
 
         try {
@@ -232,7 +233,8 @@ public class RestTransport implements Transport {
                 connection.setRequestProperty("Authorization", "Basic " + encoded);
             });
             if (connection instanceof HttpsURLConnection && sslContext.isPresent()) {
-                ((HttpsURLConnection) connection).setSSLSocketFactory(sslContext.get().getSocketFactory());
+                ((HttpsURLConnection) connection)
+                        .setSSLSocketFactory(sslContext.get().getSocketFactory());
                 if (!isHostnameVerificationEnabled) {
                     ((HttpsURLConnection) connection).setHostnameVerifier((h, s) -> true);
                 }
@@ -290,7 +292,8 @@ public class RestTransport implements Transport {
     private void setCookies(final String urlPrefix, final String relativeUri, final HttpURLConnection connection)
             throws IOException, URISyntaxException {
         for (final Entry<String, List<String>> e : cookieManager
-                .get(new URI(urlPrefix + relativeUri), connection.getRequestProperties()).entrySet()) {
+                .get(new URI(urlPrefix + relativeUri), connection.getRequestProperties())
+                .entrySet()) {
             if (!e.getValue().isEmpty()) {
                 connection.setRequestProperty(e.getKey(), e.getValue().stream().collect(Collectors.joining(",")));
             }
@@ -306,7 +309,8 @@ public class RestTransport implements Transport {
     }
 
     private Optional<String> getBody(final HttpURLConnection connection) throws IOException {
-        try (final InputStream in = ((connection.getResponseCode() / 200) == 1) ? connection.getInputStream()
+        try (final InputStream in = ((connection.getResponseCode() / 200) == 1)
+                ? connection.getInputStream()
                 : connection.getErrorStream()) {
 
             if (in == null) {
@@ -320,5 +324,4 @@ public class RestTransport implements Transport {
     public void setBasicCredentials(final Optional<String> basicCredentials) {
         this.basicCredentials = basicCredentials;
     }
-
 }

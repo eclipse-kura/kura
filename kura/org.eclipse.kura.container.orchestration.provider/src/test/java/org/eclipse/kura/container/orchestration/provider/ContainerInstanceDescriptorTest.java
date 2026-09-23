@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
@@ -20,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerPort;
@@ -30,8 +28,8 @@ public class ContainerInstanceDescriptorTest {
 
     private static final String H2_DB_NAME = "Kura_H2DB";
     private static final String H2_DB_IMAGE = "joedoe/h2db";
-    private static final List<ContainerPort> H2_DB_PORTS = new ArrayList<>(
-            Arrays.asList(new ContainerPort(1521, 1521), new ContainerPort(81, 81)));
+    private static final List<ContainerPort> H2_DB_PORTS =
+            new ArrayList<>(Arrays.asList(new ContainerPort(1521, 1521), new ContainerPort(81, 81)));
     private ContainerInstanceDescriptor firstContainerConfig;
     private ContainerInstanceDescriptor seccondContainerConfig;
 
@@ -57,15 +55,23 @@ public class ContainerInstanceDescriptorTest {
     // given
     private void givenContainerOne() {
 
-        this.firstContainerConfig = ContainerInstanceDescriptor.builder().setContainerImageTag(H2_DB_NAME)
-                .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setContainerPorts(H2_DB_PORTS).build();
+        this.firstContainerConfig = ContainerInstanceDescriptor.builder()
+                .setContainerImageTag(H2_DB_NAME)
+                .setContainerName(H2_DB_NAME)
+                .setContainerImage(H2_DB_IMAGE)
+                .setContainerPorts(H2_DB_PORTS)
+                .build();
     }
 
     private void givenContainerTwoDiffrent() {
 
-        this.seccondContainerConfig = ContainerInstanceDescriptor.builder().setContainerImageTag(H2_DB_NAME)
-                .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setContainerImageTag("diffrent")
-                .setContainerPorts(H2_DB_PORTS).build();
+        this.seccondContainerConfig = ContainerInstanceDescriptor.builder()
+                .setContainerImageTag(H2_DB_NAME)
+                .setContainerName(H2_DB_NAME)
+                .setContainerImage(H2_DB_IMAGE)
+                .setContainerImageTag("diffrent")
+                .setContainerPorts(H2_DB_PORTS)
+                .build();
     }
 
     // then
@@ -78,5 +84,4 @@ public class ContainerInstanceDescriptorTest {
     private void thenFirstContainerDoesntEqualSeccond() {
         assertFalse(firstContainerConfig.equals(this.seccondContainerConfig));
     }
-
 }

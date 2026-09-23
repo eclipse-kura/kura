@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.wire.graph;
 
 import java.util.Collections;
 import java.util.List;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -34,7 +33,8 @@ public class WireGraphConfiguration {
     private final List<WireComponentConfiguration> wireComponentConfigurations;
     private final List<MultiportWireConfiguration> wireConfigurations;
 
-    public WireGraphConfiguration(List<WireComponentConfiguration> wireComponentConfigurations,
+    public WireGraphConfiguration(
+            List<WireComponentConfiguration> wireComponentConfigurations,
             List<MultiportWireConfiguration> wireConfigurations) {
         this.wireComponentConfigurations = Collections.unmodifiableList(wireComponentConfigurations);
         this.wireConfigurations = Collections.unmodifiableList(wireConfigurations);
@@ -47,5 +47,4 @@ public class WireGraphConfiguration {
     public List<MultiportWireConfiguration> getWireConfigurations() {
         return this.wireConfigurations;
     }
-
 }

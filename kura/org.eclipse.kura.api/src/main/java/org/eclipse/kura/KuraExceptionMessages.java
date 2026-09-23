@@ -29,8 +29,7 @@ final class KuraExceptionMessages {
 
     private static final String UNKNOWN_CODE = "Unknown";
 
-    private KuraExceptionMessages() {
-    }
+    private KuraExceptionMessages() {}
 
     static String localizedMessage(final Locale locale, final KuraErrorCode code, final Object[] arguments) {
         final String pattern = messagePattern(locale, code);
@@ -40,7 +39,7 @@ final class KuraExceptionMessages {
             for (final Object argument : arguments) {
                 allArguments.append(" - ").append(argument);
             }
-            messageArguments = new Object[] { allArguments.toString() };
+            messageArguments = new Object[] {allArguments.toString()};
         }
         return MessageFormat.format(pattern, messageArguments);
     }

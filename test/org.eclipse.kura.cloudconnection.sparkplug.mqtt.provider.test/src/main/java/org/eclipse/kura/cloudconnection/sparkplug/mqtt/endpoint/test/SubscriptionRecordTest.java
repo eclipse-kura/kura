@@ -64,7 +64,7 @@ public class SubscriptionRecordTest {
     public void shouldNotEqualWithDifferentTopic() {
         whenInitSubscriptionRecord1("t1", 0);
         whenInitSubscriptionRecord2("t2", 0);
-        
+
         thenObjectsAreNotEqual(this.record1, this.record2);
         thenHashCodesAreDifferent(this.record1.hashCode(), this.record2.hashCode());
     }
@@ -122,5 +122,4 @@ public class SubscriptionRecordTest {
     private void thenHashCodesAreDifferent(int hash1, int hash2) {
         assertNotEquals(hash1, hash2);
     }
-
 }

@@ -57,6 +57,7 @@ public class UnZip {
     private static final String EXTRACTION_LIBRARY_PREFIX = "kura-unzip-lib-";
     private static final int EXTRACTION_TIMEOUT = 300;  // Max duration of an extraction, 5 minutes
     private static final int TIMEOUT_EXIT_CODE = 124;   // Exit code returned by the timeout command
+    private static final long ROLLBACK_TIMEOUT = 2000;  // Max time given to the extraction to roll itself back
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
 
@@ -145,18 +146,31 @@ public class UnZip {
         }
 
         Deque<File> createdEntries = new ConcurrentLinkedDeque<>();
+        Thread extraction = Thread.currentThread();
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             aborted = true;
+
+            awaitTermination(extraction);
             deleteCreatedEntries(createdEntries);
         }));
 
         try {
             unZipZipInputStream(new ZipInputStream(System.in), args[0], createdEntries);
-
             createdEntries.clear();
         } catch (IOException | RuntimeException e) {
-            System.err.println("Unable to extract the archive in " + args[0] + ": " + e.getMessage());
-            System.exit(1);
+            if (!aborted) {
+                System.err.println("Unable to extract the archive in " + args[0] + ": " + e.getMessage());
+                System.exit(1);
+            }
+        }
+    }
+
+    private static void awaitTermination(Thread extraction) {
+        try {
+            extraction.join(ROLLBACK_TIMEOUT);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

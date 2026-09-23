@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.configuration.metatype.Scalar;
-import org.eclipse.kura.core.configuration.util.StringUtil;
+import org.eclipse.kura.core.configuration.util.ComponentUtil;
 
 public class AdDTO implements AD {
 
@@ -45,7 +45,7 @@ public class AdDTO implements AD {
         this.cardinality = ad.getCardinality();
         this.min = ad.getMin();
         this.max = ad.getMax();
-        this.defaultValue = unescapeDefault(ad.getDefault(), ad.getCardinality());
+        this.defaultValue = unescapeDefault(ad);
         this.isRequired = ad.isRequired();
     }
 
@@ -99,18 +99,14 @@ public class AdDTO implements AD {
         return isRequired;
     }
 
-    private static String unescapeDefault(final String rawDefault, final int cardinality) {
-        if (rawDefault == null) {
-            return null;
+    private static String unescapeDefault(final AD ad) {
+        final String[] values = ComponentUtil.getDefaultValues(ad);
+
+        if (values == null) {
+            return ad.getDefault();
         }
 
-        final String[] values = StringUtil.splitValues(rawDefault);
-
-        if (values.length == 0) {
-            return rawDefault;
-        }
-
-        if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+        if (ComponentUtil.isSingleValued(ad)) {
             return values[0];
         }
 

@@ -1147,6 +1147,96 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void testADDefaultValueWithCardinalityOneIsUnescaped() throws KuraException {
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(1)
+                                        .withDefault("test\\ value").build()) //
+                                .build()) //
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.value("test value"), self().field("configs").arrayItem(0).field("definition")
+                .field("ad").arrayItem(0).field("defaultValue"));
+    }
+
+    @Test
+    public void testADDefaultValueWithCardinalityMinusOneIsUnescaped() throws KuraException {
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(-1)
+                                        .withDefault("test\\ value").build()) //
+                                .build()) //
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.value("test value"), self().field("configs").arrayItem(0).field("definition")
+                .field("ad").arrayItem(0).field("defaultValue"));
+    }
+
+    @Test
+    public void testADDefaultValueVectorKeepsSeparatorsAndEscapedCommas() throws KuraException {
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(-3)
+                                        .withDefault("a\\,b, c\\ d ,e").build()) //
+                                .build()) //
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.value("a\\,b,c d,e"), self().field("configs").arrayItem(0).field("definition")
+                .field("ad").arrayItem(0).field("defaultValue"));
+    }
+
+    @Test
+    public void testADDefaultValueArrayWithSingleElementIsUnescaped() throws KuraException {
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(3)
+                                        .withDefault("a\\ b").build()) //
+                                .build()) //
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.value("a b"), self().field("configs").arrayItem(0).field("definition")
+                .field("ad").arrayItem(0).field("defaultValue"));
+    }
+
+    @Test
+    public void testADDefaultValueScalarReturnsOnlyFirstElementOfUnescapedList() throws KuraException {
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(0)
+                                        .withDefault("a,b").build()) //
+                                .build()) //
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.value("a"), self().field("configs").arrayItem(0).field("definition")
+                .field("ad").arrayItem(0).field("defaultValue"));
+    }
+
+    @Test
     public void testADOption() throws KuraException {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //

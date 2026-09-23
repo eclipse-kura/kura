@@ -13,15 +13,16 @@
 package org.eclipse.kura.emulator.watchdog;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Icon;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.watchdog.WatchdogService", name = "WatchdogService", description = "Emulated implementation of the WatchdogService", icon = @Icon(resource = "WatchdogService", size = 32))
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.watchdog.WatchdogService",
+        name = "WatchdogService",
+        description = "Emulated implementation of the WatchdogService",
+        icon = @Icon(resource = "WatchdogService", size = 32))
 public @interface WatchdogServiceOptions {
 
     @AttributeDefinition(name = "enabled", description = "The emulated WatchdogService is always disabled.")
     boolean enabled() default false;
-
 }
-
-

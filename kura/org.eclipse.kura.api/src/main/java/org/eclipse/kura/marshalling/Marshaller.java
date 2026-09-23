@@ -13,7 +13,6 @@
 package org.eclipse.kura.marshalling;
 
 import java.io.OutputStream;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -39,7 +38,7 @@ public interface Marshaller {
 
     /**
      * Serialises the provided {@link Object} and writes the result to the supplied {@link OutputStream}
-     * 
+     *
      * @param out
      *            the {@link OutputStream} on which the data will be written
      * @param object

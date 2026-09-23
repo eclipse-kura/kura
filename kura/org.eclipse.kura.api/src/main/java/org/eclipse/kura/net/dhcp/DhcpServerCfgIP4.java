@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,6 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP4Address;
@@ -49,8 +48,14 @@ public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
-    public DhcpServerCfgIP4(IP4Address subnet, IP4Address subnetMask, short prefix, IP4Address routerAddress,
-            IP4Address rangeStart, IP4Address rangeEnd, List<IP4Address> dnsServers) {
+    public DhcpServerCfgIP4(
+            IP4Address subnet,
+            IP4Address subnetMask,
+            short prefix,
+            IP4Address routerAddress,
+            IP4Address rangeStart,
+            IP4Address rangeEnd,
+            List<IP4Address> dnsServers) {
         super(subnet, subnetMask, prefix, routerAddress, rangeStart, rangeEnd, dnsServers);
     }
 
@@ -59,9 +64,13 @@ public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
      */
     public boolean isValid() throws KuraException {
         boolean ret = false;
-        if (isIpAddressInSubnet(getRangeStart().getHostAddress(), getSubnet().getHostAddress(),
-                getSubnetMask().getHostAddress())
-                && isIpAddressInSubnet(getRangeEnd().getHostAddress(), getSubnet().getHostAddress(),
+        if (isIpAddressInSubnet(
+                        getRangeStart().getHostAddress(),
+                        getSubnet().getHostAddress(),
+                        getSubnetMask().getHostAddress())
+                && isIpAddressInSubnet(
+                        getRangeEnd().getHostAddress(),
+                        getSubnet().getHostAddress(),
                         getSubnetMask().getHostAddress())) {
             ret = true;
         }
@@ -71,10 +80,18 @@ public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(this.getClass().getName());
-        sb.append(": [subnet=").append(getSubnet().getHostAddress()).append(", subnetMask=")
-                .append(getSubnetMask().getHostAddress()).append(", prefix=").append(getPrefix())
-                .append(", routerAddress=").append(getRouterAddress()).append(", rangeStart=").append(getRangeStart())
-                .append(", rangeEnd=").append(getRangeEnd());
+        sb.append(": [subnet=")
+                .append(getSubnet().getHostAddress())
+                .append(", subnetMask=")
+                .append(getSubnetMask().getHostAddress())
+                .append(", prefix=")
+                .append(getPrefix())
+                .append(", routerAddress=")
+                .append(getRouterAddress())
+                .append(", rangeStart=")
+                .append(getRangeStart())
+                .append(", rangeEnd=")
+                .append(getRangeEnd());
         for (IP4Address dnsServer : getDnsServers()) {
             sb.append(", dnsServer=").append(dnsServer);
         }
@@ -85,7 +102,9 @@ public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
     private static int inet4address2int(Inet4Address inet4addr) {
 
         byte[] baInet4addr = inet4addr.getAddress();
-        return (baInet4addr[0] & 0xFF) << 24 | (baInet4addr[1] & 0xFF) << 16 | (baInet4addr[2] & 0xFF) << 8
+        return (baInet4addr[0] & 0xFF) << 24
+                | (baInet4addr[1] & 0xFF) << 16
+                | (baInet4addr[2] & 0xFF) << 8
                 | baInet4addr[3] & 0xFF;
     }
 

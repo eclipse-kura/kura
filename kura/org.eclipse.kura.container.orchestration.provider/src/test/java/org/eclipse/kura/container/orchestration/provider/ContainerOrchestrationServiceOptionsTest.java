@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceOptions;
 import org.junit.After;
 import org.junit.Before;
@@ -60,12 +59,10 @@ public class ContainerOrchestrationServiceOptionsTest {
     private ContainerOrchestrationServiceOptions ddso = new ContainerOrchestrationServiceOptions(this.properties);
 
     @Before
-    public void setUp() throws Exception {
-    }
+    public void setUp() throws Exception {}
 
     @After
-    public void tearDown() throws Exception {
-    }
+    public void tearDown() throws Exception {}
 
     @Test
     public void testEnabledDefault() {
@@ -204,7 +201,6 @@ public class ContainerOrchestrationServiceOptionsTest {
     /**
      * Whens
      */
-
     private void whenIsEnabled() {
         this.is_enabled = this.dso.isEnabled();
     }
@@ -255,5 +251,4 @@ public class ContainerOrchestrationServiceOptionsTest {
     private void thenDockerServiceObjectDoesntEqualsWhenWrongComparison() {
         assertNotEquals(this.dso, "String that represents a wrong object passed");
     }
-
 }

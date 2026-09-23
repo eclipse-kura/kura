@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -44,12 +43,14 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, //
+@Component(
+        immediate = true, //
         name = "org.eclipse.kura.core.token.jwt.issuer.JwtIssuingService", //
         configurationPolicy = ConfigurationPolicy.REQUIRE, //
         property = { //
-                "kura.service.pid=org.eclipse.kura.core.token.jwt.issuer.JwtIssuingService", //
-                EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC })
+            "kura.service.pid=org.eclipse.kura.core.token.jwt.issuer.JwtIssuingService", //
+            EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC
+        })
 @Designate(ocd = JwtIssuingServiceOCD.class)
 public class JwtIssuingService implements TokenIssuingService, ConfigurableComponent, EventHandler {
 
@@ -72,8 +73,8 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
     private final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.unconfigured());
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
-    public synchronized void setKeystoreService(final KeystoreService keystoreService,
-            final Map<String, Object> properties) {
+    public synchronized void setKeystoreService(
+            final KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreTracker.bind(keystoreService, properties);
         rebuildServiceState();
     }
@@ -122,8 +123,8 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
         final Optional<JwtIssuer> currentIssuer = this.state.get().issuer();
 
         if (currentIssuer.isEmpty()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "JwtIssuingService misconfigured or not yet ready");
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ERROR, "JwtIssuingService misconfigured or not yet ready");
         }
 
         return currentIssuer.get().issue(request);
@@ -154,14 +155,14 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
             return;
         }
 
-        this.state.set(new ServiceState(options.get().getMaximumLifetime(),
-                Optional.of(new JwtIssuer(options.get(), signingKey.get()))));
+        this.state.set(new ServiceState(
+                options.get().getMaximumLifetime(), Optional.of(new JwtIssuer(options.get(), signingKey.get()))));
 
         logger.info("JWT issuing service state rebuilt, using signing key '{}'", alias);
     }
 
-    private static Optional<RSAPrivateKey> loadRsaPrivateKey(final KeystoreService keystoreService,
-            final String alias) {
+    private static Optional<RSAPrivateKey> loadRsaPrivateKey(
+            final KeystoreService keystoreService, final String alias) {
         try {
             final Entry entry = keystoreService.getEntry(alias);
 
@@ -170,7 +171,9 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
             }
 
             if (!(entry instanceof PrivateKeyEntry privateKeyEntry)) {
-                logger.error("Keystore entry '{}' is a {}, a PrivateKeyEntry is required to sign tokens", alias,
+                logger.error(
+                        "Keystore entry '{}' is a {}, a PrivateKeyEntry is required to sign tokens",
+                        alias,
                         entry.getClass().getSimpleName());
                 return Optional.empty();
             }
@@ -186,5 +189,4 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
             return Optional.empty();
         }
     }
-
 }

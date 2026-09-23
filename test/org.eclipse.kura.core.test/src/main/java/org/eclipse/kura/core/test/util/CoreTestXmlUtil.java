@@ -17,13 +17,11 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
-
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;

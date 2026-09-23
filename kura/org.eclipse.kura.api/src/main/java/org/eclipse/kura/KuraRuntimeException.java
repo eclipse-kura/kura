@@ -97,5 +97,4 @@ public class KuraRuntimeException extends RuntimeException {
     public String getMessage() {
         return KuraExceptionMessages.message(this.code, this.arguments);
     }
-
 }

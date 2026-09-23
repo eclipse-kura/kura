@@ -19,9 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.net.ssl.SSLSocketFactory;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
@@ -54,9 +52,6 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -66,23 +61,34 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("java:S2789")
 @Component(
-    name = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.data.DataTransportService.class,
+        name = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+        immediate = false,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.data.DataTransportService.class,
             org.eclipse.kura.ssl.SslServiceListener.class,
-            org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "kura.ui.service.hide:Boolean=true" },
-    reference = {
-        @Reference(name = "DataTransportListener",
-                service = org.eclipse.kura.data.DataTransportListener.class,
-                cardinality = ReferenceCardinality.MULTIPLE,
-                policy = ReferencePolicy.DYNAMIC) })
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {"kura.ui.service.hide:Boolean=true"},
+        reference = {
+            @Reference(
+                    name = "DataTransportListener",
+                    service = org.eclipse.kura.data.DataTransportListener.class,
+                    cardinality = ReferenceCardinality.MULTIPLE,
+                    policy = ReferencePolicy.DYNAMIC)
+        })
 @Designate(ocd = MqttDataTransportOptions.class, factory = true)
-public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener,
-        CloudConnectionStatusComponent {
+public class MqttDataTransport
+        implements DataTransportService,
+                MqttCallback,
+                ConfigurableComponent,
+                SslServiceListener,
+                CloudConnectionStatusComponent {
 
     private static final String NOT_CONNECTED_MESSAGE = "Not connected";
 
@@ -157,7 +163,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     //
     // ----------------------------------------------------------------
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -166,7 +175,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         this.systemService = null;
     }
 
-    @Reference(name = "SslManagerService",
+    @Reference(
+            name = "SslManagerService",
             service = org.eclipse.kura.ssl.SslManagerService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -192,7 +202,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
     }
 
-    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "unsetCryptoService")
+    @Reference(
+            name = "CryptoService",
+            service = org.eclipse.kura.crypto.CryptoService.class,
+            unbind = "unsetCryptoService")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -201,7 +214,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         this.cryptoService = null;
     }
 
-    @Reference(name = "CloudConnectionStatusService",
+    @Reference(
+            name = "CloudConnectionStatusService",
             service = org.eclipse.kura.status.CloudConnectionStatusService.class,
             unbind = "unsetCloudConnectionStatusService")
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
@@ -232,8 +246,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 Object value = entry.getValue();
                 if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
                     try {
-                        Password decryptedPassword = new Password(
-                                this.cryptoService.decryptAes(((String) value).toCharArray()));
+                        Password decryptedPassword =
+                                new Password(this.cryptoService.decryptAes(((String) value).toCharArray()));
                         decryptedPropertiesMap.put(key, decryptedPassword);
                     } catch (Exception e) {
                         logger.info("Password is not encrypted");
@@ -289,8 +303,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 Object value = entry.getValue();
                 if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
                     try {
-                        Password decryptedPassword = new Password(
-                                this.cryptoService.decryptAes(((String) value).toCharArray()));
+                        Password decryptedPassword =
+                                new Password(this.cryptoService.decryptAes(((String) value).toCharArray()));
                         decryptedPropertiesMap.put(key, decryptedPassword);
                     } catch (Exception e) {
                         logger.info("Password is not encrypted");
@@ -302,11 +316,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             }
 
             this.properties.putAll(decryptedPropertiesMap);
-
         }
 
         update();
-
     }
 
     private void update() {
@@ -366,11 +378,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         logger.info("#  password  = XXXXXXXXXXXXXX");
         logger.info("#  keepAlive = {}", this.clientConf.getConnectOptions().getKeepAliveInterval());
         logger.info("#  timeout   = {}", this.clientConf.getConnectOptions().getConnectionTimeout());
-        logger.info("#  cleanSession    = {}", this.clientConf.getConnectOptions().isCleanSession());
-        logger.info("#  MQTT version    = {}",
+        logger.info(
+                "#  cleanSession    = {}", this.clientConf.getConnectOptions().isCleanSession());
+        logger.info(
+                "#  MQTT version    = {}",
                 getMqttVersionLabel(this.clientConf.getConnectOptions().getMqttVersion()));
-        logger.info("#  willDestination = {}", this.clientConf.getConnectOptions().getWillDestination());
-        logger.info("#  willMessage     = {}", this.clientConf.getConnectOptions().getWillMessage());
+        logger.info(
+                "#  willDestination = {}", this.clientConf.getConnectOptions().getWillDestination());
+        logger.info(
+                "#  willMessage     = {}", this.clientConf.getConnectOptions().getWillMessage());
         logger.info("#");
         logger.info("#  Connecting...");
 
@@ -708,8 +724,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // messages.
 
         // notify the listeners
-        this.dataTransportListeners.onMessageArrived(topic, message.getPayload(), message.getQos(),
-                message.isRetained());
+        this.dataTransportListeners.onMessageArrived(
+                topic, message.getPayload(), message.getQos(), message.isRetained());
     }
 
     private long getTimeToWaitMillis() {
@@ -732,7 +748,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
 
         update();
-
     }
 
     // ---------------------------------------------------------
@@ -827,8 +842,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             synchronized (this.topicContext) {
                 this.topicContext.clear();
                 if (properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME) != null) {
-                    this.topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME,
-                            (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
+                    this.topicContext.put(
+                            TOPIC_ACCOUNT_NAME_CTX_NAME, (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
                 }
                 this.topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
             }
@@ -878,7 +893,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                     logger.error("SSL Manager Service not selected.");
                 }
             }
-
         }
 
         String sType = (String) properties.get(PERSISTENCE_TYPE_PROP_NAME);
@@ -954,7 +968,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             String brokerUrl = this.mqttClient.getServerURI();
             String clientId = this.mqttClient.getClientId();
 
-            if (!(brokerUrl.equals(this.clientConf.getBrokerUrl()) && clientId.equals(this.clientConf.getClientId())
+            if (!(brokerUrl.equals(this.clientConf.getBrokerUrl())
+                    && clientId.equals(this.clientConf.getClientId())
                     && this.persistenceType == this.clientConf.getPersistenceType())) {
                 closeMqttClient();
             }
@@ -1017,7 +1032,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 this.persistence = new MemoryPersistence();
             } else {
                 StringBuffer sb = new StringBuffer();
-                sb.append(this.systemService.getKuraDataDirectory()).append(this.systemService.getFileSeparator())
+                sb.append(this.systemService.getKuraDataDirectory())
+                        .append(this.systemService.getFileSeparator())
                         .append("paho-persistence");
 
                 String dir = sb.toString();
@@ -1042,8 +1058,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // Construct the MqttClient instance
 
             try {
-                MqttAsyncClient newMqttClient = new MqttAsyncClient(this.clientConf.getBrokerUrl(),
-                        this.clientConf.getClientId(), this.persistence);
+                MqttAsyncClient newMqttClient = new MqttAsyncClient(
+                        this.clientConf.getBrokerUrl(), this.clientConf.getClientId(), this.persistence);
                 newMqttClient.setCallback(this);
                 this.mqttClient = newMqttClient;
             } catch (MqttException e) {
@@ -1107,12 +1123,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {
-        case MqttConnectOptions.MQTT_VERSION_3_1:
-            return "3.1";
-        case MqttConnectOptions.MQTT_VERSION_3_1_1:
-            return "3.1.1";
-        default:
-            return String.valueOf(mqttVersion);
+            case MqttConnectOptions.MQTT_VERSION_3_1:
+                return "3.1";
+            case MqttConnectOptions.MQTT_VERSION_3_1_1:
+                return "3.1.1";
+            default:
+                return String.valueOf(mqttVersion);
         }
     }
 }

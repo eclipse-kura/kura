@@ -16,7 +16,6 @@ package org.eclipse.kura.net.status.wifi;
  * Types of WiFi radio modes
  */
 public enum WifiRadioMode {
-
     UNKNOWN,
     RADIO_MODE_80211A,
     RADIO_MODE_80211B,
@@ -25,5 +24,4 @@ public enum WifiRadioMode {
     RADIO_MODE_80211NHT40_BELOW,
     RADIO_MODE_80211NHT40_ABOVE,
     RADIO_MODE_80211_AC;
-
 }

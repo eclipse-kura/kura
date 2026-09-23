@@ -30,7 +30,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
@@ -40,22 +39,20 @@ import org.eclipse.kura.rest.system.dto.FilterDTO;
 import org.eclipse.kura.rest.system.dto.FrameworkPropertiesDTO;
 import org.eclipse.kura.rest.system.dto.KuraPropertiesDTO;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 @Path(REST_APP_ID)
 @Component(
-    name = "org.eclipse.kura.rest.system.SystemRestService",
-    service = { org.eclipse.kura.rest.system.SystemRestService.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.rest.system.SystemRestService",
-        "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.rest.system.SystemRestService",
+        service = {org.eclipse.kura.rest.system.SystemRestService.class},
+        property = {"kura.service.pid=org.eclipse.kura.rest.system.SystemRestService", "osgi.jakartars.resource=true"})
 public class SystemRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemRestService.class);
@@ -74,7 +71,8 @@ public class SystemRestService {
         userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -175,5 +173,4 @@ public class SystemRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
-
 }

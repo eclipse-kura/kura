@@ -20,6 +20,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import io.moquette.broker.Server;
+import io.moquette.broker.config.FluentConfig;
+import io.moquette.broker.config.IConfig;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +38,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
@@ -68,13 +72,6 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-
-import io.moquette.broker.Server;
-import io.moquette.broker.config.FluentConfig;
-import io.moquette.broker.config.IConfig;
-
 public class CloudServiceTest {
 
     private static final String MODEM_RSSI = "modem_rssi";
@@ -87,9 +84,11 @@ public class CloudServiceTest {
     private static final String FOO_ICCID1 = "fooIccid1";
     private static final String FOO_IMSI1 = "fooImsi1";
     private static final String FOO_IMEI1 = "fooImei1";
-    private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String MQTT_DATA_TRANSPORT_FACTORY_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
-    private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceTest.class);
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(6);
@@ -108,7 +107,7 @@ public class CloudServiceTest {
     @BeforeClass
     public static void setup()
             throws KuraException, InterruptedException, ExecutionException, TimeoutException, InvalidSyntaxException,
-            IOException {
+                    IOException {
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -120,8 +119,8 @@ public class CloudServiceTest {
 
         startMoquetteBroker();
 
-        updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID, updatedProp).get(30,
-                TimeUnit.SECONDS);
+        updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID, updatedProp)
+                .get(30, TimeUnit.SECONDS);
 
         final Map<String, Object> cloudServiceProperties = new HashMap<>();
         cloudServiceProperties.put("payload.encoding", "simple-json");
@@ -131,11 +130,16 @@ public class CloudServiceTest {
          */
         cloudServiceProperties.put("topic.control-prefix", "EDC");
 
-        updateComponentConfiguration(cfgSvc, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties).get(30,
-                TimeUnit.SECONDS);
+        updateComponentConfiguration(cfgSvc, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties)
+                .get(30, TimeUnit.SECONDS);
 
-        DataTransportService observer = createFactoryConfiguration(cfgSvc, DataTransportService.class, "observer",
-                MQTT_DATA_TRANSPORT_FACTORY_PID, getConfigForLocalBroker("observer")).get(30, TimeUnit.SECONDS);
+        DataTransportService observer = createFactoryConfiguration(
+                        cfgSvc,
+                        DataTransportService.class,
+                        "observer",
+                        MQTT_DATA_TRANSPORT_FACTORY_PID,
+                        getConfigForLocalBroker("observer"))
+                .get(30, TimeUnit.SECONDS);
         observerInspector = new DataTransportInspector(observer);
 
         final CompletableFuture<Void> connected = observerInspector.connected();
@@ -145,7 +149,6 @@ public class CloudServiceTest {
         connected.get(1, TimeUnit.MINUTES);
 
         underTestInspector = new DataTransportInspector(mqttDataTransport);
-
     }
 
     @AfterClass
@@ -154,7 +157,11 @@ public class CloudServiceTest {
     }
 
     private static void startMoquetteBroker() throws IOException {
-        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+        IConfig brokerConfig = new FluentConfig()
+                .port(1883)
+                .host("0.0.0.0")
+                .disablePersistence()
+                .build();
 
         mqttBroker.startServer(brokerConfig);
 
@@ -206,7 +213,7 @@ public class CloudServiceTest {
         dependencyLatch.countDown();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(CloudServiceTest.cfgSvc);
@@ -214,7 +221,7 @@ public class CloudServiceTest {
         assertNotNull(CloudServiceTest.cloudServiceImpl);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test(expected = KuraException.class)
     public void testConnectCannotConnect()
             throws KuraException, InterruptedException, ExecutionException, TimeoutException, InvalidSyntaxException {
@@ -231,13 +238,13 @@ public class CloudServiceTest {
         cloudServiceImpl.connect();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testDisconnect() {
         cloudServiceImpl.disconnect();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetConnectionInfo() {
         Map<String, String> connectionProps = cloudServiceImpl.getInfo();
@@ -250,7 +257,7 @@ public class CloudServiceTest {
         assertNotNull(connectionProps.get("Client ID"));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetNotificationPublisherPid() {
         String pid = cloudServiceImpl.getNotificationPublisherPid();
@@ -266,8 +273,8 @@ public class CloudServiceTest {
         cloudServiceImpl.setSystemService(createMockSystemService(Optional.empty()));
         final JsonObject metrics = publishBirthAndGetMetrics();
 
-        assertEquals("getCpuVersion", metrics.get(KuraDeviceProfile.CPU_VERSION_KEY).asString());
-
+        assertEquals(
+                "getCpuVersion", metrics.get(KuraDeviceProfile.CPU_VERSION_KEY).asString());
     }
 
     @Test
@@ -299,7 +306,8 @@ public class CloudServiceTest {
         cloudServiceImpl.setSystemService(createMockSystemService(Optional.of(properties)));
         final JsonObject metrics = publishBirthAndGetMetrics();
 
-        final JsonObject parsedExtendedPropertes = Json.parse(metrics.get("extended_properties").asString()).asObject();
+        final JsonObject parsedExtendedPropertes =
+                Json.parse(metrics.get("extended_properties").asString()).asObject();
 
         assertEquals("1.5", parsedExtendedPropertes.get("version").asString());
 
@@ -314,7 +322,6 @@ public class CloudServiceTest {
         final JsonObject emptyObject = groups.get("empty").asObject();
 
         assertTrue(emptyObject.isEmpty());
-
     }
 
     @Test
@@ -334,20 +341,25 @@ public class CloudServiceTest {
         Mockito.when(tamperDetectionService.getTamperStatus())
                 .thenReturn(new TamperStatus(true, Collections.emptyMap()));
 
-        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class).getBundleContext()
+        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class)
+                .getBundleContext()
                 .registerService(TamperDetectionService.class, tamperDetectionService, null);
 
         try {
             JsonObject metrics = publishBirthAndGetMetrics();
 
-            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
+            assertEquals(
+                    KuraBirthPayload.TamperStatus.TAMPERED.name(),
+                    metrics.get(TAMPER_STATUS).asString());
 
             Mockito.when(tamperDetectionService.getTamperStatus())
                     .thenReturn(new TamperStatus(false, Collections.emptyMap()));
 
             metrics = publishBirthAndGetMetrics();
 
-            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
+            assertEquals(
+                    KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(),
+                    metrics.get(TAMPER_STATUS).asString());
         } finally {
             reg.unregister();
         }
@@ -361,13 +373,16 @@ public class CloudServiceTest {
         Mockito.when(tamperDetectionService.getTamperStatus())
                 .thenReturn(new TamperStatus(true, Collections.emptyMap()));
 
-        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class).getBundleContext()
+        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class)
+                .getBundleContext()
                 .registerService(TamperDetectionService.class, tamperDetectionService, null);
 
         try {
             JsonObject metrics = publishBirthAndGetMetrics();
 
-            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
+            assertEquals(
+                    KuraBirthPayload.TamperStatus.TAMPERED.name(),
+                    metrics.get(TAMPER_STATUS).asString());
 
             final TamperStatus tamperStatus = new TamperStatus(false, Collections.emptyMap());
 
@@ -378,7 +393,9 @@ public class CloudServiceTest {
 
             metrics = getMetrics(message.get(35, TimeUnit.SECONDS));
 
-            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
+            assertEquals(
+                    KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(),
+                    metrics.get(TAMPER_STATUS).asString());
         } finally {
             reg.unregister();
         }
@@ -396,7 +413,6 @@ public class CloudServiceTest {
         assertEquals(FOO_ICCID1, metrics.get(MODEM_ICCID).asString());
         assertEquals("1", metrics.get(MODEM_RSSI).asString());
         assertEquals(FOO_FW_VER1, metrics.get(MODEM_FIRMWARE_VERSION).asString());
-
     }
 
     @Test
@@ -411,7 +427,6 @@ public class CloudServiceTest {
         assertEquals("fooIccid2", metrics.get(MODEM_ICCID).asString());
         assertEquals("2", metrics.get(MODEM_RSSI).asString());
         assertEquals("fooFwVer2", metrics.get(MODEM_FIRMWARE_VERSION).asString());
-
     }
 
     private JsonObject publishBirthAndGetMetrics()
@@ -422,8 +437,9 @@ public class CloudServiceTest {
 
         disconnected.get(30, TimeUnit.SECONDS);
 
-        updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
-                getConfigForLocalBroker("underTest")).get(1, TimeUnit.MINUTES);
+        updateComponentConfiguration(
+                        cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID, getConfigForLocalBroker("underTest"))
+                .get(1, TimeUnit.MINUTES);
 
         final CompletableFuture<byte[]> message = observerInspector.nextMessage("EDC/mqtt/underTest/MQTT/BIRTH");
 
@@ -447,7 +463,8 @@ public class CloudServiceTest {
     }
 
     private static JsonObject getMetrics(final byte[] message) {
-        final JsonObject messageObject = Json.parse(new String(message, StandardCharsets.UTF_8)).asObject();
+        final JsonObject messageObject =
+                Json.parse(new String(message, StandardCharsets.UTF_8)).asObject();
         return messageObject.get("metrics").asObject();
     }
 
@@ -472,8 +489,8 @@ public class CloudServiceTest {
     }
 
     private static SystemService createMockSystemService(final Optional<ExtendedProperties> extendedProperties) {
-        return (SystemService) Proxy.newProxyInstance(CloudServiceTest.class.getClassLoader(),
-                new Class<?>[] { SystemService.class }, (obj, method, args) -> {
+        return (SystemService) Proxy.newProxyInstance(
+                CloudServiceTest.class.getClassLoader(), new Class<?>[] {SystemService.class}, (obj, method, args) -> {
                     if ("getExtendedProperties".equals(method.getName())) {
                         return extendedProperties;
                     } else if (method.getReturnType() == String.class) {
@@ -564,7 +581,6 @@ public class CloudServiceTest {
                 public void onMessageConfirmed(DataTransportToken token) {
                     // do nothing
                 }
-
             });
         }
 
@@ -614,12 +630,20 @@ public class CloudServiceTest {
 
     private void createNetworkStatusServiceMock() throws KuraException {
         networkStatusService = Mockito.mock(NetworkStatusService.class);
-        when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] { "1-8" }));
+        when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] {"1-8"}));
         ModemInterfaceStatusBuilder modemStatusBuilder = ModemInterfaceStatus.builder();
-        modemStatusBuilder.withConnectionStatus(ModemConnectionStatus.CONNECTED).withSerialNumber(FOO_IMEI1)
-                .withFirmwareVersion(FOO_FW_VER1).withSignalStrength(1);
-        Sim sim = Sim.builder().withIccid(FOO_ICCID1).withImsi(FOO_IMSI1).withActive(true).withPrimary(true).build();
-        modemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim }));
+        modemStatusBuilder
+                .withConnectionStatus(ModemConnectionStatus.CONNECTED)
+                .withSerialNumber(FOO_IMEI1)
+                .withFirmwareVersion(FOO_FW_VER1)
+                .withSignalStrength(1);
+        Sim sim = Sim.builder()
+                .withIccid(FOO_ICCID1)
+                .withImsi(FOO_IMSI1)
+                .withActive(true)
+                .withPrimary(true)
+                .build();
+        modemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] {sim}));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatusBuilder.build()));
 
         cloudServiceImpl.setNetworkStatusService(networkStatusService);
@@ -627,20 +651,36 @@ public class CloudServiceTest {
 
     private void createNetworkStatusServiceMockWithMultipleModems() throws KuraException {
         networkStatusService = Mockito.mock(NetworkStatusService.class);
-        when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] { "1-8", "1-6" }));
+        when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] {"1-8", "1-6"}));
 
         ModemInterfaceStatusBuilder firstModemStatusBuilder = ModemInterfaceStatus.builder();
-        firstModemStatusBuilder.withConnectionStatus(ModemConnectionStatus.FAILED).withSerialNumber(FOO_IMEI1)
-                .withFirmwareVersion(FOO_FW_VER1).withSignalStrength(1);
-        Sim sim1 = Sim.builder().withIccid(FOO_ICCID1).withImsi(FOO_IMSI1).withActive(true).withPrimary(true).build();
-        firstModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim1 }));
+        firstModemStatusBuilder
+                .withConnectionStatus(ModemConnectionStatus.FAILED)
+                .withSerialNumber(FOO_IMEI1)
+                .withFirmwareVersion(FOO_FW_VER1)
+                .withSignalStrength(1);
+        Sim sim1 = Sim.builder()
+                .withIccid(FOO_ICCID1)
+                .withImsi(FOO_IMSI1)
+                .withActive(true)
+                .withPrimary(true)
+                .build();
+        firstModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] {sim1}));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(firstModemStatusBuilder.build()));
 
         ModemInterfaceStatusBuilder secondModemStatusBuilder = ModemInterfaceStatus.builder();
-        secondModemStatusBuilder.withConnectionStatus(ModemConnectionStatus.CONNECTED).withSerialNumber("fooImei2")
-                .withFirmwareVersion("fooFwVer2").withSignalStrength(2);
-        Sim sim2 = Sim.builder().withIccid("fooIccid2").withImsi("fooImsi2").withActive(true).withPrimary(true).build();
-        secondModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim2 }));
+        secondModemStatusBuilder
+                .withConnectionStatus(ModemConnectionStatus.CONNECTED)
+                .withSerialNumber("fooImei2")
+                .withFirmwareVersion("fooFwVer2")
+                .withSignalStrength(2);
+        Sim sim2 = Sim.builder()
+                .withIccid("fooIccid2")
+                .withImsi("fooImsi2")
+                .withActive(true)
+                .withPrimary(true)
+                .build();
+        secondModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] {sim2}));
         when(networkStatusService.getNetworkStatus("1-6")).thenReturn(Optional.of(secondModemStatusBuilder.build()));
 
         cloudServiceImpl.setNetworkStatusService(networkStatusService);

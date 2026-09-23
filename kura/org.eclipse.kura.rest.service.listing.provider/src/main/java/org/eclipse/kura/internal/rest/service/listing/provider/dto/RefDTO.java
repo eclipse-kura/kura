@@ -51,5 +51,4 @@ public class RefDTO {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "referenceName must not be empty");
         }
     }
-
 }

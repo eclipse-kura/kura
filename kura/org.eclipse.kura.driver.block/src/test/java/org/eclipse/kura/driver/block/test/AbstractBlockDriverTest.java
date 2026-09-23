@@ -1,16 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.test;
 
 import static org.junit.Assert.assertEquals;
@@ -24,7 +23,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
@@ -90,7 +88,9 @@ public class AbstractBlockDriverTest {
         List<Pair<Integer, BlockTask>> tasks = testTasks(1, Mode.READ, 0, 4, 4, 6);
         List<ChannelRecord> records = getRecords(tasks);
         TestBlockFactory factory = new TestBlockFactory(Mode.READ, 0, 10);
-        TestDriver driver = new TestDriver().withTasks(tasks).withBlockFactoryProvider((domain, mode) -> factory)
+        TestDriver driver = new TestDriver()
+                .withTasks(tasks)
+                .withBlockFactoryProvider((domain, mode) -> factory)
                 .beforeAggregation((aggregator) -> aggregator.addBlock(new ProhibitedBlock(5, 10)));
         driver.read(records);
         assertEquals(1, factory.timesCalled);
@@ -104,7 +104,9 @@ public class AbstractBlockDriverTest {
         List<Pair<Integer, BlockTask>> tasks = testTasks(1, Mode.READ, 0, 4, 4, 6);
         List<ChannelRecord> records = getRecords(tasks);
         TestBlockFactory factory = new TestBlockFactory(Mode.READ, 0, 10);
-        TestDriver driver = new TestDriver().withTasks(tasks).withBlockFactoryProvider((domain, mode) -> factory)
+        TestDriver driver = new TestDriver()
+                .withTasks(tasks)
+                .withBlockFactoryProvider((domain, mode) -> factory)
                 .beforeAggregation((aggregator) -> aggregator.addBlock(new ProhibitedBlock(5, 10)));
         driver.prepareRead(records).execute();
         assertEquals(1, factory.timesCalled);
@@ -118,7 +120,9 @@ public class AbstractBlockDriverTest {
         List<Pair<Integer, BlockTask>> tasks = testTasks(1, Mode.WRITE, 0, 4, 4, 6);
         List<ChannelRecord> records = getRecords(tasks);
         TestBlockFactory factory = new TestBlockFactory(Mode.WRITE, 0, 10);
-        TestDriver driver = new TestDriver().withTasks(tasks).withBlockFactoryProvider((domain, mode) -> factory)
+        TestDriver driver = new TestDriver()
+                .withTasks(tasks)
+                .withBlockFactoryProvider((domain, mode) -> factory)
                 .beforeAggregation((aggregator) -> aggregator.addBlock(new ProhibitedBlock(5, 10)));
         driver.write(records);
         assertEquals(1, factory.timesCalled);
@@ -132,7 +136,9 @@ public class AbstractBlockDriverTest {
         List<Pair<Integer, BlockTask>> tasks = testTasks(1, Mode.READ, 0, 3, 5, 7, 9, 12);
         List<ChannelRecord> records = getRecords(tasks);
         TestBlockFactory factory = new TestBlockFactory(Mode.READ, 0, 12);
-        TestDriver driver = new TestDriver().withTasks(tasks).withBlockFactoryProvider((domain, mode) -> factory)
+        TestDriver driver = new TestDriver()
+                .withTasks(tasks)
+                .withBlockFactoryProvider((domain, mode) -> factory)
                 .withMinimumGapSize(3);
         driver.read(records);
         assertEquals(1, factory.timesCalled);
@@ -149,14 +155,17 @@ public class AbstractBlockDriverTest {
         List<ChannelRecord> records = getRecords(tasks);
         TestBlockFactory factory1 = new TestBlockFactory(Mode.READ, 0, 5);
         TestBlockFactory factory2 = new TestBlockFactory(Mode.READ, 4, 10);
-        TestDriver driver = new TestDriver().withTasks(tasks).withBlockFactoryProvider((domain, mode) -> {
-            if (domain == 1) {
-                return factory1;
-            } else if (domain == 2) {
-                return factory2;
-            }
-            return null;
-        }).afterAggregation((result) -> assertEquals(2, result.size()));
+        TestDriver driver = new TestDriver()
+                .withTasks(tasks)
+                .withBlockFactoryProvider((domain, mode) -> {
+                    if (domain == 1) {
+                        return factory1;
+                    } else if (domain == 2) {
+                        return factory2;
+                    }
+                    return null;
+                })
+                .afterAggregation((result) -> assertEquals(2, result.size()));
         driver.read(records);
         assertEquals(1, factory1.timesCalled);
         assertEquals(1, factory2.timesCalled);
@@ -197,7 +206,9 @@ public class AbstractBlockDriverTest {
     }
 
     private List<ChannelRecord> getRecords(List<Pair<Integer, BlockTask>> tasks) {
-        return tasks.stream().map(pair -> ((TestTask) pair.getSecond()).getRecord()).collect(Collectors.toList());
+        return tasks.stream()
+                .map(pair -> ((TestTask) pair.getSecond()).getRecord())
+                .collect(Collectors.toList());
     }
 
     private class TestBlockFactory implements BlockFactory<ToplevelBlockTask> {
@@ -230,7 +241,6 @@ public class AbstractBlockDriverTest {
                 }
             };
         }
-
     }
 
     private class TestTask extends UpdateBlockTask {
@@ -270,7 +280,6 @@ public class AbstractBlockDriverTest {
             assertTrue(write.getEnd() >= getEnd());
             this.record.setValue(TypedValues.newBooleanValue(true));
         }
-
     }
 
     private class TestDriver extends AbstractBlockDriver<Integer> {
@@ -329,12 +338,10 @@ public class AbstractBlockDriverTest {
         }
 
         @Override
-        public void connect() throws ConnectionException {
-        }
+        public void connect() throws ConnectionException {}
 
         @Override
-        public void disconnect() throws ConnectionException {
-        }
+        public void disconnect() throws ConnectionException {}
 
         @Override
         public ChannelDescriptor getChannelDescriptor() {
@@ -350,6 +357,5 @@ public class AbstractBlockDriverTest {
         protected Stream<Pair<Integer, BlockTask>> toTasks(List<ChannelRecord> records, Mode mode) {
             return this.tasks.stream();
         }
-
     }
 }

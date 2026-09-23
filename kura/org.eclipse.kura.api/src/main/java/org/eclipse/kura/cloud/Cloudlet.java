@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -218,17 +217,21 @@ class MessageHandlerCallable implements Callable<Void> {
     private static final Logger logger = LoggerFactory.getLogger(MessageHandlerCallable.class);
 
     private final Cloudlet cloudApp;
+
     @SuppressWarnings("unused")
     private final String deviceId;
+
     private final String appTopic;
     private final KuraPayload msg;
+
     @SuppressWarnings("unused")
     private final int qos;
+
     @SuppressWarnings("unused")
     private final boolean retain;
 
-    public MessageHandlerCallable(Cloudlet cloudApp, String deviceId, String appTopic, KuraPayload msg, int qos,
-            boolean retain) {
+    public MessageHandlerCallable(
+            Cloudlet cloudApp, String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
         super();
         this.cloudApp = cloudApp;
         this.deviceId = deviceId;
@@ -251,35 +254,35 @@ class MessageHandlerCallable implements Callable<Void> {
             CloudletTopic reqTopic = CloudletTopic.parseAppTopic(this.appTopic);
             CloudletTopic.Method method = reqTopic.getMethod();
             switch (method) {
-            case GET:
-                logger.debug("Handling GET request topic: {}", this.appTopic);
-                this.cloudApp.doGet(reqTopic, reqPayload, respPayload);
-                break;
+                case GET:
+                    logger.debug("Handling GET request topic: {}", this.appTopic);
+                    this.cloudApp.doGet(reqTopic, reqPayload, respPayload);
+                    break;
 
-            case PUT:
-                logger.debug("Handling PUT request topic: {}", this.appTopic);
-                this.cloudApp.doPut(reqTopic, reqPayload, respPayload);
-                break;
+                case PUT:
+                    logger.debug("Handling PUT request topic: {}", this.appTopic);
+                    this.cloudApp.doPut(reqTopic, reqPayload, respPayload);
+                    break;
 
-            case POST:
-                logger.debug("Handling POST request topic: {}", this.appTopic);
-                this.cloudApp.doPost(reqTopic, reqPayload, respPayload);
-                break;
+                case POST:
+                    logger.debug("Handling POST request topic: {}", this.appTopic);
+                    this.cloudApp.doPost(reqTopic, reqPayload, respPayload);
+                    break;
 
-            case DEL:
-                logger.debug("Handling DEL request topic: {}", this.appTopic);
-                this.cloudApp.doDel(reqTopic, reqPayload, respPayload);
-                break;
+                case DEL:
+                    logger.debug("Handling DEL request topic: {}", this.appTopic);
+                    this.cloudApp.doDel(reqTopic, reqPayload, respPayload);
+                    break;
 
-            case EXEC:
-                logger.debug("Handling EXEC request topic: {}", this.appTopic);
-                this.cloudApp.doExec(reqTopic, reqPayload, respPayload);
-                break;
+                case EXEC:
+                    logger.debug("Handling EXEC request topic: {}", this.appTopic);
+                    this.cloudApp.doExec(reqTopic, reqPayload, respPayload);
+                    break;
 
-            default:
-                logger.error("Bad request topic: {}", this.appTopic);
-                respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-                break;
+                default:
+                    logger.error("Bad request topic: {}", this.appTopic);
+                    respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+                    break;
             }
         } catch (IllegalArgumentException e) {
             logger.error("Bad request topic: {}", this.appTopic);
@@ -300,13 +303,17 @@ class MessageHandlerCallable implements Callable<Void> {
             String requesterClientId = reqPayload.getRequesterClientId();
 
             logger.debug("Publishing response topic: {}", sb.toString());
-            cloudClient.controlPublish(requesterClientId, sb.toString(), respPayload, Cloudlet.DFLT_PUB_QOS,
-                    Cloudlet.DFLT_RETAIN, Cloudlet.DFLT_PRIORITY);
+            cloudClient.controlPublish(
+                    requesterClientId,
+                    sb.toString(),
+                    respPayload,
+                    Cloudlet.DFLT_PUB_QOS,
+                    Cloudlet.DFLT_RETAIN,
+                    Cloudlet.DFLT_PRIORITY);
         } catch (KuraException e) {
             logger.error("Error publishing response for topic: {}", this.appTopic, e);
         }
 
         return null;
     }
-
 }

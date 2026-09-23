@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.db.H2DbService;
@@ -52,11 +51,12 @@ public interface TestTarget {
         public void setMessageId(final String pid, final String collection, final int value) {
 
             try {
-                final H2DbService dbService = ServiceUtil
-                        .trackService(H2DbService.class, Optional.of("(kura.service.pid=" + pid + ")"))
+                final H2DbService dbService = ServiceUtil.trackService(
+                                H2DbService.class, Optional.of("(kura.service.pid=" + pid + ")"))
                         .get(30, TimeUnit.SECONDS);
 
-                try (final Connection c = dbService.getConnection(); final Statement stmt = c.createStatement()) {
+                try (final Connection c = dbService.getConnection();
+                        final Statement stmt = c.createStatement()) {
                     stmt.executeUpdate(
                             "ALTER TABLE \"" + collection + "\" ALTER COLUMN id RESTART WITH " + value + ";");
                     c.commit();
@@ -66,14 +66,12 @@ public interface TestTarget {
             } catch (Exception e) {
                 throw new IllegalStateException("cannot set next message id", e);
             }
-
         }
 
         @Override
         public String toString() {
             return "H2";
         }
-
     }
 
     public class Sqlite implements TestTarget {
@@ -93,11 +91,12 @@ public interface TestTarget {
         @Override
         public void setMessageId(final String pid, final String collection, final int value) {
             try {
-                final BaseDbService dbService = ServiceUtil
-                        .trackService(BaseDbService.class, Optional.of("(kura.service.pid=" + pid + ")"))
+                final BaseDbService dbService = ServiceUtil.trackService(
+                                BaseDbService.class, Optional.of("(kura.service.pid=" + pid + ")"))
                         .get(30, TimeUnit.SECONDS);
 
-                try (final Connection c = dbService.getConnection(); final Statement stmt = c.createStatement()) {
+                try (final Connection c = dbService.getConnection();
+                        final Statement stmt = c.createStatement()) {
                     stmt.executeUpdate(
                             "UPDATE sqlite_sequence SET seq = " + value + " WHERE name = \"" + collection + "\";");
                 }
@@ -111,6 +110,5 @@ public interface TestTarget {
         public String toString() {
             return "SQLite";
         }
-
     }
 }

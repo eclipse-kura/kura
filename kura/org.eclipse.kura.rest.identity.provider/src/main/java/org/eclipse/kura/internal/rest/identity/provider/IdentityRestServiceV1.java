@@ -12,6 +12,17 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -35,23 +46,15 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
 @SuppressWarnings("restriction")
 @Path("identity/v1")
-@Component(immediate = true, property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1",
-        "osgi.jakartars.resource=true" }, service = IdentityRestServiceV1.class)
+@Component(
+        immediate = true,
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1",
+            "osgi.jakartars.resource=true"
+        },
+        service = IdentityRestServiceV1.class)
 public class IdentityRestServiceV1 {
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV1.class);
@@ -115,8 +118,8 @@ public class IdentityRestServiceV1 {
     public void activate() {
         // create only if not externally set. Added mainly for testing purposes.
         if (this.legacyIdentityService == null) {
-            this.legacyIdentityService = new LegacyIdentityService(this.cryptoService, this.userAdmin,
-                    this.passwordStrengthVerificationService);
+            this.legacyIdentityService = new LegacyIdentityService(
+                    this.cryptoService, this.userAdmin, this.passwordStrengthVerificationService);
         }
     }
 
@@ -168,7 +171,6 @@ public class IdentityRestServiceV1 {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
-
     }
 
     @DELETE
@@ -226,7 +228,7 @@ public class IdentityRestServiceV1 {
         try {
             logger.debug(DEBUG_MESSAGE, "getValidatorOptions");
             ValidatorOptions validatorOptions = this.legacyIdentityService.getValidatorOptions();
-            return new ValidatorOptionsDTO(//
+            return new ValidatorOptionsDTO( //
                     validatorOptions.isPasswordMinimumLength(), //
                     validatorOptions.isPasswordRequireDigits(), //
                     validatorOptions.isPasswordRequireBothCases(), //
@@ -235,5 +237,4 @@ public class IdentityRestServiceV1 {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
-
 }

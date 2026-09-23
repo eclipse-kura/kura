@@ -15,7 +15,6 @@ package org.eclipse.kura.core.ssl;
 import static java.util.Objects.isNull;
 
 import java.util.Map;
-
 import org.eclipse.kura.util.configuration.Property;
 
 public class SslManagerServiceOptions {
@@ -35,13 +34,13 @@ public class SslManagerServiceOptions {
 
     private static final Property<String> SELECTED_SSL_PROTOCOL = new Property<>(PROP_PROTOCOL, "");
     private static final Property<String> SELECTED_SSL_CIPHERS = new Property<>(PROP_CIPHERS, "");
-    private static final Property<Boolean> SELECTED_SSL_HN_VERIFICATION = new Property<>(PROP_HN_VERIFY,
-            PROP_DEFAULT_HN_VERIFY);
-    private static final Property<Boolean> SSL_REVOCATION_CHECK_ENABLED = new Property<>("ssl.revocation.check.enabled",
-            false);
+    private static final Property<Boolean> SELECTED_SSL_HN_VERIFICATION =
+            new Property<>(PROP_HN_VERIFY, PROP_DEFAULT_HN_VERIFY);
+    private static final Property<Boolean> SSL_REVOCATION_CHECK_ENABLED =
+            new Property<>("ssl.revocation.check.enabled", false);
     private static final Property<Boolean> SSL_REVOCATION_SOFT_FAIL = new Property<>("ssl.revocation.soft.fail", false);
-    private static final Property<String> SSL_REVOCATION_MODE = new Property<>("ssl.revocation.mode",
-            RevocationCheckMode.PREFER_OCSP.name());
+    private static final Property<String> SSL_REVOCATION_MODE =
+            new Property<>("ssl.revocation.mode", RevocationCheckMode.PREFER_OCSP.name());
 
     private final Map<String, Object> properties;
 

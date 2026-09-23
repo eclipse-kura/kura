@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 
 public class SubscriptionsMap {
@@ -28,8 +27,8 @@ public class SubscriptionsMap {
     public void add(String topicFilter, int qos, CloudSubscriberListener listener) {
         SubscriptionRecord subscription = new SubscriptionRecord(topicFilter, qos);
 
-        Set<CloudSubscriberListener> listeners = this.subscriptions.computeIfAbsent(subscription,
-                key -> new CopyOnWriteArraySet<CloudSubscriberListener>());
+        Set<CloudSubscriberListener> listeners = this.subscriptions.computeIfAbsent(
+                subscription, key -> new CopyOnWriteArraySet<CloudSubscriberListener>());
 
         listeners.add(listener);
     }
@@ -66,6 +65,4 @@ public class SubscriptionsMap {
     public Set<SubscriptionRecord> getSubscriptionRecords() {
         return this.subscriptions.keySet();
     }
-
-
 }

@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.EncryptionKeyFormat;
@@ -122,8 +121,8 @@ public class DatabaseLoaderTest {
 
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
 
         thenOpenDataSourceInvocationUrlIs(1, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(1, JournalMode.WAL);
@@ -149,8 +148,8 @@ public class DatabaseLoaderTest {
 
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
 
         thenOpenDataSourceInvocationUrlIs(1, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(1, JournalMode.WAL);
@@ -175,11 +174,11 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(1);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
 
-        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY,
-                EncryptionKeyFormat.ASCII.name() + ":" + TEST_ENCRYPTION_KEY);
+        thenCryptoServiceEntryIs(
+                TEST_DB_CRYPTO_ENTRY_KEY, EncryptionKeyFormat.ASCII.name() + ":" + TEST_ENCRYPTION_KEY);
     }
 
     @Test
@@ -200,10 +199,12 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(1);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
+        thenOpenDataSourceInvocationKeyIs(
+                0,
                 Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SSE)));
 
-        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY,
+        thenCryptoServiceEntryIs(
+                TEST_DB_CRYPTO_ENTRY_KEY,
                 EncryptionKeyFormat.HEX_SSE.name() + ":" + TEST_HEX_ENCRYPTION_KEY.toUpperCase());
     }
 
@@ -225,10 +226,13 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(1);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0, Optional
-                .of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SQLCIPHER)));
+        thenOpenDataSourceInvocationKeyIs(
+                0,
+                Optional.of(new EncryptionKeySpec(
+                        TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SQLCIPHER)));
 
-        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY,
+        thenCryptoServiceEntryIs(
+                TEST_DB_CRYPTO_ENTRY_KEY,
                 EncryptionKeyFormat.HEX_SQLCIPHER.name() + ":" + TEST_HEX_ENCRYPTION_KEY.toUpperCase());
     }
 
@@ -248,8 +252,8 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(2);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
 
         thenOpenDataSourceInvocationUrlIs(1, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(1, JournalMode.WAL);
@@ -258,7 +262,6 @@ public class DatabaseLoaderTest {
         thenQueryIsExecuted(0, "PRAGMA rekey = '';");
 
         thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "");
-
     }
 
     @Test
@@ -279,8 +282,8 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(2);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
 
         thenOpenDataSourceInvocationUrlIs(1, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(1, JournalMode.WAL);
@@ -308,8 +311,8 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(3);
 
         thenOpenDataSourceInvocationKeyIs(0, Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.ASCII)));
-        thenOpenDataSourceInvocationKeyIs(1,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                1, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
         thenOpenDataSourceInvocationKeyIs(2, Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.ASCII)));
 
         thenQueryIsExecuted(0, "PRAGMA rekey = 'otherkey';");
@@ -335,8 +338,8 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(3);
 
         thenOpenDataSourceInvocationKeyIs(0, Optional.of(new EncryptionKeySpec("CC", EncryptionKeyFormat.HEX_SSE)));
-        thenOpenDataSourceInvocationKeyIs(1,
-                Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                1, Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
         thenOpenDataSourceInvocationKeyIs(2, Optional.of(new EncryptionKeySpec("CC", EncryptionKeyFormat.HEX_SSE)));
 
         thenQueryIsExecuted(0, "PRAGMA hexrekey = 'CC';");
@@ -361,12 +364,12 @@ public class DatabaseLoaderTest {
 
         thenOpenDataSourceInvocationCountIs(3);
 
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec("BB", EncryptionKeyFormat.HEX_SQLCIPHER)));
-        thenOpenDataSourceInvocationKeyIs(1,
-                Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
-        thenOpenDataSourceInvocationKeyIs(2,
-                Optional.of(new EncryptionKeySpec("BB", EncryptionKeyFormat.HEX_SQLCIPHER)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec("BB", EncryptionKeyFormat.HEX_SQLCIPHER)));
+        thenOpenDataSourceInvocationKeyIs(
+                1, Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                2, Optional.of(new EncryptionKeySpec("BB", EncryptionKeyFormat.HEX_SQLCIPHER)));
 
         thenQueryIsExecuted(0, "PRAGMA rekey = \"x'BB'\";");
 
@@ -390,8 +393,8 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(1);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(
+                0, Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
 
         thenCryptoServiceUpdateCountIs(0);
     }
@@ -556,17 +559,21 @@ public class DatabaseLoaderTest {
     private boolean databaseFilesDeleted = false;
 
     public DatabaseLoaderTest() {
-        when(cryptoService.getKeyStorePassword(any())).thenAnswer(i -> Optional
-                .ofNullable(cryptoServiceEntries.get(i.getArgument(0))).map(String::toCharArray).orElse(null));
+        when(cryptoService.getKeyStorePassword(any()))
+                .thenAnswer(i -> Optional.ofNullable(cryptoServiceEntries.get(i.getArgument(0)))
+                        .map(String::toCharArray)
+                        .orElse(null));
 
         try {
             when(cryptoService.decryptAes(any(char[].class))).then(i -> i.getArgument(0));
 
             Mockito.doAnswer(i -> {
-                cryptoServiceUpdateCount++;
-                cryptoServiceEntries.put(i.getArgument(0), new String(i.getArgument(1, char[].class)));
-                return null;
-            }).when(cryptoService).setKeyStorePassword(any(), any(char[].class));
+                        cryptoServiceUpdateCount++;
+                        cryptoServiceEntries.put(i.getArgument(0), new String(i.getArgument(1, char[].class)));
+                        return null;
+                    })
+                    .when(cryptoService)
+                    .setKeyStorePassword(any(), any(char[].class));
         } catch (KuraException e) {
             throw new IllegalStateException();
         }
@@ -607,70 +614,75 @@ public class DatabaseLoaderTest {
 
     private void givenDatabaseLoader() {
 
-        this.loader = new DatabaseLoader(new SqliteDbServiceOptions(currentProperties),
-                oldProperties.map(SqliteDbServiceOptions::new), cryptoService) {
+        this.loader =
+                new DatabaseLoader(
+                        new SqliteDbServiceOptions(currentProperties),
+                        oldProperties.map(SqliteDbServiceOptions::new),
+                        cryptoService) {
 
-            @Override
-            protected void changeEncryptionKey(SQLiteDataSource dataSource, Optional<EncryptionKeySpec> encryptionKey,
-                    final SqliteDbServiceOptions options) throws SQLException {
-                super.changeEncryptionKey(dataSource, encryptionKey, options);
-                databaseEncryptionKeys.put(dataSource.getUrl(), encryptionKey);
-            }
+                    @Override
+                    protected void changeEncryptionKey(
+                            SQLiteDataSource dataSource,
+                            Optional<EncryptionKeySpec> encryptionKey,
+                            final SqliteDbServiceOptions options)
+                            throws SQLException {
+                        super.changeEncryptionKey(dataSource, encryptionKey, options);
+                        databaseEncryptionKeys.put(dataSource.getUrl(), encryptionKey);
+                    }
 
-            @Override
-            protected SQLiteDataSource buildDataSource(final SQLiteConfig config) {
+                    @Override
+                    protected SQLiteDataSource buildDataSource(final SQLiteConfig config) {
 
-                try {
-                    sqliteConfigs.add(config);
+                        try {
+                            sqliteConfigs.add(config);
 
-                    final Statement stmt = mock(Statement.class);
+                            final Statement stmt = mock(Statement.class);
 
-                    when(stmt.execute(any())).thenAnswer(i -> {
-                        queries.add(i.getArgument(0));
-                        return false;
-                    });
+                            when(stmt.execute(any())).thenAnswer(i -> {
+                                queries.add(i.getArgument(0));
+                                return false;
+                            });
 
-                    when(stmt.executeUpdate(any())).then(i -> {
-                        queries.add(i.getArgument(0));
-                        return 0;
-                    });
+                            when(stmt.executeUpdate(any())).then(i -> {
+                                queries.add(i.getArgument(0));
+                                return 0;
+                            });
 
-                    final Connection connection = mock(Connection.class);
+                            final Connection connection = mock(Connection.class);
 
-                    when(connection.createStatement()).thenReturn(stmt);
+                            when(connection.createStatement()).thenReturn(stmt);
 
-                    final SQLiteDataSource dataSource = new SQLiteDataSource(config) {
+                            final SQLiteDataSource dataSource = new SQLiteDataSource(config) {
 
-                        @Override
-                        public Connection getConnection() throws SQLException {
+                                @Override
+                                public Connection getConnection() throws SQLException {
 
-                            final String url = getUrl();
+                                    final String url = getUrl();
 
-                            final Optional<EncryptionKeySpec> currentKey = databaseEncryptionKeys.get(url);
+                                    final Optional<EncryptionKeySpec> currentKey = databaseEncryptionKeys.get(url);
 
-                            if (url.contains("mode=memory") || Objects.equals(currentKey, fromSqliteConfig(config))) {
-                                return connection;
-                            } else {
-                                throw new SQLException();
-                            }
+                                    if (url.contains("mode=memory")
+                                            || Objects.equals(currentKey, fromSqliteConfig(config))) {
+                                        return connection;
+                                    } else {
+                                        throw new SQLException();
+                                    }
+                                }
+                            };
+
+                            dataSources.add(dataSource);
+
+                            return dataSource;
+                        } catch (SQLException e) {
+                            throw new IllegalStateException();
                         }
-                    };
+                    }
 
-                    dataSources.add(dataSource);
-
-                    return dataSource;
-                } catch (SQLException e) {
-                    throw new IllegalStateException();
-                }
-
-            }
-
-            @Override
-            protected void deleteFile(File file) throws IOException {
-                databaseFilesDeleted = true;
-            }
-        };
-
+                    @Override
+                    protected void deleteFile(File file) throws IOException {
+                        databaseFilesDeleted = true;
+                    }
+                };
     }
 
     private void whenDataSourceIsCreated() {
@@ -704,7 +716,8 @@ public class DatabaseLoaderTest {
     }
 
     private void thenOpenDataSourceInvocationJournalModeIs(final int index, final JournalMode journalMode) {
-        assertEquals(journalMode,
+        assertEquals(
+                journalMode,
                 JournalMode.valueOf(this.sqliteConfigs.get(index).toProperties().getProperty("journal_mode")));
     }
 
@@ -748,8 +761,8 @@ public class DatabaseLoaderTest {
         final Properties properties = config.toProperties();
 
         final Optional<String> key = Optional.ofNullable(properties.getProperty("password"));
-        final Optional<HexKeyMode> hexKeyMode = Optional.ofNullable(properties.getProperty("hexkey_mode"))
-                .map(HexKeyMode::valueOf);
+        final Optional<HexKeyMode> hexKeyMode =
+                Optional.ofNullable(properties.getProperty("hexkey_mode")).map(HexKeyMode::valueOf);
 
         if (key.isPresent() && hexKeyMode.isPresent()) {
             EncryptionKeyFormat format;
@@ -768,6 +781,5 @@ public class DatabaseLoaderTest {
         } else {
             return Optional.empty();
         }
-
     }
 }

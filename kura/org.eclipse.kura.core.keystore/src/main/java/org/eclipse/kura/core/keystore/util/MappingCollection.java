@@ -103,5 +103,4 @@ public class MappingCollection<T, U> implements Collection<U> {
     public void clear() {
         throw new UnsupportedOperationException();
     }
-
 }

@@ -129,5 +129,4 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     private <T extends Event> void thenEventAdminPostedEvent(Class<T> eventType) {
         verify(this.eventAdmin, times(1)).postEvent(any(eventType));
     }
-
 }

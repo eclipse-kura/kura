@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -32,8 +31,11 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 
 @SuppressWarnings("restriction")
-@Component(immediate = true, name = PasswordStrengthVerificationServiceOptions.PID, //
-        configurationPolicy = ConfigurationPolicy.REQUIRE, property = "kura.ui.service.hide:Boolean=true")
+@Component(
+        immediate = true,
+        name = PasswordStrengthVerificationServiceOptions.PID, //
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = "kura.ui.service.hide:Boolean=true")
 @Designate(ocd = PasswordStrengthVerificationServiceOptions.class)
 public class PasswordStrengthVerificationServiceImpl
         implements PasswordStrengthVerificationService, ConfigurableComponent {
@@ -69,7 +71,8 @@ public class PasswordStrengthVerificationServiceImpl
 
     private List<Validator<String>> buildValidators(String identityName) {
         PasswordStrengthRequirements currentRequirements = getPasswordStrengthRequirements();
-        ValidatorOptions validatorOptions = new ValidatorOptions(currentRequirements.getPasswordMinimumLength(), //
+        ValidatorOptions validatorOptions = new ValidatorOptions(
+                currentRequirements.getPasswordMinimumLength(), //
                 currentRequirements.digitsRequired(), //
                 currentRequirements.bothCasesRequired(), //
                 currentRequirements.specialCharactersRequired());
@@ -89,16 +92,19 @@ public class PasswordStrengthVerificationServiceImpl
         }
 
         if (!errors.isEmpty()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Password strength requirements not satisfied: "
-                    + errors.stream().collect(Collectors.joining("; ")));
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER,
+                    "Password strength requirements not satisfied: "
+                            + errors.stream().collect(Collectors.joining("; ")));
         }
     }
 
     private static PasswordStrengthRequirements buildPasswordStrengthRequirements(
             final PasswordStrengthVerificationServiceOptions options) {
-        return new PasswordStrengthRequirements(options.new_password_min_length(),
-                options.new_password_require_digits(), options.new_password_require_special_characters(),
+        return new PasswordStrengthRequirements(
+                options.new_password_min_length(),
+                options.new_password_require_digits(),
+                options.new_password_require_special_characters(),
                 options.new_password_require_both_cases());
     }
-
 }

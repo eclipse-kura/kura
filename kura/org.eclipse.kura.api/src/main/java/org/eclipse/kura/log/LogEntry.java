@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
@@ -46,7 +45,6 @@ public class LogEntry {
      */
     public LogEntry(Map<String, Object> readProperties) {
         this(readProperties, 0);
-
     }
 
     /**

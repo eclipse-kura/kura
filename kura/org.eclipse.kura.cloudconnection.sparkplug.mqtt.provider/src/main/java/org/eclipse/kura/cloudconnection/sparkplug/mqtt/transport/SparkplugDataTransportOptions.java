@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
@@ -44,7 +43,7 @@ public class SparkplugDataTransportOptions {
     private final String clientId;
 
     public SparkplugDataTransportOptions(final Map<String, Object> properties, final CryptoService cryptoService)
-            throws KuraException {        
+            throws KuraException {
         this.groupId = getMandatoryString(KEY_GROUP_ID, properties);
         this.nodeId = getMandatoryString(KEY_NODE_ID, properties);
         this.primaryHostApplicationId = getOptionalString(KEY_PRIMARY_HOST_APPLICATION_ID, properties);
@@ -57,7 +56,8 @@ public class SparkplugDataTransportOptions {
             this.connectionOptions.setUserName(username.get());
         }
         if (password.isPresent()) {
-            this.connectionOptions.setPassword(cryptoService.decryptAes(password.get().getPassword()));
+            this.connectionOptions.setPassword(
+                    cryptoService.decryptAes(password.get().getPassword()));
         }
 
         this.connectionOptions.setKeepAliveInterval(getMandatoryInt(KEY_KEEP_ALIVE, properties));
@@ -115,7 +115,7 @@ public class SparkplugDataTransportOptions {
         if (Objects.isNull(value)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, key + " cannot be null");
         }
-        
+
         return value;
     }
 
@@ -151,7 +151,8 @@ public class SparkplugDataTransportOptions {
         String[] uris = spaceSeparatedList.split(" ");
         for (String server : uris) {
             if (server.endsWith("/") || server.isEmpty()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                throw new KuraException(
+                        KuraErrorCode.INVALID_PARAMETER,
                         key + " items cannot be empty, or end with '/', or contain a path");
             }
 
@@ -160,5 +161,4 @@ public class SparkplugDataTransportOptions {
 
         return result;
     }
-
 }

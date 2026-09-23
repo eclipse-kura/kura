@@ -21,12 +21,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.internal.rest.inventory.InventoryRestService;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -73,8 +71,8 @@ public class InventoryRestServiceTest {
         whenStartBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
 
         thenVerifyDoExecIsRun();
-        thenInventoryRequestIs(Arrays.asList("bundles", "_start"),
-                "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+        thenInventoryRequestIs(
+                Arrays.asList("bundles", "_start"), "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -295,5 +293,4 @@ public class InventoryRestServiceTest {
     private void thenVerifyNoExceptionOccurred() {
         assertFalse(hasExceptionOccured);
     }
-
 }

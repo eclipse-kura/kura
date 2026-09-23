@@ -12,13 +12,11 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
+import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-
 import org.osgi.annotation.versioning.ProviderType;
-
-import com.google.common.net.InetAddresses;
 
 /**
  * This class represents an Internet Protocol (IP) address.

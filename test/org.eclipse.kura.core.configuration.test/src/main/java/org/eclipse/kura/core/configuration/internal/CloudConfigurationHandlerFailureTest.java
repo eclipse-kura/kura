@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -152,12 +151,15 @@ public class CloudConfigurationHandlerFailureTest {
     }
 
     private void givenConfigurationUpdateFails() throws KuraException {
-        doThrow(new KuraException(KuraErrorCode.CONFIGURATION_ERROR)).when(this.configurationService)
+        doThrow(new KuraException(KuraErrorCode.CONFIGURATION_ERROR))
+                .when(this.configurationService)
                 .updateConfigurations(anyList());
     }
 
     private void givenRollbackFails() throws KuraException {
-        doThrow(new KuraException(KuraErrorCode.STORE_ERROR)).when(this.configurationService).rollback();
+        doThrow(new KuraException(KuraErrorCode.STORE_ERROR))
+                .when(this.configurationService)
+                .rollback();
     }
 
     private void givenUpdateConfigurationsCallable() {
@@ -210,7 +212,9 @@ public class CloudConfigurationHandlerFailureTest {
         assertTrue("a KuraException was expected", this.exception.isPresent());
         assertEquals(expectedCode, this.exception.get().getCode());
         if (expectedCode != KuraErrorCode.BAD_REQUEST) {
-            assertNotNull("the original failure must be preserved as cause", this.exception.get().getCause());
+            assertNotNull(
+                    "the original failure must be preserved as cause",
+                    this.exception.get().getCause());
         }
     }
 

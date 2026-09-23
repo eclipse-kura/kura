@@ -24,7 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonEncoder;
 import org.eclipse.kura.message.KuraPayload;
@@ -36,8 +35,7 @@ import org.junit.Test;
 public class CloudPayloadJsonEncoderTest {
 
     @Before
-    public void setUp() throws Exception {
-    }
+    public void setUp() throws Exception {}
 
     @Test(expected = NullPointerException.class)
     public void testToJsonNullKuraPayload() throws IOException {
@@ -355,5 +353,4 @@ public class CloudPayloadJsonEncoderTest {
 
         Assert.assertArrayEquals("Test body".getBytes(), decodedPayload.getBody());
     }
-
 }

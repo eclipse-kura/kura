@@ -41,14 +41,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -105,28 +103,33 @@ public class HttpServiceTest {
     @BeforeClass
     public static void setUp() throws TestCAException, IOException {
 
-        final TestCA serverCA = new TestCA(
-                CertificateCreationOptions.builder(new X500Name("cn=Server CA, dn=foo.org")).build());
+        final TestCA serverCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=Server CA, dn=foo.org"))
+                .build());
 
         final KeyPair serverKeyPair = TestCA.generateKeyPair();
 
         final X509Certificate serverCertificate = serverCA.createAndSignCertificate(
-                CertificateCreationOptions.builder(new X500Name("cn=Server Cert, dn=foo.org")).build(), serverKeyPair);
+                CertificateCreationOptions.builder(new X500Name("cn=Server Cert, dn=foo.org"))
+                        .build(),
+                serverKeyPair);
 
-        clientCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=Client CA, dn=bar.org")).build());
+        clientCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=Client CA, dn=bar.org"))
+                .build());
 
         serverKeystore = TestCA.writeKeystore(
-                new KeyStore.PrivateKeyEntry(serverKeyPair.getPrivate(),
-                        new Certificate[] { serverCertificate, serverCA.getCertificate() }),
+                new KeyStore.PrivateKeyEntry(
+                        serverKeyPair.getPrivate(), new Certificate[] {serverCertificate, serverCA.getCertificate()}),
                 new KeyStore.TrustedCertificateEntry(clientCA.getCertificate()));
 
         final KeyPair clientKeyPair = TestCA.generateKeyPair();
 
         clientCertificate = clientCA.createAndSignCertificate(
-                CertificateCreationOptions.builder(new X500Name("cn=admin, dn=bar.org")).build(), clientKeyPair);
+                CertificateCreationOptions.builder(new X500Name("cn=admin, dn=bar.org"))
+                        .build(),
+                clientKeyPair);
 
-        clientKeystore = TestCA.writeKeystore(new KeyStore.PrivateKeyEntry(clientKeyPair.getPrivate(),
-                new Certificate[] { clientCertificate, clientCA.getCertificate() }));
+        clientKeystore = TestCA.writeKeystore(new KeyStore.PrivateKeyEntry(
+                clientKeyPair.getPrivate(), new Certificate[] {clientCertificate, clientCA.getCertificate()}));
     }
 
     @Test
@@ -134,14 +137,16 @@ public class HttpServiceTest {
             throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().toProperties()).get(30, TimeUnit.SECONDS);
+        updateComponentConfiguration(
+                        configService,
+                        HTTP_SERVER_MANAGER_PID,
+                        HttpServiceOptions.defaultConfiguration().toProperties())
+                .get(30, TimeUnit.SECONDS);
 
         assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
         assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
         assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
         assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/") instanceof Failure);
-
     }
 
     @Test
@@ -149,15 +154,19 @@ public class HttpServiceTest {
             throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().withHttpPorts(8080).toProperties()).get(30, TimeUnit.SECONDS);
+        updateComponentConfiguration(
+                        configService,
+                        HTTP_SERVER_MANAGER_PID,
+                        HttpServiceOptions.defaultConfiguration()
+                                .withHttpPorts(8080)
+                                .toProperties())
+                .get(30, TimeUnit.SECONDS);
 
         assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8080/").equals(new StatusCode(404)));
 
         assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
         assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
         assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/") instanceof Failure);
-
     }
 
     @Test
@@ -165,14 +174,17 @@ public class HttpServiceTest {
             throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().withHttpPorts(8080, 8081, 8082).toProperties()).get(30,
-                        TimeUnit.SECONDS);
+        updateComponentConfiguration(
+                        configService,
+                        HTTP_SERVER_MANAGER_PID,
+                        HttpServiceOptions.defaultConfiguration()
+                                .withHttpPorts(8080, 8081, 8082)
+                                .toProperties())
+                .get(30, TimeUnit.SECONDS);
 
         assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8080/").equals(new StatusCode(404)));
         assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8081/").equals(new StatusCode(404)));
         assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8082/").equals(new StatusCode(404)));
-
     }
 
     @Test
@@ -180,12 +192,17 @@ public class HttpServiceTest {
             throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID, HttpServiceOptions.defaultConfiguration()
-                .withHttpsPorts(4442).withHttpsClientAuthPorts(4443).toProperties()).get(30, TimeUnit.SECONDS);
+        updateComponentConfiguration(
+                        configService,
+                        HTTP_SERVER_MANAGER_PID,
+                        HttpServiceOptions.defaultConfiguration()
+                                .withHttpsPorts(4442)
+                                .withHttpsClientAuthPorts(4443)
+                                .toProperties())
+                .get(30, TimeUnit.SECONDS);
 
         assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:443/") instanceof Failure);
         assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/") instanceof Failure);
-
     }
 
     @Test
@@ -194,16 +211,21 @@ public class HttpServiceTest {
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
-                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+        try (final TestKeystore testKeystore = new TestKeystore(
+                configSvc, cryptoSvc, TEST_KEYSTORE_PID, HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                    HttpServiceOptions.defaultConfiguration().withHttpsPorts(4442)
-                            .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
-                                    TimeUnit.SECONDS);
+            updateComponentConfiguration(
+                            configSvc,
+                            HTTP_SERVER_MANAGER_PID,
+                            HttpServiceOptions.defaultConfiguration()
+                                    .withHttpsPorts(4442)
+                                    .withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
 
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4442/", Optional.empty(),
-                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode(
+                            "https://localhost:4442/", Optional.empty(), Optional.of(buildClientTrustManagers()))
+                    .equals(new StatusCode(404)));
             assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/") instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
@@ -216,22 +238,28 @@ public class HttpServiceTest {
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
-                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+        try (final TestKeystore testKeystore = new TestKeystore(
+                configSvc, cryptoSvc, TEST_KEYSTORE_PID, HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
-                            .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
-                                    TimeUnit.SECONDS);
+            updateComponentConfiguration(
+                            configSvc,
+                            HTTP_SERVER_MANAGER_PID,
+                            HttpServiceOptions.defaultConfiguration()
+                                    .withHttpsClientAuthPorts(4443)
+                                    .withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
 
             final KeyManager[] keyManagers = buildClientKeyManagers();
 
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode(
+                            "https://localhost:4443/",
+                            Optional.of(keyManagers),
+                            Optional.of(buildClientTrustManagers()))
+                    .equals(new StatusCode(404)));
             assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
-
         }
 
         configSvc.deleteFactoryConfiguration(HTTPS_KEYSTORE_SERVICE_PID, false);
@@ -243,22 +271,29 @@ public class HttpServiceTest {
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
-                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+        try (final TestKeystore testKeystore = new TestKeystore(
+                configSvc, cryptoSvc, TEST_KEYSTORE_PID, HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
-                            .withRevocationCheckEnabled(true).withKeystoreServiceTarget(testKeystore.getTargetFilter())
-                            .toProperties()).get(30, TimeUnit.SECONDS);
+            updateComponentConfiguration(
+                            configSvc,
+                            HTTP_SERVER_MANAGER_PID,
+                            HttpServiceOptions.defaultConfiguration()
+                                    .withHttpsClientAuthPorts(4443)
+                                    .withRevocationCheckEnabled(true)
+                                    .withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
 
             final KeyManager[] keyManagers = buildClientKeyManagers();
 
-            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                    Optional.of(buildClientTrustManagers())) instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode(
+                            "https://localhost:4443/",
+                            Optional.of(keyManagers),
+                            Optional.of(buildClientTrustManagers()))
+                    instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
             assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
-
         }
 
         configSvc.deleteFactoryConfiguration(HTTPS_KEYSTORE_SERVICE_PID, false);
@@ -266,47 +301,67 @@ public class HttpServiceTest {
 
     @Test
     public void shouldSupportRevocation() throws Exception {
-        final BundleContext bundleContext = FrameworkUtil.getBundle(HttpServiceTest.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(HttpServiceTest.class).getBundleContext();
 
         final TestServer server = new TestServer(8087, Optional.empty());
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
-                HttpsKeystoreServiceOptions.defaultConfiguration().withCrlManagerEnabled(true)
-                        .withCrlUrls(new String[] { "http://localhost:8087/crl.pem" }))) {
+        try (final TestKeystore testKeystore = new TestKeystore(
+                configSvc,
+                cryptoSvc,
+                TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration()
+                        .withCrlManagerEnabled(true)
+                        .withCrlUrls(new String[] {"http://localhost:8087/crl.pem"}))) {
 
-            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
-                            .withRevocationCheckEnabled(true).withKeystoreServiceTarget(testKeystore.getTargetFilter())
-                            .toProperties()).get(30, TimeUnit.SECONDS);
+            updateComponentConfiguration(
+                            configSvc,
+                            HTTP_SERVER_MANAGER_PID,
+                            HttpServiceOptions.defaultConfiguration()
+                                    .withHttpsClientAuthPorts(4443)
+                                    .withRevocationCheckEnabled(true)
+                                    .withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
 
             CompletableFuture<KeystoreChangedEvent> nextEvent = EventAdminUtil.nextEvent(
-                    new String[] { KeystoreChangedEvent.EVENT_TOPIC }, KeystoreChangedEvent.class, bundleContext);
+                    new String[] {KeystoreChangedEvent.EVENT_TOPIC}, KeystoreChangedEvent.class, bundleContext);
 
-            server.setResource("/crl.pem", encodeCrl(clientCA.generateCRL(CRLCreationOptions.builder().build())));
+            server.setResource(
+                    "/crl.pem",
+                    encodeCrl(clientCA.generateCRL(CRLCreationOptions.builder().build())));
             nextEvent.get(60, TimeUnit.SECONDS);
 
             final KeyManager[] keyManagers = buildClientKeyManagers();
 
             Thread.sleep(10000);
 
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode(
+                            "https://localhost:4443/",
+                            Optional.of(keyManagers),
+                            Optional.of(buildClientTrustManagers()))
+                    .equals(new StatusCode(404)));
 
-            nextEvent = EventAdminUtil.nextEvent(new String[] { KeystoreChangedEvent.EVENT_TOPIC },
-                    KeystoreChangedEvent.class, bundleContext);
+            nextEvent = EventAdminUtil.nextEvent(
+                    new String[] {KeystoreChangedEvent.EVENT_TOPIC}, KeystoreChangedEvent.class, bundleContext);
 
             clientCA.revokeCertificate(clientCertificate);
-            server.setResource("/crl.pem", encodeCrl(clientCA.generateCRL(CRLCreationOptions.builder().build())));
+            server.setResource(
+                    "/crl.pem",
+                    encodeCrl(clientCA.generateCRL(CRLCreationOptions.builder().build())));
 
             nextEvent.get(60, TimeUnit.SECONDS);
 
             Thread.sleep(10000);
 
-            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                    Optional.of(buildClientTrustManagers())) instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode(
+                            "https://localhost:4443/",
+                            Optional.of(keyManagers),
+                            Optional.of(buildClientTrustManagers()))
+                    instanceof Failure);
 
         } finally {
             server.close();
@@ -319,17 +374,21 @@ public class HttpServiceTest {
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
-                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+        try (final TestKeystore testKeystore = new TestKeystore(
+                configSvc, cryptoSvc, TEST_KEYSTORE_PID, HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
-                            .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
-                                    TimeUnit.SECONDS);
+            updateComponentConfiguration(
+                            configSvc,
+                            HTTP_SERVER_MANAGER_PID,
+                            HttpServiceOptions.defaultConfiguration()
+                                    .withHttpsClientAuthPorts(4443)
+                                    .withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
 
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.empty(),
-                    Optional.of(buildClientTrustManagers())) instanceof Failure);
-
+            assertTrueAtLeastOnce(() -> getHttpStatusCode(
+                            "https://localhost:4443/", Optional.empty(), Optional.of(buildClientTrustManagers()))
+                    instanceof Failure);
         }
     }
 
@@ -339,23 +398,33 @@ public class HttpServiceTest {
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
-                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+        try (final TestKeystore testKeystore = new TestKeystore(
+                configSvc, cryptoSvc, TEST_KEYSTORE_PID, HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                    HttpServiceOptions.defaultConfiguration().withHttpPorts(8080).withHttpsPorts(4442)
-                            .withHttpsClientAuthPorts(4443).withKeystoreServiceTarget(testKeystore.getTargetFilter())
-                            .toProperties()).get(30, TimeUnit.SECONDS);
+            updateComponentConfiguration(
+                            configSvc,
+                            HTTP_SERVER_MANAGER_PID,
+                            HttpServiceOptions.defaultConfiguration()
+                                    .withHttpPorts(8080)
+                                    .withHttpsPorts(4442)
+                                    .withHttpsClientAuthPorts(4443)
+                                    .withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
 
             final KeyManager[] keyManagers = buildClientKeyManagers();
 
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8080/").equals(new StatusCode(404)));
-            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4442/", Optional.empty(),
-                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode(
+                            "https://localhost:4443/",
+                            Optional.of(keyManagers),
+                            Optional.of(buildClientTrustManagers()))
+                    .equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(
+                    () -> getHttpStatusCode("http://localhost:8080/").equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode(
+                            "https://localhost:4442/", Optional.empty(), Optional.of(buildClientTrustManagers()))
+                    .equals(new StatusCode(404)));
         }
-
     }
 
     private static byte[] encodeCrl(final X509CRL crl) throws IOException {
@@ -374,17 +443,23 @@ public class HttpServiceTest {
         private final ConfigurationService configSvc;
         private final String pid;
 
-        public TestKeystore(final ConfigurationService configSvc, final CryptoService cryptoSvc, final String pid,
+        public TestKeystore(
+                final ConfigurationService configSvc,
+                final CryptoService cryptoSvc,
+                final String pid,
                 final HttpsKeystoreServiceOptions options)
                 throws InterruptedException, ExecutionException, TimeoutException, KuraException {
             this.configSvc = configSvc;
             this.pid = pid;
 
-            WireTestUtil
-                    .createFactoryConfiguration(configSvc, ConfigurableComponent.class, pid,
+            WireTestUtil.createFactoryConfiguration(
+                            configSvc,
+                            ConfigurableComponent.class,
+                            pid,
                             "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
                             options.withKeystorePath(serverKeystore.getAbsolutePath())
-                                    .withKeystorePassword("changeit", cryptoSvc).toProperties())
+                                    .withKeystorePassword("changeit", cryptoSvc)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
         }
 
@@ -396,7 +471,6 @@ public class HttpServiceTest {
         public void close() throws Exception {
             WireTestUtil.deleteFactoryConfiguration(configSvc, pid).get(30, TimeUnit.SECONDS);
         }
-
     }
 
     private static class HttpsKeystoreServiceOptions {
@@ -406,8 +480,7 @@ public class HttpServiceTest {
         private boolean crlManagerEnabled = false;
         private Optional<String[]> crlUrls = Optional.empty();
 
-        private HttpsKeystoreServiceOptions() {
-        }
+        private HttpsKeystoreServiceOptions() {}
 
         static HttpsKeystoreServiceOptions defaultConfiguration() {
             return new HttpsKeystoreServiceOptions();
@@ -418,8 +491,8 @@ public class HttpServiceTest {
             return this;
         }
 
-        HttpsKeystoreServiceOptions withKeystorePassword(final String keystorePassword,
-                final CryptoService cryptoService) throws KuraException {
+        HttpsKeystoreServiceOptions withKeystorePassword(
+                final String keystorePassword, final CryptoService cryptoService) throws KuraException {
             this.keystorePassword = new String(cryptoService.encryptAes(keystorePassword.toCharArray()));
             return this;
         }
@@ -448,7 +521,6 @@ public class HttpServiceTest {
 
             return result;
         }
-
     }
 
     private static class HttpServiceOptions {
@@ -459,8 +531,7 @@ public class HttpServiceTest {
         private Optional<String> keystoreServiceTarget = Optional.empty();
         private Optional<Boolean> revocationCheckEnabled = Optional.empty();
 
-        private HttpServiceOptions() {
-        }
+        private HttpServiceOptions() {}
 
         static HttpServiceOptions defaultConfiguration() {
             return new HttpServiceOptions();
@@ -502,11 +573,9 @@ public class HttpServiceTest {
 
             return result;
         }
-
     }
 
-    private interface ConnectionResult {
-    }
+    private interface ConnectionResult {}
 
     private static class StatusCode implements ConnectionResult {
 
@@ -541,7 +610,6 @@ public class HttpServiceTest {
         public String toString() {
             return "StatusCode [value=" + this.value + "]";
         }
-
     }
 
     private static class Failure implements ConnectionResult {
@@ -556,15 +624,14 @@ public class HttpServiceTest {
         public String toString() {
             return "Failure [cause=" + this.cause + "]";
         }
-
     }
 
     private static ConnectionResult getHttpStatusCode(final String url) {
         return getHttpStatusCode(url, Optional.empty(), Optional.empty());
     }
 
-    private static ConnectionResult getHttpStatusCode(final String url, final Optional<KeyManager[]> keyManagers,
-            final Optional<TrustManager[]> trustManagers) {
+    private static ConnectionResult getHttpStatusCode(
+            final String url, final Optional<KeyManager[]> keyManagers, final Optional<TrustManager[]> trustManagers) {
         try {
             final HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 
@@ -613,15 +680,18 @@ public class HttpServiceTest {
         fail("should have been true at least once");
     }
 
-    static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
-            final String pid, final Map<String, Object> properties) throws InvalidSyntaxException {
+    static CompletableFuture<Void> updateComponentConfiguration(
+            final ConfigurationService configurationService, final String pid, final Map<String, Object> properties)
+            throws InvalidSyntaxException {
 
         final CompletableFuture<Void> result = new CompletableFuture<>();
-        final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+        final BundleContext context =
+                FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(context,
+        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(
+                context,
                 FrameworkUtil.createFilter("(kura.service.pid=" + pid + ")"),
                 new ServiceTrackerCustomizer<Object, Object>() {
 
@@ -630,13 +700,16 @@ public class HttpServiceTest {
                     @Override
                     public Object addingService(ServiceReference<Object> reference) {
 
-                        task = Optional.of(executor.schedule(() -> {
-                            try {
-                                configurationService.updateConfiguration(pid, properties);
-                            } catch (KuraException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }, 5, TimeUnit.SECONDS));
+                        task = Optional.of(executor.schedule(
+                                () -> {
+                                    try {
+                                        configurationService.updateConfiguration(pid, properties);
+                                    } catch (KuraException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                },
+                                5,
+                                TimeUnit.SECONDS));
 
                         return context.getService(reference);
                     }
@@ -665,8 +738,9 @@ public class HttpServiceTest {
         });
     }
 
-    private static KeyManager[] buildClientKeyManagers() throws KeyStoreException, NoSuchAlgorithmException,
-            CertificateException, IOException, UnrecoverableKeyException {
+    private static KeyManager[] buildClientKeyManagers()
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
+                    UnrecoverableKeyException {
         final KeyStore keystore = KeyStore.getInstance("JKS");
         try (final FileInputStream in = new FileInputStream(clientKeystore)) {
             keystore.load(in, "changeit".toCharArray());
@@ -697,7 +771,6 @@ public class HttpServiceTest {
             }
         };
 
-        return new TrustManager[] { trustManager };
+        return new TrustManager[] {trustManager};
     }
-
 }

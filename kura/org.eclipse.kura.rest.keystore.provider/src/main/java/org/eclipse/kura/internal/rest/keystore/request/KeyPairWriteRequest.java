@@ -35,8 +35,9 @@ public class KeyPairWriteRequest extends KeyPairInfo implements Validable {
         if (getKeystoreServicePid() == null || getAlias() == null) {
             return false;
         }
-        return !(getAlgorithm() == null || getSize() == 0 || getSignatureAlgorithm() == null
+        return !(getAlgorithm() == null
+                || getSize() == 0
+                || getSignatureAlgorithm() == null
                 || getAttributes() == null);
     }
-
 }

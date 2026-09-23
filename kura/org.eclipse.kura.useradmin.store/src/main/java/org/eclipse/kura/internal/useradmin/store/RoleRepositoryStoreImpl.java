@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.useradmin.store;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonValue;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +26,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.felix.useradmin.RoleFactory;
 import org.apache.felix.useradmin.RoleRepositoryStore;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -33,6 +35,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
@@ -42,26 +51,16 @@ import org.osgi.service.useradmin.UserAdminListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonValue;
-
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.Designate;
 @Component(
-    name = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.apache.felix.useradmin.RoleRepositoryStore.class,
+        name = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.apache.felix.useradmin.RoleRepositoryStore.class,
             org.eclipse.kura.configuration.ConfigurableComponent.class,
-            org.osgi.service.useradmin.UserAdminListener.class },
-    property = {
-        "kura.ui.service.hide:Boolean=true" })
+            org.osgi.service.useradmin.UserAdminListener.class
+        },
+        property = {"kura.ui.service.hide:Boolean=true"})
 @Designate(ocd = RoleRepositoryStoreImplOptions.class)
 public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminListener, ConfigurableComponent {
 
@@ -80,7 +79,10 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Optional<ScheduledFuture<?>> storeTask = Optional.empty();
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -111,7 +113,8 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
         final RoleBuilder roleBuilder;
 
-        final BundleContext bundleContext = FrameworkUtil.getBundle(RoleRepositoryStoreImpl.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(RoleRepositoryStoreImpl.class).getBundleContext();
 
         final ServiceReference<UserAdmin> userAdminRef = bundleContext.getServiceReference(UserAdmin.class);
 
@@ -252,7 +255,6 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         Map<String, Object> properties;
         try {
             synchronized (this) {
-
                 final JsonArray rolesArray = new JsonArray();
                 final JsonArray usersArray = new JsonArray();
                 final JsonArray groupsArray = new JsonArray();
@@ -269,11 +271,12 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
                     }
                 }
 
-                final RoleRepositoryStoreOptions newOptions = new RoleRepositoryStoreOptions(rolesArray.toString(), //
+                final RoleRepositoryStoreOptions newOptions = new RoleRepositoryStoreOptions(
+                        rolesArray.toString(), //
                         usersArray.toString(), //
                         groupsArray.toString(), //
                         this.options.getWriteDelayMs() //
-                );
+                        );
 
                 if (newOptions.equals(this.options)) {
                     logger.info("update would not change current configuration, skipping");
@@ -290,7 +293,6 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         } finally {
             this.storeTask = Optional.empty();
         }
-
     }
 
     private final Map<String, Role> decode(final RoleRepositoryStoreOptions options, final RoleBuilder roleBuilder)
@@ -316,11 +318,14 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         } catch (final Exception e) {
             throw new DeserializationException("failed to deserialize role repository", e);
         }
-
     }
 
-    private void decode(final JsonArray array, final Class<? extends Role> classz, final Map<String, Role> target,
-            final RoleBuilder roleBuilder) throws DeserializationException {
+    private void decode(
+            final JsonArray array,
+            final Class<? extends Role> classz,
+            final Map<String, Role> target,
+            final RoleBuilder roleBuilder)
+            throws DeserializationException {
         for (final JsonValue member : array) {
             final Role role = RoleSerializer.deserializeRole(classz, member.asObject(), roleBuilder);
             target.put(role.getName(), role);

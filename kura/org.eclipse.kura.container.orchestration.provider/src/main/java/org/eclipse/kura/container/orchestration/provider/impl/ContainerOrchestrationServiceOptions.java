@@ -17,14 +17,13 @@ import static java.util.Objects.isNull;
 
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.util.configuration.Property;
 
 public class ContainerOrchestrationServiceOptions {
 
     private static final Property<Boolean> IS_ENABLED = new Property<>("enabled", true);
-    private static final Property<String> DOCKER_HOST_URL = new Property<>("container.engine.host",
-            "unix:///var/run/docker.sock");
+    private static final Property<String> DOCKER_HOST_URL =
+            new Property<>("container.engine.host", "unix:///var/run/docker.sock");
     private static final Property<Boolean> ENFORCEMENT_ENABLED = new Property<>("enforcement.enabled", false);
     private static final Property<String> ENFORCEMENT_ALLOWLIST = new Property<>("enforcement.allowlist", "");
 
@@ -43,7 +42,6 @@ public class ContainerOrchestrationServiceOptions {
         this.hostUrl = DOCKER_HOST_URL.get(properties);
         this.enforcementEnabled = ENFORCEMENT_ENABLED.get(properties);
         this.enforcementAllowlist = ENFORCEMENT_ALLOWLIST.get(properties);
-
     }
 
     public boolean isEnabled() {
@@ -80,8 +78,8 @@ public class ContainerOrchestrationServiceOptions {
         }
         ContainerOrchestrationServiceOptions other = (ContainerOrchestrationServiceOptions) obj;
         return Objects.equals(enforcementAllowlist, other.enforcementAllowlist)
-                && enforcementEnabled == other.enforcementEnabled && enabled == other.enabled
+                && enforcementEnabled == other.enforcementEnabled
+                && enabled == other.enabled
                 && Objects.equals(hostUrl, other.hostUrl);
     }
-
 }

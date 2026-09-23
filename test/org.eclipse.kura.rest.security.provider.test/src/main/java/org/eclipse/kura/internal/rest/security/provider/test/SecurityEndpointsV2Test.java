@@ -13,6 +13,20 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider.test;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import jakarta.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
@@ -32,21 +46,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import jakarta.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(Parameterized.class)
 public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
@@ -148,8 +147,8 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY,
-                "This is a very cool security policy!");
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, "This is a very cool security policy!");
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
@@ -219,7 +218,8 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockSecurityService");
-        securityServiceRegistration = FrameworkUtil.getBundle(SecurityEndpointsV2Test.class).getBundleContext()
+        securityServiceRegistration = FrameworkUtil.getBundle(SecurityEndpointsV2Test.class)
+                .getBundleContext()
                 .registerService(SecurityService.class, securityServiceMock, configurationServiceProperties);
     }
 
@@ -227,8 +227,9 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("SecurityService.target", "(kura.service.pid=mockSecurityService)");
 
-        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(ConfigurationAdmin.class,
-                Optional.empty()).get(30, TimeUnit.SECONDS);
+        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(
+                        ConfigurationAdmin.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(SecurityRestServiceV2.class.getName(), "?");
         config.update(properties);
     }
@@ -236,5 +237,4 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
     private static void unregisterSecurityServiceMock() throws Exception {
         securityServiceRegistration.unregister();
     }
-
 }

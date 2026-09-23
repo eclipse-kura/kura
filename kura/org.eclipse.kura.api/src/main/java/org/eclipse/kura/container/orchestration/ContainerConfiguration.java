@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 import static java.util.Objects.requireNonNull;
@@ -24,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.osgi.annotation.versioning.ProviderType;
@@ -59,8 +57,7 @@ public class ContainerConfiguration {
     private Optional<String> runtime;
     private Optional<String> enforcementDigest;
 
-    private ContainerConfiguration() {
-    }
+    private ContainerConfiguration() {}
 
     /**
      * The method will provide information if the container is or not managed by the
@@ -325,10 +322,24 @@ public class ContainerConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
-                this.containerLoggingType, this.containerName, this.containerPorts, this.containerPrivileged,
-                this.containerVolumes, this.cpus, this.enforcementDigest, this.entryPoint, this.gpus, this.imageConfig,
-                this.isFrameworkManaged, this.memory, this.networkConfiguration, this.containerRestartOnFailure,
+        return Objects.hash(
+                this.containerDevices,
+                this.containerEnvVars,
+                this.containerLoggerParameters,
+                this.containerLoggingType,
+                this.containerName,
+                this.containerPorts,
+                this.containerPrivileged,
+                this.containerVolumes,
+                this.cpus,
+                this.enforcementDigest,
+                this.entryPoint,
+                this.gpus,
+                this.imageConfig,
+                this.isFrameworkManaged,
+                this.memory,
+                this.networkConfiguration,
+                this.containerRestartOnFailure,
                 this.runtime);
     }
 
@@ -349,8 +360,10 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPorts, other.containerPorts)
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
-                && Objects.equals(this.cpus, other.cpus) && Objects.equals(enforcementDigest, other.enforcementDigest)
-                && Objects.equals(this.entryPoint, other.entryPoint) && Objects.equals(this.gpus, other.gpus)
+                && Objects.equals(this.cpus, other.cpus)
+                && Objects.equals(enforcementDigest, other.enforcementDigest)
+                && Objects.equals(this.entryPoint, other.entryPoint)
+                && Objects.equals(this.gpus, other.gpus)
                 && Objects.equals(this.imageConfig, other.imageConfig)
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
                 && Objects.equals(this.memory, other.memory)
@@ -373,7 +386,8 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private final ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
-        private final ContainerNetworkConfigurationBuilder networkConfigurationBuilder = new ContainerNetworkConfigurationBuilder();
+        private final ContainerNetworkConfigurationBuilder networkConfigurationBuilder =
+                new ContainerNetworkConfigurationBuilder();
         private List<String> entryPoint = new LinkedList<>();
         private Boolean containerRestartOnFailure = false;
         private Optional<Long> memory = Optional.empty();
@@ -603,6 +617,5 @@ public class ContainerConfiguration {
 
             return result;
         }
-
     }
 }

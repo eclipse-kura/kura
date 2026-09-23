@@ -17,11 +17,10 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.kura.internal.rest.auth.RestSessionHelper.XsrfTokenStatus;
-import org.junit.Test;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.eclipse.kura.internal.rest.auth.RestSessionHelper.XsrfTokenStatus;
+import org.junit.Test;
 
 public class RestSessionHelperTest {
 
@@ -108,5 +107,4 @@ public class RestSessionHelperTest {
     private void thenStatusIs(final XsrfTokenStatus expected) {
         assertEquals(expected, this.status);
     }
-
 }

@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.event.publisher.test;
 
 import static org.mockito.Mockito.mock;
@@ -19,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.event.publisher.EventPublisher;

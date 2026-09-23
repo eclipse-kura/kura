@@ -15,39 +15,6 @@ package org.eclipse.kura.container.orchestration.provider.impl;
 
 import static java.util.Objects.isNull;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
-
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.ContainerConfiguration;
-import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
-import org.eclipse.kura.container.orchestration.ContainerState;
-import org.eclipse.kura.container.orchestration.ImageConfiguration;
-import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
-import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
-import org.eclipse.kura.container.orchestration.PortInternetProtocol;
-import org.eclipse.kura.container.orchestration.RegistryCredentials;
-import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
-import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
-import org.eclipse.kura.crypto.CryptoService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectImageResponse;
@@ -78,7 +45,35 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import com.google.common.collect.ImmutableList;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ContainerState;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.PortInternetProtocol;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
+import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
+import org.eclipse.kura.crypto.CryptoService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -86,13 +81,18 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService",
-    immediate = true,
-    enabled = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
-            org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class })
+        name = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService",
+        immediate = true,
+        enabled = false,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class
+        })
 @Designate(ocd = ContainerOrchestrationServiceMetatype.class)
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
@@ -189,7 +189,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private void startEnforcementMonitor() {
         logger.info("Enforcement monitor starting...");
-        this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
+        this.allowlistEnforcementMonitor = this.dockerClient
+                .eventsCmd()
+                .withEventFilter("start")
                 .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
         logger.info("Enforcement monitor starting...done.");
     }
@@ -230,7 +232,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
 
-        List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
+        List<Container> containers =
+                this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
         List<String> result = new ArrayList<>();
 
@@ -239,7 +242,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
         return result;
-
     }
 
     @Override
@@ -248,18 +250,21 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
 
-        List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
+        List<Container> containers =
+                this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
         List<ContainerInstanceDescriptor> result = new ArrayList<>();
         containers.forEach(container -> result.add(ContainerInstanceDescriptor.builder()
-                .setContainerName(getContainerName(container)).setContainerImage(getContainerTag(container))
-                .setContainerImageTag(getContainerVersion(container)).setContainerID(container.getId())
+                .setContainerName(getContainerName(container))
+                .setContainerImage(getContainerTag(container))
+                .setContainerImageTag(getContainerVersion(container))
+                .setContainerID(container.getId())
                 .setContainerPorts(parseContainerPortsList(container.getPorts()))
                 .setContainerState(convertDockerStateToFrameworkState(container.getState()))
-                .setFrameworkManaged(isFrameworkManaged(container)).build()));
+                .setFrameworkManaged(isFrameworkManaged(container))
+                .build()));
 
         return result;
-
     }
 
     private Boolean isFrameworkManaged(Container container) {
@@ -297,9 +302,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         Arrays.asList(ports).stream().forEach(containerPort -> {
             String ipTest = containerPort.getIp();
             if (ipTest != null && (ipTest.equals("::") || ipTest.equals("0.0.0.0"))) {
-                kuraContainerPorts
-                        .add(new org.eclipse.kura.container.orchestration.ContainerPort(containerPort.getPrivatePort(),
-                                containerPort.getPublicPort(), parsePortInternetProtocol(containerPort.getType())));
+                kuraContainerPorts.add(new org.eclipse.kura.container.orchestration.ContainerPort(
+                        containerPort.getPrivatePort(),
+                        containerPort.getPublicPort(),
+                        parsePortInternetProtocol(containerPort.getType())));
             }
         });
 
@@ -309,40 +315,37 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private PortInternetProtocol parsePortInternetProtocol(String dockerPortProtocol) {
 
         switch (dockerPortProtocol) {
+            case "tcp":
+                return PortInternetProtocol.TCP;
 
-        case "tcp":
-            return PortInternetProtocol.TCP;
+            case "udp":
+                return PortInternetProtocol.UDP;
 
-        case "udp":
-            return PortInternetProtocol.UDP;
+            case "sctp":
+                return PortInternetProtocol.SCTP;
 
-        case "sctp":
-            return PortInternetProtocol.SCTP;
-
-        default:
-            throw new IllegalStateException();
-
+            default:
+                throw new IllegalStateException();
         }
-
     }
 
     private ContainerState convertDockerStateToFrameworkState(String dockerState) {
 
         switch (dockerState.trim()) {
-        case "created":
-            return ContainerState.INSTALLED;
-        case "restarting":
-            return ContainerState.INSTALLED;
-        case "running":
-            return ContainerState.ACTIVE;
-        case "paused":
-            return ContainerState.STOPPING;
-        case "exited":
-            return ContainerState.STOPPING;
-        case "dead":
-            return ContainerState.FAILED;
-        default:
-            return ContainerState.INSTALLED;
+            case "created":
+                return ContainerState.INSTALLED;
+            case "restarting":
+                return ContainerState.INSTALLED;
+            case "running":
+                return ContainerState.ACTIVE;
+            case "paused":
+                return ContainerState.STOPPING;
+            case "exited":
+                return ContainerState.STOPPING;
+            case "dead":
+                return ContainerState.FAILED;
+            default:
+                return ContainerState.INSTALLED;
         }
     }
 
@@ -350,7 +353,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public Optional<String> getContainerIdByName(String name) {
         checkRequestEnv(name);
 
-        List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
+        List<Container> containers =
+                this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
         for (Container cont : containers) {
             String[] containerNames = cont.getNames();
@@ -370,8 +374,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.dockerClient.startContainerCmd(id).exec();
         } catch (Exception e) {
-            logger.error("Could not start container {}. It could be already running or not exist at all",
-                    id, e);
+            logger.error("Could not start container {}. It could be already running or not exist at all", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
     }
@@ -383,7 +386,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         logger.info("Starting {} Microservice", container.getContainerName());
 
         final Optional<ContainerInstanceDescriptor> existingInstance = listContainerDescriptors().stream()
-                .filter(c -> c.getContainerName().equals(container.getContainerName())).findAny();
+                .filter(c -> c.getContainerName().equals(container.getContainerName()))
+                .findAny();
 
         String containerId;
 
@@ -399,7 +403,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 pullImage(container.getImageConfiguration());
                 containerId = createContainer(container);
                 startContainer(containerId);
-
             }
         } else {
             logger.info("Creating new container instance");
@@ -412,8 +415,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         logger.info("Container Started Successfully");
 
         if (container.isFrameworkManaged()) {
-            this.frameworkManagedContainers
-                    .add(new FrameworkManagedContainer(container.getContainerName(), containerId));
+            this.frameworkManagedContainers.add(
+                    new FrameworkManagedContainer(container.getContainerName(), containerId));
         }
 
         return containerId;
@@ -467,17 +470,16 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     @Override
     public void registerListener(ContainerOrchestrationServiceListener dockerListener) {
         this.dockerServiceListeners.add(dockerListener);
-
     }
 
     @Override
     public void unregisterListener(ContainerOrchestrationServiceListener dockerListener) {
         this.dockerServiceListeners.remove(dockerListener);
-
     }
 
-    private void imagePullHelper(String imageName, String imageTag, int timeOutSeconds,
-            Optional<RegistryCredentials> repositoryCredentials) throws InterruptedException, KuraException {
+    private void imagePullHelper(
+            String imageName, String imageTag, int timeOutSeconds, Optional<RegistryCredentials> repositoryCredentials)
+            throws InterruptedException, KuraException {
 
         logger.info("Attempting to pull image: {}.", imageName);
         PullImageCmd pullRequest = this.dockerClient.pullImageCmd(imageName).withTag(imageTag);
@@ -486,17 +488,16 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             doAuthenticate(repositoryCredentials.get(), pullRequest);
         }
 
-        pullRequest.exec(new PullImageResultCallback() {
+        pullRequest
+                .exec(new PullImageResultCallback() {
 
-            @Override
-            public void onNext(PullResponseItem item) {
-                super.onNext(item);
-                createLoggerMessageForContainerPull(item, imageName, imageTag);
-
-            }
-
-        }).awaitCompletion(timeOutSeconds, TimeUnit.SECONDS);
-
+                    @Override
+                    public void onNext(PullResponseItem item) {
+                        super.onNext(item);
+                        createLoggerMessageForContainerPull(item, imageName, imageTag);
+                    }
+                })
+                .awaitCompletion(timeOutSeconds, TimeUnit.SECONDS);
     }
 
     private void doAuthenticate(RegistryCredentials repositoryCredentials, PullImageCmd pullRequest)
@@ -507,8 +508,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         PasswordRegistryCredentials repositoryPasswordCredentials = (PasswordRegistryCredentials) repositoryCredentials;
 
-        AuthConfig authConfig = new AuthConfig().withUsername(repositoryPasswordCredentials.getUsername()).withPassword(
-                new String(this.cryptoService.decryptAes(repositoryPasswordCredentials.getPassword().getPassword())));
+        AuthConfig authConfig = new AuthConfig()
+                .withUsername(repositoryPasswordCredentials.getUsername())
+                .withPassword(new String(this.cryptoService.decryptAes(
+                        repositoryPasswordCredentials.getPassword().getPassword())));
         Optional<String> url = repositoryPasswordCredentials.getUrl();
         if (url.isPresent()) {
             logger.info("Attempting to sign into repo: {}", url.get());
@@ -541,7 +544,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException("failed to create container, null containerImage passed");
         }
 
-        String containerImageFullString = String.format("%s:%s",
+        String containerImageFullString = String.format(
+                "%s:%s",
                 containerDescription.getImageConfiguration().getImageName(),
                 containerDescription.getImageConfiguration().getImageTag());
 
@@ -592,52 +596,52 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
-    private HostConfig containerLogConfigurationHandler(ContainerConfiguration containerDescription,
-            HostConfig configuration) {
+    private HostConfig containerLogConfigurationHandler(
+            ContainerConfiguration containerDescription, HostConfig configuration) {
         LoggingType lt;
         switch (containerDescription.getContainerLoggingType().toUpperCase().trim()) {
-        case "NONE":
-            lt = LoggingType.NONE;
-            break;
-        case "LOCAL":
-            lt = LoggingType.LOCAL;
-            break;
-        case "ETWLOGS":
-            lt = LoggingType.ETWLOGS;
-            break;
-        case "JSON_FILE":
-            lt = LoggingType.JSON_FILE;
-            break;
-        case "SYSLOG":
-            lt = LoggingType.SYSLOG;
-            break;
-        case "JOURNALD":
-            lt = LoggingType.JOURNALD;
-            break;
-        case "GELF":
-            lt = LoggingType.GELF;
-            break;
-        case "FLUENTD":
-            lt = LoggingType.FLUENTD;
-            break;
-        case "AWSLOGS":
-            lt = LoggingType.AWSLOGS;
-            break;
-        case "DB":
-            lt = LoggingType.DB;
-            break;
-        case "SPLUNK":
-            lt = LoggingType.SPLUNK;
-            break;
-        case "GCPLOGS":
-            lt = LoggingType.GCPLOGS;
-            break;
-        case "LOKI":
-            lt = LoggingType.LOKI;
-            break;
-        default:
-            lt = LoggingType.DEFAULT;
-            break;
+            case "NONE":
+                lt = LoggingType.NONE;
+                break;
+            case "LOCAL":
+                lt = LoggingType.LOCAL;
+                break;
+            case "ETWLOGS":
+                lt = LoggingType.ETWLOGS;
+                break;
+            case "JSON_FILE":
+                lt = LoggingType.JSON_FILE;
+                break;
+            case "SYSLOG":
+                lt = LoggingType.SYSLOG;
+                break;
+            case "JOURNALD":
+                lt = LoggingType.JOURNALD;
+                break;
+            case "GELF":
+                lt = LoggingType.GELF;
+                break;
+            case "FLUENTD":
+                lt = LoggingType.FLUENTD;
+                break;
+            case "AWSLOGS":
+                lt = LoggingType.AWSLOGS;
+                break;
+            case "DB":
+                lt = LoggingType.DB;
+                break;
+            case "SPLUNK":
+                lt = LoggingType.SPLUNK;
+                break;
+            case "GCPLOGS":
+                lt = LoggingType.GCPLOGS;
+                break;
+            case "LOKI":
+                lt = LoggingType.LOKI;
+                break;
+            default:
+                lt = LoggingType.DEFAULT;
+                break;
         }
 
         LogConfig lc = new LogConfig(lt, containerDescription.getLoggerParameters());
@@ -647,10 +651,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerNetworkConfigurationHandler(ContainerConfiguration containerDescription,
-            HostConfig configuration) {
+    private HostConfig containerNetworkConfigurationHandler(
+            ContainerConfiguration containerDescription, HostConfig configuration) {
 
-        Optional<String> networkMode = containerDescription.getContainerNetworkConfiguration().getNetworkMode();
+        Optional<String> networkMode =
+                containerDescription.getContainerNetworkConfiguration().getNetworkMode();
         if (networkMode.isPresent() && !networkMode.get().trim().isEmpty()) {
             configuration.withNetworkMode(networkMode.get().trim());
         }
@@ -658,8 +663,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerMemoryConfigurationHandler(ContainerConfiguration containerDescription,
-            HostConfig configuration) {
+    private HostConfig containerMemoryConfigurationHandler(
+            ContainerConfiguration containerDescription, HostConfig configuration) {
 
         Optional<Long> memory = containerDescription.getMemory();
         if (memory.isPresent()) {
@@ -673,8 +678,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerCpusConfigurationHandler(ContainerConfiguration containerDescription,
-            HostConfig configuration) {
+    private HostConfig containerCpusConfigurationHandler(
+            ContainerConfiguration containerDescription, HostConfig configuration) {
 
         Optional<Float> cpus = containerDescription.getCpus();
         cpus.ifPresent(cpu -> {
@@ -685,19 +690,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerGpusConfigurationHandler(ContainerConfiguration containerDescription,
-            HostConfig configuration) {
+    private HostConfig containerGpusConfigurationHandler(
+            ContainerConfiguration containerDescription, HostConfig configuration) {
 
         Optional<String> gpus = containerDescription.getGpus();
-        gpus.ifPresent(gpu -> configuration.withDeviceRequests(ImmutableList
-                .of(new DeviceRequest().withDriver("nvidia").withCount(gpu.equals("all") ? -1 : Integer.parseInt(gpu))
-                        .withCapabilities(ImmutableList.of(ImmutableList.of("gpu"))))));
+        gpus.ifPresent(gpu -> configuration.withDeviceRequests(ImmutableList.of(new DeviceRequest()
+                .withDriver("nvidia")
+                .withCount(gpu.equals("all") ? -1 : Integer.parseInt(gpu))
+                .withCapabilities(ImmutableList.of(ImmutableList.of("gpu"))))));
 
         return configuration;
     }
 
-    private HostConfig containerRuntimeConfigurationHandler(ContainerConfiguration containerDescription,
-            HostConfig configuration) {
+    private HostConfig containerRuntimeConfigurationHandler(
+            ContainerConfiguration containerDescription, HostConfig configuration) {
 
         Optional<String> runtime = containerDescription.getRuntime();
         runtime.ifPresent(configuration::withRuntime);
@@ -705,8 +711,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerPortManagementHandler(ContainerConfiguration containerConfiguration,
-            HostConfig hostConfig, CreateContainerCmd commandBuilder) {
+    private HostConfig containerPortManagementHandler(
+            ContainerConfiguration containerConfiguration, HostConfig hostConfig, CreateContainerCmd commandBuilder) {
 
         List<ExposedPort> exposedPorts = new LinkedList<>();
         Ports portbindings = new Ports();
@@ -714,8 +720,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         if (containerConfiguration.getContainerPorts() != null
                 && !containerConfiguration.getContainerPorts().isEmpty()) {
 
-            List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts = containerConfiguration
-                    .getContainerPorts();
+            List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts =
+                    containerConfiguration.getContainerPorts();
 
             for (org.eclipse.kura.container.orchestration.ContainerPort port : containerPorts) {
 
@@ -723,7 +729,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
                 if (port.getInternetProtocol() != null) {
                     try {
-                        ipProtocol = InternetProtocol.parse(port.getInternetProtocol().toString());
+                        ipProtocol = InternetProtocol.parse(
+                                port.getInternetProtocol().toString());
                     } catch (IllegalArgumentException e) {
                         logger.warn("Invalid internet protocol: {}. Using TCP.", port.getInternetProtocol());
                     }
@@ -735,7 +742,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             }
 
             if (exposedPorts.size() != portbindings.getBindings().size()) {
-                logger.error("portsExternal and portsInternal must have the same size: {}",
+                logger.error(
+                        "portsExternal and portsInternal must have the same size: {}",
                         containerConfiguration.getContainerName());
             }
         }
@@ -746,8 +754,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return hostConfig;
     }
 
-    private CreateContainerCmd containerEnviromentVariablesHandler(ContainerConfiguration containerDescription,
-            CreateContainerCmd commandBuilder) {
+    private CreateContainerCmd containerEnviromentVariablesHandler(
+            ContainerConfiguration containerDescription, CreateContainerCmd commandBuilder) {
 
         if (containerDescription.getContainerEnvVars().isEmpty()) {
             return commandBuilder;
@@ -765,22 +773,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
         return commandBuilder;
-
     }
 
-    private CreateContainerCmd containerEntrypointHandler(ContainerConfiguration containerDescription,
-            CreateContainerCmd commandBuilder) {
+    private CreateContainerCmd containerEntrypointHandler(
+            ContainerConfiguration containerDescription, CreateContainerCmd commandBuilder) {
 
         if (containerDescription.getEntryPoint().isEmpty() || containerDescription.getEntryPoint() == null) {
             return commandBuilder;
         }
 
         return commandBuilder.withEntrypoint(containerDescription.getEntryPoint());
-
     }
 
-    private HostConfig containerVolumeMangamentHandler(ContainerConfiguration containerDescription,
-            HostConfig hostConfiguration) {
+    private HostConfig containerVolumeMangamentHandler(
+            ContainerConfiguration containerDescription, HostConfig hostConfiguration) {
 
         final Map<String, String> containerVolumes = containerDescription.getContainerVolumes();
         if (containerVolumes == null || containerVolumes.isEmpty()) {
@@ -798,7 +804,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
         return hostConfiguration.withBinds(bindsToAdd);
-
     }
 
     private static Optional<Bind> volumeBind(final String hostPath, final String containerPathSpec) {
@@ -817,11 +822,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             return Optional.empty();
         }
 
-        return Optional.of(new Bind(hostPath, new Volume(containerPath), readOnly ? AccessMode.ro : AccessMode.DEFAULT));
+        return Optional.of(
+                new Bind(hostPath, new Volume(containerPath), readOnly ? AccessMode.ro : AccessMode.DEFAULT));
     }
 
-    private HostConfig containerDevicesHandler(ContainerConfiguration containerDescription,
-            HostConfig hostConfiguration) {
+    private HostConfig containerDevicesHandler(
+            ContainerConfiguration containerDescription, HostConfig hostConfiguration) {
 
         if (containerDescription.getContainerDevices().isEmpty()) {
             return hostConfiguration;
@@ -836,12 +842,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             }
             if (!deviceList.isEmpty()) {
                 hostConfiguration = hostConfiguration.withDevices(deviceList);
-
             }
         }
 
         return hostConfiguration;
-
     }
 
     private boolean doesImageExist(String imageName, String imageTag) {
@@ -885,9 +889,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             return false;
         }
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost(this.currentConfig.getHostUrl()).build();
+                .withDockerHost(this.currentConfig.getHostUrl())
+                .build();
 
-        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+                .dockerHost(config.getDockerHost())
+                .build();
 
         this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
 
@@ -947,13 +954,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             FrameworkManagedContainer other = (FrameworkManagedContainer) obj;
             return Objects.equals(this.id, other.id) && Objects.equals(this.name, other.name);
         }
-
     }
 
     @Override
     public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException {
-        if (isNull(imageConfig.getImageName()) || isNull(imageConfig.getImageTag())
-                || imageConfig.getimageDownloadTimeoutSeconds() < 0 || isNull(imageConfig.getRegistryCredentials())) {
+        if (isNull(imageConfig.getImageName())
+                || isNull(imageConfig.getImageTag())
+                || imageConfig.getimageDownloadTimeoutSeconds() < 0
+                || isNull(imageConfig.getRegistryCredentials())) {
             throw new IllegalArgumentException("Parameters cannot be null or negative");
         }
 
@@ -961,8 +969,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         if (!imageAvailableLocally) {
             try {
-                imagePullHelper(imageConfig.getImageName(), imageConfig.getImageTag(),
-                        imageConfig.getimageDownloadTimeoutSeconds(), imageConfig.getRegistryCredentials());
+                imagePullHelper(
+                        imageConfig.getImageName(),
+                        imageConfig.getImageTag(),
+                        imageConfig.getimageDownloadTimeoutSeconds(),
+                        imageConfig.getRegistryCredentials());
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -973,10 +984,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
-            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
-        pullImage(new ImageConfiguration.ImageConfigurationBuilder().setImageName(imageName).setImageTag(imageTag)
-                .setImageDownloadTimeoutSeconds(timeOutSeconds).setRegistryCredentials(registryCredentials).build());
+    public void pullImage(
+            String imageName, String imageTag, int timeOutSeconds, Optional<RegistryCredentials> registryCredentials)
+            throws KuraException, InterruptedException {
+        pullImage(new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(imageName)
+                .setImageTag(imageTag)
+                .setImageDownloadTimeoutSeconds(timeOutSeconds)
+                .setRegistryCredentials(registryCredentials)
+                .build());
     }
 
     @Override
@@ -987,11 +1003,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         List<Image> images = this.dockerClient.listImagesCmd().withShowAll(true).exec();
         List<ImageInstanceDescriptor> result = new ArrayList<>();
         images.forEach(image -> {
-            InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
+            InspectImageResponse iir =
+                    this.dockerClient.inspectImageCmd(image.getId()).exec();
 
             ImageInstanceDescriptorBuilder imageBuilder = ImageInstanceDescriptor.builder()
-                    .setImageName(getImageName(image)).setImageTag(getImageTag(image)).setImageId(image.getId())
-                    .setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
+                    .setImageName(getImageName(image))
+                    .setImageTag(getImageTag(image))
+                    .setImageId(image.getId())
+                    .setImageAuthor(iir.getAuthor())
+                    .setImageArch(iir.getArch())
                     .setimageSize(iir.getSize().longValue());
 
             if (image.getLabels() != null) {
@@ -1012,7 +1032,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private String getImageTag(Image image) {
-        if (image.getRepoTags() == null || image.getRepoTags().length < 1
+        if (image.getRepoTags() == null
+                || image.getRepoTags().length < 1
                 || image.getRepoTags()[0].split(":").length < 2) {
             return "";
         }
@@ -1027,7 +1048,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             this.dockerClient.removeImageCmd(imageId).exec();
         } catch (Exception e) {
             logger.error("Could not remove image {}", imageId, e);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
+            throw new KuraException(
+                    KuraErrorCode.OS_COMMAND_ERROR,
+                    "Delete Container Image",
                     "500 (server error). Image is most likely in use by a container.");
         }
     }
@@ -1037,17 +1060,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         Set<String> imageDigests = new HashSet<>();
 
         String containerName = listContainerDescriptors().stream()
-                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
-                .map(container -> container.getContainerName()).orElse(null);
+                .filter(container -> container.getContainerId().equals(containerId))
+                .findFirst()
+                .map(container -> container.getContainerName())
+                .orElse(null);
 
         if (containerName == null) {
             return imageDigests;
         }
 
-        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
-            List<String> digests = Arrays.asList(image.getRepoDigests());
-            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
-        });
+        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream()
+                .forEach(image -> {
+                    List<String> digests = Arrays.asList(image.getRepoDigests());
+                    digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
+                });
 
         return imageDigests;
     }
@@ -1060,11 +1086,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                     containerId);
             this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
         } else {
-            logger.info("Container {} doesn't contain the enforcement digest. "
-                    + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
+            logger.info(
+                    "Container {} doesn't contain the enforcement digest. "
+                            + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
                     containerId);
         }
-
     }
 
     private void removeContainerInstanceDigest(String containerId) {
@@ -1078,5 +1104,4 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public Set<String> getContainerInstancesAllowlist() {
         return new HashSet<>(this.containerInstancesDigests.values());
     }
-
 }

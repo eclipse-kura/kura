@@ -16,17 +16,14 @@ package org.eclipse.kura.core.comm;
 import static org.eclipse.kura.comm.CommURI.parseString;
 
 import java.io.IOException;
-
 import javax.microedition.io.Connection;
-
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.io.ConnectionFactory;
 
-import org.osgi.service.component.annotations.Component;
 @Component(
-    name = "org.eclipse.kura.core.comm.CommConnectionFactory",
-    service = { org.osgi.service.io.ConnectionFactory.class },
-    property = {
-        "io.scheme=comm"})
+        name = "org.eclipse.kura.core.comm.CommConnectionFactory",
+        service = {org.osgi.service.io.ConnectionFactory.class},
+        property = {"io.scheme=comm"})
 public class CommConnectionFactory implements ConnectionFactory {
 
     @Override

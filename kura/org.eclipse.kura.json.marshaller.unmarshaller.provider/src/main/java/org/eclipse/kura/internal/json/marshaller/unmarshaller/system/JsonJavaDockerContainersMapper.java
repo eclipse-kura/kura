@@ -12,18 +12,16 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Optional;
-
-import org.eclipse.kura.core.inventory.resources.DockerContainer;
-import org.eclipse.kura.core.inventory.resources.DockerContainers;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Optional;
+import org.eclipse.kura.core.inventory.resources.DockerContainer;
+import org.eclipse.kura.core.inventory.resources.DockerContainers;
 
 public class JsonJavaDockerContainersMapper {
 
@@ -56,7 +54,6 @@ public class JsonJavaDockerContainersMapper {
         final String version = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_VERSION);
 
         return new DockerContainer(name, version);
-
     }
 
     public static void marshal(Writer writer, DockerContainers dockerContainers) throws IOException {
@@ -91,5 +88,4 @@ public class JsonJavaDockerContainersMapper {
         return getOptionalStringValue(object, name)
                 .orElseThrow(() -> new IllegalArgumentException(name + " is required"));
     }
-
 }

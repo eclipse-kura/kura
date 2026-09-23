@@ -12,14 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.request.handler.jaxrs;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Optional;
-
+import com.google.gson.Gson;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
+import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -28,14 +27,11 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 public class DefaultExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
-    private DefaultExceptionHandler() {
-    }
+    private DefaultExceptionHandler() {}
 
     public static WebApplicationException toWebApplicationException(final Throwable e) {
         if (e instanceof KuraException) {
@@ -65,7 +61,8 @@ public class DefaultExceptionHandler {
         final KuraPayload responsePayload = new KuraResponsePayload(response.getStatus());
 
         try {
-            ResponseBodyHandlers.responseHandler(gson.orElseGet(Gson::new)).buildBody(response)
+            ResponseBodyHandlers.responseHandler(gson.orElseGet(Gson::new))
+                    .buildBody(response)
                     .ifPresent(responsePayload::setBody);
         } catch (final Exception ex) {
             logger.warn("failed to serialize WebApplicationException entity", ex);
@@ -78,8 +75,10 @@ public class DefaultExceptionHandler {
 
         final String actualMessage = message != null ? message : "An internal error occurred";
 
-        return new WebApplicationException(
-                Response.status(status).type(MediaType.APPLICATION_JSON).entity(new Failure(actualMessage)).build());
+        return new WebApplicationException(Response.status(status)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(new Failure(actualMessage))
+                .build());
     }
 
     private static class Failure {

@@ -13,22 +13,36 @@
 package org.eclipse.kura.emulator.position;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Icon;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.position.PositionService", name = "PositionService", description = "Emulated implementation of the PositionService.", icon = @Icon(resource = "PositionService", size = 32))
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.position.PositionService",
+        name = "PositionService",
+        description = "Emulated implementation of the PositionService.",
+        icon = @Icon(resource = "PositionService", size = 32))
 public @interface PositionServiceOptions {
 
-    @AttributeDefinition(name = "enabled", description = "The emulated PositionService is always enabled and using sample GPS positions.")
+    @AttributeDefinition(
+            name = "enabled",
+            description = "The emulated PositionService is always enabled and using sample GPS positions.")
     boolean enabled() default true;
 
-    @AttributeDefinition(name = "useGpsd", description = "If true uses the gpsd service daemon. This implies that this daemon must be installed and active first.")
+    @AttributeDefinition(
+            name = "useGpsd",
+            description =
+                    "If true uses the gpsd service daemon. This implies that this daemon must be installed and active first.")
     boolean useGpsd() default false;
 
-    @AttributeDefinition(name = "source", options = { @Option(label = "Boston", value = "boston"), @Option(label = "Denver", value = "denver"), @Option(label = "Paris", value = "paris"), @Option(label = "Test", value = "test") }, description = "Select the data source file to use.")
+    @AttributeDefinition(
+            name = "source",
+            options = {
+                @Option(label = "Boston", value = "boston"),
+                @Option(label = "Denver", value = "denver"),
+                @Option(label = "Paris", value = "paris"),
+                @Option(label = "Test", value = "test")
+            },
+            description = "Select the data source file to use.")
     String source() default "boston";
-
 }
-
-

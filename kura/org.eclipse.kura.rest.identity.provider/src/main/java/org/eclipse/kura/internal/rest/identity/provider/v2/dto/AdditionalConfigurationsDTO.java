@@ -14,7 +14,6 @@ package org.eclipse.kura.internal.rest.identity.provider.v2.dto;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 
 public class AdditionalConfigurationsDTO {
@@ -33,5 +32,4 @@ public class AdditionalConfigurationsDTO {
     public String toString() {
         return "AdditionalConfigurationDTO [configurations=" + this.configurations + "]";
     }
-
 }

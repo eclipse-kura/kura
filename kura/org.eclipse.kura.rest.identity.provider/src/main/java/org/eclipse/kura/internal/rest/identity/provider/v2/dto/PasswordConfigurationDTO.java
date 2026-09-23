@@ -47,5 +47,4 @@ public class PasswordConfigurationDTO {
         return "PasswordConfigurationDTO [passwordChangeNeeded=" + this.passwordChangeNeeded + ", passwordAuthEnabled="
                 + this.passwordAuthEnabled + "]";
     }
-
 }

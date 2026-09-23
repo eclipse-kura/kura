@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.eclipse.kura.KuraException;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
@@ -61,11 +60,12 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldSupportRollbackJournalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "ROLLBACK_JOURNAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
 
         whenQueryIsPerformed("CREATE TABLE FOO (BAR INTEGER);");
 
@@ -78,11 +78,12 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldSupportWalJournalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "WAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
 
         whenQueryIsPerformed("CREATE TABLE FOO (BAR INTEGER);");
 
@@ -95,12 +96,17 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldSupportWalCheckpoint()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.wal.checkpoint.interval.seconds", 5L //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "db.wal.checkpoint.interval.seconds",
+                        5L //
+                        ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
         givenExecutedQuery("INSERT INTO FOO VALUES (1);");
@@ -117,12 +123,18 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldDisableWalCheckpoint()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.wal.checkpoint.interval.seconds", 5L, //
-                "db.wal.checkpoint.enabled", false));
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "db.wal.checkpoint.interval.seconds",
+                        5L, //
+                        "db.wal.checkpoint.enabled",
+                        false));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
         givenExecutedQuery("INSERT INTO FOO VALUES (1);");
@@ -139,12 +151,17 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldSupporDefragInRollbackJournalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.defrag.interval.seconds", 5L //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "ROLLBACK_JOURNAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "db.defrag.interval.seconds",
+                        5L //
+                        ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
         givenExecutedQuery("INSERT INTO FOO VALUES ('" + largeText(20000) + "');");
@@ -162,13 +179,19 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldDisableDefragInRollbackJournalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.defrag.interval.seconds", 5L, //
-                "db.defrag.enabled", false //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "ROLLBACK_JOURNAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "db.defrag.interval.seconds",
+                        5L, //
+                        "db.defrag.enabled",
+                        false //
+                        ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
         givenExecutedQuery("INSERT INTO FOO VALUES ('" + largeText(20000) + "');");
@@ -186,13 +209,19 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldDisableDefragInWalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/waldefrag.sqlite", //
-                "db.defrag.interval.seconds", 5L, //
-                "db.defrag.enabled", false //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/waldefrag.sqlite", //
+                        "db.defrag.interval.seconds",
+                        5L, //
+                        "db.defrag.enabled",
+                        false //
+                        ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
         givenExecutedQuery("INSERT INTO FOO (BAR) VALUES ('" + largeText(2000) + "');");
@@ -212,12 +241,17 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shouldSupporDefragInWalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/waldefrag.sqlite", //
-                "db.defrag.interval.seconds", 5L //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/waldefrag.sqlite", //
+                        "db.defrag.interval.seconds",
+                        5L //
+                        ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
         givenExecutedQuery("INSERT INTO FOO (BAR) VALUES ('" + largeText(2000) + "');");
@@ -235,22 +269,29 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     }
 
     @Test
-    public void shouldSupportSwitchFromRollbackJournalToWal() throws InterruptedException, ExecutionException,
-            TimeoutException, IOException, KuraException, InvalidSyntaxException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+    public void shouldSupportSwitchFromRollbackJournalToWal()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException, KuraException,
+                    InvalidSyntaxException {
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "ROLLBACK_JOURNAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
         givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
         givenExecutedQuery("INSERT INTO FOO VALUES (1);");
 
-        whenSqliteDbServiceIsUpdated(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.wal.checkpoint.interval.seconds", 5L //
-        ));
+        whenSqliteDbServiceIsUpdated(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "db.wal.checkpoint.interval.seconds",
+                        5L //
+                        ));
         whenQueryIsPerformed("INSERT INTO FOO VALUES (2);");
 
         thenNoExceptionIsThrown();
@@ -260,23 +301,30 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     }
 
     @Test
-    public void shouldSupportSwitchFromWalToRollbackJournal() throws InterruptedException, ExecutionException,
-            TimeoutException, IOException, KuraException, InvalidSyntaxException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.wal.checkpoint.interval.seconds", 5L //
-        ));
+    public void shouldSupportSwitchFromWalToRollbackJournal()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException, KuraException,
+                    InvalidSyntaxException {
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "db.wal.checkpoint.interval.seconds",
+                        5L //
+                        ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
         givenExecutedQuery("INSERT INTO FOO VALUES (1);");
 
-        whenSqliteDbServiceIsUpdated(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+        whenSqliteDbServiceIsUpdated(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "ROLLBACK_JOURNAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
         whenQueryIsPerformed("INSERT INTO FOO VALUES (2);");
 
         thenNoExceptionIsThrown();
@@ -288,16 +336,18 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     @Test
     public void shoulNotSupportTwoIntancesOnSameDbPath()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "ROLLBACK_JOURNAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "ROLLBACK_JOURNAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
 
         whenAConnectionIsRequested();
 
@@ -311,11 +361,12 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "ROLLBACK_JOURNAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
         whenAConnectionIsRequested();
 
         thenNoExceptionIsThrown();
@@ -332,11 +383,12 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite" //
-        ));
+        givenSqliteDbService(
+                map( //
+                        "db.mode", "PERSISTED", //
+                        "db.journal.mode", "WAL", //
+                        "db.path", temporaryDirectory() + "/test.sqlite" //
+                        ));
         whenAConnectionIsRequested();
 
         thenNoExceptionIsThrown();
@@ -353,12 +405,17 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "ROLLBACK_JOURNAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "delete.db.files.on.failure", false) //
-        );
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "ROLLBACK_JOURNAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "delete.db.files.on.failure",
+                        false) //
+                );
         whenAConnectionIsRequested();
 
         thenExceptionIsThrown();
@@ -372,12 +429,17 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
         givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
-        givenSqliteDbService(map( //
-                "db.mode", "PERSISTED", //
-                "db.journal.mode", "WAL", //
-                "db.path", temporaryDirectory() + "/test.sqlite", //
-                "delete.db.files.on.failure", false) //
-        );
+        givenSqliteDbService(
+                map( //
+                        "db.mode",
+                        "PERSISTED", //
+                        "db.journal.mode",
+                        "WAL", //
+                        "db.path",
+                        temporaryDirectory() + "/test.sqlite", //
+                        "delete.db.files.on.failure",
+                        false) //
+                );
         whenAConnectionIsRequested();
 
         thenExceptionIsThrown();
@@ -437,5 +499,4 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
 
         return pos;
     }
-
 }

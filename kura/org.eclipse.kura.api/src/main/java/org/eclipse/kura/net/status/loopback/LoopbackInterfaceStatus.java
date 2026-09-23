@@ -46,5 +46,4 @@ public class LoopbackInterfaceStatus extends NetworkInterfaceStatus {
             return this;
         }
     }
-
 }

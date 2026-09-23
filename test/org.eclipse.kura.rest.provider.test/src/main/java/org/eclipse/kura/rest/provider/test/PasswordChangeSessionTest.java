@@ -15,6 +15,11 @@ package org.eclipse.kura.rest.provider.test;
 
 import static org.junit.Assert.fail;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -23,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
@@ -42,16 +46,10 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-
 public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
 
-    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID = "org.eclipse.kura.identity.PasswordStrengthVerificationService";
+    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID =
+            "org.eclipse.kura.identity.PasswordStrengthVerificationService";
 
     private final List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
 
@@ -89,9 +87,16 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
     }
 
     private void givenPasswordStrengthDoesNotRestrictChange() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, "new.password.min.length", 1,
-                "new.password.require.digits", false, "new.password.require.special.characters", false,
-                "new.password.require.both.cases", false);
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID,
+                "new.password.min.length",
+                1,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
     }
 
     private void givenServiceRequiresAssetsRole() {
@@ -103,7 +108,11 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
     }
 
     private void givenUserIsLoggedIn() {
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
     }
 
@@ -114,8 +123,8 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
 
             final Configuration configuration = configAdmin.getConfiguration(pid, "?");
 
-            final Dictionary<String, Object> configurationProperties = Optional
-                    .ofNullable(configuration.getProperties()).orElseGet(Hashtable::new);
+            final Dictionary<String, Object> configurationProperties =
+                    Optional.ofNullable(configuration.getProperties()).orElseGet(Hashtable::new);
 
             final Iterator<Object> iter = Arrays.asList(properties).iterator();
 
@@ -135,7 +144,8 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
 
     @SuppressWarnings("unchecked")
     private <T extends TestService> void givenService(final T service) {
-        final BundleContext bundleContext = FrameworkUtil.getBundle(PasswordChangeSessionTest.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(PasswordChangeSessionTest.class).getBundleContext();
 
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("osgi.jakartars.resource", true);
@@ -162,12 +172,16 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void givenIdentity(final String username, final Optional<String> password, final List<String> roles,
+    private void givenIdentity(
+            final String username,
+            final Optional<String> password,
+            final List<String> roles,
             final boolean needsPasswordChange) {
         final UserAdmin userAdmin;
 
         try {
-            userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            userAdmin =
+                    ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail("failed to track UserAdmin");
             return;
@@ -198,8 +212,8 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void givenSuccessfulRequest(final String proto, final int port, final MethodSpec method,
-            final String resource, final String body) {
+    private void givenSuccessfulRequest(
+            final String proto, final int port, final MethodSpec method, final String resource, final String body) {
         whenRequestIsPerformed(proto, port, method, resource, body);
         thenRequestSucceeds();
     }
@@ -209,7 +223,11 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
     }
 
     private void whenPasswordIsChanged() {
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
     }
 
@@ -217,22 +235,23 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
     }
 
-    private void whenRequestIsPerformed(final String proto, final int port, final MethodSpec method,
-            final String resource, final String body) {
+    private void whenRequestIsPerformed(
+            final String proto, final int port, final MethodSpec method, final String resource, final String body) {
         final RestTransport restTransport = (RestTransport) this.transport;
 
-        this.response = Optional
-                .of(restTransport.runRequest(proto + "://localhost:" + port + "/services", resource, method, body));
+        this.response = Optional.of(
+                restTransport.runRequest(proto + "://localhost:" + port + "/services", resource, method, body));
     }
 
     private void whenXsrfTokenIsObtained() {
         final RestTransport restTransport = (RestTransport) this.transport;
 
-        final Response response = restTransport.runRequest("http://localhost:8080/services", "/session/v1/xsrfToken",
-                new MethodSpec("GET"), null);
+        final Response response = restTransport.runRequest(
+                "http://localhost:8080/services", "/session/v1/xsrfToken", new MethodSpec("GET"), null);
 
-        final JsonObject object = Json
-                .parse(response.getBody().orElseThrow(() -> new IllegalStateException("no response body"))).asObject();
+        final JsonObject object = Json.parse(
+                        response.getBody().orElseThrow(() -> new IllegalStateException("no response body")))
+                .asObject();
 
         final String token = object.get("xsrfToken").asString();
 
@@ -265,14 +284,13 @@ public class PasswordChangeSessionTest extends AbstractRequestHandlerTest {
         return (T) userAdmin.createRole(name, type);
     }
 
-    public static abstract class TestService {
+    public abstract static class TestService {
 
         @GET
         @Path("/ping")
         public String ping() {
             return "ok";
         }
-
     }
 
     @Path("testservice")

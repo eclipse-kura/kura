@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -34,14 +33,15 @@ public class ConfigurationAdminHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationAdminHelper.class);
 
-    private ConfigurationAdminHelper() {
-    }
+    private ConfigurationAdminHelper() {}
 
-    public static Map<String, Object> loadConfigurationProperties(final ConfigurationAdmin configurationAdmin,
-            final String pid) {
+    public static Map<String, Object> loadConfigurationProperties(
+            final ConfigurationAdmin configurationAdmin, final String pid) {
 
-        return getConfiguration(configurationAdmin, pid).map(Configuration::getProperties)
-                .map(ConfigurationAdminHelper::dictionaryToMap).orElseGet(() -> new HashMap<>());
+        return getConfiguration(configurationAdmin, pid)
+                .map(Configuration::getProperties)
+                .map(ConfigurationAdminHelper::dictionaryToMap)
+                .orElseGet(() -> new HashMap<>());
     }
 
     public static Map<String, Object> loadHttpServiceConfigurationProperties(
@@ -62,8 +62,8 @@ public class ConfigurationAdminHelper {
         return Arrays.stream(portList).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
-    private static Optional<Configuration> getConfiguration(final ConfigurationAdmin configurationAdmin,
-            final String pid) {
+    private static Optional<Configuration> getConfiguration(
+            final ConfigurationAdmin configurationAdmin, final String pid) {
         try {
             return Optional.ofNullable(configurationAdmin.getConfiguration(pid, "?"));
         } catch (final IOException e) {

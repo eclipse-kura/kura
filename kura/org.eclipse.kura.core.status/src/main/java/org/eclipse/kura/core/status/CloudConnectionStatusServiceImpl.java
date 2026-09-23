@@ -19,7 +19,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.eclipse.kura.core.status.GpioLedManager.GpioIdentifier;
 import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
 import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
@@ -32,18 +31,18 @@ import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.status.CloudConnectionStatusService",
-    service = { org.eclipse.kura.status.CloudConnectionStatusService.class })
+        name = "org.eclipse.kura.status.CloudConnectionStatusService",
+        service = {org.eclipse.kura.status.CloudConnectionStatusService.class})
 public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusService {
 
     private static final String STATUS_NOTIFICATION_URL = "ccs.status.notification.url";
@@ -77,7 +76,10 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         this.idleComponent = new IdleStatusComponent();
     }
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -86,7 +88,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         this.systemService = null;
     }
 
-    @Reference(name = "GPIOService",
+    @Reference(
+            name = "GPIOService",
             service = org.eclipse.kura.gpio.GPIOService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -109,8 +112,9 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     protected void activate(ComponentContext componentContext) {
         logger.info("Activating CloudConnectionStatus service...");
 
-        String urlFromConfig = this.systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL,
-                CloudConnectionStatusURL.CCS + CloudConnectionStatusURL.NONE);
+        String urlFromConfig = this.systemService
+                .getProperties()
+                .getProperty(STATUS_NOTIFICATION_URL, CloudConnectionStatusURL.CCS + CloudConnectionStatusURL.NONE);
 
         this.properties = CloudConnectionStatusURL.parseURL(urlFromConfig);
 
@@ -194,32 +198,34 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     private StatusRunnable getRunnable(CloudConnectionStatusEnum status) {
         StatusRunnable runnable = null;
 
-        StatusNotificationTypeEnum notificationType = Optional
-                .ofNullable(this.properties.get(CloudConnectionStatusURL.NOTIFICATION_TYPE))
-                .filter(StatusNotificationTypeEnum.class::isInstance).map(StatusNotificationTypeEnum.class::cast)
+        StatusNotificationTypeEnum notificationType = Optional.ofNullable(
+                        this.properties.get(CloudConnectionStatusURL.NOTIFICATION_TYPE))
+                .filter(StatusNotificationTypeEnum.class::isInstance)
+                .map(StatusNotificationTypeEnum.class::cast)
                 .orElseGet(() -> {
-                    logger.warn("Invalid {} property, disabiling cloud connection status notifications",
+                    logger.warn(
+                            "Invalid {} property, disabiling cloud connection status notifications",
                             STATUS_NOTIFICATION_URL);
                     return StatusNotificationTypeEnum.NONE;
                 });
 
         switch (notificationType) {
-        case LED:
-            if (this.properties.get("linux_led") instanceof String) {
-                runnable = getLinuxStatusWorker(status);
-            }
-            if (runnable == null && this.properties.get("led") instanceof GpioIdentifier) {
-                runnable = getGpioStatusWorker(status);
-            }
-            if (runnable == null) {
+            case LED:
+                if (this.properties.get("linux_led") instanceof String) {
+                    runnable = getLinuxStatusWorker(status);
+                }
+                if (runnable == null && this.properties.get("led") instanceof GpioIdentifier) {
+                    runnable = getGpioStatusWorker(status);
+                }
+                if (runnable == null) {
+                    runnable = getLogStatusWorker(status);
+                }
+                break;
+            case LOG:
                 runnable = getLogStatusWorker(status);
-            }
-            break;
-        case LOG:
-            runnable = getLogStatusWorker(status);
-            break;
-        default:
-            runnable = getNoneStatusWorker();
+                break;
+            default:
+                runnable = getNoneStatusWorker();
         }
         return runnable;
     }
@@ -277,20 +283,20 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     private StatusRunnable createLedRunnable(CloudConnectionStatusEnum status, LedManager linuxLedManager) {
         StatusRunnable runnable;
         switch (status) {
-        case ON:
-            runnable = new OnOffStatusRunnable(linuxLedManager, true);
-            break;
-        case OFF:
-            runnable = new OnOffStatusRunnable(linuxLedManager, false);
-            break;
-        case SLOW_BLINKING:
-            runnable = new BlinkStatusRunnable(linuxLedManager);
-            break;
-        case FAST_BLINKING:
-            runnable = new BlinkStatusRunnable(linuxLedManager);
-            break;
-        default:
-            runnable = new HeartbeatStatusRunnable(linuxLedManager);
+            case ON:
+                runnable = new OnOffStatusRunnable(linuxLedManager, true);
+                break;
+            case OFF:
+                runnable = new OnOffStatusRunnable(linuxLedManager, false);
+                break;
+            case SLOW_BLINKING:
+                runnable = new BlinkStatusRunnable(linuxLedManager);
+                break;
+            case FAST_BLINKING:
+                runnable = new BlinkStatusRunnable(linuxLedManager);
+                break;
+            default:
+                runnable = new HeartbeatStatusRunnable(linuxLedManager);
         }
         return runnable;
     }

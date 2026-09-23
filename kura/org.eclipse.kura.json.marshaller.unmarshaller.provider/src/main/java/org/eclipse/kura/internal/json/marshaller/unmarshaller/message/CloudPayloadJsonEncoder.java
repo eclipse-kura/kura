@@ -13,9 +13,6 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.message;
 
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.BODY;
-import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.METRICS;
-import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.POSITION;
-import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.SENTON;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
@@ -24,20 +21,21 @@ import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.Clo
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Base64;
-import java.util.Date;
-
-import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraPosition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.METRICS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.POSITION;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.SENTON;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Base64;
+import java.util.Date;
+import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraPosition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides a set of methods that allow to encode the {@link KuraPayload} into a byte[] message.
@@ -47,8 +45,7 @@ public class CloudPayloadJsonEncoder {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudPayloadJsonEncoder.class);
 
-    private CloudPayloadJsonEncoder() {
-    }
+    private CloudPayloadJsonEncoder() {}
 
     /**
      * This static method takes a {@link KuraPayload} and converts it into a {@code String}
@@ -140,7 +137,8 @@ public class CloudPayloadJsonEncoder {
         encodePositionDouble(jsonPosition, SPEED.value(), position.getSpeed());
 
         if (position.getTimestamp() != null) {
-            jsonPosition.add(CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value(),
+            jsonPosition.add(
+                    CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value(),
                     position.getTimestamp().getTime());
         }
         if (position.getStatus() != null) {

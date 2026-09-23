@@ -14,7 +14,6 @@
 package org.eclipse.kura.security.keystore;
 
 import java.util.Collections;
-
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
@@ -43,7 +42,7 @@ public class KeystoreChangedEvent extends Event {
 
     /**
      * Returns the kura.service.pid of the sender {@link KeystoreService}.
-     * 
+     *
      * @return the kura.service.pid of the sender {@link KeystoreService}.
      */
     public String getSenderPid() {

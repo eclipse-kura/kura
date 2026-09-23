@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
@@ -98,7 +97,6 @@ public class IdentityServiceV1Test {
 
         thenNoExceptionOccurred();
         thenPermissionsAre("perm1", "perm2");
-
     }
 
     @Test
@@ -110,7 +108,6 @@ public class IdentityServiceV1Test {
 
         thenNoExceptionOccurred();
         thenUserIs("testuser");
-
     }
 
     @Test
@@ -132,17 +129,18 @@ public class IdentityServiceV1Test {
 
         thenNoExceptionOccurred();
         thenValidatorOptionsAre(8, false, false, false);
-
     }
 
-    private void thenValidatorOptionsAre(int passwordMinimumLength, boolean passwordRequireDigits,
-            boolean passwordRequireBothCases, boolean passwordRequireSpecialChars) {
+    private void thenValidatorOptionsAre(
+            int passwordMinimumLength,
+            boolean passwordRequireDigits,
+            boolean passwordRequireBothCases,
+            boolean passwordRequireSpecialChars) {
 
         assertEquals(passwordMinimumLength, this.validatorOptions.isPasswordMinimumLength());
         assertEquals(passwordRequireDigits, this.validatorOptions.isPasswordRequireDigits());
         assertEquals(passwordRequireBothCases, this.validatorOptions.isPasswordRequireBothCases());
         assertEquals(passwordRequireSpecialChars, this.validatorOptions.isPasswordRequireSpecialChars());
-
     }
 
     @Test
@@ -199,20 +197,22 @@ public class IdentityServiceV1Test {
             fail("fail to setup mocks");
         }
 
-        this.identityService = new LegacyIdentityService(this.cryptoService, this.userAdmin,
-                this.passwordStrengthVerificationService);
-
+        this.identityService =
+                new LegacyIdentityService(this.cryptoService, this.userAdmin, this.passwordStrengthVerificationService);
     }
 
     private void givenExistingUser(UserDTO user) {
         this.user = user;
 
-        UserImpl userImpl = new UserImpl(this.user.getUserName(), this.user.getPassword(),
+        UserImpl userImpl = new UserImpl(
+                this.user.getUserName(),
+                this.user.getPassword(),
                 this.user.isPasswordChangeNeeded().get());
 
         try {
-            when(this.userAdmin.getRole(USER_ROLE_NAME_PREFIX + user.getUserName())).thenReturn(userImpl);
-            when(this.userAdmin.getRoles(null)).thenReturn(new Role[] { userImpl });
+            when(this.userAdmin.getRole(USER_ROLE_NAME_PREFIX + user.getUserName()))
+                    .thenReturn(userImpl);
+            when(this.userAdmin.getRoles(null)).thenReturn(new Role[] {userImpl});
         } catch (InvalidSyntaxException e) {
             fail("unable to setup mock user admin");
         }
@@ -225,15 +225,18 @@ public class IdentityServiceV1Test {
     private void whenCreatingUser(UserDTO newUser) {
         try {
             this.newUser = newUser;
-            when(this.userAdmin.createRole(USER_ROLE_NAME_PREFIX + newUser.getUserName(), Role.USER)).then(anser -> {
+            when(this.userAdmin.createRole(USER_ROLE_NAME_PREFIX + newUser.getUserName(), Role.USER))
+                    .then(anser -> {
+                        User userImpl = new UserImpl(
+                                newUser.getUserName(),
+                                newUser.getPassword(),
+                                newUser.isPasswordChangeNeeded().get());
 
-                User userImpl = new UserImpl(newUser.getUserName(), newUser.getPassword(),
-                        newUser.isPasswordChangeNeeded().get());
+                        when(this.userAdmin.getRole(USER_ROLE_NAME_PREFIX + newUser.getUserName()))
+                                .thenReturn(userImpl);
 
-                when(this.userAdmin.getRole(USER_ROLE_NAME_PREFIX + newUser.getUserName())).thenReturn(userImpl);
-
-                return userImpl;
-            });
+                        return userImpl;
+                    });
             this.identityService.createUser(this.newUser);
         } catch (Exception e) {
             this.occurredException = e;
@@ -262,7 +265,6 @@ public class IdentityServiceV1Test {
         } catch (Exception e) {
             this.occurredException = e;
         }
-
     }
 
     private void whenUpdatingUser(UserDTO user) {
@@ -309,7 +311,6 @@ public class IdentityServiceV1Test {
 
     private void thenPasswordValidationIs(boolean expectedValue) {
         assertEquals(expectedValue, this.isPasswordValid);
-
     }
 
     private void thenNoExceptionOccurred() {
@@ -318,7 +319,8 @@ public class IdentityServiceV1Test {
             StringWriter sw = new StringWriter();
             this.occurredException.printStackTrace(new PrintWriter(sw));
 
-            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+            errorMessage = String.format(
+                    "No exception expected, \"%s\" found. Caused by: %s",
                     this.occurredException.getClass().getName(), sw.toString());
         }
 
@@ -336,7 +338,6 @@ public class IdentityServiceV1Test {
         @Override
         public String getName() {
             return PERMISSION_ROLE_NAME_PREFIX + this.name;
-
         }
 
         @Override
@@ -431,5 +432,4 @@ public class IdentityServiceV1Test {
     private static PasswordStrengthRequirements defaultPasswordStrengthRequirements() {
         return new PasswordStrengthRequirements(8, false, false, false);
     }
-
 }

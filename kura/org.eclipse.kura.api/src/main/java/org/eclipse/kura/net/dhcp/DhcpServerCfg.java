@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -43,8 +43,8 @@ public class DhcpServerCfg {
      * @param passDns
      *            whether or not to pass DNS to DHCP clients
      */
-    public DhcpServerCfg(String interfaceName, boolean enabled, int defaultLeaseTime, int maximumLeaseTime,
-            boolean passDns) {
+    public DhcpServerCfg(
+            String interfaceName, boolean enabled, int defaultLeaseTime, int maximumLeaseTime, boolean passDns) {
         super();
         this.interfaceName = interfaceName;
         this.enabled = enabled;
@@ -96,9 +96,18 @@ public class DhcpServerCfg {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(this.getClass().getName());
-        sb.append(": [").append("ifaceName=").append(this.interfaceName).append(", enabled?=").append(this.enabled)
-                .append(", defaultLeaseTime=").append(this.defaultLeaseTime).append(", maximumLeaseTime=")
-                .append(this.maximumLeaseTime).append(", passDNS?=").append(this.passDns).append(']');
+        sb.append(": [")
+                .append("ifaceName=")
+                .append(this.interfaceName)
+                .append(", enabled?=")
+                .append(this.enabled)
+                .append(", defaultLeaseTime=")
+                .append(this.defaultLeaseTime)
+                .append(", maximumLeaseTime=")
+                .append(this.maximumLeaseTime)
+                .append(", passDNS?=")
+                .append(this.passDns)
+                .append(']');
         return sb.toString();
     }
 }

@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.core.inventory.resources;
 
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
@@ -90,5 +89,4 @@ public class ContainerImage extends SystemResourceInfo {
     public void setImageSize(long imageSize) {
         this.imageSize = imageSize;
     }
-
 }

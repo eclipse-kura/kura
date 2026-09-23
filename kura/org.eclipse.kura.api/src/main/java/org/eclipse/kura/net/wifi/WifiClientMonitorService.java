@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -31,14 +31,14 @@ public interface WifiClientMonitorService {
 
     /**
      * Return the signal level on the given wireless interface
-     * 
+     *
      * @param interfaceName
      *                      the name of the wireless interface
      * @param ssid
      *                      the name of the ssid the interface is attached to
      * @return an integer number representing the rssi
      * @throws KuraException
-     * 
+     *
      * @deprecated since 2.4. Use {@link getSignalLevel(String interfaceName, String
      *             ssid, boolean recompute)} instead.
      */
@@ -47,7 +47,7 @@ public interface WifiClientMonitorService {
 
     /**
      * Return the signal level on the given wireless interface
-     * 
+     *
      * @param interfaceName
      *                      the name of the wireless interface
      * @param ssid
@@ -57,7 +57,7 @@ public interface WifiClientMonitorService {
      *                      cached value is returned
      * @return an integer number representing the rssi
      * @throws KuraException
-     * 
+     *
      * @since 2.4
      */
     public int getSignalLevel(String interfaceName, String ssid, boolean recompute) throws KuraException;

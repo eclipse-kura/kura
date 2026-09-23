@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraGPIODescription;
 import org.eclipse.kura.gpio.KuraGPIODirection;
@@ -26,21 +25,21 @@ import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.gpio.GPIOService",
-    immediate = true,
-    // service.pid is published as a service property so consumers can target this
-    // GPIOService by pid (e.g. BundleUtil.getBundles). This component has no @Modified
-    // and no ConfigurationAdmin configuration, so felix.scr does not auto-publish it;
-    // it must be declared explicitly, as the original OSGI-INF/gpio.xml did.
-    property = "service.pid=org.eclipse.kura.gpio.GPIOService",
-    service = { org.eclipse.kura.gpio.GPIOService.class })
+        name = "org.eclipse.kura.gpio.GPIOService",
+        immediate = true,
+        // service.pid is published as a service property so consumers can target this
+        // GPIOService by pid (e.g. BundleUtil.getBundles). This component has no @Modified
+        // and no ConfigurationAdmin configuration, so felix.scr does not auto-publish it;
+        // it must be declared explicitly, as the original OSGI-INF/gpio.xml did.
+        property = "service.pid=org.eclipse.kura.gpio.GPIOService",
+        service = {org.eclipse.kura.gpio.GPIOService.class})
 public class GpioServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GpioServiceImpl.class);
@@ -60,7 +59,7 @@ public class GpioServiceImpl implements GPIOService {
                 properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, name + ":" + chip + ":" + line);
                 KuraGPIODescription desc = new KuraGPIODescription(properties);
                 this.pinDescriptions.add(desc);
-                
+
                 this.pins.put(chip * 1000 + line, name);
             }
         }
@@ -80,8 +79,8 @@ public class GpioServiceImpl implements GPIOService {
     }
 
     @Override
-    public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
-            KuraGPIOTrigger trigger) {
+    public KuraGPIOPin getPinByName(
+            String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
         if (pinName == null || pinName.isEmpty()) {
             throw new IllegalArgumentException("pinName cannot be null");
         }
@@ -97,8 +96,8 @@ public class GpioServiceImpl implements GPIOService {
     }
 
     @Override
-    public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
-            KuraGPIOTrigger trigger) {
+    public KuraGPIOPin getPinByTerminal(
+            int terminal, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
         if (terminal < 0) {
             throw new IllegalArgumentException("terminal cannot be negative");
         }
@@ -119,8 +118,8 @@ public class GpioServiceImpl implements GPIOService {
     }
 
     @Override
-    public List<KuraGPIOPin> getPins(Map<String, String> description, KuraGPIODirection direction, KuraGPIOMode mode,
-            KuraGPIOTrigger trigger) {
+    public List<KuraGPIOPin> getPins(
+            Map<String, String> description, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
         if (description == null || description.isEmpty() || !description.containsKey("name")) {
             throw new IllegalArgumentException("description cannot be null or empty and must contain 'name' key");
         }
@@ -131,5 +130,4 @@ public class GpioServiceImpl implements GPIOService {
     public List<KuraGPIODescription> getAvailablePinDescriptions() {
         return Collections.unmodifiableList(this.pinDescriptions);
     }
-
 }

@@ -10,13 +10,10 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.http.server.manager;
 
 import java.security.KeyStore;
-
 import javax.net.ssl.KeyManager;
-
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.kura.security.keystore.KeystoreService;
 
@@ -30,7 +27,8 @@ public class BaseSslContextFactory extends SslContextFactory.Server {
 
     @Override
     protected KeyManager[] getKeyManagers(KeyStore keyStore) throws Exception {
-        return this.keystoreService.getKeyManagers(getKeyManagerFactoryAlgorithm()).toArray(new KeyManager[0]);
+        return this.keystoreService
+                .getKeyManagers(getKeyManagerFactoryAlgorithm())
+                .toArray(new KeyManager[0]);
     }
-
 }

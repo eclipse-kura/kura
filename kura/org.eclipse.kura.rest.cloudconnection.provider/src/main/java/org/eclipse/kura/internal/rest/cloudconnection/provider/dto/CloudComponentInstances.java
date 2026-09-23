@@ -20,8 +20,8 @@ public class CloudComponentInstances {
     private List<CloudEndpointInstance> cloudEndpointInstances = new ArrayList<>();
     private List<PubSubInstance> pubsubInstances = new ArrayList<>();
 
-    public CloudComponentInstances(List<CloudEndpointInstance> cloudEndpointInstances,
-            List<PubSubInstance> pubsubInstances) {
+    public CloudComponentInstances(
+            List<CloudEndpointInstance> cloudEndpointInstances, List<PubSubInstance> pubsubInstances) {
         super();
         this.cloudEndpointInstances = cloudEndpointInstances;
         this.pubsubInstances = pubsubInstances;
@@ -34,5 +34,4 @@ public class CloudComponentInstances {
     public List<PubSubInstance> getPubsubInstances() {
         return this.pubsubInstances;
     }
-
 }

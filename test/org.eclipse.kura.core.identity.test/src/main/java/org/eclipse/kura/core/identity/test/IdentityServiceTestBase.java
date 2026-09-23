@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
@@ -37,7 +36,8 @@ import org.osgi.service.useradmin.UserAdmin;
 
 public abstract class IdentityServiceTestBase {
 
-    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID = "org.eclipse.kura.identity.PasswordStrengthVerificationService";
+    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID =
+            "org.eclipse.kura.identity.PasswordStrengthVerificationService";
     private static final Pattern KURA_IDENTITY_ROLE_PATTERN = Pattern.compile("^kura\\.(user|permission)\\..+");
 
     private final ConfigurationService configurationService;
@@ -55,8 +55,9 @@ public abstract class IdentityServiceTestBase {
         }
 
         try {
-            ServiceUtil.updateComponentConfiguration(configurationService, PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID,
-                    properties).get(30, TimeUnit.SECONDS);
+            ServiceUtil.updateComponentConfiguration(
+                            configurationService, PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, properties)
+                    .get(30, TimeUnit.SECONDS);
         } catch (final Exception e) {
             fail("failed to update authentication settings");
             throw new IllegalStateException("unreachable");
@@ -65,15 +66,15 @@ public abstract class IdentityServiceTestBase {
 
     public IdentityServiceTestBase() {
         try {
-            this.configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
-            this.identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
-            this.userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
+            this.configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
+            this.identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
+            this.userAdmin =
+                    ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
-            ServiceUtil
-                    .trackService(ConfigurableComponent.class,
+            ServiceUtil.trackService(
+                            ConfigurableComponent.class,
                             Optional.of("(kura.service.pid=" + PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID + ")"))
                     .get(30, TimeUnit.SECONDS);
         } catch (final Exception e) {
@@ -85,8 +86,8 @@ public abstract class IdentityServiceTestBase {
     @After
     public void cleanupIdentityState() {
         try {
-            for (final IdentityConfiguration identity : this.identityService
-                    .getIdentitiesConfiguration(Collections.emptySet())) {
+            for (final IdentityConfiguration identity :
+                    this.identityService.getIdentitiesConfiguration(Collections.emptySet())) {
                 this.identityService.deleteIdentity(identity.getName());
             }
         } catch (final Exception e) {
@@ -111,5 +112,4 @@ public abstract class IdentityServiceTestBase {
         } catch (final InvalidSyntaxException e) {
         }
     }
-
 }

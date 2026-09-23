@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditConstants;
@@ -72,7 +71,10 @@ public class MessageHandlerCallable implements Callable<Void> {
     private final CloudConnectionManagerImpl cloudConnectionManager;
     private final RequestHandlerContext requestHandlerContext;
 
-    public MessageHandlerCallable(RequestHandler cloudApp, String appTopic, KuraPayload msg,
+    public MessageHandlerCallable(
+            RequestHandler cloudApp,
+            String appTopic,
+            KuraPayload msg,
             CloudConnectionManagerImpl cloudConnectionManager) {
         super();
         this.cloudApp = cloudApp;
@@ -82,7 +84,7 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         String notificationPublisherPid = null; // TODO: this.cloudConnectionManager.getNotificationPublisherPid();
         CloudNotificationPublisher notificationPublisher = null; // TODO:
-                                                                 // this.cloudConnectionManager.getNotificationPublisher();
+        // this.cloudConnectionManager.getNotificationPublisher();
         Map<String, String> contextProperties = new HashMap<>();
         contextProperties.put(NOTIFICATION_PUBLISHER_PID.name(), notificationPublisherPid);
 
@@ -95,9 +97,9 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         String requestId = (String) this.kuraMessage.getMetric(METRIC_REQUEST_ID);
         if (requestId == null) {
-        if(logger.isDebugEnabled()) {
-            logger.debug("Request Id is null"); 
-        }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Request Id is null");
+            }
             throw new ParseException("Not a valid request payload", 0);
         }
 
@@ -113,7 +115,8 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         try (final Scope scope = AuditContext.openScope(new AuditContext(auditProperties))) {
             try {
-                Iterator<String> resources = RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
+                Iterator<String> resources =
+                        RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
 
                 if (!resources.hasNext()) {
                     throw new IllegalArgumentException();
@@ -126,36 +129,36 @@ public class MessageHandlerCallable implements Callable<Void> {
                 KuraMessage reqMessage = new KuraMessage(reqPayload, reqResources);
 
                 switch (method) {
-                case "GET":
-                    logger.debug("Handling GET request topic: {}", this.appTopic);
-                    response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "GET":
+                        logger.debug("Handling GET request topic: {}", this.appTopic);
+                        response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "PUT":
-                    logger.debug("Handling PUT request topic: {}", this.appTopic);
-                    response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "PUT":
+                        logger.debug("Handling PUT request topic: {}", this.appTopic);
+                        response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "POST":
-                    logger.debug("Handling POST request topic: {}", this.appTopic);
-                    response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "POST":
+                        logger.debug("Handling POST request topic: {}", this.appTopic);
+                        response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "DEL":
-                    logger.debug("Handling DEL request topic: {}", this.appTopic);
-                    response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "DEL":
+                        logger.debug("Handling DEL request topic: {}", this.appTopic);
+                        response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "EXEC":
-                    logger.debug("Handling EXEC request topic: {}", this.appTopic);
-                    response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "EXEC":
+                        logger.debug("Handling EXEC request topic: {}", this.appTopic);
+                        response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
+                        break;
 
-                default:
-                    logger.error("Bad request topic: {}", this.appTopic);
-                    KuraPayload payload = new KuraPayload();
-                    response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
-                    break;
+                    default:
+                        logger.error("Bad request topic: {}", this.appTopic);
+                        KuraPayload payload = new KuraPayload();
+                        response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
+                        break;
                 }
             } catch (IllegalArgumentException e) {
                 logger.error("Bad request topic: {}", this.appTopic);
@@ -170,9 +173,11 @@ public class MessageHandlerCallable implements Callable<Void> {
             final boolean isSuccessful = responseCode instanceof Integer && ((Integer) responseCode) / 200 == 1;
 
             if (isSuccessful) {
-                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call", AuditContext.currentOrInternal());
+                auditLogger.info(
+                        "{} CloudCall - Success - Execute RequestHandler call", AuditContext.currentOrInternal());
             } else {
-                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call", AuditContext.currentOrInternal());
+                auditLogger.warn(
+                        "{} CloudCall - Failure - Execute RequestHandler call", AuditContext.currentOrInternal());
             }
 
             buildResponseMessage(requestId, response);
@@ -185,8 +190,8 @@ public class MessageHandlerCallable implements Callable<Void> {
             response.getPayload().setTimestamp(new Date());
 
             DataService dataService = this.cloudConnectionManager.getDataService();
-            String fullTopic = encodeTopic(requestId,
-                    String.valueOf(response.getPayload().getMetric(METRIC_RESPONSE_CODE)));
+            String fullTopic =
+                    encodeTopic(requestId, String.valueOf(response.getPayload().getMetric(METRIC_RESPONSE_CODE)));
             byte[] appPayload = this.cloudConnectionManager.encodePayload(response.getPayload());
             dataService.publish(fullTopic, appPayload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
@@ -243,8 +248,11 @@ public class MessageHandlerCallable implements Callable<Void> {
         StringBuilder sb = new StringBuilder();
 
         // fixed response topic subsection
-        sb.append(MessageType.CONTROL.getTopicPrefix()).append(topicSeparator).append(topicSeparator)
-                .append(topicSeparator).append("res");
+        sb.append(MessageType.CONTROL.getTopicPrefix())
+                .append(topicSeparator)
+                .append(topicSeparator)
+                .append(topicSeparator)
+                .append("res");
 
         // variable response topic part
         sb.append(topicSeparator).append(requestId).append(topicSeparator).append(responseCode);

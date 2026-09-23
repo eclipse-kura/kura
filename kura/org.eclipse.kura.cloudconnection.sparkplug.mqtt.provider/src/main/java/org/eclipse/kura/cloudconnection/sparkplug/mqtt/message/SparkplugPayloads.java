@@ -1,38 +1,37 @@
 /*******************************************************************************
  * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 public class SparkplugPayloads {
 
     public static final String NODE_CONTROL_REBIRTH_METRIC_NAME = "Node Control/Rebirth";
 
-    private SparkplugPayloads() {
-    }
+    private SparkplugPayloads() {}
 
     public static byte[] getNodeDeathPayload(long bdSeq) {
-        return new SparkplugBProtobufPayloadBuilder().withBdSeq(bdSeq, new Date().getTime()).build();
+        return new SparkplugBProtobufPayloadBuilder()
+                .withBdSeq(bdSeq, new Date().getTime())
+                .build();
     }
 
     public static byte[] getNodeBirthPayload(long bdSeq, long seq) {
@@ -56,7 +55,7 @@ public class SparkplugPayloads {
                 return metric.getBooleanValue();
             }
         }
-        
+
         throw new NoSuchFieldException("Metric " + metricName + " not found in payload");
     }
 
@@ -98,7 +97,7 @@ public class SparkplugPayloads {
     public static KuraPayload getKuraPayload(byte[] rawSparkplugPayload) throws InvalidProtocolBufferException {
         KuraPayload kuraPayload = new KuraPayload();
         Payload sparkplugPayload = Payload.parseFrom(rawSparkplugPayload);
-        
+
         for (Metric metric : sparkplugPayload.getMetricsList()) {
             kuraPayload.addMetric(metric.getName(), getMetricValue(metric));
         }
@@ -118,8 +117,8 @@ public class SparkplugPayloads {
         return kuraPayload;
     }
 
-    private static void addMetricIfNonNull(SparkplugBProtobufPayloadBuilder payloadBuilder, String name, Object value,
-            long timestamp) {
+    private static void addMetricIfNonNull(
+            SparkplugBProtobufPayloadBuilder payloadBuilder, String name, Object value, long timestamp) {
         if (Objects.nonNull(value)) {
             payloadBuilder.withMetric(name, value, timestamp);
         }
@@ -127,30 +126,29 @@ public class SparkplugPayloads {
 
     private static Object getMetricValue(Metric metric) {
         switch (metric.getValueCase()) {
-        case BOOLEAN_VALUE:
-            return metric.getBooleanValue();
-        case BYTES_VALUE:
-            return metric.getBytesValue().toByteArray();
-        case DATASET_VALUE:
-            return metric.getDatasetValue().toByteArray();
-        case DOUBLE_VALUE:
-            return metric.getDoubleValue();
-        case EXTENSION_VALUE:
-            return metric.getExtensionValue().toByteArray();
-        case FLOAT_VALUE:
-            return metric.getFloatValue();
-        case INT_VALUE:
-            return metric.getIntValue();
-        case LONG_VALUE:
-            return metric.getLongValue();
-        case STRING_VALUE:
-            return metric.getStringValue();
-        case TEMPLATE_VALUE:
-            return metric.getTemplateValue().toByteArray();
-        case VALUE_NOT_SET:
-        default:
-            return null;
+            case BOOLEAN_VALUE:
+                return metric.getBooleanValue();
+            case BYTES_VALUE:
+                return metric.getBytesValue().toByteArray();
+            case DATASET_VALUE:
+                return metric.getDatasetValue().toByteArray();
+            case DOUBLE_VALUE:
+                return metric.getDoubleValue();
+            case EXTENSION_VALUE:
+                return metric.getExtensionValue().toByteArray();
+            case FLOAT_VALUE:
+                return metric.getFloatValue();
+            case INT_VALUE:
+                return metric.getIntValue();
+            case LONG_VALUE:
+                return metric.getLongValue();
+            case STRING_VALUE:
+                return metric.getStringValue();
+            case TEMPLATE_VALUE:
+                return metric.getTemplateValue().toByteArray();
+            case VALUE_NOT_SET:
+            default:
+                return null;
         }
     }
-
 }

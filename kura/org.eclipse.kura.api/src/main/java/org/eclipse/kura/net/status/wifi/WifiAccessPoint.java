@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -54,7 +53,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the Service Set IDentifier of the WiFi network.
-     * 
+     *
      * @return a string representing the ssid
      */
     public String getSsid() {
@@ -63,7 +62,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the Basic Service Set IDentifier of the WiFi access point.
-     * 
+     *
      * @return a string representing the the bssid
      */
     public byte[] getHardwareAddress() {
@@ -72,7 +71,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the {@link WifiChannel} used by the WiFi access point.
-     * 
+     *
      * @return a {@link WifiChannel} object
      */
     public WifiChannel getChannel() {
@@ -81,7 +80,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the {@link WifiMode} of the wireless interface.
-     * 
+     *
      * @return a {@link WifiMode} entry
      */
     public WifiMode getMode() {
@@ -90,7 +89,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the maximum bitrate this access point is capable of.
-     * 
+     *
      * @return a long value representing the bitrate
      */
     public long getMaxBitrate() {
@@ -99,7 +98,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the current signal quality of the access point in percentage.
-     * 
+     *
      * @return an integer value between 0 and 100
      */
     public int getSignalQuality() {
@@ -108,7 +107,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the current signal strength of the access point in dBm.
-     * 
+     *
      * @return an integer value representing the rssi
      */
     public int getSignalStrength() {
@@ -117,7 +116,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the WPA capabilities of the access point.
-     * 
+     *
      * @return a set of {@link WifiSecurity} representing the capabilities
      */
     public Set<WifiSecurity> getWpaSecurity() {
@@ -126,7 +125,7 @@ public class WifiAccessPoint {
 
     /**
      * Return the RSN capabilities of the access point.
-     * 
+     *
      * @return a set of {@link WifiSecurity} representing the capabilities
      */
     public Set<WifiSecurity> getRsnSecurity() {
@@ -135,9 +134,9 @@ public class WifiAccessPoint {
 
     /**
      * Return the capabilities of the access point.
-     * 
+     *
      * @return a set of {@link WifiFlag} representing the capabilities
-     * 
+     *
      * @since 2.8
      */
     public Set<WifiFlag> getFlags() {
@@ -161,8 +160,7 @@ public class WifiAccessPoint {
         private Set<WifiSecurity> rsnSecurity = Collections.emptySet();
         private Set<WifiFlag> flags = Collections.emptySet();
 
-        private WifiAccessPointBuilder() {
-        }
+        private WifiAccessPointBuilder() {}
 
         public WifiAccessPointBuilder withSsid(String ssid) {
             this.ssid = ssid;
@@ -224,8 +222,17 @@ public class WifiAccessPoint {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result + Objects.hash(this.channel, this.maxBitrate, this.mode, this.rsnSecurity,
-                this.signalQuality, this.signalStrength, this.ssid, this.wpaSecurity, this.flags);
+        result = prime * result
+                + Objects.hash(
+                        this.channel,
+                        this.maxBitrate,
+                        this.mode,
+                        this.rsnSecurity,
+                        this.signalQuality,
+                        this.signalStrength,
+                        this.ssid,
+                        this.wpaSecurity,
+                        this.flags);
         return result;
     }
 
@@ -238,11 +245,15 @@ public class WifiAccessPoint {
             return false;
         }
         WifiAccessPoint other = (WifiAccessPoint) obj;
-        return Objects.equals(this.channel, other.channel) && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
-                && this.maxBitrate == other.maxBitrate && this.mode == other.mode
-                && Objects.equals(this.rsnSecurity, other.rsnSecurity) && this.signalQuality == other.signalQuality
-                && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.signalStrength, other.signalStrength)
-                && Objects.equals(this.wpaSecurity, other.wpaSecurity) && Objects.equals(this.flags, other.flags);
+        return Objects.equals(this.channel, other.channel)
+                && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
+                && this.maxBitrate == other.maxBitrate
+                && this.mode == other.mode
+                && Objects.equals(this.rsnSecurity, other.rsnSecurity)
+                && this.signalQuality == other.signalQuality
+                && Objects.equals(this.ssid, other.ssid)
+                && Objects.equals(this.signalStrength, other.signalStrength)
+                && Objects.equals(this.wpaSecurity, other.wpaSecurity)
+                && Objects.equals(this.flags, other.flags);
     }
-
 }

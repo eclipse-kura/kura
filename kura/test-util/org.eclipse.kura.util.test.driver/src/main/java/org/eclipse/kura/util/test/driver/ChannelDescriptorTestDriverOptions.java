@@ -15,12 +15,12 @@ package org.eclipse.kura.util.test.driver;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.util.test.driver.ChannelDescriptorTestDriver", name = "ChannelDescriptorTestDriver", description = "A driver for testing channel descriptor properties")
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.util.test.driver.ChannelDescriptorTestDriver",
+        name = "ChannelDescriptorTestDriver",
+        description = "A driver for testing channel descriptor properties")
 public @interface ChannelDescriptorTestDriverOptions {
 
     @AttributeDefinition(name = "Test Property", description = "A test property")
     String test_property() default "test value";
-
 }
-
-

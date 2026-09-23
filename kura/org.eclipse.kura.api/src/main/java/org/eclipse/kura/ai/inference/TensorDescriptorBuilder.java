@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -51,8 +50,8 @@ public class TensorDescriptorBuilder {
      * @return a {@link TensorDescriptorBuilder}.
      */
     public static TensorDescriptorBuilder fromTensorDescriptor(TensorDescriptor descriptor) {
-        final TensorDescriptorBuilder result = new TensorDescriptorBuilder(descriptor.getName(), descriptor.getType(),
-                descriptor.getShape());
+        final TensorDescriptorBuilder result =
+                new TensorDescriptorBuilder(descriptor.getName(), descriptor.getType(), descriptor.getShape());
         result.parameters.putAll(descriptor.getParameters());
         result.format = descriptor.getFormat();
         return result;

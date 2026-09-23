@@ -12,6 +12,11 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.wiregraph;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.WriterConfig;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -22,18 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
-import com.eclipsesource.json.WriterConfig;
 
 @SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class WireGraphJsonMarshallUnmarshallImpl {
@@ -59,8 +57,8 @@ public class WireGraphJsonMarshallUnmarshallImpl {
     public static void marshalWireGraphConfiguration(Writer writer, WireGraphConfiguration graphConfiguration)
             throws IOException {
         JsonArray wireConfigurationJson = marshalWireConfigurationList(graphConfiguration.getWireConfigurations());
-        JsonArray wireComponentConfigurationJson = marshalWireComponentConfigurationList(
-                graphConfiguration.getWireComponentConfigurations());
+        JsonArray wireComponentConfigurationJson =
+                marshalWireComponentConfigurationList(graphConfiguration.getWireComponentConfigurations());
 
         JsonObject wireGraphConfiguration = new JsonObject();
         wireGraphConfiguration.add(COMPONENTS_KEY, wireComponentConfigurationJson);
@@ -116,8 +114,8 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         result.add(PID_KEY, pid);
 
         addPropertyChecked(componentProperties, INPUT_PORT_COUNT_KEY, INPUT_PORT_COUNT_KEY, Integer.class, result::add);
-        addPropertyChecked(componentProperties, OUTPUT_PORT_COUNT_KEY, OUTPUT_PORT_COUNT_KEY, Integer.class,
-                result::add);
+        addPropertyChecked(
+                componentProperties, OUTPUT_PORT_COUNT_KEY, OUTPUT_PORT_COUNT_KEY, Integer.class, result::add);
 
         result.add(RENDERING_PROPERTIES_KEY, resultElems);
 
@@ -201,12 +199,11 @@ public class WireGraphJsonMarshallUnmarshallImpl {
                 } else if (RECEIVER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
                     receiverPort = value.asInt();
                 }
-
             }
 
             if (emitterPid != null && receiverPid != null) {
-                MultiportWireConfiguration wireConfiguration = new MultiportWireConfiguration(emitterPid, receiverPid,
-                        emitterPort, receiverPort);
+                MultiportWireConfiguration wireConfiguration =
+                        new MultiportWireConfiguration(emitterPid, receiverPid, emitterPort, receiverPort);
                 wireConfigurationList.add(wireConfiguration);
             }
         });
@@ -239,11 +236,11 @@ public class WireGraphJsonMarshallUnmarshallImpl {
             }
 
             if (componentPid != null) {
-                ComponentConfiguration componentConfiguration = new ComponentConfigurationImpl(componentPid, null,
-                        null);
+                ComponentConfiguration componentConfiguration =
+                        new ComponentConfigurationImpl(componentPid, null, null);
 
-                WireComponentConfiguration wireComponentConfiguration = new WireComponentConfiguration(
-                        componentConfiguration, properties);
+                WireComponentConfiguration wireComponentConfiguration =
+                        new WireComponentConfiguration(componentConfiguration, properties);
                 wireComponentConfigurationList.add(wireComponentConfiguration);
             }
         }
@@ -317,8 +314,11 @@ public class WireGraphJsonMarshallUnmarshallImpl {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> void addPropertyChecked(final Map<String, Object> componentProperties,
-            final String jsonPropertyKey, final String componentPropertyKey, final Class<T> expectedClass,
+    private static <T> void addPropertyChecked(
+            final Map<String, Object> componentProperties,
+            final String jsonPropertyKey,
+            final String componentPropertyKey,
+            final Class<T> expectedClass,
             final BiConsumer<String, T> adder) {
         final Object property = componentProperties.get(componentPropertyKey);
 
@@ -328,5 +328,4 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
         adder.accept(jsonPropertyKey, (T) property);
     }
-
 }

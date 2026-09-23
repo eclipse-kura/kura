@@ -12,8 +12,17 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Optional;
-
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.rest.security.provider.dto.DebugEnabledDTO;
@@ -28,17 +37,6 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 public abstract class AbstractRestSecurityService {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractRestSecurityService.class);
@@ -50,7 +48,11 @@ public abstract class AbstractRestSecurityService {
     protected SecurityService security;
     protected final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    @Reference(name = "SecurityService", service = SecurityService.class, cardinality = ReferenceCardinality.OPTIONAL, unbind = "-")
+    @Reference(
+            name = "SecurityService",
+            service = SecurityService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            unbind = "-")
     public void bindSecurityService(SecurityService securityService) {
         this.security = securityService;
     }
@@ -60,7 +62,8 @@ public abstract class AbstractRestSecurityService {
         userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -132,8 +135,10 @@ public abstract class AbstractRestSecurityService {
     public DebugEnabledDTO isDebugEnabled(final @Context ContainerRequestContext context) {
         try {
 
-            if (context != null && !Optional.ofNullable(context.getSecurityContext())
-                    .filter(c -> c.getUserPrincipal() != null).isPresent()) {
+            if (context != null
+                    && !Optional.ofNullable(context.getSecurityContext())
+                            .filter(c -> c.getUserPrincipal() != null)
+                            .isPresent()) {
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
             }
 
@@ -142,6 +147,5 @@ public abstract class AbstractRestSecurityService {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
-
     }
 }

@@ -14,9 +14,9 @@ package org.eclipse.kura.internal.rest.tamper.detection;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
+import com.google.gson.Gson;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -25,19 +25,17 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.rest.tamper.detection.util.TamperDetectionRemoteService;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRequestHandler",
-    immediate = true,
-    service = {})
+        name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRequestHandler",
+        immediate = true,
+        service = {})
 public class TamperDetectionRequestHandler extends TamperDetectionRemoteService implements RequestHandler {
 
     private static final String APP_ID = "TAMPER-V1";
@@ -50,7 +48,8 @@ public class TamperDetectionRequestHandler extends TamperDetectionRemoteService 
 
     private static final Logger logger = LoggerFactory.getLogger(TamperDetectionRequestHandler.class);
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -59,7 +58,10 @@ public class TamperDetectionRequestHandler extends TamperDetectionRemoteService 
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -67,7 +69,10 @@ public class TamperDetectionRequestHandler extends TamperDetectionRemoteService 
         try {
             requestHandlerRegistry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 

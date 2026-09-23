@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Scott Ware
@@ -23,7 +23,6 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public enum AdvertisingReportEventType {
-
     ADV_IND((byte) 0x00),
     ADV_DIRECT_IND((byte) 0x01),
     ADV_SCAN_IND((byte) 0x02),
@@ -216,7 +215,7 @@ public enum AdvertisingReportEventType {
     }
 
     /**
-     * 
+     *
      * @deprecated since 2.2 use instead {@link valueOf(int event, boolean extendedReport)}
      */
     @Deprecated

@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint;
@@ -41,7 +40,8 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
     private final AtomicReference<Optional<RawMqttCloudEndpoint>> endpoint = new AtomicReference<>(Optional.empty());
 
     private ServiceTracker<CloudEndpoint, RawMqttCloudEndpoint> tracker;
-    private final BundleContext context = FrameworkUtil.getBundle(AbstractStackComponent.class).getBundleContext();
+    private final BundleContext context =
+            FrameworkUtil.getBundle(AbstractStackComponent.class).getBundleContext();
 
     protected abstract Logger getLogger();
 
@@ -146,19 +146,18 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
         }
 
         @Override
-        public void modifiedService(final ServiceReference<CloudEndpoint> reference,
-                final RawMqttCloudEndpoint service) {
+        public void modifiedService(
+                final ServiceReference<CloudEndpoint> reference, final RawMqttCloudEndpoint service) {
             // do nothing
         }
 
         @Override
-        public void removedService(final ServiceReference<CloudEndpoint> reference,
-                final RawMqttCloudEndpoint service) {
+        public void removedService(
+                final ServiceReference<CloudEndpoint> reference, final RawMqttCloudEndpoint service) {
 
             unsetCloudEndpoint(service);
             AbstractStackComponent.this.context.ungetService(reference);
         }
-
     }
 
     public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {

@@ -14,7 +14,6 @@ package org.eclipse.kura.rest.system.dto;
 
 import java.util.List;
 import java.util.function.Predicate;
-
 import org.eclipse.kura.system.SystemService;
 
 @SuppressWarnings("unused")
@@ -227,7 +226,8 @@ public class FrameworkPropertiesDTO {
         }
 
         if (filter.test("internetConnectionStatus")) {
-            this.internetConnectionStatus = systemService.getInternetConnectionStatus().toString();
+            this.internetConnectionStatus =
+                    systemService.getInternetConnectionStatus().toString();
         }
     }
 
@@ -312,5 +312,4 @@ public class FrameworkPropertiesDTO {
             this.commandZipMaxUploadSize = systemService.getFileCommandZipMaxUploadSize();
         }
     }
-
 }

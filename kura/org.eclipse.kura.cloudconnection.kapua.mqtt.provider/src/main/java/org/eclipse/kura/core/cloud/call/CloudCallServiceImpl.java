@@ -13,7 +13,6 @@
 package org.eclipse.kura.core.cloud.call;
 
 import java.io.IOException;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
@@ -31,16 +30,16 @@ import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloud.CloudCallService",
-    service = { org.eclipse.kura.cloud.CloudCallService.class })
+        name = "org.eclipse.kura.cloud.CloudCallService",
+        service = {org.eclipse.kura.cloud.CloudCallService.class})
 public class CloudCallServiceImpl implements CloudCallService, DataServiceListener {
 
     private static final Logger s_logger = LoggerFactory.getLogger(CloudCallServiceImpl.class);
@@ -104,16 +103,31 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
     }
 
     @Override
-    public synchronized KuraResponsePayload call(String deviceId, String appId, String appTopic, KuraPayload appPayload,
-            int timeout) throws KuraException {
+    public synchronized KuraResponsePayload call(
+            String deviceId, String appId, String appTopic, KuraPayload appPayload, int timeout) throws KuraException {
         // Generate the request ID
         String requestId = s_generator.next();
 
-        StringBuilder sbReqTopic = new StringBuilder("$EDC").append("/").append(ACCOUNT_NAME_VAR_NAME).append("/")
-                .append(deviceId).append("/").append(appId).append("/").append(appTopic);
+        StringBuilder sbReqTopic = new StringBuilder("$EDC")
+                .append("/")
+                .append(ACCOUNT_NAME_VAR_NAME)
+                .append("/")
+                .append(deviceId)
+                .append("/")
+                .append(appId)
+                .append("/")
+                .append(appTopic);
 
-        StringBuilder sbRespTopic = new StringBuilder("$EDC").append("/").append(ACCOUNT_NAME_VAR_NAME).append("/")
-                .append(CLIENT_ID_VAR_NAME).append("/").append(appId).append("/").append("REPLY").append("/")
+        StringBuilder sbRespTopic = new StringBuilder("$EDC")
+                .append("/")
+                .append(ACCOUNT_NAME_VAR_NAME)
+                .append("/")
+                .append(CLIENT_ID_VAR_NAME)
+                .append("/")
+                .append(appId)
+                .append("/")
+                .append("REPLY")
+                .append("/")
                 .append(requestId);
 
         KuraRequestPayload req = null;

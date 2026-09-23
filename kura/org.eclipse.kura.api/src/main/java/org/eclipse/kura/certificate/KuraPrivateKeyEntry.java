@@ -62,5 +62,4 @@ public class KuraPrivateKeyEntry {
     public PrivateKeyEntry getPrivateKey() {
         return this.privateKeyEntry;
     }
-
 }

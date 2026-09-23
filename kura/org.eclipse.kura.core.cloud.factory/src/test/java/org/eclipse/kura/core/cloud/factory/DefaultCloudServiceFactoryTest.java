@@ -17,8 +17,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -33,11 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
+import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -77,28 +76,30 @@ public class DefaultCloudServiceFactoryTest {
 
         doAnswer(new Answer<Void>() {
 
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
+                    @Override
+                    public Void answer(InvocationOnMock invocation) throws Throwable {
+                        Object[] args = invocation.getArguments();
 
-                assertTrue(args[0].equals("org.eclipse.kura.cloud.CloudService")
-                        || args[0].equals("org.eclipse.kura.data.DataService")
-                        || args[0].equals("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"));
+                        assertTrue(args[0].equals("org.eclipse.kura.cloud.CloudService")
+                                || args[0].equals("org.eclipse.kura.data.DataService")
+                                || args[0].equals("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"));
 
-                if (args[0].equals("org.eclipse.kura.cloud.CloudService")) {
-                    assertEquals(pid, args[1]);
-                    assertFalse((boolean) args[3]);
-                } else if (args[0].equals("org.eclipse.kura.data.DataService")) {
-                    assertEquals("org.eclipse.kura.data.DataService-1", args[1]);
-                    assertFalse((boolean) args[3]);
-                } else if (args[0].equals("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport")) {
-                    assertEquals("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-1", args[1]);
-                    assertTrue((boolean) args[3]);
-                }
+                        if (args[0].equals("org.eclipse.kura.cloud.CloudService")) {
+                            assertEquals(pid, args[1]);
+                            assertFalse((boolean) args[3]);
+                        } else if (args[0].equals("org.eclipse.kura.data.DataService")) {
+                            assertEquals("org.eclipse.kura.data.DataService-1", args[1]);
+                            assertFalse((boolean) args[3]);
+                        } else if (args[0].equals("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport")) {
+                            assertEquals("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-1", args[1]);
+                            assertTrue((boolean) args[3]);
+                        }
 
-                return null;
-            }
-        }).when(csMock).createFactoryConfiguration(anyString(), anyString(), any(), anyBoolean());
+                        return null;
+                    }
+                })
+                .when(csMock)
+                .createFactoryConfiguration(anyString(), anyString(), any(), anyBoolean());
 
         factory.createConfiguration(pid);
 
@@ -180,7 +181,8 @@ public class DefaultCloudServiceFactoryTest {
         try {
             final BundleContext context = mock(BundleContext.class);
 
-            when(context.getServiceReferences(CloudConnectionManager.class, null)).thenReturn(refs);
+            when(context.getServiceReferences(CloudConnectionManager.class, null))
+                    .thenReturn(refs);
 
             final ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -192,8 +194,8 @@ public class DefaultCloudServiceFactoryTest {
         }
     }
 
-    private ServiceReference<CloudConnectionManager> createMockReference(final String pid, final String factoryPid,
-            final Map<String, Object> properties) {
+    private ServiceReference<CloudConnectionManager> createMockReference(
+            final String pid, final String factoryPid, final Map<String, Object> properties) {
 
         final Map<String, Object> refProperties = new HashMap<>();
 
@@ -218,12 +220,19 @@ public class DefaultCloudServiceFactoryTest {
         DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         List<ServiceReference<CloudConnectionManager>> list = new ArrayList<>();
-        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-FOO", CLOUD_SERVICE_FACTORY_PID,
-                Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
+        list.add(createMockReference(
+                CLOUD_SERVICE_FACTORY_PID + "-FOO",
+                CLOUD_SERVICE_FACTORY_PID,
+                Collections.singletonMap(
+                        CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
                         DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
-                CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, DefaultCloudServiceFactory.class.getName())));
+        list.add(createMockReference(
+                CLOUD_SERVICE_FACTORY_PID,
+                CLOUD_SERVICE_FACTORY_PID,
+                Collections.singletonMap(
+                        CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
+                        DefaultCloudServiceFactory.class.getName())));
 
         factory.activate(getMockComponentContext(list));
 
@@ -240,22 +249,37 @@ public class DefaultCloudServiceFactoryTest {
         DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         List<ServiceReference<CloudConnectionManager>> list = new ArrayList<>();
-        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-OK", CLOUD_SERVICE_FACTORY_PID,
-                Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
+        list.add(createMockReference(
+                CLOUD_SERVICE_FACTORY_PID + "-OK",
+                CLOUD_SERVICE_FACTORY_PID,
+                Collections.singletonMap(
+                        CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
                         DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-OK2", CLOUD_SERVICE_FACTORY_PID,
-                Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
+        list.add(createMockReference(
+                CLOUD_SERVICE_FACTORY_PID + "-OK2",
+                CLOUD_SERVICE_FACTORY_PID,
+                Collections.singletonMap(
+                        CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
                         DefaultCloudServiceFactory.class.getName())));
 
-        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-BAR", CLOUD_SERVICE_FACTORY_PID, Collections
-                .singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, "OtherCloudServiceFactory")));
+        list.add(createMockReference(
+                CLOUD_SERVICE_FACTORY_PID + "-BAR",
+                CLOUD_SERVICE_FACTORY_PID,
+                Collections.singletonMap(
+                        CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, "OtherCloudServiceFactory")));
 
-        list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
-                CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, DefaultCloudServiceFactory.class.getName())));
+        list.add(createMockReference(
+                CLOUD_SERVICE_FACTORY_PID,
+                CLOUD_SERVICE_FACTORY_PID,
+                Collections.singletonMap(
+                        CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID,
+                        DefaultCloudServiceFactory.class.getName())));
 
         list.add(createMockReference("CloudServiceBaz", CLOUD_SERVICE_FACTORY_PID, Collections.emptyMap()));
-        list.add(createMockReference("OtherCloudService", CLOUD_SERVICE_FACTORY_PID,
+        list.add(createMockReference(
+                "OtherCloudService",
+                CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID, null)));
 
         list.add(createMockReference("foo", "bar", Collections.emptyMap()));

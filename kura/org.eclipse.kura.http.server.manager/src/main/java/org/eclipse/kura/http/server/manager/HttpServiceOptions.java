@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import org.eclipse.kura.util.configuration.Property;
 
 public class HttpServiceOptions {
@@ -41,14 +40,14 @@ public class HttpServiceOptions {
 
     private static final Property<Integer[]> HTTP_PORTS = new Property<>(PROP_HTTP_PORTS, new Integer[] {});
     private static final Property<Integer[]> HTTPS_PORTS = new Property<>(PROP_HTTPS_PORTS, new Integer[] {});
-    private static final Property<Integer[]> HTTPS_CLIENT_AUTH_PORTS = new Property<>(PROP_HTTPS_CLIENT_AUTH_PORTS,
-            new Integer[] {});
+    private static final Property<Integer[]> HTTPS_CLIENT_AUTH_PORTS =
+            new Property<>(PROP_HTTPS_CLIENT_AUTH_PORTS, new Integer[] {});
     private static final Property<Boolean> REVOCATION_ENABLED = new Property<>(PROP_REVOCATION_ENABLED, false);
-    private static final Property<String> REVOCATION_MODE = new Property<>(PROP_REVOCATION_MODE,
-            RevocationCheckMode.PREFER_OCSP.name());
+    private static final Property<String> REVOCATION_MODE =
+            new Property<>(PROP_REVOCATION_MODE, RevocationCheckMode.PREFER_OCSP.name());
     private static final Property<Boolean> REVOCATION_SOFT_FAIL = new Property<>(PROP_REVOCATION_SOFT_FAIL, false);
-    private static final Property<String> KEYSTORE_SERVICE = new Property<>(PROP_KEYSTORE_SERVICE,
-            "kura.service.pid=changeit");
+    private static final Property<String> KEYSTORE_SERVICE =
+            new Property<>(PROP_KEYSTORE_SERVICE, "kura.service.pid=changeit");
 
     private final Set<Integer> httpPorts;
     private final Set<Integer> httpsPorts;
@@ -115,8 +114,14 @@ public class HttpServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpPorts, httpsPorts, httpsWithClientAuthPorts, isRevocationEnabled,
-                isRevocationSoftFailEnabled, keystoreServicePid, revocationCheckMode);
+        return Objects.hash(
+                httpPorts,
+                httpsPorts,
+                httpsWithClientAuthPorts,
+                isRevocationEnabled,
+                isRevocationSoftFailEnabled,
+                keystoreServicePid,
+                revocationCheckMode);
     }
 
     @Override
@@ -128,7 +133,8 @@ public class HttpServiceOptions {
             return false;
         }
         HttpServiceOptions other = (HttpServiceOptions) obj;
-        return Objects.equals(httpPorts, other.httpPorts) && Objects.equals(httpsPorts, other.httpsPorts)
+        return Objects.equals(httpPorts, other.httpPorts)
+                && Objects.equals(httpsPorts, other.httpsPorts)
                 && Objects.equals(httpsWithClientAuthPorts, other.httpsWithClientAuthPorts)
                 && isRevocationEnabled == other.isRevocationEnabled
                 && isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled

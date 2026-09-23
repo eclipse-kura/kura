@@ -17,11 +17,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
 import javax.usb.UsbServices;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.udev.LinuxUdevListener;
@@ -36,19 +34,19 @@ import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
-import org.osgi.service.event.EventAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.usb.UsbService",
-    immediate = true,
-    service = { org.eclipse.kura.usb.UsbService.class })
+        name = "org.eclipse.kura.usb.UsbService",
+        immediate = true,
+        service = {org.eclipse.kura.usb.UsbService.class})
 public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
     private static final Logger logger = LoggerFactory.getLogger(UsbServiceImpl.class);
@@ -79,7 +77,11 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
         this.linuxUdevNative = null;
     }
 
-    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, policy = ReferencePolicy.DYNAMIC, unbind = "unsetEventAdmin")
+    @Reference(
+            name = "EventAdmin",
+            service = org.osgi.service.event.EventAdmin.class,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }

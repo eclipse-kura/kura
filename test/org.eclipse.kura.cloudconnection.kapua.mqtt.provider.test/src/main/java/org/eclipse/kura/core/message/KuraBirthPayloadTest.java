@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
 import org.eclipse.kura.message.KuraBirthPayload.TamperStatus;
@@ -79,7 +78,6 @@ public class KuraBirthPayloadTest {
 
             thenBirthPayloadContainsJdkVendorVersion("JDK 123");
         }
-
     }
 
     @RunWith(Parameterized.class)
@@ -122,7 +120,6 @@ public class KuraBirthPayloadTest {
 
             thenToStringRepresentationIsCorrect();
         }
-
     }
 
     static class StepsCollection {
@@ -283,14 +280,14 @@ public class KuraBirthPayloadTest {
             assertTrue(this.toStringRepresentation.startsWith("KuraBirthPayload ["));
             assertTrue(this.toStringRepresentation.endsWith("]"));
 
-            assertEquals("Some properties are missing in the toString method.", 30,
+            assertEquals(
+                    "Some properties are missing in the toString method.",
+                    30,
                     this.toStringRepresentation.split(",").length);
 
             for (String keyValueField : this.toStringRepresentation.split(",")) {
                 assertTrue(keyValueField.contains("="));
             }
         }
-
     }
-
 }

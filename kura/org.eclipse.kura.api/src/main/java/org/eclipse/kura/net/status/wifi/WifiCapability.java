@@ -45,5 +45,4 @@ public enum WifiCapability {
     MESH,
     /** The device supports WPA2 in IBSS networks */
     IBSS_RSN;
-
 }

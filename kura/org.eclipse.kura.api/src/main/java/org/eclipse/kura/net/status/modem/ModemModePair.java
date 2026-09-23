@@ -53,5 +53,4 @@ public class ModemModePair {
         ModemModePair other = (ModemModePair) obj;
         return Objects.equals(this.modes, other.modes) && this.preferredMode == other.preferredMode;
     }
-
 }

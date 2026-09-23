@@ -31,5 +31,4 @@ public class PermissionConfigurationDTO {
     public String toString() {
         return "PermissionConfigurationDTO [permissions=" + this.permissions + "]";
     }
-
 }

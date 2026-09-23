@@ -12,16 +12,14 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.eclipse.kura.core.inventory.resources.SystemPackage;
-import org.eclipse.kura.core.inventory.resources.SystemPackages;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Writer;
+import org.eclipse.kura.core.inventory.resources.SystemPackage;
+import org.eclipse.kura.core.inventory.resources.SystemPackages;
 
 public class JsonJavaSystemPackagesMapper {
 
@@ -61,5 +59,4 @@ public class JsonJavaSystemPackagesMapper {
         jsonObject.add(SYSTEM_PACKAGES_PACKAGE_TYPE, p.getTypeString());
         return jsonObject;
     }
-
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -15,12 +15,11 @@ package org.eclipse.kura.identity;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represents a permission that can be assigned to Kura identites.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.7.0
  */
@@ -31,7 +30,7 @@ public class Permission {
 
     /**
      * Creates a new instance.
-     * 
+     *
      * @param name the permission name.
      */
     public Permission(String name) {
@@ -40,7 +39,7 @@ public class Permission {
 
     /**
      * Returns the permission name.
-     * 
+     *
      * @return the permission name.
      */
     public String getName() {
@@ -63,5 +62,4 @@ public class Permission {
         Permission other = (Permission) obj;
         return Objects.equals(name, other.name);
     }
-
 }

@@ -56,5 +56,4 @@ public class FilterBuilder {
     public String build() {
         return stringBuilder.toString();
     }
-
 }

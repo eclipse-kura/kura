@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -64,16 +64,15 @@ public final class TypeUtil {
     }
 
     /**
-     * 
+     *
      * Convert an hex string to a byte array. Simple copy-paste of the method in standard JRE 8
      * {@link javax.xml.bind.DatatypeConverter#parseHexBinary(String)}
-     * 
+     *
      * @param string
      * @return the byte array
      * @throws IllegalArgumentException
      *             if the hex string is invalid
      */
-
     public static byte[] parseHexBinary(String string) {
         final int len = string.length();
 
@@ -109,5 +108,4 @@ public final class TypeUtil {
         }
         return -1;
     }
-
 }

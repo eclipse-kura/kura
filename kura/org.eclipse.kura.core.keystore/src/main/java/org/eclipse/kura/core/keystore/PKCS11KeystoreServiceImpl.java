@@ -32,15 +32,11 @@ import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -48,14 +44,18 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.core.keystore.PKCS11KeystoreServiceImpl",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.security.keystore.KeystoreService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "kura.ui.factory.hide=true",
-        "kura.ui.service.hide=true" })
+        name = "org.eclipse.kura.core.keystore.PKCS11KeystoreServiceImpl",
+        immediate = false,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.security.keystore.KeystoreService.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {"kura.ui.factory.hide=true", "kura.ui.service.hide=true"})
 @Designate(ocd = PKCS11KeystoreServiceImplOptions.class, factory = true)
 public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
 
@@ -84,7 +84,6 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
         super.activate(context, properties);
 
         options = new PKCS11KeystoreServiceOptions(properties, ownPid);
-
     }
 
     @Override
@@ -101,7 +100,6 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
             removeProvider();
             this.options = newOptions;
         }
-
     }
 
     @Override
@@ -149,14 +147,25 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
-    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
-            String signatureAlgorithm, String attributes) throws KuraException {
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm,
+            String attributes)
+            throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 
     @Override
-    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
-            String signatureAlgorithm, String attributes, SecureRandom secureRandom) throws KuraException {
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm,
+            String attributes,
+            SecureRandom secureRandom)
+            throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 
@@ -167,15 +176,23 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
-    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes,
-            SecureRandom secureRandom) throws KuraException {
+    public void createKeyPair(
+            String alias,
+            String algorithm,
+            int keySize,
+            String signatureAlgorithm,
+            String attributes,
+            SecureRandom secureRandom)
+            throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 
     @Override
     protected String getCrlStorePath() {
-        return this.options.getCrlStorePath().orElseGet(
-                () -> this.systemService.getKuraUserConfigDirectory() + "/security/pkcs11." + ownPid + ".crl");
+        return this.options
+                .getCrlStorePath()
+                .orElseGet(
+                        () -> this.systemService.getKuraUserConfigDirectory() + "/security/pkcs11." + ownPid + ".crl");
     }
 
     private synchronized Provider getOrRegisterProvider() throws KuraException {
@@ -185,7 +202,8 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
 
         logger.info("Registering provider...");
 
-        final String config = this.options.buildSunPKCS11ProviderConfig()
+        final String config = this.options
+                .buildSunPKCS11ProviderConfig()
                 .orElseThrow(() -> new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_UNDEFINED, "library.path"));
 
         logger.debug("PKCS11 config: {}", config);
@@ -283,6 +301,5 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
         public char[] getPassword() {
             return password;
         }
-
     }
 }

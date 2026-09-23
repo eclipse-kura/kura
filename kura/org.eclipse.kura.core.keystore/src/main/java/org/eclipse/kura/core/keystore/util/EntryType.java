@@ -13,7 +13,6 @@
 package org.eclipse.kura.core.keystore.util;
 
 public enum EntryType {
-
     TRUSTED_CERTIFICATE,
     PRIVATE_KEY,
     KEY_PAIR,

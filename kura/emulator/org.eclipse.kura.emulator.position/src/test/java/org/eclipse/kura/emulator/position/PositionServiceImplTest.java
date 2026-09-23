@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionLockedEvent;

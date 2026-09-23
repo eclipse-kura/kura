@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -15,7 +15,6 @@ package org.eclipse.kura.core.cloud;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -148,8 +147,9 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     }
 
     @Override
-    public int controlPublish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain,
-            int priority) throws KuraException {
+    public int controlPublish(
+            String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException {
         byte[] appPayload = this.cloudServiceImpl.encodePayload(payload);
         return controlPublish(deviceId, appTopic, appPayload, qos, retain, priority);
     }
@@ -246,8 +246,8 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     }
 
     @Override
-    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload payload, int qos,
-            boolean retain) {
+    public void onControlMessageArrived(
+            String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain) {
         for (CloudClientListener listener : this.listeners) {
             listener.onControlMessageArrived(deviceId, appTopic, payload, qos, retain);
         }
@@ -294,8 +294,11 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
             sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
         }
 
-        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(deviceId)
-                .append(options.getTopicSeparator()).append(this.applicationId);
+        sb.append(options.getTopicAccountToken())
+                .append(options.getTopicSeparator())
+                .append(deviceId)
+                .append(options.getTopicSeparator())
+                .append(this.applicationId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
             sb.append(options.getTopicSeparator()).append(appTopic);
@@ -313,11 +316,16 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
         // Optional control prefix
         sb.append("^(")
                 // .append(options.getTopicControlPrefix())
-                .append("\\$EDC").append(options.getTopicSeparator()).append(")?")
-
-                .append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+") // Any device
-                                                                                                         // ID
-                .append(options.getTopicSeparator()).append(this.applicationId).append("(/.+)?");
+                .append("\\$EDC")
+                .append(options.getTopicSeparator())
+                .append(")?")
+                .append(options.getTopicAccountToken())
+                .append(options.getTopicSeparator())
+                .append(".+") // Any device
+                // ID
+                .append(options.getTopicSeparator())
+                .append(this.applicationId)
+                .append("(/.+)?");
 
         return sb.toString();
     }

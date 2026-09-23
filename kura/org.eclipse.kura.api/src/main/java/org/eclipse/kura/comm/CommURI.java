@@ -1,21 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.comm;
 
 import java.net.URISyntaxException;
-
 import javax.comm.SerialPort;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -165,10 +163,22 @@ public class CommURI {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("comm:").append(this.port).append(";baudrate=").append(this.baudRate).append(";databits=")
-                .append(this.dataBits).append(";stopbits=").append(this.stopBits).append(";parity=")
-                .append(this.parity).append(";flowcontrol=").append(this.flowControl).append(";timeout=")
-                .append(this.openTimeout).append(";receivetimeout=").append(this.receiveTimeout);
+        sb.append("comm:")
+                .append(this.port)
+                .append(";baudrate=")
+                .append(this.baudRate)
+                .append(";databits=")
+                .append(this.dataBits)
+                .append(";stopbits=")
+                .append(this.stopBits)
+                .append(";parity=")
+                .append(this.parity)
+                .append(";flowcontrol=")
+                .append(this.flowControl)
+                .append(";timeout=")
+                .append(this.openTimeout)
+                .append(";receivetimeout=")
+                .append(this.receiveTimeout);
         return sb.toString();
     }
 

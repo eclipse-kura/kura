@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
 import org.eclipse.kura.core.linux.executor.LinuxPid;
@@ -33,8 +32,8 @@ import org.junit.Test;
 
 public class ExecutorUtilRunningTest {
 
-    private static String[] commandLine1 = { "find", "/", "-name", "foo" };
-    private static String[] commandLine2 = { "find", "/", "-name", "bar" };
+    private static String[] commandLine1 = {"find", "/", "-name", "foo"};
+    private static String[] commandLine2 = {"find", "/", "-name", "bar"};
     private static ByteArrayOutputStream out = new ByteArrayOutputStream();
     private ExecutorUtil executorUtil;
     private boolean isRunning;
@@ -141,30 +140,34 @@ public class ExecutorUtilRunningTest {
 
     private void configureMock(DefaultExecutor deMock) {
         String executablePs = "ps";
-        String[] argumentsPs1 = { "-p", "1234" };
-        String[] argumentsPs2 = { "-p", "12345" };
-        String[] argumentsPsAx = { "-ax" };
+        String[] argumentsPs1 = {"-p", "1234"};
+        String[] argumentsPs2 = {"-p", "12345"};
+        String[] argumentsPsAx = {"-ax"};
         try {
-            when(deMock.execute(argThat(new CommandLineMatcher(executablePs, argumentsPs1)))).thenReturn(1);
+            when(deMock.execute(argThat(new CommandLineMatcher(executablePs, argumentsPs1))))
+                    .thenReturn(1);
             doAnswer(invocation -> {
-                out.reset();
-                PrintWriter pw = new PrintWriter(out);
-                pw.println(12345);
-                pw.flush();
-                pw.close();
-                return 0;
-            }).when(deMock).execute(argThat(new CommandLineMatcher(executablePs, argumentsPs2)));
+                        out.reset();
+                        PrintWriter pw = new PrintWriter(out);
+                        pw.println(12345);
+                        pw.flush();
+                        pw.close();
+                        return 0;
+                    })
+                    .when(deMock)
+                    .execute(argThat(new CommandLineMatcher(executablePs, argumentsPs2)));
             doAnswer(invocation -> {
-                out.reset();
-                PrintWriter pw = new PrintWriter(out);
-                pw.println(" 4333 pts/0    R+     0:00 find / -name bar");
-                pw.flush();
-                pw.close();
-                return 0;
-            }).when(deMock).execute(argThat(new CommandLineMatcher(executablePs, argumentsPsAx)));
+                        out.reset();
+                        PrintWriter pw = new PrintWriter(out);
+                        pw.println(" 4333 pts/0    R+     0:00 find / -name bar");
+                        pw.flush();
+                        pw.close();
+                        return 0;
+                    })
+                    .when(deMock)
+                    .execute(argThat(new CommandLineMatcher(executablePs, argumentsPsAx)));
         } catch (IOException e) {
             // Do nothing...
         }
     }
-
 }

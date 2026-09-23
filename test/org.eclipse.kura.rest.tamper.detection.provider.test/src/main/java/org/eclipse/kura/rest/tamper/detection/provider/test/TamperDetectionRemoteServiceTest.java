@@ -15,6 +15,8 @@ package org.eclipse.kura.rest.tamper.detection.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -26,7 +28,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
@@ -44,9 +45,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 @RunWith(Parameterized.class)
 public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest {
 
@@ -61,9 +59,13 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldSupportListingTamperDetectionServices() throws MalformedURLException, IOException {
-        assertEquals(0, runRequestAndGetResponse("/list", new MethodSpec("GET"),
-                new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
-                }).size());
+        assertEquals(
+                0,
+                runRequestAndGetResponse(
+                                "/list",
+                                new MethodSpec("GET"),
+                                new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {})
+                        .size());
     }
 
     @Test
@@ -74,9 +76,8 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("/list", new MethodSpec("GET"),
-                    new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
-                    });
+            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse(
+                    "/list", new MethodSpec("GET"), new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {});
 
             assertEquals(1, infos.size());
             assertEquals("foo", infos.get(0).getDisplayName());
@@ -92,7 +93,8 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            assertEquals(404, transport.runRequest("/pid/boo", new MethodSpec("GET")).getStatus());
+            assertEquals(
+                    404, transport.runRequest("/pid/boo", new MethodSpec("GET")).getStatus());
         }
     }
 
@@ -108,13 +110,16 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
             Mockito.when(second.getDisplayName()).thenReturn("boo");
             fixture.registerService(second, TamperDetectionService.class, "bar");
 
-            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("/list", new MethodSpec("GET"),
-                    new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
-                    });
+            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse(
+                    "/list", new MethodSpec("GET"), new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {});
 
             assertEquals(2, infos.size());
-            assertTrue(infos.stream().anyMatch(p -> p.getPid().equals("moo") && p.getDisplayName().equals("foo")));
-            assertTrue(infos.stream().anyMatch(p -> p.getPid().equals("bar") && p.getDisplayName().equals("boo")));
+            assertTrue(infos.stream()
+                    .anyMatch(
+                            p -> p.getPid().equals("moo") && p.getDisplayName().equals("foo")));
+            assertTrue(infos.stream()
+                    .anyMatch(
+                            p -> p.getPid().equals("bar") && p.getDisplayName().equals("boo")));
         }
     }
 
@@ -128,9 +133,8 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            final TamperStatusInfo info = runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"),
-                    new TypeToken<TamperStatusInfo>() {
-                    });
+            final TamperStatusInfo info =
+                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {});
 
             assertEquals(false, info.isDeviceTampered);
             assertTrue(info.properties.isEmpty());
@@ -142,14 +146,14 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
         try (final Fixture fixture = new Fixture()) {
             final TamperDetectionService tamperDetectionService = Mockito.mock(TamperDetectionService.class);
             Mockito.when(tamperDetectionService.getDisplayName()).thenReturn("foo");
-            Mockito.when(tamperDetectionService.getTamperStatus()).thenReturn(
-                    new TamperStatus(true, Collections.singletonMap("timestamp", TypedValues.newLongValue(5000L))));
+            Mockito.when(tamperDetectionService.getTamperStatus())
+                    .thenReturn(new TamperStatus(
+                            true, Collections.singletonMap("timestamp", TypedValues.newLongValue(5000L))));
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            final TamperStatusInfo info = runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"),
-                    new TypeToken<TamperStatusInfo>() {
-                    });
+            final TamperStatusInfo info =
+                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {});
 
             assertEquals(true, info.isDeviceTampered);
             assertEquals(5000.0d, info.properties.get("timestamp"));
@@ -181,15 +185,22 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            assertEquals(true,
-                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {
-                    }).isDeviceTampered);
+            assertEquals(
+                    true,
+                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {})
+                            .isDeviceTampered);
 
-            assertEquals(1, transport.runRequest("/pid/moo/_reset", new MethodSpec("POST", "EXEC")).getStatus() / 200);
+            assertEquals(
+                    1,
+                    transport
+                                    .runRequest("/pid/moo/_reset", new MethodSpec("POST", "EXEC"))
+                                    .getStatus()
+                            / 200);
 
-            assertEquals(false,
-                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {
-                    }).isDeviceTampered);
+            assertEquals(
+                    false,
+                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {})
+                            .isDeviceTampered);
         }
     }
 
@@ -199,12 +210,13 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
             final TamperDetectionService tamperDetectionService = Mockito.mock(TamperDetectionService.class);
             Mockito.when(tamperDetectionService.getDisplayName()).thenReturn("foo");
 
-            fixture.registerService(tamperDetectionService, TamperDetectionService.class,
+            fixture.registerService(
+                    tamperDetectionService,
+                    TamperDetectionService.class,
                     Collections.singletonMap("service.pid", "moo"));
 
-            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("/list", new MethodSpec("GET"),
-                    new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
-                    });
+            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse(
+                    "/list", new MethodSpec("GET"), new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {});
 
             assertEquals(1, infos.size());
             assertEquals("foo", infos.get(0).getDisplayName());
@@ -220,8 +232,8 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
             registerService(service, providedInterface, Collections.singletonMap("kura.service.pid", pid));
         }
 
-        public <T> void registerService(final T service, final Class<? super T> providedInterface,
-                final Map<String, Object> properties) {
+        public <T> void registerService(
+                final T service, final Class<? super T> providedInterface, final Map<String, Object> properties) {
             final BundleContext bundleContext = FrameworkUtil.getBundle(TamperDetectionRemoteServiceTest.class)
                     .getBundleContext();
 
@@ -240,12 +252,13 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
                 reg.unregister();
             }
         }
-
     }
 
-    private <T> T runRequestAndGetResponse(final String resource, final MethodSpec method,
-            final TypeToken<T> responseType) {
-        final String response = this.transport.runRequest(resource, method).getBody()
+    private <T> T runRequestAndGetResponse(
+            final String resource, final MethodSpec method, final TypeToken<T> responseType) {
+        final String response = this.transport
+                .runRequest(resource, method)
+                .getBody()
                 .orElseThrow(() -> new IllegalStateException("expected body"));
 
         final Gson gson = new Gson();

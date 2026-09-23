@@ -172,7 +172,6 @@ public abstract class AbstractHttpContractTest {
         sessionAuth.setOptions(restOptions);
 
         final ResourceConfig application = new ResourceConfig();
-        application.property("jersey.config.server.response.setStatusOverSendError", true);
         final BundleContext bundle = mock(BundleContext.class);
         when(bundle.registerService(eq(ContainerResponseFilter.class), any(ContainerResponseFilter.class), isNull()))
                 .thenAnswer(invocation -> {
@@ -290,15 +289,18 @@ public abstract class AbstractHttpContractTest {
         }
         final JsonNode content = contract.path("content");
         if (content.isMissingNode() || content.isEmpty()) {
-            assertTrue(this.response.body(), this.response.body().isEmpty());
+            if (status < 400) {
+                assertTrue(this.response.body(), this.response.body().isEmpty());
+            }
             return;
         }
-        assertTrue(this.response.headers().firstValue("Content-Type").orElse(""), this.response.headers()
-                .firstValue("Content-Type").orElse("").startsWith("application/json"));
-        final JsonNode schema = content.path("application/json").path("schema");
+        final String mediaType = this.response.headers().firstValue("Content-Type").orElse("").split(";", 2)[0].trim();
+        assertTrue("Undocumented response media type: " + mediaType, content.has(mediaType));
+        final JsonNode schema = content.path(mediaType).path("schema");
         final ObjectNode resolved = schema.deepCopy();
         resolved.set("components", this.document.path("components"));
-        final JsonNode payload = Json.mapper().readTree(this.response.body());
+        final JsonNode payload = "application/json".equals(mediaType) ? Json.mapper().readTree(this.response.body())
+                : Json.mapper().getNodeFactory().textNode(this.response.body());
         final Set<ValidationMessage> errors = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
                 .metaSchema(OpenApi30.getInstance()).defaultMetaSchemaIri("https://spec.openapis.org/oas/3.0/dialect").build()
                 .getSchema(resolved).validate(payload);

@@ -283,6 +283,7 @@ public class UnZip {
             if (aborted) {
                 throw new IllegalStateException("The extraction has been interrupted.");
             }
+            ensureNotAborted();
 
             File newFile = getFile(entryPath(folder, ze), folder);
 
@@ -319,6 +320,7 @@ public class UnZip {
 
             int len = zis.read(buffer);
             while (total + BUFFER <= tooBig && len > 0) {
+                ensureNotAborted();
                 fos.write(buffer, 0, len);
                 total += len;
                 len = zis.read(buffer);
@@ -327,6 +329,12 @@ public class UnZip {
         }
 
         return total;
+    }
+
+    private static void ensureNotAborted() {
+        if (aborted) {
+            throw new IllegalStateException("The extraction has been interrupted.");
+        }
     }
 
     private static void verifyLimits(int entries, long total) {

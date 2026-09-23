@@ -11,16 +11,14 @@
  *  Sterwen-Technology
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.net.wifi;
 
 import java.util.Objects;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wifi channel and Frequency in MHz
- * 
+ *
  * @since 2.2
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -144,5 +142,4 @@ public class WifiChannel {
                 + ", noInitiatingRadiation=" + noInitiatingRadiation + ", radarDetection=" + radarDetection
                 + ", disabled=" + disabled + "]";
     }
-
 }

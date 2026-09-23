@@ -25,7 +25,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
@@ -212,14 +211,17 @@ public class PasswordTypePreservationTest {
 
         Configuration factoryConfiguration = mock(Configuration.class);
         when(factoryConfiguration.getPid()).thenReturn(SERVICE_PID);
-        when(this.configurationAdmin.createFactoryConfiguration(FACTORY_PID, null)).thenReturn(factoryConfiguration);
+        when(this.configurationAdmin.createFactoryConfiguration(FACTORY_PID, null))
+                .thenReturn(factoryConfiguration);
 
         this.configuration = mock(Configuration.class);
         when(this.configurationAdmin.getConfiguration(SERVICE_PID, "?")).thenReturn(this.configuration);
         doAnswer(invocation -> {
-            this.storedProperties = invocation.getArgument(0);
-            return null;
-        }).when(this.configuration).update(any(Dictionary.class));
+                    this.storedProperties = invocation.getArgument(0);
+                    return null;
+                })
+                .when(this.configuration)
+                .update(any(Dictionary.class));
         when(this.configuration.getProperties()).thenAnswer(invocation -> this.storedProperties);
 
         TestUtil.setFieldValue(this.configurationService, "ctx", givenComponentContext());
@@ -262,7 +264,7 @@ public class PasswordTypePreservationTest {
 
     private void givenFactoryConfigurationWithAPasswordArray() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
-        properties.put(PASSWORD_PROPERTY, new Password[] { new Password(SECRET), new Password(NEW_SECRET) });
+        properties.put(PASSWORD_PROPERTY, new Password[] {new Password(SECRET), new Password(NEW_SECRET)});
 
         this.configurationService.createFactoryConfiguration(FACTORY_PID, PID, properties, false);
     }
@@ -309,50 +311,66 @@ public class PasswordTypePreservationTest {
     }
 
     private void whenMetatypeWithoutThePasswordAttributeDefinitionIsRegistered() throws KuraException {
-        this.configurationService.registerComponentOCD(FACTORY_PID, ocdWithoutThePasswordAttributeDefinition(), true,
-                mock(Bundle.class));
+        this.configurationService.registerComponentOCD(
+                FACTORY_PID, ocdWithoutThePasswordAttributeDefinition(), true, mock(Bundle.class));
     }
 
     private void whenOtherPropertyIsUpdatedTo(String value) throws Throwable {
         Map<String, Object> properties = new HashMap<>();
         properties.put(OTHER_PROPERTY, value);
 
-        TestUtil.invokePrivate(this.configurationService, "updateConfigurationInternal",
-                new Class<?>[] { String.class, Map.class, boolean.class }, PID, properties, false);
+        TestUtil.invokePrivate(
+                this.configurationService,
+                "updateConfigurationInternal",
+                new Class<?>[] {String.class, Map.class, boolean.class},
+                PID,
+                properties,
+                false);
     }
 
     private void whenRolledBackToAConfigurationHolding(Object passwordValue) throws Throwable {
         Map<String, Object> properties = new HashMap<>();
         properties.put(PASSWORD_PROPERTY, passwordValue);
 
-        TestUtil.invokePrivate(this.configurationService, "rollbackConfigurationInternal",
-                new Class<?>[] { ComponentConfiguration.class, Optional.class },
-                new ComponentConfigurationImpl(PID, null, properties), Optional.of(this.configuration));
+        TestUtil.invokePrivate(
+                this.configurationService,
+                "rollbackConfigurationInternal",
+                new Class<?>[] {ComponentConfiguration.class, Optional.class},
+                new ComponentConfigurationImpl(PID, null, properties),
+                Optional.of(this.configuration));
     }
 
     private void whenPasswordIsUpdatedTo(String newSecret) throws Throwable {
         Map<String, Object> properties = new HashMap<>();
         properties.put(PASSWORD_PROPERTY, new Password(newSecret));
 
-        TestUtil.invokePrivate(this.configurationService, "updateConfigurationInternal",
-                new Class<?>[] { String.class, Map.class, boolean.class }, PID, properties, false);
+        TestUtil.invokePrivate(
+                this.configurationService,
+                "updateConfigurationInternal",
+                new Class<?>[] {String.class, Map.class, boolean.class},
+                PID,
+                properties,
+                false);
     }
 
     private void whenConfigurationIsReadBack() throws Throwable {
-        this.readBackConfiguration = (ComponentConfiguration) TestUtil.invokePrivate(this.configurationService,
-                "getConfigurableComponentConfiguration", PID);
+        this.readBackConfiguration = (ComponentConfiguration)
+                TestUtil.invokePrivate(this.configurationService, "getConfigurableComponentConfiguration", PID);
     }
 
     private void thenConfigurationAdminHoldsAPlainString() {
         assertNotNull(this.storedProperties);
-        assertTrue("ConfigurationAdmin can only hold plain strings",
+        assertTrue(
+                "ConfigurationAdmin can only hold plain strings",
                 this.storedProperties.get(PASSWORD_PROPERTY) instanceof String);
     }
 
     private void thenReadBackPropertyIsAPassword(String expectedValue) {
         assertNotNull(this.readBackConfiguration);
         Object value = this.readBackConfiguration.getConfigurationProperties().get(PASSWORD_PROPERTY);
-        assertTrue("expected a Password but was " + (value == null ? "null" : value.getClass().getName()),
+        assertTrue(
+                "expected a Password but was "
+                        + (value == null ? "null" : value.getClass().getName()),
                 value instanceof Password);
         assertEquals(expectedValue, value.toString());
     }
@@ -360,7 +378,9 @@ public class PasswordTypePreservationTest {
     private void thenReadBackPropertyIsAPasswordArray(String... expectedValues) {
         assertNotNull(this.readBackConfiguration);
         Object value = this.readBackConfiguration.getConfigurationProperties().get(PASSWORD_PROPERTY);
-        assertTrue("expected a Password[] but was " + (value == null ? "null" : value.getClass().getName()),
+        assertTrue(
+                "expected a Password[] but was "
+                        + (value == null ? "null" : value.getClass().getName()),
                 value instanceof Password[]);
 
         Password[] passwords = (Password[]) value;
@@ -373,7 +393,9 @@ public class PasswordTypePreservationTest {
     private void thenReadBackPropertyIsAPlainString(String expectedValue) {
         assertNotNull(this.readBackConfiguration);
         Object value = this.readBackConfiguration.getConfigurationProperties().get(PASSWORD_PROPERTY);
-        assertTrue("expected a String but was " + (value == null ? "null" : value.getClass().getName()),
+        assertTrue(
+                "expected a String but was "
+                        + (value == null ? "null" : value.getClass().getName()),
                 value instanceof String);
         assertEquals(expectedValue, value);
     }

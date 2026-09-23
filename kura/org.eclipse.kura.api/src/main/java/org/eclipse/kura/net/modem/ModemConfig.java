@@ -15,7 +15,6 @@ package org.eclipse.kura.net.modem;
 
 import java.util.Arrays;
 import java.util.Objects;
-
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -72,8 +71,7 @@ public class ModemConfig implements NetConfig {
     /**
      * Empty constructor
      */
-    public ModemConfig() {
-    }
+    public ModemConfig() {}
 
     /**
      * PDP config constructor
@@ -91,7 +89,12 @@ public class ModemConfig implements NetConfig {
      * @param headerCompresion
      *            - PDP header compression as {@link int}
      */
-    public ModemConfig(int profileID, PdpType pdpType, String apn, IPAddress ipAddress, int dataCompression,
+    public ModemConfig(
+            int profileID,
+            PdpType pdpType,
+            String apn,
+            IPAddress ipAddress,
+            int dataCompression,
             int headerCompresion) {
 
         this.profileID = profileID;
@@ -554,10 +557,29 @@ public class ModemConfig implements NetConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.activeFilter, this.apn, this.authType, this.dataCompression, this.dialString,
-                this.diversityEnabled, this.enabled, this.gpsEnabled, this.headerCompression, this.holdoff, this.idle,
-                this.ipAddress, this.lcpEchoFailure, this.lcpEchoInterval, this.maxFail, this.password, this.pdpType,
-                this.persist, this.pppNumber, this.profileID, this.resetTimeout, this.username);
+        return Objects.hash(
+                this.activeFilter,
+                this.apn,
+                this.authType,
+                this.dataCompression,
+                this.dialString,
+                this.diversityEnabled,
+                this.enabled,
+                this.gpsEnabled,
+                this.headerCompression,
+                this.holdoff,
+                this.idle,
+                this.ipAddress,
+                this.lcpEchoFailure,
+                this.lcpEchoInterval,
+                this.maxFail,
+                this.password,
+                this.pdpType,
+                this.persist,
+                this.pppNumber,
+                this.profileID,
+                this.resetTimeout,
+                this.username);
     }
 
     @Override
@@ -569,17 +591,29 @@ public class ModemConfig implements NetConfig {
             return false;
         }
         ModemConfig other = (ModemConfig) obj;
-        return Objects.equals(this.activeFilter, other.activeFilter) && Objects.equals(this.apn, other.apn)
-                && this.authType == other.authType && this.dataCompression == other.dataCompression
-                && Objects.equals(this.dialString, other.dialString) && this.diversityEnabled == other.diversityEnabled
-                && this.enabled == other.enabled && this.gpsEnabled == other.gpsEnabled
-                && this.headerCompression == other.headerCompression && this.holdoff == other.holdoff
-                && this.idle == other.idle && Objects.equals(this.ipAddress, other.ipAddress)
-                && this.lcpEchoFailure == other.lcpEchoFailure && this.lcpEchoInterval == other.lcpEchoInterval
+        return Objects.equals(this.activeFilter, other.activeFilter)
+                && Objects.equals(this.apn, other.apn)
+                && this.authType == other.authType
+                && this.dataCompression == other.dataCompression
+                && Objects.equals(this.dialString, other.dialString)
+                && this.diversityEnabled == other.diversityEnabled
+                && this.enabled == other.enabled
+                && this.gpsEnabled == other.gpsEnabled
+                && this.headerCompression == other.headerCompression
+                && this.holdoff == other.holdoff
+                && this.idle == other.idle
+                && Objects.equals(this.ipAddress, other.ipAddress)
+                && this.lcpEchoFailure == other.lcpEchoFailure
+                && this.lcpEchoInterval == other.lcpEchoInterval
                 && this.maxFail == other.maxFail
-                && Arrays.equals(this.password.getPassword(), other.getPasswordAsPassword().getPassword())
-                && this.pdpType == other.pdpType && this.persist == other.persist && this.pppNumber == other.pppNumber
-                && this.profileID == other.profileID && this.resetTimeout == other.resetTimeout
+                && Arrays.equals(
+                        this.password.getPassword(),
+                        other.getPasswordAsPassword().getPassword())
+                && this.pdpType == other.pdpType
+                && this.persist == other.persist
+                && this.pppNumber == other.pppNumber
+                && this.profileID == other.profileID
+                && this.resetTimeout == other.resetTimeout
                 && Objects.equals(this.username, other.username);
     }
 

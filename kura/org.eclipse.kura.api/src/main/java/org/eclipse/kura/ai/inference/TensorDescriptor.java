@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -46,8 +45,8 @@ public class TensorDescriptor {
      * @param shape
      *            the shape of the data
      */
-    public TensorDescriptor(String name, String type, Optional<String> format, List<Long> shape,
-            Map<String, Object> parameters) {
+    public TensorDescriptor(
+            String name, String type, Optional<String> format, List<Long> shape, Map<String, Object> parameters) {
         this.name = name;
         this.type = type;
         this.format = format;
@@ -129,5 +128,4 @@ public class TensorDescriptor {
     public Map<String, Object> getParameters() {
         return this.parameters;
     }
-
 }

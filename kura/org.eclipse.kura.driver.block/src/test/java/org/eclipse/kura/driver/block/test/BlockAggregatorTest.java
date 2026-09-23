@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.test;
 
 import static org.junit.Assert.assertEquals;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import org.eclipse.kura.driver.block.Block;
 import org.eclipse.kura.driver.block.BlockAggregator;
 import org.eclipse.kura.driver.block.ProhibitedBlock;
@@ -30,8 +28,10 @@ public class BlockAggregatorTest {
 
     @Test
     public void shouldSupportEmptyList() {
-        assertEquals(false, new BlockAggregator<Block>(Collections.emptyList(), (start, end) -> new Block(start, end))
-                .stream().iterator().hasNext());
+        assertEquals(
+                false,
+                new BlockAggregator<Block>(Collections.emptyList(), (start, end) -> new Block(start, end))
+                        .stream().iterator().hasNext());
     }
 
     @Test
@@ -51,12 +51,18 @@ public class BlockAggregatorTest {
         new TestHelper().setInput(0, 1, 1, 2, 2, 10).expect(0, 10).exec();
         new TestHelper().setInput(2, 10, 1, 2, 0, 1).expect(0, 10).exec();
         new TestHelper().setInput(0, 1, 1, 2, 3, 4, 2, 3).expect(0, 4).exec();
-        new TestHelper().setInput(0, 4, 4, 8, 10, 12, 12, 14).expect(0, 8, 10, 14).exec();
+        new TestHelper()
+                .setInput(0, 4, 4, 8, 10, 12, 12, 14)
+                .expect(0, 8, 10, 14)
+                .exec();
     }
 
     @Test
     public void shouldSupportNonSortedList() {
-        new TestHelper().setInput(10, 12, 12, 14, 4, 8, 0, 4).expect(0, 8, 10, 14).exec();
+        new TestHelper()
+                .setInput(10, 12, 12, 14, 4, 8, 0, 4)
+                .expect(0, 8, 10, 14)
+                .exec();
     }
 
     @Test
@@ -69,13 +75,20 @@ public class BlockAggregatorTest {
         new TestHelper().setInput(1, 9, 2, 4).expect(1, 9).exec();
         new TestHelper().setInput(1, 9, 2, 4, 3, 6).expect(1, 9).exec();
         new TestHelper().setInput(0, 1, 0, 1, 0, 1).expect(0, 1).exec();
-        new TestHelper().setInput(0, 1, 1, 3, 20, 25, 15, 21).expect(0, 3, 15, 25).exec();
+        new TestHelper()
+                .setInput(0, 1, 1, 3, 20, 25, 15, 21)
+                .expect(0, 3, 15, 25)
+                .exec();
     }
 
     @Test
     public void shouldSupportProhibitedBlocks() {
         new TestHelper().prohibit(0, 1).expect().exec();
-        new TestHelper().setInput(0, 1, 1, 2, 3, 4).prohibit(2, 3).expect(0, 2, 3, 4).exec();
+        new TestHelper()
+                .setInput(0, 1, 1, 2, 3, 4)
+                .prohibit(2, 3)
+                .expect(0, 2, 3, 4)
+                .exec();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -100,14 +113,31 @@ public class BlockAggregatorTest {
 
     @Test
     public void shouldAggregateAccordingToMinimumGapSize() {
-        new TestHelper().setInput(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).expect(0, 9).setMinimumGapSize(2).exec();
-        new TestHelper().setInput(0, 1, 2, 3, 6, 7, 8, 9).expect(0, 3, 6, 9).setMinimumGapSize(2).exec();
+        new TestHelper()
+                .setInput(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+                .expect(0, 9)
+                .setMinimumGapSize(2)
+                .exec();
+        new TestHelper()
+                .setInput(0, 1, 2, 3, 6, 7, 8, 9)
+                .expect(0, 3, 6, 9)
+                .setMinimumGapSize(2)
+                .exec();
     }
 
     @Test
     public void shouldSupportProhibitedBlocksWithMinimumGapSize() {
-        new TestHelper().setInput(0, 1, 2, 3, 8, 9).expect(0, 9).setMinimumGapSize(10).exec();
-        new TestHelper().setInput(0, 1, 2, 3, 8, 9).prohibit(4, 7).expect(0, 3, 8, 9).setMinimumGapSize(10).exec();
+        new TestHelper()
+                .setInput(0, 1, 2, 3, 8, 9)
+                .expect(0, 9)
+                .setMinimumGapSize(10)
+                .exec();
+        new TestHelper()
+                .setInput(0, 1, 2, 3, 8, 9)
+                .prohibit(4, 7)
+                .expect(0, 3, 8, 9)
+                .setMinimumGapSize(10)
+                .exec();
     }
 
     private static class TestHelper {
@@ -118,8 +148,7 @@ public class BlockAggregatorTest {
         private int minimumGapSize;
         BlockAggregator<Block> aggregator;
 
-        private TestHelper() {
-        }
+        private TestHelper() {}
 
         public TestHelper setInput(int... inputBlocks) {
             if (inputBlocks.length % 2 != 0) {
@@ -185,5 +214,4 @@ public class BlockAggregatorTest {
             return this;
         }
     }
-
 }

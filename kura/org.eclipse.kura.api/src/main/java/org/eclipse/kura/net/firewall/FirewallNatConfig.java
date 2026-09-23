@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -43,19 +43,19 @@ public class FirewallNatConfig implements NetConfig {
 
     /**
      * Represent the type of the rule
-     * 
+     *
      * @since 2.2
      */
     private final RuleType type;
 
     /**
-     * 
+     *
      * @deprecated since version 2.2. It will be removed in the next major release. Use instead
      *             {@link #FirewallNatConfig(String, String, String, String, String, boolean, RuleType)}
      */
     @Deprecated
-    public FirewallNatConfig(String srcIface, String dstIface, String protocol, String src, String dst,
-            boolean masquerade) {
+    public FirewallNatConfig(
+            String srcIface, String dstIface, String protocol, String src, String dst, boolean masquerade) {
         this.sourceInterface = srcIface;
         this.destinationInterface = dstIface;
         this.protocol = protocol;
@@ -66,9 +66,9 @@ public class FirewallNatConfig implements NetConfig {
     }
 
     /**
-     * 
+     *
      * Create a configuration for a NAT rule
-     * 
+     *
      * @param srcIface
      *            the source network interface (WAN interface)
      * @param dstIface
@@ -83,11 +83,17 @@ public class FirewallNatConfig implements NetConfig {
      *            whether or not MASQUERADE should be enabled
      * @param type
      *            the type of the rule (IP forwarding, Port forwarding or generic)
-     * 
+     *
      * @since 2.2
      */
-    public FirewallNatConfig(String srcIface, String dstIface, String protocol, String src, String dst,
-            boolean masquerade, RuleType type) {
+    public FirewallNatConfig(
+            String srcIface,
+            String dstIface,
+            String protocol,
+            String src,
+            String dst,
+            boolean masquerade,
+            RuleType type) {
         this.sourceInterface = srcIface;
         this.destinationInterface = dstIface;
         this.protocol = protocol;
@@ -122,7 +128,7 @@ public class FirewallNatConfig implements NetConfig {
     }
 
     /**
-     * 
+     *
      * @since 2.2
      */
     public RuleType getRuleType() {
@@ -132,8 +138,10 @@ public class FirewallNatConfig implements NetConfig {
     @Override
     public boolean isValid() {
         boolean result = false;
-        if (this.destinationInterface != null && !this.destinationInterface.trim().isEmpty()
-                && this.sourceInterface != null && !this.sourceInterface.trim().isEmpty()) {
+        if (this.destinationInterface != null
+                && !this.destinationInterface.trim().isEmpty()
+                && this.sourceInterface != null
+                && !this.sourceInterface.trim().isEmpty()) {
             result = true;
         }
 

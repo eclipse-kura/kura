@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
@@ -314,7 +313,7 @@ public class InventoryHandlerV1Test {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertEquals(TEST_JSON, new String(resPayload.getBody(), Charset.forName("UTF-8")));
     }
-    
+
     @Test
     public void testDoGetPackagesTwoElementsListPartiallySigned() throws KuraException, NoSuchFieldException {
         DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
@@ -325,7 +324,7 @@ public class InventoryHandlerV1Test {
         BundleInfo[] bundleInfos = new BundleInfo[2];
         BundleInfo bundleInfo = mock(BundleInfo.class);
         bundleInfos[0] = bundleInfo;
-        
+
         BundleInfo bundleInfo2 = mock(BundleInfo.class);
         bundleInfos[1] = bundleInfo2;
 
@@ -387,7 +386,7 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.INSTALLED);
-        
+
         when(bundle2.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater2");
         when(bundle2.getVersion()).thenReturn(new Version("2.0.0"));
         when(bundle2.getBundleId()).thenReturn(2L);
@@ -466,7 +465,7 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.UNINSTALLED);
-        
+
         Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
         signingCerts.put(getEmptyX509Cert(), null);
         when(bundle.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
@@ -604,7 +603,7 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.INSTALLED);
-        
+
         Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
         signingCerts.put(getEmptyX509Cert(), null);
         when(bundle.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
@@ -804,7 +803,7 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.ACTIVE);
-        
+
         Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
         signingCerts.put(getEmptyX509Cert(), null);
         when(bundle.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
@@ -1049,7 +1048,8 @@ public class InventoryHandlerV1Test {
         handler.activate(mockComponentContext(bundles));
 
         try {
-            handler.doExec(mock(RequestHandlerContext.class),
+            handler.doExec(
+                    mock(RequestHandlerContext.class),
                     requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"baz\"}"));
             fail("should have failed");
         } catch (final KuraException e) {
@@ -1057,7 +1057,8 @@ public class InventoryHandlerV1Test {
         }
 
         try {
-            handler.doExec(mock(RequestHandlerContext.class),
+            handler.doExec(
+                    mock(RequestHandlerContext.class),
                     requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"baz\"}"));
             fail("should have failed");
         } catch (final KuraException e) {
@@ -1065,7 +1066,8 @@ public class InventoryHandlerV1Test {
         }
 
         try {
-            handler.doExec(mock(RequestHandlerContext.class),
+            handler.doExec(
+                    mock(RequestHandlerContext.class),
                     requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"baz\",\"version\":\"1.0\"}"));
             fail("should have failed");
         } catch (final KuraException e) {
@@ -1073,7 +1075,8 @@ public class InventoryHandlerV1Test {
         }
 
         try {
-            handler.doExec(mock(RequestHandlerContext.class),
+            handler.doExec(
+                    mock(RequestHandlerContext.class),
                     requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"baz\",\"version\":\"1.0\"}"));
             fail("should have failed");
         } catch (final KuraException e) {
@@ -1081,7 +1084,8 @@ public class InventoryHandlerV1Test {
         }
 
         try {
-            handler.doExec(mock(RequestHandlerContext.class),
+            handler.doExec(
+                    mock(RequestHandlerContext.class),
                     requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"foo\",\"version\":\"2.0\"}"));
             fail("should have failed");
         } catch (final KuraException e) {
@@ -1089,7 +1093,8 @@ public class InventoryHandlerV1Test {
         }
 
         try {
-            handler.doExec(mock(RequestHandlerContext.class),
+            handler.doExec(
+                    mock(RequestHandlerContext.class),
                     requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"bar\",\"version\":\"3.0\"}"));
             fail("should have failed");
         } catch (final KuraException e) {
@@ -1110,11 +1115,12 @@ public class InventoryHandlerV1Test {
         InventoryHandlerV1 handler = new InventoryHandlerV1();
         handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+        final KuraMessage response = handler.doExec(
+                mock(RequestHandlerContext.class),
                 requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"foo\",\"version\":\"1.0.0\"}"));
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
-                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+        assertEquals(
+                KuraResponsePayload.RESPONSE_CODE_OK, ((KuraResponsePayload) response.getPayload()).getResponseCode());
 
         Mockito.verify(foo, times(1)).start();
         Mockito.verify(foo, times(0)).stop();
@@ -1130,11 +1136,12 @@ public class InventoryHandlerV1Test {
         InventoryHandlerV1 handler = new InventoryHandlerV1();
         handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+        final KuraMessage response = handler.doExec(
+                mock(RequestHandlerContext.class),
                 requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"foo\"}"));
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
-                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+        assertEquals(
+                KuraResponsePayload.RESPONSE_CODE_OK, ((KuraResponsePayload) response.getPayload()).getResponseCode());
 
         Mockito.verify(foo, times(1)).start();
         Mockito.verify(foo, times(0)).stop();
@@ -1150,11 +1157,12 @@ public class InventoryHandlerV1Test {
         InventoryHandlerV1 handler = new InventoryHandlerV1();
         handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+        final KuraMessage response = handler.doExec(
+                mock(RequestHandlerContext.class),
                 requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"foo\",\"version\":\"1.0.0\"}"));
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
-                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+        assertEquals(
+                KuraResponsePayload.RESPONSE_CODE_OK, ((KuraResponsePayload) response.getPayload()).getResponseCode());
 
         Mockito.verify(foo, times(0)).start();
         Mockito.verify(foo, times(1)).stop();
@@ -1170,11 +1178,12 @@ public class InventoryHandlerV1Test {
         InventoryHandlerV1 handler = new InventoryHandlerV1();
         handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+        final KuraMessage response = handler.doExec(
+                mock(RequestHandlerContext.class),
                 requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"foo\"}"));
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
-                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+        assertEquals(
+                KuraResponsePayload.RESPONSE_CODE_OK, ((KuraResponsePayload) response.getPayload()).getResponseCode());
 
         Mockito.verify(foo, times(0)).start();
         Mockito.verify(foo, times(1)).stop();
@@ -1247,7 +1256,6 @@ public class InventoryHandlerV1Test {
         whenTheFollowingJsonKuraPayloadDoExec(STOP_CONTAINER, "{\"name\":\"dockerContainer1\"}");
 
         thenCheckIfContainerOneHasStopped();
-
     }
 
     // endregion
@@ -1296,8 +1304,8 @@ public class InventoryHandlerV1Test {
     public void testDeleteImage() throws BundleException, KuraException, InterruptedException {
         givenTwoDockerContainers();
 
-        whenTheFollowingJsonContainerImageKuraPayloadDoExec(DELETE_IMAGE,
-                "{\"name\":\"nginx\",\"version\":\"latest\"}");
+        whenTheFollowingJsonContainerImageKuraPayloadDoExec(
+                DELETE_IMAGE, "{\"name\":\"nginx\",\"version\":\"latest\"}");
         thenCheckIfImageHasDelete();
     }
 
@@ -1311,7 +1319,6 @@ public class InventoryHandlerV1Test {
     /**
      * given
      */
-
     private void giventheFollowingContainerSetupToMarshal() {
 
         this.dockerContainerObject = new DockerContainer(this.dockerContainer1);
@@ -1327,27 +1334,42 @@ public class InventoryHandlerV1Test {
     }
 
     private void givenTwoDockerContainers() {
-        this.dockerContainer1 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer1")
-                .setContainerImage("nginx").setContainerImageTag("latest").setContainerID("1234").build();
-        this.dockerContainer2 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer2")
-                .setContainerImage("nginx").setContainerID("124344").build();
+        this.dockerContainer1 = ContainerInstanceDescriptor.builder()
+                .setContainerName("dockerContainer1")
+                .setContainerImage("nginx")
+                .setContainerImageTag("latest")
+                .setContainerID("1234")
+                .build();
+        this.dockerContainer2 = ContainerInstanceDescriptor.builder()
+                .setContainerName("dockerContainer2")
+                .setContainerImage("nginx")
+                .setContainerID("124344")
+                .build();
 
-        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
-                .setImageTag("latest").setImageDownloadTimeoutSeconds(200)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName("nginx")
+                .setImageTag("latest")
+                .setImageDownloadTimeoutSeconds(200)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
         this.containerInstanceImage1 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
-                .setImageName(this.containerImage1.getImageName()).setImageTag(this.containerImage1.getImageTag())
-                .setImageId("SHA256:3h278f34yhufy3h").build();
-        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
-                .setImageTag("alpine").setImageDownloadTimeoutSeconds(200)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .setImageName(this.containerImage1.getImageName())
+                .setImageTag(this.containerImage1.getImageTag())
+                .setImageId("SHA256:3h278f34yhufy3h")
+                .build();
+        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName("nginx")
+                .setImageTag("alpine")
+                .setImageDownloadTimeoutSeconds(200)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
         this.containerInstanceImage2 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
-                .setImageName(this.containerImage2.getImageName()).setImageTag(this.containerImage2.getImageTag())
-                .setImageId("SHA256:dfiyegfyuwehf978ew4hu").build();
+                .setImageName(this.containerImage2.getImageName())
+                .setImageTag(this.containerImage2.getImageTag())
+                .setImageId("SHA256:dfiyegfyuwehf978ew4hu")
+                .build();
     }
 
     private void givenTheFollowingContainerJson() {
@@ -1412,11 +1434,11 @@ public class InventoryHandlerV1Test {
 
         doReturn(testContainer).when(handler).unmarshal(payload, DockerContainer.class);
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
-                theMessage);
+        final KuraMessage response =
+                handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS), theMessage);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
-                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+        assertEquals(
+                KuraResponsePayload.RESPONSE_CODE_OK, ((KuraResponsePayload) response.getPayload()).getResponseCode());
     }
 
     private void whenTheFollowingJsonContainerImageKuraPayloadDoExec(List<String> request, String payload)
@@ -1439,11 +1461,11 @@ public class InventoryHandlerV1Test {
 
         doReturn(testImageInstance).when(handler).unmarshal(payload, ContainerImage.class);
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
-                theMessage);
+        final KuraMessage response =
+                handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS), theMessage);
 
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
-                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+        assertEquals(
+                KuraResponsePayload.RESPONSE_CODE_OK, ((KuraResponsePayload) response.getPayload()).getResponseCode());
     }
 
     private void whenTheFollowingJsonKuraPayloadDoGet(List<String> request, String payload)
@@ -1474,7 +1496,6 @@ public class InventoryHandlerV1Test {
      *
      * @throws KuraException
      */
-
     private void thenCheckIfContainerMatchesJSON() {
         assertEquals(
                 "{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\",\"state\":\"uninstalled\"}]}",
@@ -1482,8 +1503,8 @@ public class InventoryHandlerV1Test {
     }
 
     private void thenCheckIfImageMatchesJSON() {
-        assertEquals("{\"images\":[{\"name\":\"nginx\",\"version\":\"latest\",\"type\":\"CONTAINER_IMAGE\"}]}",
-                TEST_JSON);
+        assertEquals(
+                "{\"images\":[{\"name\":\"nginx\",\"version\":\"latest\",\"type\":\"CONTAINER_IMAGE\"}]}", TEST_JSON);
     }
 
     private void thenCheckIfContainerMatchesXML() {
@@ -1493,7 +1514,8 @@ public class InventoryHandlerV1Test {
          * <state>uninstalled</state> </container>
          * </containers> ]>
          */
-        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version><state>uninstalled</state></container></containers>";
+        String containerXMLExpected =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version><state>uninstalled</state></container></containers>";
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 
@@ -1503,18 +1525,17 @@ public class InventoryHandlerV1Test {
          * <name>dockerContainer1</name> <version>nginx:latest</version> </container>
          * </containers> ]>
          */
-        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><images><image><name>nginx</name><version>latest</version></image></images>";
+        String containerXMLExpected =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><images><image><name>nginx</name><version>latest</version></image></images>";
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 
     private void thenCheckIfJsonMatchesContainer() {
         assertEquals("test", this.dockerContainerObject.getContainerName());
-
     }
 
     private void thenCheckIfJsonMatchesImage() {
         assertEquals("nginx", this.containerImageObject.getName());
-
     }
 
     private void thenCheckIfContainerWereListed() throws KuraException {
@@ -1565,8 +1586,9 @@ public class InventoryHandlerV1Test {
 
         when(bundleContext.getService(ref)).thenReturn(jsonMarshaller);
         try {
-            when(bundleContext.getServiceReferences(ArgumentMatchers.eq(Unmarshaller.class),
-                    ArgumentMatchers.anyString())).thenReturn(Arrays.asList(ref));
+            when(bundleContext.getServiceReferences(
+                            ArgumentMatchers.eq(Unmarshaller.class), ArgumentMatchers.anyString()))
+                    .thenReturn(Arrays.asList(ref));
         } catch (InvalidSyntaxException e) {
             throw new IllegalStateException(e);
         }
@@ -1614,168 +1636,169 @@ public class InventoryHandlerV1Test {
         assertEquals(this.containerImageObject.getImageSize(), imageSize);
         assertEquals(this.containerImagesObject.getContainerImages().get(0).getName(), imageName);
     }
-    
+
     private X509Certificate getEmptyX509Cert() {
         return new X509Certificate() {
-            
+
             @Override
             public boolean hasUnsupportedCriticalExtension() {
                 // TODO Auto-generated method stub
                 return false;
             }
-            
+
             @Override
             public Set<String> getNonCriticalExtensionOIDs() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public byte[] getExtensionValue(String arg0) {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Set<String> getCriticalExtensionOIDs() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
-            public void verify(PublicKey arg0, String arg1) throws CertificateException, NoSuchAlgorithmException,
-                    InvalidKeyException, NoSuchProviderException, SignatureException {
+            public void verify(PublicKey arg0, String arg1)
+                    throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException,
+                            SignatureException {
                 // TODO Auto-generated method stub
-                
+
             }
-            
+
             @Override
-            public void verify(PublicKey arg0) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException,
-                    NoSuchProviderException, SignatureException {
+            public void verify(PublicKey arg0)
+                    throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException,
+                            SignatureException {
                 // TODO Auto-generated method stub
-                
+
             }
-            
+
             @Override
             public String toString() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public PublicKey getPublicKey() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public byte[] getEncoded() throws CertificateEncodingException {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public int getVersion() {
                 // TODO Auto-generated method stub
                 return 0;
             }
-            
+
             @Override
             public byte[] getTBSCertificate() throws CertificateEncodingException {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public boolean[] getSubjectUniqueID() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Principal getSubjectDN() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public byte[] getSignature() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public byte[] getSigAlgParams() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public String getSigAlgOID() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public String getSigAlgName() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public BigInteger getSerialNumber() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Date getNotBefore() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Date getNotAfter() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public boolean[] getKeyUsage() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public boolean[] getIssuerUniqueID() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public Principal getIssuerDN() {
                 // TODO Auto-generated method stub
                 return null;
             }
-            
+
             @Override
             public int getBasicConstraints() {
                 // TODO Auto-generated method stub
                 return 0;
             }
-            
+
             @Override
             public void checkValidity(Date date) throws CertificateExpiredException, CertificateNotYetValidException {
                 // TODO Auto-generated method stub
-                
+
             }
-            
+
             @Override
             public void checkValidity() throws CertificateExpiredException, CertificateNotYetValidException {
                 // TODO Auto-generated method stub
-                
+
             }
         };
     }
-
 }

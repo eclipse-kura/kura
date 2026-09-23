@@ -18,6 +18,11 @@ import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.BA
 import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.CHANGE_PASSWORD_PATH;
 import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.XSRF_TOKEN_PATH;
 
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.MessageBodyReader;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +33,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.LoginBannerService;
@@ -57,12 +61,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.MessageBodyReader;
-import jakarta.ws.rs.ext.MessageBodyWriter;
 
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = RestServiceMetatype.class)
@@ -125,39 +123,42 @@ public class RestService implements ConfigurableComponent {
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
-        final BundleContext bundleContext = FrameworkUtil.getBundle(RestService.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(RestService.class).getBundleContext();
 
         final RestIdentityHelper identityHelper = new RestIdentityHelper(this.identityService);
         final RestSessionHelper restSessionHelper = new RestSessionHelper(identityHelper);
         final Dictionary<String, Object> serviceProperties = RestServiceUtils.extensionProperties();
 
-        this.registeredServices
-                .add(bundleContext.registerService(ContainerRequestFilter.class, this.incomingPortCheckFilter,
-                serviceProperties));
-        this.registeredServices
-                .add(bundleContext.registerService(ContainerRequestFilter.class, this.authenticationFilter,
-                serviceProperties));
-        this.registeredServices
-                .add(bundleContext.registerService(ContainerRequestFilter.class, new AuthorizationFilter(),
-                serviceProperties));
+        this.registeredServices.add(bundleContext.registerService(
+                ContainerRequestFilter.class, this.incomingPortCheckFilter, serviceProperties));
+        this.registeredServices.add(bundleContext.registerService(
+                ContainerRequestFilter.class, this.authenticationFilter, serviceProperties));
+        this.registeredServices.add(bundleContext.registerService(
+                ContainerRequestFilter.class, new AuthorizationFilter(), serviceProperties));
         this.registeredServices.add(
                 bundleContext.registerService(ContainerResponseFilter.class, new AuditFilter(), serviceProperties));
         this.registeredServices.add(bundleContext.registerService(
-                new String[] { MessageBodyReader.class.getName(), MessageBodyWriter.class.getName() },
-                new GsonSerializer<Object>(), serviceProperties));
+                new String[] {MessageBodyReader.class.getName(), MessageBodyWriter.class.getName()},
+                new GsonSerializer<Object>(),
+                serviceProperties));
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, identityHelper);
         this.certificateAuthProvider = new CertificateAuthenticationProvider(identityHelper);
-        this.sessionAuthenticationProvider = new SessionAuthProvider(//
+        this.sessionAuthenticationProvider = new SessionAuthProvider( //
                 restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
                 Collections.singleton(BASE_PATH + XSRF_TOKEN_PATH));
 
-        this.authRestService = new SessionRestService(identityHelper, restSessionHelper, this.configurationAdmin,
-                this.passwordStrengthVerificationService, this.loginBannerService);
+        this.authRestService = new SessionRestService(
+                identityHelper,
+                restSessionHelper,
+                this.configurationAdmin,
+                this.passwordStrengthVerificationService,
+                this.loginBannerService);
 
-        this.registeredServices.add(bundleContext.registerService(SessionRestService.class, this.authRestService,
-                RestServiceUtils.resourceProperties()));
+        this.registeredServices.add(bundleContext.registerService(
+                SessionRestService.class, this.authRestService, RestServiceUtils.resourceProperties()));
         this.registeredServices.add(
                 bundleContext.registerService(ExceptionMapper.class, new RestExceptionMapper(), serviceProperties));
 
@@ -183,13 +184,11 @@ public class RestService implements ConfigurableComponent {
             properties.put("jersey.context.path", "/services");
             properties.put("jersey.jakartars.whiteboard.name", KURA_DEFAULT_JAKARTARS_WHITEBOARD_NAME);
 
-            final Configuration newConfiguration = this.configurationAdmin
-                    .createFactoryConfiguration("JakartarsServletWhiteboardRuntimeComponent", null);
+            final Configuration newConfiguration = this.configurationAdmin.createFactoryConfiguration(
+                    "JakartarsServletWhiteboardRuntimeComponent", null);
 
             newConfiguration.update(properties);
-
         }
-
     }
 
     @Modified
@@ -240,5 +239,4 @@ public class RestService implements ConfigurableComponent {
             bindAuthenticationProvider(this.sessionAuthenticationProvider);
         }
     }
-
 }

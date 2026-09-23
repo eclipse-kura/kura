@@ -16,14 +16,13 @@ package org.eclipse.kura.core.token.jwt.roundtrip;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.token.jwt.common.AbstractJwtScenario;
 import org.eclipse.kura.core.token.jwt.common.IssuingConfig;
 import org.eclipse.kura.core.token.jwt.common.TestKeys;
 import org.eclipse.kura.core.token.jwt.common.VerificationConfig;
 import org.junit.Test;
-
-import com.auth0.jwt.exceptions.SignatureVerificationException;
 
 public class KeyRotationTest extends AbstractJwtScenario {
 
@@ -103,8 +102,9 @@ public class KeyRotationTest extends AbstractJwtScenario {
     }
 
     private void thenTheTwoTokensDiffer() {
-        assertNotEquals("the rotation did not change the issued token", this.tokenIssuedBeforeRotation,
+        assertNotEquals(
+                "the rotation did not change the issued token",
+                this.tokenIssuedBeforeRotation,
                 this.tokenIssuedAfterRotation);
     }
-
 }

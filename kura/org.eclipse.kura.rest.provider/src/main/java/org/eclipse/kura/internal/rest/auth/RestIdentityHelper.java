@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.identity.AssignedPermissions;
@@ -43,7 +42,9 @@ public class RestIdentityHelper {
     }
 
     public boolean isPasswordChangeRequired(final String username) throws KuraException {
-        return passwordConfiguration(username).map(PasswordConfiguration::isPasswordChangeNeeded).orElse(false);
+        return passwordConfiguration(username)
+                .map(PasswordConfiguration::isPasswordChangeNeeded)
+                .orElse(false);
     }
 
     public Optional<PasswordHash> getPasswordHash(final String username) throws KuraException {
@@ -58,7 +59,9 @@ public class RestIdentityHelper {
     }
 
     public boolean identityExists(final String username) throws KuraException {
-        return identityService.getIdentityConfiguration(username, Collections.emptySet()).isPresent();
+        return identityService
+                .getIdentityConfiguration(username, Collections.emptySet())
+                .isPresent();
     }
 
     public void checkPermission(final String username, final Permission permission) throws KuraException {
@@ -67,14 +70,17 @@ public class RestIdentityHelper {
 
     public void updatePassword(final String username, final char[] newPassword, final boolean passwordChangeNeeded)
             throws KuraException {
-        final PasswordConfiguration existingPasswordConfig = passwordConfiguration(username)
-                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
+        final PasswordConfiguration existingPasswordConfig =
+                passwordConfiguration(username).orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
 
-        final PasswordConfiguration updatedPasswordConfig = new PasswordConfiguration(passwordChangeNeeded,
-                existingPasswordConfig.isPasswordAuthEnabled(), Optional.of(newPassword), Optional.empty());
+        final PasswordConfiguration updatedPasswordConfig = new PasswordConfiguration(
+                passwordChangeNeeded,
+                existingPasswordConfig.isPasswordAuthEnabled(),
+                Optional.of(newPassword),
+                Optional.empty());
 
-        final IdentityConfiguration identityConfiguration = new IdentityConfiguration(username,
-                Collections.singletonList(updatedPasswordConfig));
+        final IdentityConfiguration identityConfiguration =
+                new IdentityConfiguration(username, Collections.singletonList(updatedPasswordConfig));
 
         identityService.updateIdentityConfiguration(identityConfiguration);
     }
@@ -83,10 +89,11 @@ public class RestIdentityHelper {
         return identityService.computePasswordHash(password);
     }
 
-    private Optional<IdentityConfiguration> identityConfiguration(final String username,
-            final Class<? extends IdentityConfigurationComponent>... components) throws KuraException {
-        final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn = new HashSet<>(
-                Arrays.asList(components));
+    private Optional<IdentityConfiguration> identityConfiguration(
+            final String username, final Class<? extends IdentityConfigurationComponent>... components)
+            throws KuraException {
+        final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn =
+                new HashSet<>(Arrays.asList(components));
         return identityService.getIdentityConfiguration(username, componentsToReturn);
     }
 

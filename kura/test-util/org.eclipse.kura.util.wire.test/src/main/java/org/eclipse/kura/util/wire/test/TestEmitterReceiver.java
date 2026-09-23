@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
@@ -29,32 +28,35 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.wireadmin.Wire;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.wireadmin.Wire;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.util.wire.test.TestEmitterReceiver",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+        name = "org.eclipse.kura.util.wire.test.TestEmitterReceiver",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.wire.WireComponent.class,
             org.osgi.service.wireadmin.Consumer.class,
-            org.osgi.service.wireadmin.Producer.class },
-    property = {
-        "service.pid=com.eurotech.framework.wire.AvroSerializer",
-        "kura.ui.service.hide:Boolean=true",
-        "input.cardinality.minimum:Integer=1",
-        "input.cardinality.maximum:Integer=1",
-        "input.cardinality.default:Integer=1",
-        "output.cardinality.minimum:Integer=1",
-        "output.cardinality.maximum:Integer=1",
-        "output.cardinality.default:Integer=1" })
+            org.osgi.service.wireadmin.Producer.class
+        },
+        property = {
+            "service.pid=com.eurotech.framework.wire.AvroSerializer",
+            "kura.ui.service.hide:Boolean=true",
+            "input.cardinality.minimum:Integer=1",
+            "input.cardinality.maximum:Integer=1",
+            "input.cardinality.default:Integer=1",
+            "output.cardinality.minimum:Integer=1",
+            "output.cardinality.maximum:Integer=1",
+            "output.cardinality.default:Integer=1"
+        })
 @Designate(ocd = TestEmitterReceiverOptions.class, factory = true)
 public class TestEmitterReceiver implements WireEmitter, WireReceiver, ConfigurableComponent {
 
@@ -68,8 +70,8 @@ public class TestEmitterReceiver implements WireEmitter, WireReceiver, Configura
     @Activate
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.info("activating...");
-        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this,
-                getWireComponentServiceReference(componentContext));
+        this.wireSupport = (MultiportWireSupport)
+                this.wireHelperService.newWireSupport(this, getWireComponentServiceReference(componentContext));
         logger.info("activating...done");
     }
 

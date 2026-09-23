@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.eclipsesource.json.ParseException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,24 +29,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map.Entry;
-
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.eclipsesource.json.ParseException;
-
 public class CloudPayloadJsonDecoderTest {
 
     @Before
-    public void setUp() throws Exception {
-    }
+    public void setUp() throws Exception {}
 
     @Test
     public void testStringToJson() throws IOException {
-        String stringToConvert = "{\"ts\":1490196349868,\"metric.string\":\"string.value\",\"metric.long\":9223372036854774999,\"metric.char\":\"a\",\"metric.string.oneof\":\"string.value.option.1\",\"metric.password\":\"xea2sebrvKJQEW1YRDEEGg==\",\"metric.float\":32766.98,\"metric.integer.fixed\":101,\"metric.byte\":119,\"metric.boolean\":false,\"temperature\":127.19863,\"metric.integer\":2147483599,\"metric.short\":32759,\"metric.double\":4.29496729599998E9}";
+        String stringToConvert =
+                "{\"ts\":1490196349868,\"metric.string\":\"string.value\",\"metric.long\":9223372036854774999,\"metric.char\":\"a\",\"metric.string.oneof\":\"string.value.option.1\",\"metric.password\":\"xea2sebrvKJQEW1YRDEEGg==\",\"metric.float\":32766.98,\"metric.integer.fixed\":101,\"metric.byte\":119,\"metric.boolean\":false,\"temperature\":127.19863,\"metric.integer\":2147483599,\"metric.short\":32759,\"metric.double\":4.29496729599998E9}";
         KuraPayload kuraPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(stringToConvert));
         assertNotNull(kuraPayload);
     }
@@ -58,13 +56,15 @@ public class CloudPayloadJsonDecoderTest {
 
     @Test(expected = ParseException.class)
     public void testStringToJsonIncompleteFailure() throws IOException {
-        String stringToConvert = "{\"TIMESTAMP\":,\"POSITION\":{\"LATITUDE\":10,\"LONGITUDE\":20,\"ALTITUDE\":200,\"HEADING\":30,\"PRECISION\":1,\"SATELLITES\":3,\"SPEED\":50,\"TIMESTAMP\":123456789,\"STATUS\":0},\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}";
+        String stringToConvert =
+                "{\"TIMESTAMP\":,\"POSITION\":{\"LATITUDE\":10,\"LONGITUDE\":20,\"ALTITUDE\":200,\"HEADING\":30,\"PRECISION\":1,\"SATELLITES\":3,\"SPEED\":50,\"TIMESTAMP\":123456789,\"STATUS\":0},\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}";
         CloudPayloadJsonDecoder.buildFromReader(new StringReader(stringToConvert));
     }
 
     @Test
     public void testStringToJsonUnparsableMetric() throws IOException {
-        String stringToConvert = "{\"SENTON\":1490275324619,\"METRICS\":{\"metric.name\":{\"metric.value\":\"value\"}}}";
+        String stringToConvert =
+                "{\"SENTON\":1490275324619,\"METRICS\":{\"metric.name\":{\"metric.value\":\"value\"}}}";
 
         KuraPayload payload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(stringToConvert));
 
@@ -138,7 +138,8 @@ public class CloudPayloadJsonDecoderTest {
     // this test is prepared for one of the new format possibilities with better decoding options - currently invalid
     // @Test
     public void testFromJson() throws IOException {
-        String stringToConvert = "{\"TIMESTAMP\":1490275324619,\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}";
+        String stringToConvert =
+                "{\"TIMESTAMP\":1490275324619,\"metric.name\":{\"type\":\"STRING\",\"value\":\"metric.value\"},\"metric.int\":{\"type\":\"INTEGER\",\"value\":1},\"metric.character\":{\"type\":\"CHARACTER\",\"value\":99},\"metric.float\":{\"type\":\"FLOAT\",\"value\":1.2},\"metric.bytearray\":{\"type\":\"BYTEARRAY\",\"value\":\"VGVzdA==\"},\"metric.double\":{\"type\":\"DOUBLE\",\"value\":1.7976931348623157E308}}";
         KuraPayload payload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(stringToConvert));
         assertNotNull(payload);
 
@@ -166,10 +167,11 @@ public class CloudPayloadJsonDecoderTest {
 
     @Test
     public void testFromJsonUnknownJson() throws IOException {
-        String stringToConvert = "{\"stuff\": {\"onetype\": [{\"id\":1,\"name\":\"John Doe\"},{\"id\":2,\"name\":\"Don Joeh\"}],\"othertype\": {\"id\":2,\"company\":\"ACME\"}}, \"otherstuff\": {\"thing\": [[1,42],[2,2]]}}";
+        String stringToConvert =
+                "{\"stuff\": {\"onetype\": [{\"id\":1,\"name\":\"John Doe\"},{\"id\":2,\"name\":\"Don Joeh\"}],\"othertype\": {\"id\":2,\"company\":\"ACME\"}}, \"otherstuff\": {\"thing\": [[1,42],[2,2]]}}";
         InputStream inputStream = new ByteArrayInputStream(stringToConvert.getBytes(StandardCharsets.UTF_8));
-        KuraPayload payload = CloudPayloadJsonDecoder
-                .buildFromReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        KuraPayload payload =
+                CloudPayloadJsonDecoder.buildFromReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         assertNotNull(payload);
 
         // timestamp

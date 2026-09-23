@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
@@ -29,22 +28,23 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.osgi.service.event.EventAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.clock.ClockService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.clock.ClockService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class
+        })
 @Designate(ocd = ClockServiceOptions.class)
 public class ClockServiceImpl implements ConfigurableComponent, ClockService, ClockSyncListener {
 
@@ -75,7 +75,8 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         this.eventAdmin = null;
     }
 
-    @Reference(name = "PrivilegedExecutorService",
+    @Reference(
+            name = "PrivilegedExecutorService",
             service = org.eclipse.kura.executor.PrivilegedExecutorService.class,
             unbind = "unsetExecutorService")
     public void setExecutorService(CommandExecutorService executorService) {
@@ -189,18 +190,18 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         String sprovider = this.clockServiceConfig.getClockProvider();
 
         switch (ClockProviderType.fromValue(sprovider)) {
-        case JAVA_NTP:
-            this.provider = new JavaNtpClockSyncProvider();
-            break;
-        case NTPD:
-            logger.error("NTPD clock provider is not supported anymore. Use JAVA_NTP or CHRONY_ADVANCED instead.");
-            return;
-        case CHRONY_ADVANCED:
-            this.provider = new ChronyClockSyncProvider(this.executorService, this.cryptoService);
-            break;
+            case JAVA_NTP:
+                this.provider = new JavaNtpClockSyncProvider();
+                break;
+            case NTPD:
+                logger.error("NTPD clock provider is not supported anymore. Use JAVA_NTP or CHRONY_ADVANCED instead.");
+                return;
+            case CHRONY_ADVANCED:
+                this.provider = new ChronyClockSyncProvider(this.executorService, this.cryptoService);
+                break;
 
-        default:
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+            default:
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
         }
 
         this.provider.init(this.clockServiceConfig, this.scheduler, this);
@@ -226,7 +227,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         boolean bClockUpToDate = false;
         if (offset != 0 && changeSystemClock) {
             long time = System.currentTimeMillis() + offset;
-            Command command = new Command(new String[] { "date", "-s", "@" + Long.toString(time / 1000) });
+            Command command = new Command(new String[] {"date", "-s", "@" + Long.toString(time / 1000)});
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             if (status.getExitStatus().isSuccessful()) {
@@ -235,7 +236,9 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             } else {
                 logger.error(
                         "Unexpected error while updating System Clock - rc = {}, CommandLine:{}, it should've been {}",
-                        status.getExitStatus().getExitCode(), command.getCommandLine(), new Date());
+                        status.getExitStatus().getExitCode(),
+                        command.getCommandLine(),
+                        new Date());
             }
         } else {
             bClockUpToDate = true;
@@ -243,13 +246,14 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
         if (this.clockServiceConfig.isHwclockEnabled() && changeSystemClock) {
             Command command = new Command(
-                    new String[] { "hwclock", "--utc", "--systohc", "-f", this.clockServiceConfig.getRtcFilename() });
+                    new String[] {"hwclock", "--utc", "--systohc", "-f", this.clockServiceConfig.getRtcFilename()});
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             if (status.getExitStatus().isSuccessful()) {
                 logger.info("Hardware Clock Updated");
             } else {
-                logger.error("Unexpected error while updating Hardware Clock - rc = {}",
+                logger.error(
+                        "Unexpected error while updating Hardware Clock - rc = {}",
                         status.getExitStatus().getExitCode());
             }
         }
@@ -259,5 +263,4 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             this.eventAdmin.postEvent(EMPTY_EVENT);
         }
     }
-
 }

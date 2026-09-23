@@ -1,24 +1,24 @@
 /*******************************************************************************
  * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.request.handler.jaxrs;
 
+import com.google.gson.Gson;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
@@ -27,16 +27,13 @@ import org.eclipse.kura.request.handler.jaxrs.consumer.RequestParameterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 public final class RequestParameterHandlers {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestParameterHandlers.class);
 
     private static final Object[] EMPTY_PARAMETERS = new Object[0];
 
-    private RequestParameterHandlers() {
-    }
+    private RequestParameterHandlers() {}
 
     public static RequestParameterHandler noArgsHandler() {
         return m -> EMPTY_PARAMETERS;
@@ -74,7 +71,7 @@ public final class RequestParameterHandlers {
         return m -> {
             final RequestArgumentHandler<InputStream> handler = inputStreamArgumentHandler();
 
-            return new Object[] { handler.buildParameter(m) };
+            return new Object[] {handler.buildParameter(m)};
         };
     }
 
@@ -91,8 +88,11 @@ public final class RequestParameterHandlers {
 
             try {
 
-                asString = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
-                        .decode(ByteBuffer.wrap(body)).toString();
+                asString = StandardCharsets.UTF_8
+                        .newDecoder()
+                        .onMalformedInput(CodingErrorAction.REPORT)
+                        .decode(ByteBuffer.wrap(body))
+                        .toString();
             } catch (final Exception e) {
                 logger.warn("request body is not valid UTF8", e);
                 throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -114,10 +114,9 @@ public final class RequestParameterHandlers {
     public static RequestParameterHandler gsonHandler(final Class<?> type, final Gson gson) {
 
         return m -> {
-
             final RequestArgumentHandler<?> handler = gsonArgumentHandler(type, gson);
 
-            return new Object[] { handler.buildParameter(m) };
+            return new Object[] {handler.buildParameter(m)};
         };
     }
 }

@@ -12,6 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.core.testutil.requesthandler;
 
+import io.moquette.broker.Server;
+import io.moquette.broker.config.FluentConfig;
+import io.moquette.broker.config.IConfig;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -21,7 +24,6 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.util.MqttTopicUtil;
@@ -35,18 +37,16 @@ import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.moquette.broker.Server;
-import io.moquette.broker.config.FluentConfig;
-import io.moquette.broker.config.IConfig;
-
 public class MqttTransport implements Transport {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttTransport.class);
 
-    private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String MQTT_DATA_TRANSPORT_FACTORY_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
-    private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     private static Server mqttBroker;
 
@@ -72,21 +72,26 @@ public class MqttTransport implements Transport {
         try {
             startMoquetteBroker();
 
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
-            final DataTransportService mqttDataTransport = ServiceUtil
-                    .trackService(DataTransportService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
-            jsonMarshaller = ServiceUtil
-                    .trackService(Marshaller.class,
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(1, TimeUnit.MINUTES);
+            final DataTransportService mqttDataTransport = ServiceUtil.trackService(
+                            DataTransportService.class, Optional.empty())
+                    .get(1, TimeUnit.MINUTES);
+            jsonMarshaller = ServiceUtil.trackService(
+                            Marshaller.class,
                             Optional.of("(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"))
                     .get(1, TimeUnit.MINUTES);
-            jsonUnmarshaller = ServiceUtil
-                    .trackService(Unmarshaller.class,
+            jsonUnmarshaller = ServiceUtil.trackService(
+                            Unmarshaller.class,
                             Optional.of("(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"))
                     .get(1, TimeUnit.MINUTES);
 
-            ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
-                    getConfigForLocalBroker("test")).get(30, TimeUnit.SECONDS);
+            ServiceUtil.updateComponentConfiguration(
+                            configurationService,
+                            DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
+                            getConfigForLocalBroker("test"))
+                    .get(30, TimeUnit.SECONDS);
 
             final Map<String, Object> cloudServiceProperties = new HashMap<>();
             cloudServiceProperties.put("payload.encoding", "simple-json");
@@ -96,12 +101,17 @@ public class MqttTransport implements Transport {
              */
             cloudServiceProperties.put("topic.control-prefix", "EDC");
 
-            ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_CLOUD_SERVICE_PID,
-                    cloudServiceProperties).get(30, TimeUnit.SECONDS);
+            ServiceUtil.updateComponentConfiguration(
+                            configurationService, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties)
+                    .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService observer = ServiceUtil.createFactoryConfiguration(configurationService,
-                    DataTransportService.class, "observer-" + this.appId, MQTT_DATA_TRANSPORT_FACTORY_PID,
-                    getConfigForLocalBroker("observer-" + this.appId)).get(30, TimeUnit.SECONDS);
+            final DataTransportService observer = ServiceUtil.createFactoryConfiguration(
+                            configurationService,
+                            DataTransportService.class,
+                            "observer-" + this.appId,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            getConfigForLocalBroker("observer-" + this.appId))
+                    .get(30, TimeUnit.SECONDS);
             observerInspector = new DataTransportInspector(observer, true);
             final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport, false);
 
@@ -141,12 +151,13 @@ public class MqttTransport implements Transport {
                 requestPayload.setBody(requestBody.getBytes(StandardCharsets.UTF_8));
             }
 
-            final KuraPayload response = observerInspector.runRequest(adaptResource(resource, method), requestPayload)
+            final KuraPayload response = observerInspector
+                    .runRequest(adaptResource(resource, method), requestPayload)
                     .get(10, TimeUnit.SECONDS);
 
             final int status = (int) (long) response.getMetric("response.code");
-            final Optional<String> body = Optional.ofNullable(response.getBody())
-                    .map(s -> new String(s, StandardCharsets.UTF_8));
+            final Optional<String> body =
+                    Optional.ofNullable(response.getBody()).map(s -> new String(s, StandardCharsets.UTF_8));
 
             return new Response(status, body);
         } catch (Exception e) {
@@ -175,7 +186,11 @@ public class MqttTransport implements Transport {
             return;
         }
 
-        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+        IConfig brokerConfig = new FluentConfig()
+                .port(1883)
+                .host("0.0.0.0")
+                .disablePersistence()
+                .build();
         brokerConfig.setProperty(IConfig.NETTY_MAX_BYTES_PROPERTY_NAME, "16777216");
 
         mqttBroker = new Server();
@@ -272,7 +287,6 @@ public class MqttTransport implements Transport {
                 public void onMessageConfirmed(DataTransportToken token) {
                     // do nothing
                 }
-
             });
         }
 
@@ -313,20 +327,19 @@ public class MqttTransport implements Transport {
 
             final CompletableFuture<byte[]> message = new CompletableFuture<>();
 
-            this.messageLookup = Optional
-                    .of(new MessageLookup(message, "EDC/mqtt/test/" + appId + "/REPLY/" + requestId));
+            this.messageLookup =
+                    Optional.of(new MessageLookup(message, "EDC/mqtt/test/" + appId + "/REPLY/" + requestId));
 
             dataTransportService.publish(topic, data, 0, false);
 
             return message.thenApply(d -> {
-                try {
-                    return jsonUnmarshaller.unmarshal(new String(d), KuraPayload.class);
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).whenComplete((ok, ex) -> this.messageLookup = Optional.empty());
-
+                        try {
+                            return jsonUnmarshaller.unmarshal(new String(d), KuraPayload.class);
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .whenComplete((ok, ex) -> this.messageLookup = Optional.empty());
         }
     }
-
 }

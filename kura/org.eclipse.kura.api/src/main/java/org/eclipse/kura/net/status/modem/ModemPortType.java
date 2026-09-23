@@ -17,7 +17,6 @@ package org.eclipse.kura.net.status.modem;
  *
  */
 public enum ModemPortType {
-
     UNKNOWN,
     NET,
     AT,
@@ -27,5 +26,4 @@ public enum ModemPortType {
     MBIM,
     AUDIO,
     IGNORED;
-
 }

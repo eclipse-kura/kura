@@ -36,5 +36,4 @@ public class ConfigurationChangeManagerOptions {
     public long getSendDelay() {
         return this.sendDelay;
     }
-
 }

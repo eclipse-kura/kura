@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.osgi.service.event.Event;
 
 /**
@@ -39,7 +38,8 @@ public class TamperEvent extends Event {
     /**
      * The EventAdmin topic of this event.
      */
-    public static final String TAMPER_EVENT_TOPIC = "org/eclipse/kura/security/tamper/detection/TamperEvent/TAMPER_STATUS_CHANGED";
+    public static final String TAMPER_EVENT_TOPIC =
+            "org/eclipse/kura/security/tamper/detection/TamperEvent/TAMPER_STATUS_CHANGED";
     /**
      * The key of a Event property containing the new {@link TamperStatus}
      */
@@ -51,7 +51,7 @@ public class TamperEvent extends Event {
 
     /**
      * Creates a new {@link TamperEvent} instance.
-     * 
+     *
      * @param tamperDetectionKuraServicePid
      *            the kura.service.pid of the sender {@link TamperDetectionService}.
      *
@@ -73,22 +73,22 @@ public class TamperEvent extends Event {
 
     /**
      * Returns the kura.service.pid of the sender {@link TamperDetectionService}.
-     * 
+     *
      * @return the kura.service.pid of the sender {@link TamperDetectionService}.
      */
     public String getSenderPid() {
         return (String) getProperty(SENDER_PID_PROPERTY_KEY);
     }
 
-    private static Map<String, Object> buildEventProperties(final String tamperDetectionServicePid,
-            final TamperStatus tamperStatus) {
+    private static Map<String, Object> buildEventProperties(
+            final String tamperDetectionServicePid, final TamperStatus tamperStatus) {
         final Map<String, Object> properties = new HashMap<>();
 
         properties.put(TAMPER_STATUS_PROPERTY_KEY, requireNonNull(tamperStatus, "Tamper status cannot be null"));
-        properties.put(SENDER_PID_PROPERTY_KEY,
+        properties.put(
+                SENDER_PID_PROPERTY_KEY,
                 requireNonNull(tamperDetectionServicePid, "Tamper detection service pid cannot be null"));
 
         return properties;
     }
-
 }

@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
@@ -138,7 +137,8 @@ public class KeystoreRestServiceTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE_RSA.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
         certs.put("alias", new KeyStore.TrustedCertificateEntry(cert));
@@ -173,7 +173,8 @@ public class KeystoreRestServiceTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE_DSA.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
         certs.put("alias", new KeyStore.TrustedCertificateEntry(cert));
@@ -209,7 +210,8 @@ public class KeystoreRestServiceTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE_EC.getBytes());
-        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        X509Certificate cert =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         when(ksMock.getKeyStore()).thenReturn(ks);
         when(ksMock.getEntry("alias")).thenReturn(new KeyStore.TrustedCertificateEntry(cert));
@@ -258,7 +260,6 @@ public class KeystoreRestServiceTest {
         krs.storeTrustedCertificateEntry(writeRequest);
 
         verify(ksMock, times(1)).setEntry(eq("MyAlias"), any(TrustedCertificateEntry.class));
-
     }
 
     @Test
@@ -311,8 +312,8 @@ public class KeystoreRestServiceTest {
 
         krs.storeKeypairEntry(writeRequest);
 
-        verify(ksMock, times(1)).createKeyPair("MyAlias", "RSA", 1024, "SHA256WithRSA",
-                "CN=Kura, OU=IoT, O=Eclipse, C=US");
+        verify(ksMock, times(1))
+                .createKeyPair("MyAlias", "RSA", 1024, "SHA256WithRSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
     @Test

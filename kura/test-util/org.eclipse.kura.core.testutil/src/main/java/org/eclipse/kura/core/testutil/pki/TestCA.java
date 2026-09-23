@@ -38,7 +38,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -82,8 +81,8 @@ public class TestCA {
     public TestCA(final KeyStore keyStore, final String keyAlias, final String keystorePassword)
             throws TestCAException {
         try {
-            final PrivateKeyEntry entry = (PrivateKeyEntry) keyStore.getEntry(keyAlias,
-                    new PasswordProtection(keystorePassword.toCharArray()));
+            final PrivateKeyEntry entry = (PrivateKeyEntry)
+                    keyStore.getEntry(keyAlias, new PasswordProtection(keystorePassword.toCharArray()));
 
             this.certificate = (X509Certificate) entry.getCertificate();
             this.caKeyPair = new KeyPair(this.certificate.getPublicKey(), entry.getPrivateKey());
@@ -126,24 +125,39 @@ public class TestCA {
         return this.certificate;
     }
 
-    private static X509Certificate buildCertificate(final CertificateCreationOptions options, final BigInteger serial,
-            final KeyPair certPair, final X500Name issuerName, final KeyPair issuerPair) throws TestCAException {
+    private static X509Certificate buildCertificate(
+            final CertificateCreationOptions options,
+            final BigInteger serial,
+            final KeyPair certPair,
+            final X500Name issuerName,
+            final KeyPair issuerPair)
+            throws TestCAException {
         try {
-            final ContentSigner contentSigner = new JcaContentSignerBuilder(options.getSignatureAlgorithm())
-                    .build(issuerPair.getPrivate());
+            final ContentSigner contentSigner =
+                    new JcaContentSignerBuilder(options.getSignatureAlgorithm()).build(issuerPair.getPrivate());
 
-            final JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(issuerName, serial,
+            final JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                    issuerName,
+                    serial,
                     options.getStartDate().orElseGet(() -> Date.from(DEFAULT_START_INSTANT)),
-                    options.getEndDate().orElseGet(() -> Date.from(DEFAULT_END_INSTANT)), options.getDn(),
+                    options.getEndDate().orElseGet(() -> Date.from(DEFAULT_END_INSTANT)),
+                    options.getDn(),
                     certPair.getPublic());
 
-            certBuilder.addExtension(Extension.subjectKeyIdentifier, false, new BcX509ExtensionUtils()
-                    .createSubjectKeyIdentifier(SubjectPublicKeyInfo.getInstance(certPair.getPublic().getEncoded())));
+            certBuilder.addExtension(
+                    Extension.subjectKeyIdentifier,
+                    false,
+                    new BcX509ExtensionUtils()
+                            .createSubjectKeyIdentifier(SubjectPublicKeyInfo.getInstance(
+                                    certPair.getPublic().getEncoded())));
 
             if (!(issuerName.equals(options.dn))) {
-                certBuilder.addExtension(Extension.authorityKeyIdentifier, false,
-                        new BcX509ExtensionUtils().createAuthorityKeyIdentifier(
-                                SubjectPublicKeyInfo.getInstance(issuerPair.getPublic().getEncoded())));
+                certBuilder.addExtension(
+                        Extension.authorityKeyIdentifier,
+                        false,
+                        new BcX509ExtensionUtils()
+                                .createAuthorityKeyIdentifier(SubjectPublicKeyInfo.getInstance(
+                                        issuerPair.getPublic().getEncoded())));
             } else {
                 certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
             }
@@ -151,8 +165,8 @@ public class TestCA {
             final Optional<URI> crlDistributionPoint = options.getGetDownloadURL();
 
             if (crlDistributionPoint.isPresent()) {
-                final GeneralName generalName = new GeneralName(6,
-                        new DERIA5String(crlDistributionPoint.get().toString()));
+                final GeneralName generalName = new GeneralName(
+                        6, new DERIA5String(crlDistributionPoint.get().toString()));
                 final GeneralNames generalNames = new GeneralNames(generalName);
                 final DistributionPointName dpn = new DistributionPointName(0, generalNames);
                 CRLDistPoint crlDp = new CRLDistPoint(Collections.singletonList(new DistributionPoint(dpn, null, null))
@@ -160,7 +174,8 @@ public class TestCA {
                 certBuilder.addExtension(Extension.cRLDistributionPoints, false, crlDp);
             }
 
-            return new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME)
+            return new JcaX509CertificateConverter()
+                    .setProvider(BouncyCastleProvider.PROVIDER_NAME)
                     .getCertificate(certBuilder.build(contentSigner));
         } catch (final Exception e) {
             throw new TestCAException(e);
@@ -204,13 +219,16 @@ public class TestCA {
 
             crlBuilder.setNextUpdate(endDate.orElseGet(() -> Date.from(DEFAULT_END_INSTANT)));
 
-            crlBuilder.addExtension(Extension.authorityKeyIdentifier, false,
-                    new BcX509ExtensionUtils().createAuthorityKeyIdentifier(
-                            SubjectPublicKeyInfo.getInstance(this.caKeyPair.getPublic().getEncoded())));
+            crlBuilder.addExtension(
+                    Extension.authorityKeyIdentifier,
+                    false,
+                    new BcX509ExtensionUtils()
+                            .createAuthorityKeyIdentifier(SubjectPublicKeyInfo.getInstance(
+                                    this.caKeyPair.getPublic().getEncoded())));
             crlBuilder.addExtension(Extension.cRLNumber, false, new CRLNumber(this.nextCrlNumber));
 
-            final ContentSigner contentSigner = new JcaContentSignerBuilder(options.getSignatureAlgorithm())
-                    .build(this.caKeyPair.getPrivate());
+            final ContentSigner contentSigner =
+                    new JcaContentSignerBuilder(options.getSignatureAlgorithm()).build(this.caKeyPair.getPrivate());
 
             return new JcaX509CRLConverter().getCRL(crlBuilder.build(contentSigner));
         } catch (final Exception e) {
@@ -263,7 +281,6 @@ public class TestCA {
         } catch (final Exception e) {
             throw new TestCAException(e);
         }
-
     }
 
     public static File writeKeystore(final KeyStore.Entry... entries) throws TestCAException, IOException {
@@ -421,14 +438,12 @@ public class TestCA {
     public static class TestCAException extends Exception {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -8997629775984256528L;
 
         public TestCAException(Throwable cause) {
             super(cause);
         }
-
     }
-
 }

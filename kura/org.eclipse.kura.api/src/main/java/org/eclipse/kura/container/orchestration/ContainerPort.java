@@ -15,9 +15,9 @@ package org.eclipse.kura.container.orchestration;
 import java.util.Objects;
 
 /**
- * 
+ *
  * This class is used to represent a port mapping within a container.
- * 
+ *
  *
  * @since 2.5
  */
@@ -68,8 +68,8 @@ public class ContainerPort {
             return false;
         }
         ContainerPort other = (ContainerPort) obj;
-        return externalPort == other.externalPort && internalPort == other.internalPort
+        return externalPort == other.externalPort
+                && internalPort == other.internalPort
                 && internetProtocol == other.internetProtocol;
     }
-
 }

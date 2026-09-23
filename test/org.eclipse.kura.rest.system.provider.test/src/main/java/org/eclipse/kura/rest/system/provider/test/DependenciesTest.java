@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Objects;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -105,9 +104,12 @@ public class DependenciesTest {
 
     private void givenFailingMockRequestHandlerRegistry() throws KuraException {
         this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistry)
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST))
+                .when(this.requestHandlerRegistry)
                 .registerRequestHandler(any(), any());
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistry).unregister(any());
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST))
+                .when(this.requestHandlerRegistry)
+                .unregister(any());
     }
 
     /*
@@ -143,8 +145,8 @@ public class DependenciesTest {
     }
 
     private void thenRequestHandlerIsRegistered(String expectedMqttAppId) throws KuraException {
-        verify(this.requestHandlerRegistry, times(1)).registerRequestHandler(eq(expectedMqttAppId),
-                any(RequestHandler.class));
+        verify(this.requestHandlerRegistry, times(1))
+                .registerRequestHandler(eq(expectedMqttAppId), any(RequestHandler.class));
     }
 
     private void thenRequestHandlerIsUnregistered(String expectedMqttAppId) throws KuraException {
@@ -157,11 +159,11 @@ public class DependenciesTest {
             StringWriter sw = new StringWriter();
             this.occurredException.printStackTrace(new PrintWriter(sw));
 
-            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+            errorMessage = String.format(
+                    "No exception expected, \"%s\" found. Caused by: %s",
                     this.occurredException.getClass().getName(), sw.toString());
         }
 
         assertNull(errorMessage, this.occurredException);
     }
-
 }

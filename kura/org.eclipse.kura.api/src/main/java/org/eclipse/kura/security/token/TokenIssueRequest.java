@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * Describes the token a caller wants issued.
- * 
+ *
  * @since 3.0
  */
 public final class TokenIssueRequest {
@@ -43,7 +43,7 @@ public final class TokenIssueRequest {
     }
 
     /**
-     * 
+     *
      * @return the identity name for this request, cannot be {@code null}, empty or whitespace-only
      */
     public String getIdentityName() {
@@ -51,7 +51,7 @@ public final class TokenIssueRequest {
     }
 
     /**
-     * 
+     *
      * @return the requested expiration instant, if present
      */
     public Optional<Instant> getExpiresAt() {
@@ -59,7 +59,7 @@ public final class TokenIssueRequest {
     }
 
     /**
-     * 
+     *
      * @return the requested not before instant, if present
      */
     public Optional<Instant> getNotBefore() {
@@ -67,7 +67,7 @@ public final class TokenIssueRequest {
     }
 
     /**
-     * 
+     *
      * @return an unmodifiable set of the requested consumers, cannot be {@code null}. The returned set can be empty if
      *         no explicit consumers were requested. Set entries cannot be {@code null}, nor empty, nor whitespace-only
      *         {@link String}
@@ -77,7 +77,7 @@ public final class TokenIssueRequest {
     }
 
     /**
-     * 
+     *
      * @return an unmodifiable map of the requested claims, cannot be {@code null}. The returned map can be empty if
      *         no claims were requested. Map keys cannot be {@code null}, nor empty, nor whitespace-only {@link String}.
      *         Supported claim values depend on the implementation
@@ -89,7 +89,7 @@ public final class TokenIssueRequest {
     /**
      * Get a builder for constructing a {@link TokenIssueRequest} with the identity name that
      * the request should be issued for.
-     * 
+     *
      * @param identityName
      *            the name of the identity, must not be {@code null}, empty or whitespace-only
      * @return a {@link Builder} for constructing a {@link TokenIssueRequest}
@@ -161,14 +161,14 @@ public final class TokenIssueRequest {
 
         /**
          * Adds an intended consumer of the token to this request. This property is optional.
-         * 
+         *
          * <p>
          * Call this method again to add multiple intended consumers to the request.
-         * 
+         *
          * <p>
          * Purpose of specifying an intended consumer is that a token consumer (like a token verifier) can reject the
          * presented token if it is not for him.
-         * 
+         *
          * @param consumer
          *            the consumer name, cannot be {@code null}, empty or whitespace-only
          * @return this builder instance, for method chaining
@@ -184,11 +184,11 @@ public final class TokenIssueRequest {
 
         /**
          * Sets a claim in the generic form of key-value pair. This property is optional.
-         * 
+         *
          * <p>
          * Call this method again to add multiple claims to the request. When called on a claim with the same name, its
          * value gets updated.
-         * 
+         *
          * @param name
          *            the claim name, cannot be {@code null}, empty or whitespace-only
          * @param value
@@ -207,7 +207,7 @@ public final class TokenIssueRequest {
 
         /**
          * Builds a {@link TokenIssueRequest}.
-         * 
+         *
          * @return a {@link TokenIssueRequest}
          */
         public TokenIssueRequest build() {

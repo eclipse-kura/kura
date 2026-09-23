@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.message.KuraBirthPayload;
@@ -72,37 +71,54 @@ public class LifeCyclePayloadBuilder {
             deviceName = this.cloudConnectionManagerImpl.getSystemService().getDeviceName();
         }
 
-        String payloadEncoding = this.cloudConnectionManagerImpl.getCloudConnectionManagerOptions().getPayloadEncoding()
+        String payloadEncoding = this.cloudConnectionManagerImpl
+                .getCloudConnectionManagerOptions()
+                .getPayloadEncoding()
                 .name();
 
         // build birth certificate
         KuraBirthPayloadBuilder birthPayloadBuilder = new KuraBirthPayloadBuilder();
-        birthPayloadBuilder.withUptime(deviceProfile.getUptime()).withDisplayName(deviceName)
-                .withModelName(deviceProfile.getModelName()).withModelId(deviceProfile.getModelId())
-                .withPartNumber(deviceProfile.getPartNumber()).withSerialNumber(deviceProfile.getSerialNumber())
-                .withFirmwareVersion(deviceProfile.getFirmwareVersion()).withBiosVersion(deviceProfile.getBiosVersion())
-                .withCpuVersion(deviceProfile.getCpuVersion()).withOs(deviceProfile.getOs())
-                .withOsVersion(deviceProfile.getOsVersion()).withJvmName(deviceProfile.getJvmName())
-                .withJvmVersion(deviceProfile.getJvmVersion()).withJvmProfile(deviceProfile.getJvmProfile())
+        birthPayloadBuilder
+                .withUptime(deviceProfile.getUptime())
+                .withDisplayName(deviceName)
+                .withModelName(deviceProfile.getModelName())
+                .withModelId(deviceProfile.getModelId())
+                .withPartNumber(deviceProfile.getPartNumber())
+                .withSerialNumber(deviceProfile.getSerialNumber())
+                .withFirmwareVersion(deviceProfile.getFirmwareVersion())
+                .withBiosVersion(deviceProfile.getBiosVersion())
+                .withCpuVersion(deviceProfile.getCpuVersion())
+                .withOs(deviceProfile.getOs())
+                .withOsVersion(deviceProfile.getOsVersion())
+                .withJvmName(deviceProfile.getJvmName())
+                .withJvmVersion(deviceProfile.getJvmVersion())
+                .withJvmProfile(deviceProfile.getJvmProfile())
                 .withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
                 .withConnectionInterface(deviceProfile.getConnectionInterface())
-                .withConnectionIp(deviceProfile.getConnectionIp()).withAcceptEncoding(acceptEncoding)
+                .withConnectionIp(deviceProfile.getConnectionIp())
+                .withAcceptEncoding(acceptEncoding)
                 .withAvailableProcessors(deviceProfile.getAvailableProcessors())
-                .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
+                .withTotalMemory(deviceProfile.getTotalMemory())
+                .withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
-                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding)
-                .withJvmVendor(deviceProfile.getJvmVendor()).withJdkVendorVersion(deviceProfile.getJdkVendorVersion());
+                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion())
+                .withPayloadEncoding(payloadEncoding)
+                .withJvmVendor(deviceProfile.getJvmVendor())
+                .withJdkVendorVersion(deviceProfile.getJdkVendorVersion());
 
-        if (this.cloudConnectionManagerImpl.imei != null && this.cloudConnectionManagerImpl.imei.length() > 0
+        if (this.cloudConnectionManagerImpl.imei != null
+                && this.cloudConnectionManagerImpl.imei.length() > 0
                 && !this.cloudConnectionManagerImpl.imei.equals(ERROR)) {
             birthPayloadBuilder.withModemImei(this.cloudConnectionManagerImpl.imei);
         }
-        if (this.cloudConnectionManagerImpl.iccid != null && this.cloudConnectionManagerImpl.iccid.length() > 0
+        if (this.cloudConnectionManagerImpl.iccid != null
+                && this.cloudConnectionManagerImpl.iccid.length() > 0
                 && !this.cloudConnectionManagerImpl.iccid.equals(ERROR)) {
             birthPayloadBuilder.withModemIccid(this.cloudConnectionManagerImpl.iccid);
         }
 
-        if (this.cloudConnectionManagerImpl.imsi != null && this.cloudConnectionManagerImpl.imsi.length() > 0
+        if (this.cloudConnectionManagerImpl.imsi != null
+                && this.cloudConnectionManagerImpl.imsi.length() > 0
                 && !this.cloudConnectionManagerImpl.imsi.equals(ERROR)) {
             birthPayloadBuilder.withModemImsi(this.cloudConnectionManagerImpl.imsi);
         }
@@ -177,12 +193,18 @@ public class LifeCyclePayloadBuilder {
             }
         }
 
-        return buildKuraDeviceProfile(systemService, sysAdminService, connectionIp, connectionInterface, latitude,
-                longitude, altitude);
+        return buildKuraDeviceProfile(
+                systemService, sysAdminService, connectionIp, connectionInterface, latitude, longitude, altitude);
     }
 
-    private KuraDeviceProfile buildKuraDeviceProfile(SystemService systemService, SystemAdminService sysAdminService,
-            String connectionIp, String connectionInterface, double latitude, double longitude, double altitude) {
+    private KuraDeviceProfile buildKuraDeviceProfile(
+            SystemService systemService,
+            SystemAdminService sysAdminService,
+            String connectionIp,
+            String connectionInterface,
+            double latitude,
+            double longitude,
+            double altitude) {
         KuraDeviceProfile kuraDeviceProfile = new KuraDeviceProfile();
         kuraDeviceProfile.setUptime(sysAdminService.getUptime());
         kuraDeviceProfile.setDisplayName(systemService.getDeviceName());
@@ -226,13 +248,15 @@ public class LifeCyclePayloadBuilder {
 
     private String buildConnectionInterface(NetInterface<? extends NetInterfaceAddress> ni) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ni.getName()).append(" (").append(NetUtil.hardwareAddressToString(ni.getHardwareAddress()))
+        sb.append(ni.getName())
+                .append(" (")
+                .append(NetUtil.hardwareAddressToString(ni.getHardwareAddress()))
                 .append(")");
         return sb.toString();
     }
 
-    private void appendActiveNetworkInterfaces(StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp,
-            Set<String> reportedInterfaceNames) {
+    private void appendActiveNetworkInterfaces(
+            StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp, Set<String> reportedInterfaceNames) {
         this.cloudConnectionManagerImpl.getNetworkService().ifPresent(ns -> {
             try {
                 for (NetInterface<? extends NetInterfaceAddress> ni : ns.getActiveNetworkInterfaces()) {
@@ -249,8 +273,8 @@ public class LifeCyclePayloadBuilder {
         });
     }
 
-    private void appendConnectedModemsWithIp(StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp,
-            Set<String> reportedInterfaceNames) {
+    private void appendConnectedModemsWithIp(
+            StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp, Set<String> reportedInterfaceNames) {
         for (final ModemInterfaceStatus modemStatus : getConnectedModemsWithIp(reportedInterfaceNames)) {
             appendCsv(sbConnectionInterface, buildConnectionInterface(modemStatus));
             appendCsv(sbConnectionIp, buildConnectionIp(modemStatus));
@@ -287,18 +311,22 @@ public class LifeCyclePayloadBuilder {
     }
 
     private boolean hasIpAddress(NetworkInterfaceStatus status) {
-        return status.getInterfaceIp4Addresses().map(ips -> !ips.getAddresses().isEmpty()).orElse(false)
-                || status.getInterfaceIp6Addresses().map(ips -> !ips.getAddresses().isEmpty()).orElse(false);
+        return status.getInterfaceIp4Addresses()
+                        .map(ips -> !ips.getAddresses().isEmpty())
+                        .orElse(false)
+                || status.getInterfaceIp6Addresses()
+                        .map(ips -> !ips.getAddresses().isEmpty())
+                        .orElse(false);
     }
 
     private String buildConnectionIp(ModemInterfaceStatus modemStatus) {
-        final Optional<NetworkInterfaceIpAddressStatus<IP4Address>> ip4Addresses = modemStatus
-                .getInterfaceIp4Addresses();
+        final Optional<NetworkInterfaceIpAddressStatus<IP4Address>> ip4Addresses =
+                modemStatus.getInterfaceIp4Addresses();
         if (ip4Addresses.isPresent() && !ip4Addresses.get().getAddresses().isEmpty()) {
             return ip4Addresses.get().getAddresses().get(0).getAddress().getHostAddress();
         }
-        final Optional<NetworkInterfaceIpAddressStatus<IP6Address>> ip6Addresses = modemStatus
-                .getInterfaceIp6Addresses();
+        final Optional<NetworkInterfaceIpAddressStatus<IP6Address>> ip6Addresses =
+                modemStatus.getInterfaceIp6Addresses();
         if (ip6Addresses.isPresent() && !ip6Addresses.get().getAddresses().isEmpty()) {
             return ip6Addresses.get().getAddresses().get(0).getAddress().getHostAddress();
         }
@@ -306,8 +334,8 @@ public class LifeCyclePayloadBuilder {
     }
 
     private String buildConnectionInterface(ModemInterfaceStatus modemStatus) {
-        return modemStatus.getInterfaceName() + " ("
-                + NetUtil.hardwareAddressToString(modemStatus.getHardwareAddress()) + ")";
+        return modemStatus.getInterfaceName() + " (" + NetUtil.hardwareAddressToString(modemStatus.getHardwareAddress())
+                + ")";
     }
 
     private String buildAcceptEncoding() {

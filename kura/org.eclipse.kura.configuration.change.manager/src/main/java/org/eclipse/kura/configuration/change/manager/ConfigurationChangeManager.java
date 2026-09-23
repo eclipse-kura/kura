@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.configuration.change.manager;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.GsonBuilder;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
@@ -20,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
@@ -29,13 +31,6 @@ import org.eclipse.kura.message.KuraPayload;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.GsonBuilder;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -45,13 +40,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager" })
+        name = "org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.configuration.ConfigurableComponent.class},
+        property = {"kura.service.pid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"})
 @Designate(ocd = ConfigurationChangeManagerMetatype.class, factory = true)
 public class ConfigurationChangeManager implements ConfigurableComponent, ServiceTrackerListener {
 
@@ -80,7 +77,6 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
         public int hashCode() {
             return this.pid.hashCode();
         }
-
     }
 
     private ConfigurationChangeManagerOptions options;
@@ -96,7 +92,8 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
      * Dependencies
      */
 
-    @Reference(name = "CloudPublisher",
+    @Reference(
+            name = "CloudPublisher",
             service = org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -121,7 +118,8 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
 
         this.acceptNotifications = false;
 
-        BundleContext bundleContext = FrameworkUtil.getBundle(ConfigurationChangeManager.class).getBundleContext();
+        BundleContext bundleContext =
+                FrameworkUtil.getBundle(ConfigurationChangeManager.class).getBundleContext();
         this.serviceTracker = new ComponentsServiceTracker(bundleContext);
 
         updated(properties);
@@ -169,8 +167,8 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
             if (this.futureSendQueue != null) {
                 this.futureSendQueue.cancel(false);
             }
-            this.futureSendQueue = this.scheduledSendQueueExecutor.schedule(this::sendQueue,
-                    this.options.getSendDelay(), TimeUnit.SECONDS);
+            this.futureSendQueue = this.scheduledSendQueueExecutor.schedule(
+                    this::sendQueue, this.options.getSendDelay(), TimeUnit.SECONDS);
         }
     }
 
@@ -187,7 +185,6 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
             public boolean shouldSkipField(FieldAttributes arg0) {
                 return arg0.getName().equals("timestamp");
             }
-
         });
         return builder.create().toJson(this.notificationsQueue).getBytes();
     }
@@ -207,5 +204,4 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
             }
         }
     }
-
 }

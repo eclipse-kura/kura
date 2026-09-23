@@ -22,30 +22,28 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.util.configuration.Property;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+
 @Component(
-    name = "org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell",
-    service = { org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell.class },
-    property = {
-        "osgi.command.scope=sqlitedbg",
-        "osgi.command.function=executeQuery" })
+        name = "org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell",
+        service = {org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell.class},
+        property = {"osgi.command.scope=sqlitedbg", "osgi.command.function=executeQuery"})
 public class SqliteDebugShell {
 
-    private static final Property<String> KURA_SERVICE_PID = new Property<>(ConfigurationService.KURA_SERVICE_PID,
-            String.class);
+    private static final Property<String> KURA_SERVICE_PID =
+            new Property<>(ConfigurationService.KURA_SERVICE_PID, String.class);
 
     private final Map<String, BaseDbService> dbServices = new HashMap<>();
     private final Set<String> allowedPids = new HashSet<>();
 
-    @Reference(name = "BaseDbService",
+    @Reference(
+            name = "BaseDbService",
             service = org.eclipse.kura.db.BaseDbService.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -77,7 +75,8 @@ public class SqliteDebugShell {
 
         final BaseDbService dbService = this.dbServices.get(dbServicePid);
 
-        try (final Connection conn = dbService.getConnection(); final Statement statement = conn.createStatement()) {
+        try (final Connection conn = dbService.getConnection();
+                final Statement statement = conn.createStatement()) {
 
             final boolean hasResultSet = statement.execute(sql);
 
@@ -109,10 +108,7 @@ public class SqliteDebugShell {
                     builder.append("|");
                     System.out.println(builder.toString());
                 }
-
             }
-
         }
     }
-
 }

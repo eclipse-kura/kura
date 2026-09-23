@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -40,11 +39,6 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
 import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sqlite.SQLiteDataSource;
-import org.sqlite.SQLiteJDBCLoader;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -52,17 +46,28 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sqlite.SQLiteDataSource;
+import org.sqlite.SQLiteJDBCLoader;
+
 @Component(
-    name = "org.eclipse.kura.db.SQLiteDbService",
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+        name = "org.eclipse.kura.db.SQLiteDbService",
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.db.BaseDbService.class,
             org.eclipse.kura.message.store.provider.MessageStoreProvider.class,
             org.eclipse.kura.wire.store.provider.WireRecordStoreProvider.class,
-            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class })
+            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class
+        })
 @Designate(ocd = SQLiteDbServiceMetatype.class, factory = true)
-public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
-        WireRecordStoreProvider, QueryableWireRecordStoreProvider {
+public class SqliteDbServiceImpl
+        implements BaseDbService,
+                ConfigurableComponent,
+                MessageStoreProvider,
+                WireRecordStoreProvider,
+                QueryableWireRecordStoreProvider {
 
     private static final Set<String> OPEN_URLS = new HashSet<>();
 
@@ -74,7 +79,10 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     private Optional<DbState> state = Optional.empty();
     private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
-    @Reference(name = "SqliteDebugShell", service = org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell.class, unbind = "-")
+    @Reference(
+            name = "SqliteDebugShell",
+            service = org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell.class,
+            unbind = "-")
     public void setDebugShell(final SqliteDebugShell debugShell) {
         this.debugShell = debugShell;
     }
@@ -153,7 +161,6 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
             this.listenerManager.dispatchDisconnected();
             throw new SQLException("Database is not initialized");
         }
-
     }
 
     private class DbState {
@@ -162,16 +169,19 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         private final ConnectionPoolManager connectionPool;
         private final SqliteDbServiceOptions options;
 
-        public DbState(SqliteDbServiceOptions options, final Optional<SqliteDbServiceOptions> oldOptions,
-                final CryptoService cryptoService) throws SQLException, KuraException {
+        public DbState(
+                SqliteDbServiceOptions options,
+                final Optional<SqliteDbServiceOptions> oldOptions,
+                final CryptoService cryptoService)
+                throws SQLException, KuraException {
             this.options = options;
             tryClaimFile();
 
             try {
                 logger.info("opening database with url: {}...", options.getDbUrl());
 
-                final SQLiteDataSource dataSource = new DatabaseLoader(options, oldOptions, cryptoService)
-                        .openDataSource();
+                final SQLiteDataSource dataSource =
+                        new DatabaseLoader(options, oldOptions, cryptoService).openDataSource();
 
                 int maxConnectionCount = options.getMode() == Mode.PERSISTED ? options.getConnectionPoolMaxSize() : 1;
 
@@ -184,14 +194,23 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                 }
 
                 if (options.isPeriodicDefragEnabled()) {
-                    this.executor.get().scheduleWithFixedDelay(this::defrag, options.getDefragIntervalSeconds(),
-                            options.getDefragIntervalSeconds(), TimeUnit.SECONDS);
+                    this.executor
+                            .get()
+                            .scheduleWithFixedDelay(
+                                    this::defrag,
+                                    options.getDefragIntervalSeconds(),
+                                    options.getDefragIntervalSeconds(),
+                                    TimeUnit.SECONDS);
                 }
 
                 if (options.isPeriodicWalCheckpointEnabled()) {
-                    this.executor.get().scheduleWithFixedDelay(this::walCheckpoint,
-                            options.getWalCheckpointIntervalSeconds(), options.getWalCheckpointIntervalSeconds(),
-                            TimeUnit.SECONDS);
+                    this.executor
+                            .get()
+                            .scheduleWithFixedDelay(
+                                    this::walCheckpoint,
+                                    options.getWalCheckpointIntervalSeconds(),
+                                    options.getWalCheckpointIntervalSeconds(),
+                                    TimeUnit.SECONDS);
                 }
 
                 logger.info("opening database with url: {}...done", options.getDbUrl());
@@ -353,13 +372,10 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     @Override
     public void addListener(ConnectionListener listener) {
         this.listenerManager.add(listener);
-
     }
 
     @Override
     public void removeListener(ConnectionListener listener) {
         this.listenerManager.remove(listener);
-
     }
-
 }

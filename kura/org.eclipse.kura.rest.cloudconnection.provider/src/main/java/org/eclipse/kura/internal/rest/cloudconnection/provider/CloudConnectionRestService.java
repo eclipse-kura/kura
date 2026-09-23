@@ -12,10 +12,19 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -34,35 +43,25 @@ import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
 import org.eclipse.kura.rest.configuration.api.PidSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.UserAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Path("cloudconnection/v1")
 @Component(
-    name = "org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
-    immediate = true,
-    service = { org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
-        "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
+        immediate = true,
+        service = {org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService.class},
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
+            "osgi.jakartars.resource=true"
+        })
 public class CloudConnectionRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionRestService.class);
@@ -88,7 +87,8 @@ public class CloudConnectionRestService {
         this.cryptoService = cryptoService;
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -101,7 +101,10 @@ public class CloudConnectionRestService {
         }
     }
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public void bindConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -126,7 +129,8 @@ public class CloudConnectionRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public CloudComponentInstances findCloudComponentInstances() {
         try {
-            return new CloudComponentInstances(this.cloudConnectionService.findCloudEndpointInstances(),
+            return new CloudComponentInstances(
+                    this.cloudConnectionService.findCloudEndpointInstances(),
                     this.cloudConnectionService.findPubsubInstances());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -204,7 +208,8 @@ public class CloudConnectionRestService {
     public Response createPubSubInstance(
             final PidAndFactoryPidAndCloudEndpointPid pidAndFactoryPidAndCloudEndpointPid) {
         try {
-            this.cloudConnectionService.createPubSubInstance(pidAndFactoryPidAndCloudEndpointPid.getPid(),
+            this.cloudConnectionService.createPubSubInstance(
+                    pidAndFactoryPidAndCloudEndpointPid.getPid(),
                     pidAndFactoryPidAndCloudEndpointPid.getFactoryPid(),
                     pidAndFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
@@ -238,9 +243,10 @@ public class CloudConnectionRestService {
 
             result.addAll(this.cloudConnectionService.getStackConfigurationsByPid(pidSet.getPids()));
 
-            return new ComponentConfigurationList(
-                    result.stream().map(c -> DTOUtil.toComponentConfigurationDTO(c, this.cryptoService, false)
-                            .replacePasswordsWithPlaceholder()).collect(Collectors.toList()));
+            return new ComponentConfigurationList(result.stream()
+                    .map(c -> DTOUtil.toComponentConfigurationDTO(c, this.cryptoService, false)
+                            .replacePasswordsWithPlaceholder())
+                    .collect(Collectors.toList()));
 
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -305,5 +311,4 @@ public class CloudConnectionRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
-
 }

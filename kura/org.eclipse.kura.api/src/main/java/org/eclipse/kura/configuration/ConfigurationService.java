@@ -16,7 +16,6 @@ package org.eclipse.kura.configuration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Filter;
@@ -149,8 +148,8 @@ public interface ConfigurationService {
      *
      * @since 1.0.8
      */
-    public void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
-            boolean takeSnapshot) throws KuraException;
+    public void createFactoryConfiguration(
+            String factoryPid, String pid, Map<String, Object> properties, boolean takeSnapshot) throws KuraException;
 
     /**
      * Deletes the ConfigurableComponent instance having the specified PID.

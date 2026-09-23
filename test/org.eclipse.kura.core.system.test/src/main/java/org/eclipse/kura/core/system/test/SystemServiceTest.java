@@ -27,7 +27,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.system.InternetConnectionStatus;
 import org.eclipse.kura.system.SystemService;
@@ -41,7 +40,7 @@ public class SystemServiceTest {
     private static final String LINUX = "Linux"; // Ubuntu
     private static SystemService systemService = null;
     private static CommandExecutorService executorService = null;
-    private static CountDownLatch dependencyLatch = new CountDownLatch(2);    // initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(2); // initialize with number of dependencies
     private boolean onCloudbees = false;
 
     @BeforeClass
@@ -73,13 +72,13 @@ public class SystemServiceTest {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(systemService);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetPrimaryMacAddress() {
 
@@ -94,12 +93,13 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetPlatform() {
-        String[] expected = { "DevPlatform", // emulated
-                "Ubuntu",                    // Ubuntu
-                "BeagleBone"                 // BeagleBone
+        String[] expected = {
+            "DevPlatform", // emulated
+            "Ubuntu", // Ubuntu
+            "BeagleBone" // BeagleBone
         };
 
         try {
@@ -116,11 +116,13 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetOsDistro() {
-        String[] expected = { "DevOsDitribution",            // emulated
-                LINUX };
+        String[] expected = {
+            "DevOsDitribution", // emulated
+            LINUX
+        };
 
         try {
             boolean foundMatch = false;
@@ -136,11 +138,12 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetOsDistroVersion() {
-        String[] expected = { "DevOsDitributionVersion",    // emulated
-                "N/A"                                        // Ubuntu
+        String[] expected = {
+            "DevOsDitributionVersion", // emulated
+            "N/A" // Ubuntu
         };
 
         try {
@@ -157,7 +160,7 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetOsArch() {
         String expected = System.getProperty("os.arch");
@@ -167,7 +170,7 @@ public class SystemServiceTest {
         assertEquals("getOsArch() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetOsName() {
         String expected = System.getProperty("os.name");
@@ -181,7 +184,7 @@ public class SystemServiceTest {
         assertEquals("getOsName() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetOsVersion() throws IOException {
         String osVersion = System.getProperty("os.version");
@@ -192,7 +195,8 @@ public class SystemServiceTest {
         linuxKernelVersion = new File("/proc/sys/kernel/version");
         if (linuxKernelVersion.exists()) {
             StringBuilder kernelVersionData = new StringBuilder();
-            try (FileReader fr = new FileReader(linuxKernelVersion); BufferedReader in = new BufferedReader(fr)) {
+            try (FileReader fr = new FileReader(linuxKernelVersion);
+                    BufferedReader in = new BufferedReader(fr)) {
                 String tempLine = null;
                 while ((tempLine = in.readLine()) != null) {
                     kernelVersionData.append(" ");
@@ -209,7 +213,7 @@ public class SystemServiceTest {
         assertEquals("getOsVersion() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetJavaVersion() {
         String expected = System.getProperty("java.runtime.version");
@@ -219,7 +223,7 @@ public class SystemServiceTest {
         assertEquals("getJavaVersion() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetJavaVmName() {
         String expected = System.getProperty("java.vm.name");
@@ -229,7 +233,7 @@ public class SystemServiceTest {
         assertEquals("getJavaVmName() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetJavaVmVersion() {
         String expected = System.getProperty("java.vm.version");
@@ -249,7 +253,7 @@ public class SystemServiceTest {
         assertNull(systemService.getJdkVendorVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetFileSeparator() {
         String expected = System.getProperty("file.separator");
@@ -259,86 +263,86 @@ public class SystemServiceTest {
         assertEquals("getFileSeparator() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testJavaHome() {
         String actual = systemService.getJavaHome();
         assertNotNull("getJavaHome() not null", actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetProductVersion() {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testKuraTemporaryConfigDirectory() {
         assertNotNull(systemService.getKuraTemporaryConfigDirectory());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetBiosVersion() {
         assertNotNull(systemService.getBiosVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void getDeviceName() {
         assertNotNull(systemService.getDeviceName());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void getFirmwareVersion() {
         assertNotNull(systemService.getFirmwareVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void getModelId() {
         assertNotNull(systemService.getModelId());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void getPartNumber() {
         assertNotNull(systemService.getPartNumber());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void shouldGetDefaultLogManagerProperty() {
         assertFalse(systemService.getDefaultLogManager().isPresent());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void shouldGetDefaultWPA3WifiSecuritySupportProperty() {
         assertFalse(systemService.isWPA3WifiSecurityEnabled());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void shouldGetDefaultNetworkConfigurationTimeoutProperty() {
         assertEquals(30, systemService.getNetworkConfigurationTimeout());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void shouldNotBeConnectedToInternet() {
         assertEquals(InternetConnectionStatus.UNAVAILABLE, systemService.getInternetConnectionStatus());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void shouldGetDefaultInternetConnectionStatusCheckHost() {
         assertEquals("eclipse.org", systemService.getInternetConnectionStatusCheckHost());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void shouldGetDefaultInternetConnectionStatusCheckIp() {
         assertEquals("198.41.30.198", systemService.getInternetConnectionStatusCheckIp());

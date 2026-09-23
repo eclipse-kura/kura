@@ -18,7 +18,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.binary.BinaryDataTypes;
@@ -40,87 +39,133 @@ public class BlockTaskTest {
 
     @Test
     public void shouldSupportBinaryDataTask() throws IOException {
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT32_BE, mode),
-                new byte[] { 1, 2, 3, 4 }, 16909060L);
+        testReadWrite(
+                (record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT32_BE, mode),
+                new byte[] {1, 2, 3, 4},
+                16909060L);
     }
 
     @Test
     public void shouldSupportBinaryDataTaskTypeConversions() throws IOException {
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE,
-                DataType.DOUBLE, mode), new byte[] { 1, 2, 3, 4 }, ((Number) 16909060).doubleValue());
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE,
-                DataType.FLOAT, mode), new byte[] { 1, 2, 3, 4 }, ((Number) 16909060).floatValue());
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE,
-                DataType.LONG, mode), new byte[] { 1, 2, 3, 4 }, ((Number) 16909060).longValue());
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT32_BE,
-                DataType.INTEGER, mode), new byte[] { 1, 2, 3, 4 }, 16909060);
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE, DataType.DOUBLE, mode),
+                new byte[] {1, 2, 3, 4},
+                ((Number) 16909060).doubleValue());
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE, DataType.FLOAT, mode),
+                new byte[] {1, 2, 3, 4},
+                ((Number) 16909060).floatValue());
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE, DataType.LONG, mode),
+                new byte[] {1, 2, 3, 4},
+                ((Number) 16909060).longValue());
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT32_BE, DataType.INTEGER, mode),
+                new byte[] {1, 2, 3, 4},
+                16909060);
 
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT32_BE,
-                DataType.STRING, mode), new byte[] { 1, 2, 3, 4 }, "16909060");
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE,
-                DataType.STRING, mode), new byte[] { 1, 2, 3, 4 }, "16909060");
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.UINT32_BE, DataType.STRING, mode),
+                new byte[] {1, 2, 3, 4},
+                "16909060");
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.INT32_BE, DataType.STRING, mode),
+                new byte[] {1, 2, 3, 4},
+                "16909060");
 
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.FLOAT_BE,
-                DataType.INTEGER, mode), new byte[] { 0x47, (byte) 0x80, 0, 0 }, 65536);
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE,
-                DataType.INTEGER, mode), new byte[] { 0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0 }, 65536);
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.FLOAT_BE,
-                DataType.LONG, mode), new byte[] { 0x47, (byte) 0x80, 0, 0 }, 65536L);
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE,
-                DataType.LONG, mode), new byte[] { 0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0 }, 65536L);
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.FLOAT_BE, DataType.INTEGER, mode),
+                new byte[] {0x47, (byte) 0x80, 0, 0},
+                65536);
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE, DataType.INTEGER, mode),
+                new byte[] {0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0},
+                65536);
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.FLOAT_BE, DataType.LONG, mode),
+                new byte[] {0x47, (byte) 0x80, 0, 0},
+                65536L);
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE, DataType.LONG, mode),
+                new byte[] {0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0},
+                65536L);
 
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.FLOAT_BE,
-                DataType.STRING, mode), new byte[] { 0x47, (byte) 0x80, 0, 0 }, "65536.0");
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE,
-                DataType.STRING, mode), new byte[] { 0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0 }, "65536.0");
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.FLOAT_BE, DataType.STRING, mode),
+                new byte[] {0x47, (byte) 0x80, 0, 0},
+                "65536.0");
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, BinaryDataTypes.DOUBLE_BE, DataType.STRING, mode),
+                new byte[] {0x40, (byte) 0xf0, 0, 0, 0, 0, 0, 0},
+                "65536.0");
 
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset, new ByteArray(4),
-                DataType.BYTE_ARRAY, mode), new byte[] { 1, 2, 3, 4 }, new byte[] { 1, 2, 3, 4 });
+        testReadWrite(
+                (record, offset, mode) ->
+                        new BinaryDataTask<>(record, offset, new ByteArray(4), DataType.BYTE_ARRAY, mode),
+                new byte[] {1, 2, 3, 4},
+                new byte[] {1, 2, 3, 4});
     }
 
     @Test
     public void shouldSupportBitTask() throws IOException {
-        testRead((record, offset, mode) -> new BitTask(record, offset, 0, mode), new byte[] { 1 << 0 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 1, mode), new byte[] { 1 << 1 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 2, mode), new byte[] { 1 << 2 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 3, mode), new byte[] { 1 << 3 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 4, mode), new byte[] { 1 << 4 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 5, mode), new byte[] { 1 << 5 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 6, mode), new byte[] { 1 << 6 }, true);
-        testRead((record, offset, mode) -> new BitTask(record, offset, 7, mode), new byte[] { (byte) (1 << 7) }, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 0, mode), new byte[] {1 << 0}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 1, mode), new byte[] {1 << 1}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 2, mode), new byte[] {1 << 2}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 3, mode), new byte[] {1 << 3}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 4, mode), new byte[] {1 << 4}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 5, mode), new byte[] {1 << 5}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 6, mode), new byte[] {1 << 6}, true);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 7, mode), new byte[] {(byte) (1 << 7)}, true);
 
-        testRead((record, offset, mode) -> new BitTask(record, offset, 0, mode), new byte[] { (byte) (1 << 7) }, false);
+        testRead((record, offset, mode) -> new BitTask(record, offset, 0, mode), new byte[] {(byte) (1 << 7)}, false);
 
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 0, mode), new byte[] { 1 << 0 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 1, mode), new byte[] { 1 << 1 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 2, mode), new byte[] { 1 << 2 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 3, mode), new byte[] { 1 << 3 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 4, mode), new byte[] { 1 << 4 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 5, mode), new byte[] { 1 << 5 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 6, mode), new byte[] { 1 << 6 }, true);
-        testUpdate((record, offset, mode) -> new BitTask(record, offset, 7, mode), new byte[] { (byte) (1 << 7) },
-                true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 0, mode), new byte[] {1 << 0}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 1, mode), new byte[] {1 << 1}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 2, mode), new byte[] {1 << 2}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 3, mode), new byte[] {1 << 3}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 4, mode), new byte[] {1 << 4}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 5, mode), new byte[] {1 << 5}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 6, mode), new byte[] {1 << 6}, true);
+        testUpdate((record, offset, mode) -> new BitTask(record, offset, 7, mode), new byte[] {(byte) (1 << 7)}, true);
     }
 
     @Test
     public void shouldSupportStringTask() throws IOException {
         final String testString = "test string";
-        testReadWrite((record, offset, mode) -> new StringTask(record, offset, offset + testString.length(), mode),
-                testString.getBytes(StandardCharsets.US_ASCII), testString);
+        testReadWrite(
+                (record, offset, mode) -> new StringTask(record, offset, offset + testString.length(), mode),
+                testString.getBytes(StandardCharsets.US_ASCII),
+                testString);
     }
 
     @Test
     public void shouldSupportByteArrayTask() throws IOException {
-        final byte[] testByteArray = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        testReadWrite((record, offset, mode) -> new ByteArrayTask(record, offset, offset + testByteArray.length, mode),
-                testByteArray, Arrays.copyOf(testByteArray, testByteArray.length));
+        final byte[] testByteArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        testReadWrite(
+                (record, offset, mode) -> new ByteArrayTask(record, offset, offset + testByteArray.length, mode),
+                testByteArray,
+                Arrays.copyOf(testByteArray, testByteArray.length));
     }
 
     @Test
     public void shouldSupportByteArrayTaskWithBinaryData() throws IOException {
-        final byte[] testByteArray = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        testReadWrite((record, offset, mode) -> new BinaryDataTask<>(record, offset,
-                new ByteArray(testByteArray.length), DataType.BYTE_ARRAY, mode), testByteArray,
+        final byte[] testByteArray = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        testReadWrite(
+                (record, offset, mode) -> new BinaryDataTask<>(
+                        record, offset, new ByteArray(testByteArray.length), DataType.BYTE_ARRAY, mode),
+                testByteArray,
                 Arrays.copyOf(testByteArray, testByteArray.length));
     }
 
@@ -128,8 +173,7 @@ public class BlockTaskTest {
         return new ToplevelBlockTask(0, buf.length, mode) {
 
             @Override
-            public void processBuffer() throws IOException {
-            }
+            public void processBuffer() throws IOException {}
 
             @Override
             public Buffer getBuffer() {
@@ -154,7 +198,7 @@ public class BlockTaskTest {
 
     private void testRead(TaskProvider taskProvider, byte[] raw, Object javaValue, DataType valueType)
             throws IOException {
-        int[] offsets = new int[] { 0, 7 };
+        int[] offsets = new int[] {0, 7};
         for (final int offset : offsets) {
             ChannelRecord record = ChannelRecord.createReadRecord("test", valueType);
             byte[] buf = new byte[offset + raw.length];
@@ -163,17 +207,19 @@ public class BlockTaskTest {
             ToplevelBlockTask parent = getToplevelBlockTask(buf, Mode.READ);
             parent.addChild(task);
             parent.run();
-            assertEquals(ChannelFlag.SUCCESS, task.getRecord().getChannelStatus().getChannelFlag());
+            assertEquals(
+                    ChannelFlag.SUCCESS, task.getRecord().getChannelStatus().getChannelFlag());
             if (!javaValue.getClass().isArray()) {
                 assertEquals(javaValue, task.getRecord().getValue().getValue());
             } else {
-                assertArrayEquals((byte[]) javaValue, (byte[]) task.getRecord().getValue().getValue());
+                assertArrayEquals(
+                        (byte[]) javaValue, (byte[]) task.getRecord().getValue().getValue());
             }
         }
     }
 
     private void testWrite(TaskProvider taskProvider, byte[] raw, Object javaValue) throws IOException {
-        int[] offsets = new int[] { 0, 7 };
+        int[] offsets = new int[] {0, 7};
         for (final int offset : offsets) {
             ChannelRecord record = ChannelRecord.createWriteRecord("test", TypedValues.newTypedValue(javaValue));
             byte[] buf = new byte[offset + raw.length];
@@ -189,7 +235,7 @@ public class BlockTaskTest {
     }
 
     private void testUpdate(TaskProvider taskProvider, byte[] raw, Object javaValue) throws IOException {
-        int[] offsets = new int[] { 0, 7 };
+        int[] offsets = new int[] {0, 7};
         for (final int offset : offsets) {
             ChannelRecord record = ChannelRecord.createWriteRecord("test", TypedValues.newTypedValue(javaValue));
             byte[] buf = new byte[offset + raw.length];

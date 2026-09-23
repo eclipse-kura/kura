@@ -32,7 +32,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.core.keystore.util.CRLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +54,12 @@ public class CRLManager implements Closeable {
     private Optional<ScheduledFuture<?>> updateTask = Optional.empty();
     private Optional<Listener> listener;
 
-    public CRLManager(final File storeFile, final long storeDelayMs, final long periodicRecheckIntervalMs,
-            final long forceUpdateIntervalMs, final CRLVerifier verifier) {
+    public CRLManager(
+            final File storeFile,
+            final long storeDelayMs,
+            final long periodicRecheckIntervalMs,
+            final long forceUpdateIntervalMs,
+            final CRLVerifier verifier) {
         this.store = new CRLStore(storeFile, storeDelayMs);
         this.periodicReckeckIntervalMs = periodicRecheckIntervalMs;
         this.forceUpdateIntervalMs = forceUpdateIntervalMs;
@@ -72,7 +75,8 @@ public class CRLManager implements Closeable {
         logger.info("referencing distribution points: {}", uris);
 
         final Optional<DistributionPointState> existing = this.referencedDistributionPoints.stream()
-                .filter(p -> p.distributionPoints.equals(uris)).findAny();
+                .filter(p -> p.distributionPoints.equals(uris))
+                .findAny();
 
         if (existing.isPresent()) {
             existing.get().ref();
@@ -128,7 +132,8 @@ public class CRLManager implements Closeable {
     }
 
     public synchronized List<X509CRL> getCrls() {
-        return this.store.getCRLs() //
+        return this.store
+                .getCRLs() //
                 .stream() //
                 .map(StoredCRL::getCrl) //
                 .toList();
@@ -155,23 +160,28 @@ public class CRLManager implements Closeable {
             this.updateTask.get().cancel(false);
         }
 
-        this.updateTask = Optional.of(this.updateExecutor.schedule(() -> {
-            try {
-                update();
-            } catch (final Exception e) {
-                logger.warn("Error during CRL update", e);
-            } finally {
-                rescheduleBasedOnNextUpdate();
-            }
-        }, 5000, TimeUnit.MILLISECONDS));
+        this.updateTask = Optional.of(this.updateExecutor.schedule(
+                () -> {
+                    try {
+                        update();
+                    } catch (final Exception e) {
+                        logger.warn("Error during CRL update", e);
+                    } finally {
+                        rescheduleBasedOnNextUpdate();
+                    }
+                },
+                5000,
+                TimeUnit.MILLISECONDS));
     }
 
     private void rescheduleBasedOnNextUpdate() {
-        final long nextUpdateDelayMs = this.store.getCRLs().stream().mapToLong(StoredCRL::getTimeToNextUpdateMs).min()
+        final long nextUpdateDelayMs = this.store.getCRLs().stream()
+                .mapToLong(StoredCRL::getTimeToNextUpdateMs)
+                .min()
                 .orElse(Long.MAX_VALUE);
 
-        final long rawDelayMs = Math.min(nextUpdateDelayMs,
-                Math.min(this.forceUpdateIntervalMs, this.periodicReckeckIntervalMs));
+        final long rawDelayMs =
+                Math.min(nextUpdateDelayMs, Math.min(this.forceUpdateIntervalMs, this.periodicReckeckIntervalMs));
         final long scheduleDelayMs = Math.max(rawDelayMs, MIN_RESCHEDULE_DELAY_MS);
 
         if (this.updateTask.isPresent()) {
@@ -179,15 +189,18 @@ public class CRLManager implements Closeable {
         }
 
         logger.info("scheduling next CRL check in {} ms (nextUpdate-aligned)", scheduleDelayMs);
-        this.updateTask = Optional.of(this.updateExecutor.schedule(() -> {
-            try {
-                update();
-            } catch (final Exception e) {
-                logger.warn("Error during CRL update", e);
-            } finally {
-                rescheduleBasedOnNextUpdate();
-            }
-        }, scheduleDelayMs, TimeUnit.MILLISECONDS));
+        this.updateTask = Optional.of(this.updateExecutor.schedule(
+                () -> {
+                    try {
+                        update();
+                    } catch (final Exception e) {
+                        logger.warn("Error during CRL update", e);
+                    } finally {
+                        rescheduleBasedOnNextUpdate();
+                    }
+                },
+                scheduleDelayMs,
+                TimeUnit.MILLISECONDS));
     }
 
     private void update() {
@@ -209,7 +222,8 @@ public class CRLManager implements Closeable {
 
         for (final DistributionPointState state : this.referencedDistributionPoints) {
             final Optional<StoredCRL> storedCrl = this.store.getCRLs().stream()
-                    .filter(c -> c.getDistributionPoints().equals(state.distributionPoints)).findAny();
+                    .filter(c -> c.getDistributionPoints().equals(state.distributionPoints))
+                    .findAny();
 
             if (storedCrl.isPresent() && storedCrl.get().isExpired()) {
                 logger.warn("CRL expired for distribution points: {}", state.distributionPoints);
@@ -219,8 +233,8 @@ public class CRLManager implements Closeable {
             }
 
             if (needsDownload(state, storedCrl, now)) {
-                pending.add(new PendingDownload(state, storedCrl,
-                        CRLUtil.fetchCRL(state.distributionPoints, this.downloadExecutor)));
+                pending.add(new PendingDownload(
+                        state, storedCrl, CRLUtil.fetchCRL(state.distributionPoints, this.downloadExecutor)));
             }
         }
 
@@ -264,16 +278,16 @@ public class CRLManager implements Closeable {
         return changed;
     }
 
-    private boolean needsDownload(final DistributionPointState state, final Optional<StoredCRL> storedCrl,
-            final long now) {
+    private boolean needsDownload(
+            final DistributionPointState state, final Optional<StoredCRL> storedCrl, final long now) {
         if (!storedCrl.isPresent() || storedCrl.get().isExpired()) {
             return true;
         }
         if (!state.lastDownloadInstantNanos.isPresent()) {
             return true;
         }
-        if (TimeUnit.MILLISECONDS.convert(now - state.lastDownloadInstantNanos.getAsLong(),
-                TimeUnit.NANOSECONDS) > this.forceUpdateIntervalMs) {
+        if (TimeUnit.MILLISECONDS.convert(now - state.lastDownloadInstantNanos.getAsLong(), TimeUnit.NANOSECONDS)
+                > this.forceUpdateIntervalMs) {
             return true;
         }
         return storedCrl.get().isNearingExpiry(this.forceUpdateIntervalMs);
@@ -285,7 +299,9 @@ public class CRLManager implements Closeable {
         final Optional<StoredCRL> storedCrl;
         final CompletableFuture<X509CRL> future;
 
-        PendingDownload(final DistributionPointState state, final Optional<StoredCRL> storedCrl,
+        PendingDownload(
+                final DistributionPointState state,
+                final Optional<StoredCRL> storedCrl,
                 final CompletableFuture<X509CRL> future) {
             this.state = state;
             this.storedCrl = storedCrl;
@@ -297,6 +313,7 @@ public class CRLManager implements Closeable {
 
         final PendingDownload pending;
         final X509CRL crl;
+
         @SuppressWarnings("unused")
         final Exception error;
 
@@ -307,8 +324,11 @@ public class CRLManager implements Closeable {
         }
     }
 
-    private boolean validateAndStoreCRL(final long now, final DistributionPointState state,
-            final Optional<StoredCRL> storedCrl, final X509CRL newCrl) {
+    private boolean validateAndStoreCRL(
+            final long now,
+            final DistributionPointState state,
+            final Optional<StoredCRL> storedCrl,
+            final X509CRL newCrl) {
 
         if (storedCrl.isPresent()) {
             final X509CRL stored = storedCrl.get().getCrl();

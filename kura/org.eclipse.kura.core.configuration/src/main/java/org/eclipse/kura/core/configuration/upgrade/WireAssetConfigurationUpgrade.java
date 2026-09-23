@@ -1,16 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.core.configuration.upgrade;
 
 import java.util.HashSet;
@@ -26,8 +25,7 @@ public final class WireAssetConfigurationUpgrade {
     private static final String CHANNEL_NAME_PROPERTY_SUFFIX = CHANNEL_PROPERTY_SEPARATOR + "+name";
     private static final String EMIT_ALL_CHANNELS_PROP_NAME = "emit.all.channels";
 
-    private WireAssetConfigurationUpgrade() {
-    }
+    private WireAssetConfigurationUpgrade() {}
 
     static void upgrade(final Map<String, Object> properties) {
         if (properties.containsKey(EMIT_ALL_CHANNELS_PROP_NAME)) {

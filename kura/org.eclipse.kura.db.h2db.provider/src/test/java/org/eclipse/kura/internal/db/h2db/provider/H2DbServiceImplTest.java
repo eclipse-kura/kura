@@ -27,11 +27,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
@@ -209,8 +207,8 @@ public class H2DbServiceImplTest {
         String url = "jdbc:h2:mem:test";
 
         H2DbServiceImpl svc1 = new H2DbServiceImpl();
-        Map<String, H2DbServiceImpl> activeInstances = (Map<String, H2DbServiceImpl>) TestUtil.getFieldValue(svc1,
-                "activeInstances");
+        Map<String, H2DbServiceImpl> activeInstances =
+                (Map<String, H2DbServiceImpl>) TestUtil.getFieldValue(svc1, "activeInstances");
         activeInstances.put(url, svc1);
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
@@ -286,5 +284,4 @@ public class H2DbServiceImplTest {
 
         assertFalse(Files.exists(filePath));
     }
-
 }

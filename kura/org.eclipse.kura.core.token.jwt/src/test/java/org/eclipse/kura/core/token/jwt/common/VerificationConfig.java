@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.token.jwt.common;
 
 import java.lang.annotation.Annotation;
-
 import org.eclipse.kura.core.token.jwt.verifier.JwtVerificationServiceOCD;
 
 public final class VerificationConfig {
@@ -25,8 +24,7 @@ public final class VerificationConfig {
     private int clockSkewSeconds = JwtVerificationServiceOCD.DEFAULT_CLOCK_SKEW_SECONDS;
     private boolean requireValidCertificate = JwtVerificationServiceOCD.DEFAULT_REQUIRE_VALID_CERTIFICATE;
 
-    private VerificationConfig() {
-    }
+    private VerificationConfig() {}
 
     public static VerificationConfig defaults() {
         return new VerificationConfig();
@@ -89,8 +87,6 @@ public final class VerificationConfig {
             public boolean require_valid_certificate() {
                 return VerificationConfig.this.requireValidCertificate;
             }
-
         };
     }
-
 }

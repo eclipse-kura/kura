@@ -13,7 +13,6 @@
 package org.eclipse.kura.watchdog.criticaltest;
 
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.watchdog.CriticalComponent;

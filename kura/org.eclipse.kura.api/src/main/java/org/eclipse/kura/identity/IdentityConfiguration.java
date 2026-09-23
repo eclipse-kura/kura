@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -17,14 +17,13 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Describes the configuration for an identity. It is composed by different
  * {@link IdentityConfigurationComponent}s that can be retrieved and updated
  * separately using the {@link IdentityService}.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.7.0
  */
@@ -36,7 +35,7 @@ public class IdentityConfiguration {
 
     /**
      * Creates a new identity configuration with the given name and components.
-     * 
+     *
      * @param name       the identity name.
      * @param components the {@link IdentityConfigurationComponent} list.
      */
@@ -52,7 +51,7 @@ public class IdentityConfiguration {
 
     /**
      * Returns the identity name.
-     * 
+     *
      * @return the identity name.
      */
     public String getName() {
@@ -61,7 +60,7 @@ public class IdentityConfiguration {
 
     /**
      * Returns the list of {@link IdentityConfigurationComponent}s.
-     * 
+     *
      * @return the list of {@link IdentityConfigurationComponent}s.
      */
     public List<IdentityConfigurationComponent> getComponents() {
@@ -94,5 +93,4 @@ public class IdentityConfiguration {
         IdentityConfiguration other = (IdentityConfiguration) obj;
         return Objects.equals(components, other.components) && Objects.equals(name, other.name);
     }
-
 }

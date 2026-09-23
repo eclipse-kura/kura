@@ -22,5 +22,4 @@ public class CloudPublisherImplTest {
         CloudPublisherImpl cloudPublisherImpl = new CloudPublisherImpl();
         cloudPublisherImpl.publish(null);
     }
-
 }

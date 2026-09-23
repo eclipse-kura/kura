@@ -14,7 +14,6 @@ package org.eclipse.kura.net.status.wifi;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -68,7 +67,12 @@ public class WifiChannel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.attenuation, this.channel, this.disabled, this.frequency, this.noInitiatingRadiation,
+        return Objects.hash(
+                this.attenuation,
+                this.channel,
+                this.disabled,
+                this.frequency,
+                this.noInitiatingRadiation,
                 this.radarDetection);
     }
 
@@ -81,8 +85,10 @@ public class WifiChannel {
             return false;
         }
         WifiChannel other = (WifiChannel) obj;
-        return Objects.equals(this.attenuation, other.attenuation) && this.channel == other.channel
-                && Objects.equals(this.disabled, other.disabled) && this.frequency == other.frequency
+        return Objects.equals(this.attenuation, other.attenuation)
+                && this.channel == other.channel
+                && Objects.equals(this.disabled, other.disabled)
+                && this.frequency == other.frequency
                 && Objects.equals(this.noInitiatingRadiation, other.noInitiatingRadiation)
                 && Objects.equals(this.radarDetection, other.radarDetection);
     }
@@ -139,5 +145,4 @@ public class WifiChannel {
             return new WifiChannel(this);
         }
     }
-
 }

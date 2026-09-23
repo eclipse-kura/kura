@@ -17,5 +17,4 @@ public class RegexValidator extends PredicateValidator {
     public RegexValidator(final String pattern, final String message) {
         super(v -> v.matches(pattern), message);
     }
-
 }

@@ -19,8 +19,8 @@ public class PubSubFactoryInfo {
     private final String defaultPid;
     private final String defaultPidRegex;
 
-    public PubSubFactoryInfo(String factoryPid, String cloudConnectionFactoryPid, String defaultPid,
-            String defaultPidRegex) {
+    public PubSubFactoryInfo(
+            String factoryPid, String cloudConnectionFactoryPid, String defaultPid, String defaultPidRegex) {
 
         this.factoryPid = factoryPid;
         this.cloudConnectionFactoryPid = cloudConnectionFactoryPid;
@@ -43,5 +43,4 @@ public class PubSubFactoryInfo {
     public String getDefaultPidRegex() {
         return this.defaultPidRegex;
     }
-
 }

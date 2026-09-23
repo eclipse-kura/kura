@@ -34,5 +34,4 @@ public class EntryRequest extends EntryInfo implements Validable {
     public boolean isValid() {
         return this.getKeystoreServicePid() != null && this.getAlias() != null;
     }
-
 }

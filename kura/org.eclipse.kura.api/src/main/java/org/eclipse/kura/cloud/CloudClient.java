@@ -1,19 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.cloud;
 
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.annotation.versioning.ProviderType;
@@ -77,7 +76,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * to specific applications running on specific devices.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher} and 
+ * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher} and
  * {@link org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber}
  */
 @ProviderType
@@ -409,8 +408,9 @@ public interface CloudClient {
      * @throws KuraException
      *             if one of the message composition or message publishing operation fails.
      */
-    public int controlPublish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain,
-            int priority) throws KuraException;
+    public int controlPublish(
+            String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException;
 
     /**
      * Publishes a control message to the remote server addressing it to another device

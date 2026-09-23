@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -51,8 +50,12 @@ public class ModelInfo {
      * @param outputDescriptors
      *            a list of {@link TensorDescriptor} of the output tensors
      */
-    protected ModelInfo(String modelName, Optional<String> platform, Optional<String> version,
-            Map<String, Object> parameters, List<TensorDescriptor> inputDescriptors,
+    protected ModelInfo(
+            String modelName,
+            Optional<String> platform,
+            Optional<String> version,
+            Map<String, Object> parameters,
+            List<TensorDescriptor> inputDescriptors,
             List<TensorDescriptor> outputDescriptors) {
         this.name = modelName;
         this.platform = platform;

@@ -12,16 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.provider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.JsonParseException;
-
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 public class RestExceptionMapper implements ExceptionMapper<Exception> {
@@ -35,8 +33,10 @@ public class RestExceptionMapper implements ExceptionMapper<Exception> {
         }
 
         if (exception instanceof JsonParseException) {
-            return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON)
-                    .entity("{\"message\":\"Error parsing request body\"}").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity("{\"message\":\"Error parsing request body\"}")
+                    .build();
         }
 
         return processDefaultException(exception);
@@ -53,8 +53,9 @@ public class RestExceptionMapper implements ExceptionMapper<Exception> {
             Thread.currentThread().interrupt();
         }
 
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON)
-                .entity("{\"message\":\"Something went wrong\"}").build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .type(MediaType.APPLICATION_JSON)
+                .entity("{\"message\":\"Something went wrong\"}")
+                .build();
     }
-
 }

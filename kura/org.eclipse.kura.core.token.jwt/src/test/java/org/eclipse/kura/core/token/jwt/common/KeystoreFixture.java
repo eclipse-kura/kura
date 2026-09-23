@@ -29,9 +29,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.crypto.spec.SecretKeySpec;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -83,10 +81,10 @@ public final class KeystoreFixture {
         return withPrivateKeyEntry(alias, keyPair, TestKeys.certificate(alias, keyPair));
     }
 
-    public KeystoreFixture withPrivateKeyEntry(final String alias, final KeyPair keyPair,
-            final X509Certificate certificate) {
+    public KeystoreFixture withPrivateKeyEntry(
+            final String alias, final KeyPair keyPair, final X509Certificate certificate) {
 
-        this.entries.put(alias, new PrivateKeyEntry(keyPair.getPrivate(), new Certificate[] { certificate }));
+        this.entries.put(alias, new PrivateKeyEntry(keyPair.getPrivate(), new Certificate[] {certificate}));
 
         return this;
     }
@@ -99,8 +97,9 @@ public final class KeystoreFixture {
         return withTrustedCertificate(alias, TestKeys.certificate(alias, keyPair));
     }
 
-    public KeystoreFixture withTrustedCertificate(final String alias, final KeyPair keyPair, final Instant validFrom,
-            final Instant validTo) throws TestCAException {
+    public KeystoreFixture withTrustedCertificate(
+            final String alias, final KeyPair keyPair, final Instant validFrom, final Instant validTo)
+            throws TestCAException {
 
         return withTrustedCertificate(alias, TestKeys.certificate(alias, keyPair, validFrom, validTo));
     }
@@ -148,12 +147,12 @@ public final class KeystoreFixture {
     }
 
     public static Event unrelatedEventOnTheKeystoreTopic() {
-        return new Event(KeystoreChangedEvent.EVENT_TOPIC,
+        return new Event(
+                KeystoreChangedEvent.EVENT_TOPIC,
                 Collections.singletonMap(KeystoreChangedEvent.SENDER_PID_PROPERTY_KEY, DEFAULT_PID));
     }
 
     public void forgetRecordedInteractions() {
         clearInvocations(this.keystoreService);
     }
-
 }

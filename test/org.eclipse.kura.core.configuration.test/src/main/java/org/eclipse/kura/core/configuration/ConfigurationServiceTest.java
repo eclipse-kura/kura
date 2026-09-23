@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
-import org.eclipse.kura.configuration.Password;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -40,12 +39,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.system.SystemService;
@@ -156,8 +155,8 @@ public class ConfigurationServiceTest {
     private Set<String> factoryComponentPids;
     private Map<String, Object> exampleProperties = map("key1", "value1", "key2", "value2");
 
-    private Map<String, Object> defaultProperties = map("field.test", 1, "password.test",
-            new Password(TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT.toCharArray()));
+    private Map<String, Object> defaultProperties =
+            map("field.test", 1, "password.test", new Password(TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT.toCharArray()));
 
     private Set<Long> snapshotsBefore;
     private Set<Long> snapshotsAfter;
@@ -231,12 +230,15 @@ public class ConfigurationServiceTest {
     public void testCreateFactoryConfigurationWithCustomPassword() {
         // positive test; the created snapshot contains the properties
 
-        whenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "cfcmp_pid_3",
-                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password("bar".toCharArray())), true);
+        whenCreateFactoryConfiguration(
+                TEST_COMPONENT_FPID,
+                "cfcmp_pid_3",
+                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password("bar".toCharArray())),
+                true);
 
         thenSnapshotsIncreasedBy(1);
-        thenLastSnapshotContainsProperties("cfcmp_pid_3",
-                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password("bar".toCharArray())));
+        thenLastSnapshotContainsProperties(
+                "cfcmp_pid_3", map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password("bar".toCharArray())));
     }
 
     @Test
@@ -261,8 +263,8 @@ public class ConfigurationServiceTest {
     public void testDeleteFactoryConfigurationWithSnapshot() {
         // positive test; pid registered in factory and service pids, configuration delete is expected, with snapshots
 
-        givenCreateFactoryConfiguration("fpid_" + System.currentTimeMillis(), "spid-test1", this.exampleProperties,
-                true);
+        givenCreateFactoryConfiguration(
+                "fpid_" + System.currentTimeMillis(), "spid-test1", this.exampleProperties, true);
 
         whenDeleteFactoryConfiguration("spid-test1", true);
 
@@ -390,7 +392,9 @@ public class ConfigurationServiceTest {
 
         thenDefaultConfigurationIs(TEST_COMPONENT_PID, false, false);
         thenDefaultConfigurationPropertiesHas(2, TEST_COMPONENT_PROPERTY_KEY, TEST_COMPONENT_PROPERTY_VALUE);
-        thenDefaultConfigurationPropertiesHas(2, TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
+        thenDefaultConfigurationPropertiesHas(
+                2,
+                TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
                 new Password(TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT.toCharArray()));
         thenDefaultConfigurationDefinitionIsPopulated();
         thenNoExceptionOccurred();
@@ -490,15 +494,18 @@ public class ConfigurationServiceTest {
     public void testUpdateConfigurationPidPropertiesNoSnapshot() {
         // existing component PID and takeSnapshot == false
 
-        whenUpdateConfiguration(TEST_COMPONENT_PID, new HashMap<String, Object>() {
+        whenUpdateConfiguration(
+                TEST_COMPONENT_PID,
+                new HashMap<String, Object>() {
 
-            private static final long serialVersionUID = 7567583973175478794L;
+                    private static final long serialVersionUID = 7567583973175478794L;
 
-            {
-                put("unknown property", 123);
-                put(TEST_COMPONENT_PROPERTY_KEY, 10);
-            }
-        }, false);
+                    {
+                        put("unknown property", 123);
+                        put(TEST_COMPONENT_PROPERTY_KEY, 10);
+                    }
+                },
+                false);
 
         thenSnapshotsIncreasedBy(0);
         thenUpdatedConfigurationPropertiesContains(new HashMap<String, Object>() {
@@ -632,8 +639,10 @@ public class ConfigurationServiceTest {
     public void testUpdateKeepsThePasswordTypeInTheSnapshot() {
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_update_pid", null, true);
 
-        whenUpdateConfiguration("pwd_update_pid",
-                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())), true);
+        whenUpdateConfiguration(
+                "pwd_update_pid",
+                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())),
+                true);
 
         thenLatestSnapshotPropertyIsAPassword("pwd_update_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY, UPDATED_PASSWORD);
         thenNoExceptionOccurred();
@@ -646,8 +655,8 @@ public class ConfigurationServiceTest {
         whenUpdateConfiguration("pwd_untouched_pid", map(TEST_COMPONENT_PROPERTY_KEY, 42), true);
 
         thenUpdatedConfigurationPropertiesContains(map(TEST_COMPONENT_PROPERTY_KEY, 42));
-        thenLatestSnapshotPropertyIsAPassword("pwd_untouched_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
-                TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
+        thenLatestSnapshotPropertyIsAPassword(
+                "pwd_untouched_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY, TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
         thenNoExceptionOccurred();
     }
 
@@ -658,11 +667,13 @@ public class ConfigurationServiceTest {
 
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_undeclared_pid", null, true);
 
-        whenUpdateConfiguration("pwd_undeclared_pid",
-                map(UNDECLARED_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())), true);
+        whenUpdateConfiguration(
+                "pwd_undeclared_pid",
+                map(UNDECLARED_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())),
+                true);
 
-        thenComponentConfigurationPropertyIsAPassword("pwd_undeclared_pid", UNDECLARED_PASSWORD_PROPERTY_KEY,
-                UPDATED_PASSWORD);
+        thenComponentConfigurationPropertyIsAPassword(
+                "pwd_undeclared_pid", UNDECLARED_PASSWORD_PROPERTY_KEY, UPDATED_PASSWORD);
         thenLatestSnapshotPropertyIsAPassword("pwd_undeclared_pid", UNDECLARED_PASSWORD_PROPERTY_KEY, UPDATED_PASSWORD);
         thenNoExceptionOccurred();
     }
@@ -670,15 +681,16 @@ public class ConfigurationServiceTest {
     @Test
     public void testRollbackKeepsThePasswordTypeOfAPropertyTheMetatypeDoesNotDeclare() {
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_undeclared_rollback_pid", null, true);
-        givenUpdatedConfiguration("pwd_undeclared_rollback_pid",
+        givenUpdatedConfiguration(
+                "pwd_undeclared_rollback_pid",
                 map(UNDECLARED_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())));
         givenSnapshotIdIsRemembered();
         givenUpdatedConfiguration("pwd_undeclared_rollback_pid", map(TEST_COMPONENT_PROPERTY_KEY, 7));
 
         whenRollbackToRememberedSnapshot();
 
-        thenComponentConfigurationPropertyIsAPassword("pwd_undeclared_rollback_pid", UNDECLARED_PASSWORD_PROPERTY_KEY,
-                UPDATED_PASSWORD);
+        thenComponentConfigurationPropertyIsAPassword(
+                "pwd_undeclared_rollback_pid", UNDECLARED_PASSWORD_PROPERTY_KEY, UPDATED_PASSWORD);
         thenNoExceptionOccurred();
     }
 
@@ -687,31 +699,35 @@ public class ConfigurationServiceTest {
         // the property is a Password when the instance is created and becomes a plain String afterwards; rolling
         // back to the snapshot holding the String must not resurrect the Password type
 
-        givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_rollback_plain_pid",
-                map(UNDECLARED_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())), true);
+        givenCreateFactoryConfiguration(
+                TEST_COMPONENT_FPID,
+                "pwd_rollback_plain_pid",
+                map(UNDECLARED_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())),
+                true);
         givenUpdatedConfiguration("pwd_rollback_plain_pid", map(UNDECLARED_PASSWORD_PROPERTY_KEY, PLAIN_VALUE));
         givenSnapshotIdIsRemembered();
         givenUpdatedConfiguration("pwd_rollback_plain_pid", map(TEST_COMPONENT_PROPERTY_KEY, 5));
 
         whenRollbackToRememberedSnapshot();
 
-        thenComponentConfigurationPropertyIsAPlainString("pwd_rollback_plain_pid", UNDECLARED_PASSWORD_PROPERTY_KEY,
-                PLAIN_VALUE);
+        thenComponentConfigurationPropertyIsAPlainString(
+                "pwd_rollback_plain_pid", UNDECLARED_PASSWORD_PROPERTY_KEY, PLAIN_VALUE);
         thenNoExceptionOccurred();
     }
 
     @Test
     public void testRollbackRestoresThePreviousPasswordValueAndType() {
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_rollback_pid", null, true);
-        givenUpdatedConfiguration("pwd_rollback_pid",
+        givenUpdatedConfiguration(
+                "pwd_rollback_pid",
                 map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())));
 
         whenRollback();
 
-        thenLatestSnapshotPropertyIsAPassword("pwd_rollback_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
-                TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
-        thenComponentConfigurationPropertyIsAPassword("pwd_rollback_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
-                TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
+        thenLatestSnapshotPropertyIsAPassword(
+                "pwd_rollback_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY, TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
+        thenComponentConfigurationPropertyIsAPassword(
+                "pwd_rollback_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY, TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
         thenNoExceptionOccurred();
     }
 
@@ -719,13 +735,14 @@ public class ConfigurationServiceTest {
     public void testRollbackToIdRestoresThePasswordOfThatSnapshot() {
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_rollback_id_pid", null, true);
         givenSnapshotIdIsRemembered();
-        givenUpdatedConfiguration("pwd_rollback_id_pid",
+        givenUpdatedConfiguration(
+                "pwd_rollback_id_pid",
                 map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password(UPDATED_PASSWORD.toCharArray())));
 
         whenRollbackToRememberedSnapshot();
 
-        thenComponentConfigurationPropertyIsAPassword("pwd_rollback_id_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
-                TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
+        thenComponentConfigurationPropertyIsAPassword(
+                "pwd_rollback_id_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY, TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
         thenNoExceptionOccurred();
     }
 
@@ -737,11 +754,11 @@ public class ConfigurationServiceTest {
      * Given
      */
 
-    private void givenCreateFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
-            boolean takeSnapshot) {
+    private void givenCreateFactoryConfiguration(
+            String factoryPid, String pid, Map<String, Object> properties, boolean takeSnapshot) {
         try {
-            ConfigurationServiceTest.configurationService.createFactoryConfiguration(factoryPid, pid, properties,
-                    takeSnapshot);
+            ConfigurationServiceTest.configurationService.createFactoryConfiguration(
+                    factoryPid, pid, properties, takeSnapshot);
 
             if (takeSnapshot) {
                 settleSnapshots();
@@ -770,9 +787,10 @@ public class ConfigurationServiceTest {
             Dictionary<String, Object> componentConfigurationProperties = new Hashtable<>();
             componentConfigurationProperties.put(KURA_SERVICE_PID, pid);
             componentConfigurationProperties.put(SERVICE_PID, servicePid);
-            BundleContext bundleContext = FrameworkUtil.getBundle(ConfigurationServiceTest.class).getBundleContext();
-            bundleContext.registerService(SelfConfiguringComponent.class, new CfgSvcTestSelfComponent(),
-                    componentConfigurationProperties);
+            BundleContext bundleContext =
+                    FrameworkUtil.getBundle(ConfigurationServiceTest.class).getBundleContext();
+            bundleContext.registerService(
+                    SelfConfiguringComponent.class, new CfgSvcTestSelfComponent(), componentConfigurationProperties);
 
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -827,8 +845,8 @@ public class ConfigurationServiceTest {
 
     private void givenSnapshotIdIsRemembered() {
         try {
-            this.rememberedSnapshotId = ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots())
-                    .last();
+            this.rememberedSnapshotId =
+                    ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots()).last();
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
         }
@@ -864,11 +882,11 @@ public class ConfigurationServiceTest {
         this.factoryComponentPids = ConfigurationServiceTest.configurationService.getFactoryComponentPids();
     }
 
-    private void whenCreateFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
-            boolean takeSnapshot) {
+    private void whenCreateFactoryConfiguration(
+            String factoryPid, String pid, Map<String, Object> properties, boolean takeSnapshot) {
         try {
-            ConfigurationServiceTest.configurationService.createFactoryConfiguration(factoryPid, pid, properties,
-                    takeSnapshot);
+            ConfigurationServiceTest.configurationService.createFactoryConfiguration(
+                    factoryPid, pid, properties, takeSnapshot);
 
             if (takeSnapshot) {
                 this.snapshotsAfter = ConfigurationServiceTest.configurationService.getSnapshots();
@@ -896,8 +914,8 @@ public class ConfigurationServiceTest {
 
     private void whenGetComponentConfigurations(String searchedPid) {
         try {
-            this.configurations = configurationService
-                    .getComponentConfigurations(FrameworkUtil.createFilter("(kura.service.pid=" + searchedPid + ")"));
+            this.configurations = configurationService.getComponentConfigurations(
+                    FrameworkUtil.createFilter("(kura.service.pid=" + searchedPid + ")"));
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
         }
@@ -1043,8 +1061,8 @@ public class ConfigurationServiceTest {
     }
 
     private void thenSnapshotsIncreasedBy(int amount) {
-        assertEquals(Math.min(this.kuraSnapshotsCount, this.snapshotsBefore.size() + amount),
-                this.snapshotsAfter.size());
+        assertEquals(
+                Math.min(this.kuraSnapshotsCount, this.snapshotsBefore.size() + amount), this.snapshotsAfter.size());
     }
 
     private void thenLastSnapshotContainsProperties(String pid, Map<String, Object> expectedProperties) {
@@ -1062,8 +1080,8 @@ public class ConfigurationServiceTest {
         after.removeAll(before);
 
         try {
-            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
-                    .getSnapshot(after.iterator().next().longValue());
+            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService.getSnapshot(
+                    after.iterator().next().longValue());
             assertSnapshotContains(lastSnapshot, pid, expectedProperties);
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -1085,8 +1103,8 @@ public class ConfigurationServiceTest {
         after.removeAll(before);
 
         try {
-            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
-                    .getSnapshot(after.iterator().next().longValue());
+            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService.getSnapshot(
+                    after.iterator().next().longValue());
             assertFalse(snapshotContains(lastSnapshot, pid, expectedProperties));
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -1100,11 +1118,11 @@ public class ConfigurationServiceTest {
         after.removeAll(before);
 
         try {
-            List<ComponentConfiguration> previousSnapshot = ConfigurationServiceTest.configurationService
-                    .getSnapshot(before.iterator().next().longValue());
+            List<ComponentConfiguration> previousSnapshot = ConfigurationServiceTest.configurationService.getSnapshot(
+                    before.iterator().next().longValue());
 
-            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
-                    .getSnapshot(after.iterator().next().longValue());
+            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService.getSnapshot(
+                    after.iterator().next().longValue());
 
             assertTrue(snapshotsEqual(previousSnapshot, lastSnapshot));
         } catch (Exception e) {
@@ -1114,18 +1132,20 @@ public class ConfigurationServiceTest {
 
     private void thenFactoryComponentHasBeenDeleted(String pid) throws KuraException {
         Long lastSnapshotId = ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots()).last();
-        List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
-                .getSnapshot(lastSnapshotId);
+        List<ComponentConfiguration> lastSnapshot =
+                ConfigurationServiceTest.configurationService.getSnapshot(lastSnapshotId);
 
-        assertEquals(0, lastSnapshot.stream().filter(cc -> cc.getPid().equals(pid)).count());
+        assertEquals(
+                0, lastSnapshot.stream().filter(cc -> cc.getPid().equals(pid)).count());
     }
 
     private void thenFactoryComponentHasBeenCreated(String pid) throws KuraException {
         Long lastSnapshotId = ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots()).last();
-        List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
-                .getSnapshot(lastSnapshotId);
+        List<ComponentConfiguration> lastSnapshot =
+                ConfigurationServiceTest.configurationService.getSnapshot(lastSnapshotId);
 
-        assertEquals(1, lastSnapshot.stream().filter(cc -> cc.getPid().equals(pid)).count());
+        assertEquals(
+                1, lastSnapshot.stream().filter(cc -> cc.getPid().equals(pid)).count());
     }
 
     private void thenConfigurableComponentPidsNotAssignable() {
@@ -1174,23 +1194,35 @@ public class ConfigurationServiceTest {
 
     private void thenDefaultConfigurationPropertiesHas(int size, String expectedKey, Object expectedValue) {
         assertNotNull(this.defaultConfiguration.getConfigurationProperties());
-        assertEquals(size, this.defaultConfiguration.getConfigurationProperties().size());
-        assertPropertyEquals(expectedKey, expectedValue,
+        assertEquals(
+                size, this.defaultConfiguration.getConfigurationProperties().size());
+        assertPropertyEquals(
+                expectedKey,
+                expectedValue,
                 this.defaultConfiguration.getConfigurationProperties().get(expectedKey));
     }
 
     private void thenDefaultConfigurationDefinitionIsPopulated() {
         assertNotNull("Definition should exist", this.defaultConfiguration.getDefinition());
-        assertNotNull("ID should exist", this.defaultConfiguration.getDefinition().getId());
-        assertNotNull("Name should exist", this.defaultConfiguration.getDefinition().getName());
-        assertNotNull("Description should exist", this.defaultConfiguration.getDefinition().getDescription());
-        assertNotNull("Icon should exist", this.defaultConfiguration.getDefinition().getIcon());
-        assertNotNull("AD should exist", this.defaultConfiguration.getDefinition().getAD());
-        assertFalse("AD is not empty", this.defaultConfiguration.getDefinition().getAD().isEmpty());
+        assertNotNull(
+                "ID should exist", this.defaultConfiguration.getDefinition().getId());
+        assertNotNull(
+                "Name should exist", this.defaultConfiguration.getDefinition().getName());
+        assertNotNull(
+                "Description should exist",
+                this.defaultConfiguration.getDefinition().getDescription());
+        assertNotNull(
+                "Icon should exist", this.defaultConfiguration.getDefinition().getIcon());
+        assertNotNull(
+                "AD should exist", this.defaultConfiguration.getDefinition().getAD());
+        assertFalse(
+                "AD is not empty",
+                this.defaultConfiguration.getDefinition().getAD().isEmpty());
     }
 
     private void thenConfigurationPropertiesHaveNotChanged() {
-        assertPropertiesContain(this.configuration.getConfigurationProperties(),
+        assertPropertiesContain(
+                this.configuration.getConfigurationProperties(),
                 this.updatedConfiguration.getConfigurationProperties());
     }
 
@@ -1202,8 +1234,8 @@ public class ConfigurationServiceTest {
         for (String pid : pids) {
             try {
 
-                ComponentConfiguration cc = ConfigurationServiceTest.configurationService
-                        .getComponentConfiguration(pid);
+                ComponentConfiguration cc =
+                        ConfigurationServiceTest.configurationService.getComponentConfiguration(pid);
 
                 assertPropertiesContain(this.exampleProperties, cc.getConfigurationProperties());
 
@@ -1243,16 +1275,22 @@ public class ConfigurationServiceTest {
 
     private void thenDefinitionsContain(List<ComponentConfiguration> configs, String pid) {
         assertNotNull("definitions should not be null", configs);
-        assertTrue("definitions should contain " + pid + " with a populated definition",
-                configs.stream().anyMatch(config -> pid.equals(config.getPid()) && config.getDefinition() != null
-                        && pid.equals(config.getDefinition().getId())));
+        assertTrue(
+                "definitions should contain " + pid + " with a populated definition",
+                configs.stream()
+                        .anyMatch(config -> pid.equals(config.getPid())
+                                && config.getDefinition() != null
+                                && pid.equals(config.getDefinition().getId())));
     }
 
     private void thenLatestSnapshotPropertyIsAPassword(String pid, String key, String expectedValue) {
         try {
             long latest = ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots()).last();
 
-            assertPropertyIsAPassword(pid, key, expectedValue,
+            assertPropertyIsAPassword(
+                    pid,
+                    key,
+                    expectedValue,
                     propertyOf(ConfigurationServiceTest.configurationService.getSnapshot(latest), pid, key));
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -1264,7 +1302,8 @@ public class ConfigurationServiceTest {
             ComponentConfiguration cc = ConfigurationServiceTest.configurationService.getComponentConfiguration(pid);
 
             assertNotNull("the configuration of " + pid + " should exist", cc);
-            assertPropertyIsAPassword(pid, key, expectedValue, cc.getConfigurationProperties().get(key));
+            assertPropertyIsAPassword(
+                    pid, key, expectedValue, cc.getConfigurationProperties().get(key));
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
         }
@@ -1278,8 +1317,10 @@ public class ConfigurationServiceTest {
 
             Object value = cc.getConfigurationProperties().get(key);
 
-            assertTrue("property " + key + " of " + pid + " should be a String but was "
-                    + (value == null ? "null" : value.getClass().getName()), value instanceof String);
+            assertTrue(
+                    "property " + key + " of " + pid + " should be a String but was "
+                            + (value == null ? "null" : value.getClass().getName()),
+                    value instanceof String);
             assertEquals("property " + key + " of " + pid + " does not match", expectedValue, value);
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -1287,9 +1328,13 @@ public class ConfigurationServiceTest {
     }
 
     private void assertPropertyIsAPassword(String pid, String key, String expectedValue, Object value) {
-        assertTrue("property " + key + " of " + pid + " should be a Password but was "
-                + (value == null ? "null" : value.getClass().getName()), value instanceof Password);
-        assertArrayEquals("property " + key + " of " + pid + " does not match", expectedValue.toCharArray(),
+        assertTrue(
+                "property " + key + " of " + pid + " should be a Password but was "
+                        + (value == null ? "null" : value.getClass().getName()),
+                value instanceof Password);
+        assertArrayEquals(
+                "property " + key + " of " + pid + " does not match",
+                expectedValue.toCharArray(),
                 ((Password) value).getPassword());
     }
 
@@ -1351,7 +1396,8 @@ public class ConfigurationServiceTest {
         while (stable < SNAPSHOT_QUIESCE_STABLE_ITERATIONS && System.currentTimeMillis() < deadline) {
             Thread.sleep(SNAPSHOT_QUIESCE_INTERVAL_MS);
 
-            int current = ConfigurationServiceTest.configurationService.getSnapshots().size();
+            int current =
+                    ConfigurationServiceTest.configurationService.getSnapshots().size();
             if (current == last) {
                 stable++;
             } else {
@@ -1361,8 +1407,8 @@ public class ConfigurationServiceTest {
         }
     }
 
-    private boolean snapshotContains(List<ComponentConfiguration> snapshot, String pid,
-            Map<String, Object> expectedProperties) {
+    private boolean snapshotContains(
+            List<ComponentConfiguration> snapshot, String pid, Map<String, Object> expectedProperties) {
         boolean found = false;
 
         for (ComponentConfiguration cc : snapshot) {
@@ -1386,8 +1432,9 @@ public class ConfigurationServiceTest {
         return found;
     }
 
-    private void assertSnapshotContains(List<ComponentConfiguration> snapshot, String pid,
-            Map<String, Object> expectedProperties) throws KuraException {
+    private void assertSnapshotContains(
+            List<ComponentConfiguration> snapshot, String pid, Map<String, Object> expectedProperties)
+            throws KuraException {
         for (ComponentConfiguration cc : snapshot) {
             if (pid.equals(cc.getPid())) {
                 if (expectedProperties == null) {
@@ -1417,8 +1464,10 @@ public class ConfigurationServiceTest {
     }
 
     private boolean snapshotsEqual(List<ComponentConfiguration> snap1, List<ComponentConfiguration> snap2) {
-        List<String> pids1 = snap1.stream().flatMap(cc -> Stream.of(cc.getPid())).collect(Collectors.toList());
-        List<String> pids2 = snap2.stream().flatMap(cc -> Stream.of(cc.getPid())).collect(Collectors.toList());
+        List<String> pids1 =
+                snap1.stream().flatMap(cc -> Stream.of(cc.getPid())).collect(Collectors.toList());
+        List<String> pids2 =
+                snap2.stream().flatMap(cc -> Stream.of(cc.getPid())).collect(Collectors.toList());
 
         return pids1.containsAll(pids2) && pids2.containsAll(pids1);
     }
@@ -1435,7 +1484,9 @@ public class ConfigurationServiceTest {
 
     private void assertPropertyEquals(final String key, final Object expected, final Object actual) {
         if (expected instanceof Password && actual instanceof Password) {
-            assertArrayEquals("property " + key + " does not match", ((Password) expected).getPassword(),
+            assertArrayEquals(
+                    "property " + key + " does not match",
+                    ((Password) expected).getPassword(),
                     ((Password) actual).getPassword());
         } else {
             assertEquals("property " + key + " does not match", expected, actual);

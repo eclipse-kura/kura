@@ -24,6 +24,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.UriInfo;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper.XsrfTokenStatus;
@@ -41,12 +45,6 @@ import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.PathSegment;
-import jakarta.ws.rs.core.UriInfo;
 
 public class SessionAuthProviderTest {
 
@@ -74,7 +72,8 @@ public class SessionAuthProviderTest {
         when(this.requestContext.getUriInfo()).thenReturn(this.uriInfo);
         when(this.session.getId()).thenReturn("sessionId");
 
-        this.provider = new SessionAuthProvider(this.sessionHelper,
+        this.provider = new SessionAuthProvider(
+                this.sessionHelper,
                 new HashSet<>(Arrays.asList(CHANGE_PASSWORD_PATH, XSRF_TOKEN_PATH)),
                 Collections.singleton(XSRF_TOKEN_PATH));
         this.provider.setOptions(new RestServiceOptions(Collections.emptyMap()));
@@ -212,8 +211,7 @@ public class SessionAuthProviderTest {
 
     private void givenAuthenticatedSession() {
         when(this.sessionHelper.getExistingSession(this.request)).thenReturn(Optional.of(this.session));
-        when(this.sessionHelper.getPrincipalFromSession(this.session))
-                .thenReturn(Optional.of(() -> IDENTITY_NAME));
+        when(this.sessionHelper.getPrincipalFromSession(this.session)).thenReturn(Optional.of(() -> IDENTITY_NAME));
     }
 
     private void givenXsrfTokenStatus(final XsrfTokenStatus status) {
@@ -221,7 +219,8 @@ public class SessionAuthProviderTest {
     }
 
     private void givenExpiredSession() {
-        when(this.sessionHelper.isSessionExpired(any(HttpSession.class), anyInt())).thenReturn(true);
+        when(this.sessionHelper.isSessionExpired(any(HttpSession.class), anyInt()))
+                .thenReturn(true);
     }
 
     private void givenLockedSession() {
@@ -229,7 +228,8 @@ public class SessionAuthProviderTest {
     }
 
     private void givenChangedCredentials() {
-        when(this.sessionHelper.credentialsChanged(any(HttpSession.class), anyString())).thenReturn(true);
+        when(this.sessionHelper.credentialsChanged(any(HttpSession.class), anyString()))
+                .thenReturn(true);
     }
 
     private void givenRequestPath(final String path) {
@@ -278,5 +278,4 @@ public class SessionAuthProviderTest {
     private void thenXsrfTokenIsNotChecked() {
         verify(this.sessionHelper, never()).getXsrfTokenStatus(any(HttpServletRequest.class));
     }
-
 }

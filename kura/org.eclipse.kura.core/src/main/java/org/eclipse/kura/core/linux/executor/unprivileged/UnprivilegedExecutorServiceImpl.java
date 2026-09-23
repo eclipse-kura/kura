@@ -16,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
@@ -130,5 +129,4 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         status.setErrorStream(err);
         return status;
     }
-
 }

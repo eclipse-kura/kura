@@ -23,7 +23,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -43,7 +42,7 @@ public class BundleUtil {
     /**
      * Returns the set of OSGi bundles in which registered services match one of the classes and all specified
      * properties.
-     * 
+     *
      * @param bundleContext
      *            the context of bundle.
      * @param classes
@@ -52,16 +51,16 @@ public class BundleUtil {
      *            Map of required properties.
      * @return A set of OSGi bundles.
      */
-
-    public static Set<Bundle> getBundles(final BundleContext bundleContext, final Class<?>[] classes,
-            final Map<String, String> properties) {
+    public static Set<Bundle> getBundles(
+            final BundleContext bundleContext, final Class<?>[] classes, final Map<String, String> properties) {
         requireNonNull(bundleContext, "Bundle context cannot be null.");
         requireNonNull(properties, "Filter cannot be null.");
         requireNonNull(classes, "Class array cannot be null.");
 
         String classFilter = Arrays.stream(classes).map(FilterUtil::objectClass).reduce("", FilterUtil::or);
 
-        String propertiesFilter = properties.entrySet().stream().map(p -> FilterUtil.equal(p.getKey(), p.getValue()))
+        String propertiesFilter = properties.entrySet().stream()
+                .map(p -> FilterUtil.equal(p.getKey(), p.getValue()))
                 .reduce("", FilterUtil::and);
 
         String filterAsString = FilterUtil.and(classFilter, propertiesFilter);
@@ -83,14 +82,13 @@ public class BundleUtil {
 
     /**
      * Returns the set of OSGi bundles containing the list of required headers key/value in the MANIFEST.MF file.
-     * 
+     *
      * @param bundleContext
      *            the context of the bundle.
      * @param headers
      *            the list of key/value required headers
      * @return the set of bundles
      */
-
     public static Set<Bundle> getBundles(final BundleContext bundleContext, final Map<String, String> headers) {
         requireNonNull(bundleContext, "Bundle context cannot be null.");
         requireNonNull(headers, "Properties cannot be null.");
@@ -108,5 +106,4 @@ public class BundleUtil {
             return headersMap.entrySet().containsAll(properties.entrySet());
         };
     }
-
 }

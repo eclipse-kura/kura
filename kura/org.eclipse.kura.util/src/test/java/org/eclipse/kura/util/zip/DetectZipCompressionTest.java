@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -66,7 +65,7 @@ public class DetectZipCompressionTest {
 
     @Test
     public void fileWithTruncatedMagicNumberIsNotDetected() throws IOException {
-        givenFileContaining(new byte[] { 0x50 });
+        givenFileContaining(new byte[] {0x50});
 
         whenFileIsChecked();
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.crypto.CryptoService;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.useradmin.Group;
@@ -84,7 +83,8 @@ public class UserAdminHelper {
             final Group asGroup = (Group) permissionRole;
             final Role[] members = asGroup.getMembers();
 
-            if (members == null || Arrays.stream(members).noneMatch(r -> r.getName().equals(userRoleName))) {
+            if (members == null
+                    || Arrays.stream(members).noneMatch(r -> r.getName().equals(userRoleName))) {
                 throw new AuthenticationException(AuthenticationException.Reason.USER_NOT_IN_ROLE);
             }
         }
@@ -101,10 +101,10 @@ public class UserAdminHelper {
         final Set<String> result = new HashSet<>();
 
         foreachPermission((permission, group) -> {
-
             final Role[] members = group.getMembers();
 
-            if (members != null && Arrays.stream(members).anyMatch(r -> r.getName().equals(userRoleName))) {
+            if (members != null
+                    && Arrays.stream(members).anyMatch(r -> r.getName().equals(userRoleName))) {
 
                 result.add(getBaseName(group));
             }
@@ -288,8 +288,8 @@ public class UserAdminHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public <R extends Role, E extends Exception> void foreachRole(final Class<R> classz,
-            final FallibleConsumer<R, E> consumer) throws E {
+    public <R extends Role, E extends Exception> void foreachRole(
+            final Class<R> classz, final FallibleConsumer<R, E> consumer) throws E {
         try {
             final Role[] existingRoles = userAdmin.getRoles(null);
 
@@ -309,7 +309,6 @@ public class UserAdminHelper {
 
     public <E extends Exception> void foreachUser(final UserConsumer<E> consumer) throws E {
         foreachRole(User.class, user -> {
-
             final String name = user.getName();
 
             if (!name.startsWith(USER_ROLE_NAME_PREFIX)) {

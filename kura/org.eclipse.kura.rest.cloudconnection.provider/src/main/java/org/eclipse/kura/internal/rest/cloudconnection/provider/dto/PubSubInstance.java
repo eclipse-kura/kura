@@ -41,5 +41,4 @@ public class PubSubInstance {
     public CloudPubSubType getType() {
         return this.type;
     }
-
 }

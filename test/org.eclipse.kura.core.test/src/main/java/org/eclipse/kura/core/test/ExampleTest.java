@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataService;
@@ -70,7 +69,7 @@ public class ExampleTest implements DataServiceListener {
     // See also:
     // http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
     private static DataService s_dataService;
-    private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of
+    private static CountDownLatch s_dependencyLatch = new CountDownLatch(1); // initialize with number of
     // dependencies
 
     private static Lock s_lock = new ReentrantLock();
@@ -124,8 +123,9 @@ public class ExampleTest implements DataServiceListener {
 
     @Before
     public void setUp() throws KuraConnectException {
-        System.err.println("ExampleTest instance :" + System.identityHashCode(this)
-                + ": setup test preconditions. This is method is called before every @Test method like the JUnit 3 setUp method");
+        System.err.println(
+                "ExampleTest instance :" + System.identityHashCode(this)
+                        + ": setup test preconditions. This is method is called before every @Test method like the JUnit 3 setUp method");
         if (!s_dataService.isConnected()) {
             s_dataService.connect();
         }
@@ -137,8 +137,8 @@ public class ExampleTest implements DataServiceListener {
 
         s_lock.lock();
         try {
-            Integer messageId = s_dataService.publish("#account-name/#client-id/a/b/c", "Hello!".getBytes(), 1, false,
-                    5);
+            Integer messageId =
+                    s_dataService.publish("#account-name/#client-id/a/b/c", "Hello!".getBytes(), 1, false, 5);
             s_messageIds.add(messageId);
             boolean confirmed = s_condition.await(5, TimeUnit.SECONDS);
             assertTrue(confirmed);
@@ -153,8 +153,9 @@ public class ExampleTest implements DataServiceListener {
 
     @After
     public void tearDown() {
-        System.err.println("ExampleTest instance :" + System.identityHashCode(this)
-                + ": release resources that might have been allocated by the @Before method. This is method is called after every @Test method like the JUnit 3 tearDown method");
+        System.err.println(
+                "ExampleTest instance :" + System.identityHashCode(this)
+                        + ": release resources that might have been allocated by the @Before method. This is method is called after every @Test method like the JUnit 3 tearDown method");
     }
 
     @AfterClass

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -18,11 +18,11 @@ import java.util.Optional;
 
 public class JdbcUtil {
 
-    private JdbcUtil() {
-    }
+    private JdbcUtil() {}
 
-    public static <T> Optional<T> getFirstColumnValueOrEmpty(final SQLSupplier<ResultSet> resultSet,
-            final SQLBiFunction<ResultSet, Integer, T> extractor) throws SQLException {
+    public static <T> Optional<T> getFirstColumnValueOrEmpty(
+            final SQLSupplier<ResultSet> resultSet, final SQLBiFunction<ResultSet, Integer, T> extractor)
+            throws SQLException {
         try (final ResultSet rs = resultSet.get()) {
             if (rs.next()) {
                 return Optional.of(extractor.call(rs, 1));
@@ -32,8 +32,9 @@ public class JdbcUtil {
         }
     }
 
-    public static <T> T getFirstColumnValue(final SQLSupplier<ResultSet> resultSet,
-            final SQLBiFunction<ResultSet, Integer, T> extractor) throws SQLException {
+    public static <T> T getFirstColumnValue(
+            final SQLSupplier<ResultSet> resultSet, final SQLBiFunction<ResultSet, Integer, T> extractor)
+            throws SQLException {
         return getFirstColumnValueOrEmpty(resultSet, extractor).orElseThrow(() -> new SQLException("empty result set"));
     }
 }

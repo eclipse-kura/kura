@@ -1,19 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net;
 
 import java.util.Map;
-
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
@@ -28,7 +27,8 @@ import org.osgi.service.event.Event;
 public class NetInterfaceStateChangedEvent extends Event {
 
     /** Topic of the NetworkStateChangedEvent */
-    public static final String NETWORK_EVENT_INTERFACE_STATE_CHANGED_TOPIC = "org/eclipse/kura/net/NetworkEvent/interface/STATE_CHANGED";
+    public static final String NETWORK_EVENT_INTERFACE_STATE_CHANGED_TOPIC =
+            "org/eclipse/kura/net/NetworkEvent/interface/STATE_CHANGED";
 
     /** Name of the property to access the network interface name */
     public static final String NETWORK_EVENT_INTERFACE_PROPERTY = "network.interface";

@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.kura.message.KuraDisconnectPayload;
 import org.junit.Test;
 
-
 public class KuraDisconnectPayloadTest {
 
     @Test
@@ -40,7 +39,7 @@ public class KuraDisconnectPayloadTest {
         String uptime = "0 days 1:2:34 hms";
         String displayName = "dname";
         KuraDisconnectPayload payload = new KuraDisconnectPayload(uptime, displayName);
-        byte[] bytes = { 1, 2, 3 };
+        byte[] bytes = {1, 2, 3};
         payload.setBody(bytes);
 
         KuraDisconnectPayload payload2 = new KuraDisconnectPayload(payload);
@@ -49,5 +48,4 @@ public class KuraDisconnectPayloadTest {
         assertEquals(displayName, payload2.getDisplayName());
         assertArrayEquals(bytes, payload2.getBody());
     }
-
 }

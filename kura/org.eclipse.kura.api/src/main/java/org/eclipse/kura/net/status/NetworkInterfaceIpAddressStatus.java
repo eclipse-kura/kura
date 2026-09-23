@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.kura.net.IPAddress;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -80,8 +79,7 @@ public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
         private Optional<U> gateway = Optional.empty();
         private List<U> dnsServerAddresses = Collections.emptyList();
 
-        private Builder() {
-        }
+        private Builder() {}
 
         public Builder<U> withAddresses(List<NetworkInterfaceIpAddress<U>> addresses) {
             this.addresses = addresses;
@@ -102,5 +100,4 @@ public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
             return new NetworkInterfaceIpAddressStatus<>(this);
         }
     }
-
 }

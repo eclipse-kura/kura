@@ -14,19 +14,6 @@
 
 package org.eclipse.kura.internal.rest.provider;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.eclipse.kura.audit.AuditConstants;
-import org.eclipse.kura.audit.AuditContext;
-import org.eclipse.kura.identity.IdentityService;
-import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.rest.auth.AuthenticationProvider;
-
 import jakarta.annotation.Priority;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +23,17 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import org.eclipse.kura.audit.AuditConstants;
+import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.rest.auth.AuthenticationProvider;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -48,6 +46,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Context
     private HttpServletRequest request;
+
     @Context
     private HttpServletResponse response;
 
@@ -78,11 +77,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         RestServiceUtils.initAuditContext(requestContext, request);
 
         final Optional<Principal> principal = authenticate(requestContext);
-        final boolean isSecure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
+        final boolean isSecure =
+                requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
 
         if (principal.isPresent()) {
             final AuditContext auditContext = AuditContext.currentOrInternal();
-            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), principal.get().getName());
+            auditContext
+                    .getProperties()
+                    .put(AuditConstants.KEY_IDENTITY.getValue(), principal.get().getName());
 
             requestContext.setSecurityContext(new SecurityContext() {
 

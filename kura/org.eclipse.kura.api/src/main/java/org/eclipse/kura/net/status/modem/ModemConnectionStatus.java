@@ -43,5 +43,4 @@ public enum ModemConnectionStatus {
     CONNECTING,
     /** The modem is connected. */
     CONNECTED;
-
 }

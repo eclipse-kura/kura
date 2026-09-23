@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -71,8 +70,8 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_STATE_DISABLED = "Disabled";
 
     private ContainerOrchestrationService mockContainerOrchestrationService = mock(ContainerOrchestrationService.class);
-    private ContainerSignatureValidationService mockContainerSignatureValidationService = mock(
-            ContainerSignatureValidationService.class);
+    private ContainerSignatureValidationService mockContainerSignatureValidationService =
+            mock(ContainerSignatureValidationService.class);
     private Map<String, Object> properties = new HashMap<>();
     private Map<String, Object> newProperties = new HashMap<>();
     private String signatureExtractedDigest;
@@ -308,7 +307,6 @@ public class ContainerInstanceTest {
         thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenStopContainerWasCalledFor("test-id");
         thenDeleteContainerWasCalledFor("test-id");
-
     }
 
     @Test
@@ -455,7 +453,11 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
         thenStartContainerWasCalledWith(this.properties);
-        thenAuthenticatedVerifySignatureWasCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true,
+        thenAuthenticatedVerifySignatureWasCalledFor(
+                "nginx",
+                "latest",
+                "aRealTrustAnchor ;)",
+                true,
                 new PasswordRegistryCredentials(Optional.empty(), "username", new Password("password")));
     }
 
@@ -532,8 +534,9 @@ public class ContainerInstanceTest {
         } while (!expectedState.equals(this.containerInstance.getState()) && count-- > 0);
 
         if (count <= 0) {
-            fail(String.format("Container instance state is not \"%s\" (currently \"%s\")", expectedState,
-                    this.containerInstance.getState()));
+            fail(String.format(
+                    "Container instance state is not \"%s\" (currently \"%s\")",
+                    expectedState, this.containerInstance.getState()));
         }
     }
 
@@ -547,8 +550,11 @@ public class ContainerInstanceTest {
     }
 
     private void givenContainerOrchestratorWithRunningContainer(String containerName, String containerId) {
-        List<ContainerInstanceDescriptor> runningContainers = Collections.singletonList(ContainerInstanceDescriptor
-                .builder().setContainerName(containerName).setContainerID(containerId).build());
+        List<ContainerInstanceDescriptor> runningContainers =
+                Collections.singletonList(ContainerInstanceDescriptor.builder()
+                        .setContainerName(containerName)
+                        .setContainerID(containerId)
+                        .build());
         when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenReturn(runningContainers);
     }
 
@@ -560,27 +566,35 @@ public class ContainerInstanceTest {
 
     private void givenContainerSignatureValidationServiceReturningFailureFor(String imageName, String imageTag)
             throws KuraException {
-        when(this.mockContainerSignatureValidationService.verify(eq(imageName), eq(imageTag), any(String.class),
-                any(Boolean.class))).thenReturn(FAILED_VALIDATION);
+        when(this.mockContainerSignatureValidationService.verify(
+                        eq(imageName), eq(imageTag), any(String.class), any(Boolean.class)))
+                .thenReturn(FAILED_VALIDATION);
     }
 
     private void givenContainerSignatureValidationServiceReturningSuccessFor(String imageName, String imageTag)
             throws KuraException {
         // Generate random sha256 string
         this.signatureExtractedDigest = "sha256:" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-        when(this.mockContainerSignatureValidationService.verify(eq(imageName), eq(imageTag), any(String.class),
-                any(Boolean.class))).thenReturn(new ValidationResult(true, this.signatureExtractedDigest));
+        when(this.mockContainerSignatureValidationService.verify(
+                        eq(imageName), eq(imageTag), any(String.class), any(Boolean.class)))
+                .thenReturn(new ValidationResult(true, this.signatureExtractedDigest));
     }
 
-    private void givenContainerSignatureValidationServiceReturningFailureForAuthenticated(String imageName,
-            String imageTag) throws KuraException {
-        when(this.mockContainerSignatureValidationService.verify(eq(imageName), eq(imageTag), any(String.class),
-                any(Boolean.class), any(RegistryCredentials.class))).thenReturn(FAILED_VALIDATION);
+    private void givenContainerSignatureValidationServiceReturningFailureForAuthenticated(
+            String imageName, String imageTag) throws KuraException {
+        when(this.mockContainerSignatureValidationService.verify(
+                        eq(imageName),
+                        eq(imageTag),
+                        any(String.class),
+                        any(Boolean.class),
+                        any(RegistryCredentials.class)))
+                .thenReturn(FAILED_VALIDATION);
     }
 
     private void givenContainerSignatureValidationServiceThrows() throws KuraException {
-        when(this.mockContainerSignatureValidationService.verify(any(String.class), any(String.class),
-                any(String.class), any(Boolean.class))).thenThrow(new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
+        when(this.mockContainerSignatureValidationService.verify(
+                        any(String.class), any(String.class), any(String.class), any(Boolean.class)))
+                .thenThrow(new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
     }
 
     private void givenContainerInstanceWith(ContainerSignatureValidationService signatureValidationService) {
@@ -664,22 +678,32 @@ public class ContainerInstanceTest {
     }
 
     private void thenVerifySignatureWasNeverCalled() throws KuraException {
-        verify(this.mockContainerSignatureValidationService, never()).verify(any(String.class), any(String.class),
-                any(String.class), any(Boolean.class));
-        verify(this.mockContainerSignatureValidationService, never()).verify(any(String.class), any(String.class),
-                any(String.class), any(Boolean.class), any(RegistryCredentials.class));
+        verify(this.mockContainerSignatureValidationService, never())
+                .verify(any(String.class), any(String.class), any(String.class), any(Boolean.class));
+        verify(this.mockContainerSignatureValidationService, never())
+                .verify(
+                        any(String.class),
+                        any(String.class),
+                        any(String.class),
+                        any(Boolean.class),
+                        any(RegistryCredentials.class));
     }
 
-    private void thenVerifySignatureWasCalledFor(String imageName, String imageTag, String trustAnchor,
-            boolean verifyTlog) throws KuraException {
-        verify(this.mockContainerSignatureValidationService, times(1)).verify(imageName, imageTag, trustAnchor,
-                verifyTlog);
+    private void thenVerifySignatureWasCalledFor(
+            String imageName, String imageTag, String trustAnchor, boolean verifyTlog) throws KuraException {
+        verify(this.mockContainerSignatureValidationService, times(1))
+                .verify(imageName, imageTag, trustAnchor, verifyTlog);
     }
 
-    private void thenAuthenticatedVerifySignatureWasCalledFor(String imageName, String imageTag, String trustAnchor,
-            boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials) throws KuraException {
-        verify(this.mockContainerSignatureValidationService, times(1)).verify(imageName, imageTag, trustAnchor,
-                verifyTlog, passwordRegistryCredentials);
+    private void thenAuthenticatedVerifySignatureWasCalledFor(
+            String imageName,
+            String imageTag,
+            String trustAnchor,
+            boolean verifyTlog,
+            PasswordRegistryCredentials passwordRegistryCredentials)
+            throws KuraException {
+        verify(this.mockContainerSignatureValidationService, times(1))
+                .verify(imageName, imageTag, trustAnchor, verifyTlog, passwordRegistryCredentials);
     }
 
     private void thenNoExceptionOccurred() {
@@ -688,7 +712,8 @@ public class ContainerInstanceTest {
             StringWriter sw = new StringWriter();
             this.occurredException.printStackTrace(new PrintWriter(sw));
 
-            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+            errorMessage = String.format(
+                    "No exception expected, \"%s\" found. Caused by: %s",
                     this.occurredException.getClass().getName(), sw.toString());
         }
 
@@ -697,7 +722,7 @@ public class ContainerInstanceTest {
 
     private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
         assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+        assertEquals(
+                expectedException.getName(), this.occurredException.getClass().getName());
     }
-
 }

@@ -14,7 +14,6 @@ package org.eclipse.kura.container.orchestration;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.osgi.annotation.versioning.ProviderType;
@@ -73,7 +72,7 @@ public interface ContainerOrchestrationService {
      * @param imageConfig an ImageConfiguration object which contains info such as
      *                    image name, tag, pull timeout in seconds and registry
      *                    credentials.
-     * 
+     *
      * @throws KuraException        if the pull operation fails
      * @throws InterruptedException
      * @since 2.4
@@ -94,8 +93,9 @@ public interface ContainerOrchestrationService {
      * @throws KuraException        if the pull operation fails
      * @throws InterruptedException
      */
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
-            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException;
+    public void pullImage(
+            String imageName, String imageTag, int timeOutSeconds, Optional<RegistryCredentials> registryCredentials)
+            throws KuraException, InterruptedException;
 
     /**
      * Returns the id of the container corresponding to the specified name. If no

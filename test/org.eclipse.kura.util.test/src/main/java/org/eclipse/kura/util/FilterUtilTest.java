@@ -44,7 +44,8 @@ public class FilterUtilTest {
 
     @Test
     public void testAnd2() throws InvalidSyntaxException {
-        testFilter("(&(foo1=bar1)(foo2=bar2)(foo3=bar3))",
+        testFilter(
+                "(&(foo1=bar1)(foo2=bar2)(foo3=bar3))",
                 and(equal("foo1", "bar1"), equal("foo2", "bar2"), equal("foo3", "bar3")));
     }
 
@@ -75,7 +76,8 @@ public class FilterUtilTest {
 
     @Test
     public void testSimpleFilter() throws InvalidSyntaxException {
-        testFilter("(&(objectClass=org.eclipse.kura.util.FilterUtilTest)(foo=bar))",
+        testFilter(
+                "(&(objectClass=org.eclipse.kura.util.FilterUtilTest)(foo=bar))",
                 FilterUtil.simpleFilter(FilterUtilTest.class, "foo", "bar"));
     }
 

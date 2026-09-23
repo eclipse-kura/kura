@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -33,24 +32,28 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = SparkplugSubscriberOptions.class, factory = true)
 public class SparkplugSubscriber
         implements ConfigurableComponent, CloudSubscriber, CloudSubscriberListener, CloudConnectionListener {
@@ -81,11 +84,14 @@ public class SparkplugSubscriber
 
         logger.info("{} - Activating", this.kuraServicePid);
 
-        String endpointPid = (String) properties
-                .get(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
+        String endpointPid =
+                (String) properties.get(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
 
-        this.endpointTracker = new SparkplugCloudEndpointTracker(componentContext.getBundleContext(),
-                this::setSparkplugCloudEndpoint, this::unsetSparkplugCloudEndpoint, endpointPid);
+        this.endpointTracker = new SparkplugCloudEndpointTracker(
+                componentContext.getBundleContext(),
+                this::setSparkplugCloudEndpoint,
+                this::unsetSparkplugCloudEndpoint,
+                endpointPid);
         update(properties);
 
         logger.info("{} - Activated", this.kuraServicePid);
@@ -147,8 +153,8 @@ public class SparkplugSubscriber
 
     @Override
     public void onMessageArrived(KuraMessage message) {
-        this.cloudSubscriberListeners.forEach(listener -> this.executorService
-                .execute(() -> InvocationUtils.callSafely(listener::onMessageArrived, message)));
+        this.cloudSubscriberListeners.forEach(listener ->
+                this.executorService.execute(() -> InvocationUtils.callSafely(listener::onMessageArrived, message)));
     }
 
     /*
@@ -169,8 +175,8 @@ public class SparkplugSubscriber
 
     @Override
     public void onConnectionEstablished() {
-        this.cloudConnectionListeners.forEach(listener -> this.executorService
-                .execute(() -> InvocationUtils.callSafely(listener::onConnectionEstablished)));
+        this.cloudConnectionListeners.forEach(listener ->
+                this.executorService.execute(() -> InvocationUtils.callSafely(listener::onConnectionEstablished)));
     }
 
     /*
@@ -192,5 +198,4 @@ public class SparkplugSubscriber
             this.sparkplugCloudEndpoint = Optional.empty();
         }
     }
-
 }

@@ -12,16 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.tamper.detection;
 
-import java.util.List;
-
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.internal.rest.tamper.detection.util.TamperDetectionRemoteService;
-import org.eclipse.kura.rest.tamper.detection.api.TamperDetectionServiceInfo;
-import org.eclipse.kura.rest.tamper.detection.api.TamperStatusInfo;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.UserAdmin;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -30,15 +20,23 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
-
+import java.util.List;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.internal.rest.tamper.detection.util.TamperDetectionRemoteService;
+import org.eclipse.kura.rest.tamper.detection.api.TamperDetectionServiceInfo;
+import org.eclipse.kura.rest.tamper.detection.api.TamperStatusInfo;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
+
 @Path("/tamper/v1")
 @Component(
-    name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService",
-    immediate = true,
-    service = { org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService.class },
-    property = { "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService",
+        immediate = true,
+        service = {org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService.class},
+        property = {"osgi.jakartars.resource=true"})
 public class TamperDetectionRestService extends TamperDetectionRemoteService {
 
     @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")

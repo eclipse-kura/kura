@@ -10,13 +10,11 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.kura.configuration.Password;
 
 /**
@@ -66,7 +64,7 @@ public class PasswordRegistryCredentials implements RegistryCredentials {
         }
         PasswordRegistryCredentials other = (PasswordRegistryCredentials) obj;
         return Arrays.equals(this.password.getPassword(), other.password.getPassword())
-                && Objects.equals(this.url, other.url) && Objects.equals(this.username, other.username);
+                && Objects.equals(this.url, other.url)
+                && Objects.equals(this.username, other.username);
     }
-
 }

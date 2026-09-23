@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.UUID;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.db.H2DbService.ConnectionCallable;
@@ -156,13 +155,15 @@ public class DbDataStoreStorageTest {
         H2DbService h2Service = new MockH2DbService();
 
         try {
-            this.dataStore = new H2DbMessageStoreImpl(new ConnectionProvider() {
+            this.dataStore = new H2DbMessageStoreImpl(
+                    new ConnectionProvider() {
 
-                @Override
-                public <T> T withConnection(SQLFunction<Connection, T> task) throws SQLException {
-                    return h2Service.withConnection(task::call);
-                }
-            }, TABLE_NAME);
+                        @Override
+                        public <T> T withConnection(SQLFunction<Connection, T> task) throws SQLException {
+                            return h2Service.withConnection(task::call);
+                        }
+                    },
+                    TABLE_NAME);
         } catch (KuraStoreException e) {
             this.occurredException = e;
         }
@@ -186,8 +187,8 @@ public class DbDataStoreStorageTest {
                 this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
 
                 Class.forName("org.h2.Driver");
-                try (Connection c = DriverManager.getConnection(
-                        "jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "")) {
+                try (Connection c =
+                        DriverManager.getConnection("jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "")) {
                     // keep just one message at every moment
                     for (int j = 0; j < i; j++) {
                         PreparedStatement stmt = c.prepareStatement("DELETE FROM ? WHERE ID=?;");
@@ -218,7 +219,8 @@ public class DbDataStoreStorageTest {
     private void thenStoredMessageIs(String topic, byte[] payload, int qos, boolean retain, int priority) {
         StoredMessage message;
         try {
-            message = this.dataStore.get(this.messageId)
+            message = this.dataStore
+                    .get(this.messageId)
                     .orElseThrow(() -> new IllegalStateException("no message with the given id"));
         } catch (KuraStoreException e1) {
             fail("Unable to retrieve last message");
@@ -234,10 +236,9 @@ public class DbDataStoreStorageTest {
         // also inspect the database
         try {
             Class.forName("org.h2.Driver");
-            try (Connection c = DriverManager.getConnection(
-                    "jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "");
-                    PreparedStatement stmt = c.prepareStatement("SELECT * FROM ?;",
-                            Statement.RETURN_GENERATED_KEYS)) {
+            try (Connection c =
+                            DriverManager.getConnection("jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "");
+                    PreparedStatement stmt = c.prepareStatement("SELECT * FROM ?;", Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, TABLE_NAME);
                 ResultSet rs = stmt.executeQuery();
 
@@ -267,7 +268,6 @@ public class DbDataStoreStorageTest {
         } catch (SQLException | ClassNotFoundException e) {
             this.occurredException = e;
         }
-
     }
 
     private void thenStoreCapacityExceededException() {
@@ -288,8 +288,8 @@ public class DbDataStoreStorageTest {
         this.dbName = "testdb_" + UUID.randomUUID().toString().replace("-", "");
         // Hold a connection open to prevent H2 from dropping the in-memory DB between steps
         Class.forName("org.h2.Driver");
-        this.keepAliveConnection = DriverManager.getConnection("jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1",
-                "sa", "");
+        this.keepAliveConnection =
+                DriverManager.getConnection("jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "");
     }
 
     @After
@@ -341,7 +341,5 @@ public class DbDataStoreStorageTest {
         public <T> T withConnection(ConnectionCallable<T> task) throws SQLException {
             return task.call(this.getConnection());
         }
-
     }
-
 }

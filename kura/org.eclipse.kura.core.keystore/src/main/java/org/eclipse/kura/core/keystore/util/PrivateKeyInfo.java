@@ -60,5 +60,4 @@ public class PrivateKeyInfo extends EntryInfo {
     public EntryType getType() {
         return this.type;
     }
-
 }

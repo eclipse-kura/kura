@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,12 +16,11 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Describes the password related configuration for an identity.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.7.0
  */
@@ -35,7 +34,7 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
 
     /**
      * Creates a new password configuration.
-     * 
+     *
      * @param passwordChangeNeeded a {@code boolean} indicating whether a password
      *                             change for the given
      *                             identity is required at next login.
@@ -50,8 +49,11 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
      *                             {@link IdentityService} in case of identity
      *                             configuration update.
      */
-    public PasswordConfiguration(boolean passwordChangeNeeded, boolean passwordAuthEnabled,
-            Optional<char[]> newPassword, Optional<PasswordHash> passwordHash) {
+    public PasswordConfiguration(
+            boolean passwordChangeNeeded,
+            boolean passwordAuthEnabled,
+            Optional<char[]> newPassword,
+            Optional<PasswordHash> passwordHash) {
         this.passwordChangeNeeded = passwordChangeNeeded;
         this.passwordAuthEnabled = passwordAuthEnabled;
         this.newPassword = requireNonNull(newPassword, "newPassword cannot be null");
@@ -61,7 +63,7 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
     /**
      * Defines whether a password change is required for the given identity at next
      * login.
-     * 
+     *
      * @return a {@code boolean} indicating whether a password change for the given
      *         identity is required at next login.
      */
@@ -71,7 +73,7 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
 
     /**
      * Defines whether a password authentication is enabled for the given identity.
-     * 
+     *
      * @return a {@code boolean} indicating whether a password authentication is
      *         enabled for the given identity.
      */
@@ -82,7 +84,7 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
     /**
      * Returns the hash of the password currently associated with the given
      * identity, if any.
-     * 
+     *
      * @return the password hash.
      */
     public Optional<PasswordHash> getPasswordHash() {
@@ -93,7 +95,7 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
      * Returns the new password that should be set for the given identity as part of
      * a configuration update. The {@link IdentityService} will always return an
      * empty optional when the password data for an existing identity is retrieved.
-     * 
+     *
      * @return the new password.
      */
     public Optional<char[]> getNewPassword() {
@@ -114,9 +116,9 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
             return false;
         }
         PasswordConfiguration other = (PasswordConfiguration) obj;
-        return Objects.equals(newPassword, other.newPassword) && passwordAuthEnabled == other.passwordAuthEnabled
+        return Objects.equals(newPassword, other.newPassword)
+                && passwordAuthEnabled == other.passwordAuthEnabled
                 && passwordChangeNeeded == other.passwordChangeNeeded
                 && Objects.equals(passwordHash, other.passwordHash);
     }
-
 }

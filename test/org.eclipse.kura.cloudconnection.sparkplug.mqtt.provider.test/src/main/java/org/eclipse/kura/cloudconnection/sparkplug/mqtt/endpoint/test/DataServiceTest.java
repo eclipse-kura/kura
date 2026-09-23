@@ -35,7 +35,9 @@ public class DataServiceTest extends StepsCollection {
     public void shouldRegisterAsDataServiceListenerToDataService() {
         givenDataService(this.dataService);
 
-        whenActivate(new PropertiesBuilder().add(ConfigurationService.KURA_SERVICE_PID, "test-pid").build());
+        whenActivate(new PropertiesBuilder()
+                .add(ConfigurationService.KURA_SERVICE_PID, "test-pid")
+                .build());
 
         thenDataServiceAddedDataServiceListener(this.endpoint);
     }
@@ -86,5 +88,4 @@ public class DataServiceTest extends StepsCollection {
     private void thenDataServiceCalledConnect() throws KuraConnectException {
         verify(this.dataService, times(1)).connect();
     }
-
 }

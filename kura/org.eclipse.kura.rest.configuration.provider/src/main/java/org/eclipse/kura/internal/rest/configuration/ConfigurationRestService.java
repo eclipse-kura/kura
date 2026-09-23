@@ -14,6 +14,17 @@ package org.eclipse.kura.internal.rest.configuration;
 
 import static java.util.Objects.isNull;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -47,34 +57,23 @@ import org.eclipse.kura.rest.configuration.api.SnapshotId;
 import org.eclipse.kura.rest.configuration.api.SnapshotIdSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 @Path("/configuration/v2")
 @Component(
-    name = "org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
-    service = { org.eclipse.kura.internal.rest.configuration.ConfigurationRestService.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
-        "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
+        service = {org.eclipse.kura.internal.rest.configuration.ConfigurationRestService.class},
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
+            "osgi.jakartars.resource=true"
+        })
 public class ConfigurationRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationRestService.class);
@@ -95,7 +94,10 @@ public class ConfigurationRestService {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
     }
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -110,7 +112,8 @@ public class ConfigurationRestService {
         this.cryptoService = cryptoService;
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -165,7 +168,8 @@ public class ConfigurationRestService {
     @Path("/factoryComponents")
     @Produces(MediaType.APPLICATION_JSON)
     public PidSet listFactoryComponentsPids() {
-        return new PidSet(this.configurationService.getFactoryComponentPids().stream().collect(Collectors.toSet()));
+        return new PidSet(
+                this.configurationService.getFactoryComponentPids().stream().collect(Collectors.toSet()));
     }
 
     /**
@@ -199,12 +203,11 @@ public class ConfigurationRestService {
 
         for (final FactoryComponentConfigurationDTO config : configs.getConfigs()) {
             handler.runFallibleSubtask("create:" + config.getPid(), () -> {
-                final Map<String, Object> castedProperties = DTOUtil
-                        .dtosToConfigurationProperties(config.getProperties());
+                final Map<String, Object> castedProperties =
+                        DTOUtil.dtosToConfigurationProperties(config.getProperties());
 
-                this.configurationService.createFactoryConfiguration(config.getFactoryPid(), config.getPid(),
-                        castedProperties, false);
-
+                this.configurationService.createFactoryConfiguration(
+                        config.getFactoryPid(), config.getPid(), castedProperties, false);
             });
         }
 
@@ -245,8 +248,8 @@ public class ConfigurationRestService {
         final FailureHandler handler = new FailureHandler();
 
         for (final String pid : request.getPids()) {
-            handler.runFallibleSubtask("delete:" + pid,
-                    () -> this.configurationService.deleteFactoryConfiguration(pid, false));
+            handler.runFallibleSubtask(
+                    "delete:" + pid, () -> this.configurationService.deleteFactoryConfiguration(pid, false));
         }
 
         if (request.isTakeSnapshot()) {
@@ -285,7 +288,8 @@ public class ConfigurationRestService {
 
         try {
             ocds = this.ocdService.getFactoryComponentOCDs().stream()
-                    .filter(c -> factoryPids.getPids().contains(c.getPid())).collect(Collectors.toList());
+                    .filter(c -> factoryPids.getPids().contains(c.getPid()))
+                    .collect(Collectors.toList());
         } catch (final Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -316,25 +320,27 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        final Set<PidAndFactoryPid> result = ccs.stream().map(c -> {
-            final String pid = c.getPid();
+        final Set<PidAndFactoryPid> result = ccs.stream()
+                .map(c -> {
+                    final String pid = c.getPid();
 
-            final Optional<String> factoryPid = Optional.ofNullable(c.getConfigurationProperties())
-                    .map(p -> p.get(ConfigurationAdmin.SERVICE_FACTORYPID)).flatMap(o -> {
-                        if (o instanceof String) {
-                            return Optional.of((String) o);
-                        } else {
-                            return Optional.empty();
-                        }
-                    });
+                    final Optional<String> factoryPid = Optional.ofNullable(c.getConfigurationProperties())
+                            .map(p -> p.get(ConfigurationAdmin.SERVICE_FACTORYPID))
+                            .flatMap(o -> {
+                                if (o instanceof String) {
+                                    return Optional.of((String) o);
+                                } else {
+                                    return Optional.empty();
+                                }
+                            });
 
-            if (factoryPid.isPresent()) {
-                return new PidAndFactoryPid(pid, factoryPid.get());
-            } else {
-                return new PidAndFactoryPid(pid);
-            }
-
-        }).collect(Collectors.toSet());
+                    if (factoryPid.isPresent()) {
+                        return new PidAndFactoryPid(pid, factoryPid.get());
+                    } else {
+                        return new PidAndFactoryPid(pid);
+                    }
+                })
+                .collect(Collectors.toSet());
 
         return new PidAndFactoryPidSet(result);
     }
@@ -353,8 +359,8 @@ public class ConfigurationRestService {
     @Path("/configurableComponents")
     @Produces(MediaType.APPLICATION_JSON)
     public PidSet listConfigurableComponentsPids() {
-        return new PidSet(
-                this.configurationService.getConfigurableComponentPids().stream().collect(Collectors.toSet()));
+        return new PidSet(this.configurationService.getConfigurableComponentPids().stream()
+                .collect(Collectors.toSet()));
     }
 
     /**
@@ -382,8 +388,8 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false).replacePasswordsWithPlaceholder();
-
+        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false)
+                .replacePasswordsWithPlaceholder();
     }
 
     /**
@@ -481,8 +487,8 @@ public class ConfigurationRestService {
         for (ComponentConfigurationDTO ccr : request.getComponentConfigurations()) {
 
             handler.runFallibleSubtask("update:" + ccr.getPid(), () -> {
-                final Map<String, Object> configurationProperties = DTOUtil
-                        .dtosToConfigurationProperties(ccr.getProperties());
+                final Map<String, Object> configurationProperties =
+                        DTOUtil.dtosToConfigurationProperties(ccr.getProperties());
                 this.configurationService.updateConfiguration(ccr.getPid(), configurationProperties, false);
             });
         }
@@ -521,8 +527,8 @@ public class ConfigurationRestService {
             return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false);
         } catch (KuraException e) {
             if (e.getCode() == KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND,
-                        "The requested snapshot cannot be found.");
+                throw DefaultExceptionHandler.buildWebApplicationException(
+                        Status.NOT_FOUND, "The requested snapshot cannot be found.");
             }
 
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -593,5 +599,4 @@ public class ConfigurationRestService {
 
         return Response.ok().build();
     }
-
 }

@@ -84,5 +84,4 @@ public class KeystoreUnbindingTest extends AbstractJwtScenario {
                 .subject(TEST_IDENTITY) //
                 .signedWith(TestKeys.rsaPrivateKey(SIGNER_KEY));
     }
-
 }

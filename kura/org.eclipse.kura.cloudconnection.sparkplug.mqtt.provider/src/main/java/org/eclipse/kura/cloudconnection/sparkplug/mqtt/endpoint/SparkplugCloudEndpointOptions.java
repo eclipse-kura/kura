@@ -14,9 +14,8 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint;
 
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint", name = "SparkplugCloudEndpoint", description = "Cloud Endpoint layer configuration.")
-public @interface SparkplugCloudEndpointOptions {
-
-}
-
-
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+        name = "SparkplugCloudEndpoint",
+        description = "Cloud Endpoint layer configuration.")
+public @interface SparkplugCloudEndpointOptions {}

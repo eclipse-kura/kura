@@ -1,19 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.raw.mqtt.subscriber;
 
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.Qos;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Property;
@@ -25,8 +24,8 @@ public class SubscribeOptions {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscribeOptions.class);
 
-    public static final Property<String> TOPIC_FILTER_PROP = new Property<>("topic.filter", String.class)
-            .validate(SubscribeOptions::validateTopicFilter);
+    public static final Property<String> TOPIC_FILTER_PROP =
+            new Property<>("topic.filter", String.class).validate(SubscribeOptions::validateTopicFilter);
     public static final Property<Qos> QOS_PROP = new Property<>("qos", 0).map(Qos.class, Qos::valueOf);
 
     private final String topicFilter;
@@ -88,5 +87,4 @@ public class SubscribeOptions {
         }
         return true;
     }
-
 }

@@ -1,19 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
 import java.util.Map;
-
 import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
@@ -159,7 +158,8 @@ public class CloudServiceOptions {
     public CloudPayloadEncoding getPayloadEncoding() {
         CloudPayloadEncoding result = CloudPayloadEncoding.KURA_PROTOBUF;
         String encodingString = "";
-        if (this.properties != null && this.properties.get(PAYLOAD_ENCODING) != null
+        if (this.properties != null
+                && this.properties.get(PAYLOAD_ENCODING) != null
                 && this.properties.get(PAYLOAD_ENCODING) instanceof String) {
             encodingString = (String) this.properties.get(PAYLOAD_ENCODING);
         }

@@ -23,6 +23,7 @@ import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 
+import jakarta.ws.rs.core.Response.Status;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -30,9 +31,6 @@ import java.util.Hashtable;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
-
-import jakarta.ws.rs.core.Response.Status;
-
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
@@ -53,25 +51,36 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class EndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String EXPECTED_FRAMEWORK_PROPERTIES_RESPONSE = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/FRAMEWORK_PROPERTIES_RESPONSE"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    EndpointsTest.class.getResourceAsStream("/FRAMEWORK_PROPERTIES_RESPONSE"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
     private static final String EXPECTED_EXTENDED_PROPERTIES_RESPONSE = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
     private static final String EXPECTED_KURA_PROPERTIES_RESPONSE = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/KURA_PROPERTIES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
-                    .replace(" ", "");
+                    EndpointsTest.class.getResourceAsStream("/KURA_PROPERTIES_RESPONSE"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String FRAMEWORK_PROPERTIES_FILTER_REQUEST = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/FRAMEWORK_PROPERTIES_FILTER_REQUEST"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    EndpointsTest.class.getResourceAsStream("/FRAMEWORK_PROPERTIES_FILTER_REQUEST"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
     private static final String EXTENDED_PROPERTIES_FILTER_REQUEST = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A")
-                    .next().replace(" ", "");
+                    EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_FILTER_REQUEST"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
     private static final String KURA_PROPERTIES_FILTER_REQUEST = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/KURA_PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A")
-                    .next().replace(" ", "");
-
+                    EndpointsTest.class.getResourceAsStream("/KURA_PROPERTIES_FILTER_REQUEST"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
@@ -131,7 +140,9 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnFilteredFrameworkProperties() {
         givenSystemServiceMockWithFrameworkProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER,
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                RESOURCE_FRAMEWORK_PROPERTIES_FILTER,
                 FRAMEWORK_PROPERTIES_FILTER_REQUEST);
 
         thenRequestSucceeds();
@@ -142,7 +153,9 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnFilteredExtendedProperties() {
         givenSystemServiceMockWithExtendedProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_EXTENDED_PROPERTIES_FILTER,
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                RESOURCE_EXTENDED_PROPERTIES_FILTER,
                 EXTENDED_PROPERTIES_FILTER_REQUEST);
 
         thenRequestSucceeds();
@@ -153,8 +166,8 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnFilteredKuraProperties() {
         givenSystemServiceMockWithKuraProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_KURA_PROPERTIES_FILTER,
-                KURA_PROPERTIES_FILTER_REQUEST);
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), RESOURCE_KURA_PROPERTIES_FILTER, KURA_PROPERTIES_FILTER_REQUEST);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_KURA_PROPERTIES_RESPONSE);
@@ -197,7 +210,9 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnFailingFrameworkPropertiesFilter() {
         givenFailingSystemServiceMock();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER,
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                RESOURCE_FRAMEWORK_PROPERTIES_FILTER,
                 FRAMEWORK_PROPERTIES_FILTER_REQUEST);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
@@ -207,7 +222,9 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnFailingExtendedPropertiesFilter() {
         givenFailingSystemServiceMock();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_EXTENDED_PROPERTIES_FILTER,
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                RESOURCE_EXTENDED_PROPERTIES_FILTER,
                 EXTENDED_PROPERTIES_FILTER_REQUEST);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
@@ -217,8 +234,8 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnFailingKuraPropertiesFilter() {
         givenFailingSystemServiceMock();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_KURA_PROPERTIES_FILTER,
-                KURA_PROPERTIES_FILTER_REQUEST);
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), RESOURCE_KURA_PROPERTIES_FILTER, KURA_PROPERTIES_FILTER_REQUEST);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -263,18 +280,19 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockSystemService");
-        FrameworkUtil.getBundle(EndpointsTest.class).getBundleContext().registerService(SystemService.class,
-                systemServiceMock, configurationServiceProperties);
+        FrameworkUtil.getBundle(EndpointsTest.class)
+                .getBundleContext()
+                .registerService(SystemService.class, systemServiceMock, configurationServiceProperties);
     }
 
     private static void registerSystemServiceMock() throws Exception {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("SystemService.target", "(kura.service.pid=mockSystemService)");
 
-        final ConfigurationAdmin configurationAdmin = WireTestUtil
-                .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(
+                        ConfigurationAdmin.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(SystemRestService.class.getName(), "?");
         config.update(properties);
     }
-
 }

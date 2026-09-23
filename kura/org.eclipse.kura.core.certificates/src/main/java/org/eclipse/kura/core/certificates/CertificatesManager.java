@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -38,24 +37,24 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  *
  */
 @Component(
-    name = "org.eclipse.kura.certificate.CertificatesService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.certificate.CertificatesService.class })
+        name = "org.eclipse.kura.certificate.CertificatesService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        service = {org.eclipse.kura.certificate.CertificatesService.class})
 public class CertificatesManager implements CertificatesService {
 
     private static final Logger logger = LoggerFactory.getLogger(CertificatesManager.class);
@@ -84,7 +83,10 @@ public class CertificatesManager implements CertificatesService {
     //
     // ----------------------------------------------------------------
 
-    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "unsetCryptoService")
+    @Reference(
+            name = "CryptoService",
+            service = org.eclipse.kura.crypto.CryptoService.class,
+            unbind = "unsetCryptoService")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -95,7 +97,8 @@ public class CertificatesManager implements CertificatesService {
         }
     }
 
-    @Reference(name = "ConfigurationService",
+    @Reference(
+            name = "ConfigurationService",
             service = org.eclipse.kura.configuration.ConfigurationService.class,
             unbind = "unsetConfigurationService")
     public void setConfigurationService(ConfigurationService configurationService) {
@@ -134,7 +137,8 @@ public class CertificatesManager implements CertificatesService {
     public Certificate returnCertificate(String alias) throws KuraException {
         TrustedCertificateEntry cert;
         try {
-            cert = getCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID + ":" + alias).getCertificateEntry();
+            cert = getCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID + ":" + alias)
+                    .getCertificateEntry();
         } catch (KuraException e) {
             return null;
         }
@@ -218,12 +222,14 @@ public class CertificatesManager implements CertificatesService {
         List<KuraCertificateEntry> certificates = new ArrayList<>();
         for (Entry<String, KeystoreService> keystoreServiceEntry : this.keystoreServices.entrySet()) {
             String keystoreId = keystoreServiceEntry.getKey();
-            Map<String, java.security.KeyStore.Entry> keystoreEntries = keystoreServiceEntry.getValue().getEntries();
-            keystoreEntries.entrySet().stream().filter(entry -> entry.getValue() instanceof TrustedCertificateEntry)
+            Map<String, java.security.KeyStore.Entry> keystoreEntries =
+                    keystoreServiceEntry.getValue().getEntries();
+            keystoreEntries.entrySet().stream()
+                    .filter(entry -> entry.getValue() instanceof TrustedCertificateEntry)
                     .forEach(entry -> {
                         String alias = entry.getKey();
-                        certificates.add(new KuraCertificateEntry(keystoreId, alias,
-                                (TrustedCertificateEntry) entry.getValue()));
+                        certificates.add(new KuraCertificateEntry(
+                                keystoreId, alias, (TrustedCertificateEntry) entry.getValue()));
                     });
         }
         return certificates;
@@ -266,8 +272,8 @@ public class CertificatesManager implements CertificatesService {
         } catch (InvalidSyntaxException e) {
             logger.error("Filter setup exception ", e);
         }
-        this.keystoreServiceTracker = new ServiceTracker<>(this.bundleContext, filter,
-                this.keystoreServiceTrackerCustomizer);
+        this.keystoreServiceTracker =
+                new ServiceTracker<>(this.bundleContext, filter, this.keystoreServiceTrackerCustomizer);
         this.keystoreServiceTracker.open();
     }
 
@@ -287,16 +293,16 @@ public class CertificatesManager implements CertificatesService {
         @Override
         public KeystoreService addingService(final ServiceReference<KeystoreService> reference) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            CertificatesManager.this.keystoreServices.put(kuraServicePid,
-                    CertificatesManager.this.bundleContext.getService(reference));
+            CertificatesManager.this.keystoreServices.put(
+                    kuraServicePid, CertificatesManager.this.bundleContext.getService(reference));
             return CertificatesManager.this.keystoreServices.get(kuraServicePid);
         }
 
         @Override
         public void modifiedService(final ServiceReference<KeystoreService> reference, final KeystoreService service) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            CertificatesManager.this.keystoreServices.put(kuraServicePid,
-                    CertificatesManager.this.bundleContext.getService(reference));
+            CertificatesManager.this.keystoreServices.put(
+                    kuraServicePid, CertificatesManager.this.bundleContext.getService(reference));
         }
 
         @Override

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.net.firewall;
 
 import java.net.UnknownHostException;
 import java.util.Objects;
-
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
@@ -57,7 +56,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
     /**
      * Creates and empty open port configuration
-     * 
+     *
      * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
@@ -82,12 +81,17 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
      *            The (optional) permitted MAC address for inbound connections
      * @param sourcePortRange
      *            The (optional) permitted source port range for inbound connections
-     * 
+     *
      * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
-    public FirewallOpenPortConfigIP(int port, NetProtocol protocol, NetworkPair<T> permittedNetwork,
-            String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac,
+    public FirewallOpenPortConfigIP(
+            int port,
+            NetProtocol protocol,
+            NetworkPair<T> permittedNetwork,
+            String permittedInterfaceName,
+            String unpermittedInterfaceName,
+            String permittedMac,
             String sourcePortRange) {
         super();
         this.port = port;
@@ -117,12 +121,17 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
      *            The (optional) permitted MAC address for inbound connections
      * @param sourcePortRange
      *            The (options) permitted source port range for inbound connections
-     * 
+     *
      * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
-    public FirewallOpenPortConfigIP(String portRange, NetProtocol protocol, NetworkPair<T> permittedNetwork,
-            String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac,
+    public FirewallOpenPortConfigIP(
+            String portRange,
+            NetProtocol protocol,
+            NetworkPair<T> permittedNetwork,
+            String permittedInterfaceName,
+            String unpermittedInterfaceName,
+            String permittedMac,
             String sourcePortRange) {
         super();
         this.portRange = portRange;
@@ -258,11 +267,12 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
     /**
      * The base builder class for firewall open port configurations
-     * 
+     *
      * @since 2.6
      */
     @ProviderType
-    public abstract static class FirewallOpenPortConfigIPBuilder<U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>> {
+    public abstract static class FirewallOpenPortConfigIPBuilder<
+            U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>> {
 
         protected int port = -1;
         protected String portRange;
@@ -320,8 +330,15 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
     @Override
     public int hashCode() {
-        return Objects.hash(permittedInterfaceName, permittedMac, permittedNetwork, port, portRange, protocol,
-                sourcePortRange, unpermittedInterfaceName);
+        return Objects.hash(
+                permittedInterfaceName,
+                permittedMac,
+                permittedNetwork,
+                port,
+                portRange,
+                protocol,
+                sourcePortRange,
+                unpermittedInterfaceName);
     }
 
     @Override
@@ -338,8 +355,10 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         FirewallOpenPortConfigIP<?> other = (FirewallOpenPortConfigIP<?>) obj;
         return Objects.equals(permittedInterfaceName, other.permittedInterfaceName)
                 && Objects.equals(permittedMac, other.permittedMac)
-                && Objects.equals(permittedNetwork, other.permittedNetwork) && port == other.port
-                && Objects.equals(portRange, other.portRange) && protocol == other.protocol
+                && Objects.equals(permittedNetwork, other.permittedNetwork)
+                && port == other.port
+                && Objects.equals(portRange, other.portRange)
+                && protocol == other.protocol
                 && Objects.equals(sourcePortRange, other.sourcePortRange)
                 && Objects.equals(unpermittedInterfaceName, other.unpermittedInterfaceName);
     }

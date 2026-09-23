@@ -34,5 +34,4 @@ public class PermissionDTO {
     public String toString() {
         return "PermissionDTO [name=" + this.name + "]";
     }
-
 }

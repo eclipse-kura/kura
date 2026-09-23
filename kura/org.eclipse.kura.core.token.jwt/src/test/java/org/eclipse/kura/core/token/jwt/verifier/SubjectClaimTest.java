@@ -91,5 +91,4 @@ public class SubjectClaimTest extends AbstractJwtScenario {
                 .issuer(DEFAULT_ISSUER) //
                 .signedWith(TestKeys.rsaPrivateKey(SIGNER_KEY)));
     }
-
 }

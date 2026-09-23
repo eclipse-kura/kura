@@ -15,13 +15,13 @@ package org.eclipse.kura.rest.tamper.detection.api;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
 
 public class TamperStatusInfo {
 
     @SuppressWarnings("unused")
     private final boolean isDeviceTampered;
+
     @SuppressWarnings("unused")
     private final Map<String, Object> properties;
 

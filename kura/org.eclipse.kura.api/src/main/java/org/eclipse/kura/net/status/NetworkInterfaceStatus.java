@@ -15,7 +15,6 @@ package org.eclipse.kura.net.status;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.osgi.annotation.versioning.ProviderType;
@@ -130,7 +129,7 @@ public abstract class NetworkInterfaceStatus {
         private static final String NA = "N/A";
         private String interfaceId = NA;
         private String interfaceName = NA;
-        private byte[] hardwareAddress = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private byte[] hardwareAddress = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         private NetworkInterfaceType type = NetworkInterfaceType.UNKNOWN;
         private String driver = NA;
         private String driverVersion = NA;
@@ -219,9 +218,20 @@ public abstract class NetworkInterfaceStatus {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result + Objects.hash(this.autoConnect, this.driver, this.driverVersion, this.firmwareVersion,
-                this.interfaceName, this.interfaceIp4Addresses, this.interfaceIp6Addresses, this.mtu, this.interfaceId,
-                this.state, this.type, this.virtual);
+        result = prime * result
+                + Objects.hash(
+                        this.autoConnect,
+                        this.driver,
+                        this.driverVersion,
+                        this.firmwareVersion,
+                        this.interfaceName,
+                        this.interfaceIp4Addresses,
+                        this.interfaceIp6Addresses,
+                        this.mtu,
+                        this.interfaceId,
+                        this.state,
+                        this.type,
+                        this.virtual);
         return result;
     }
 
@@ -234,16 +244,18 @@ public abstract class NetworkInterfaceStatus {
             return false;
         }
         NetworkInterfaceStatus other = (NetworkInterfaceStatus) obj;
-        return this.autoConnect == other.autoConnect && Objects.equals(this.driver, other.driver)
+        return this.autoConnect == other.autoConnect
+                && Objects.equals(this.driver, other.driver)
                 && Objects.equals(this.driverVersion, other.driverVersion)
                 && Objects.equals(this.firmwareVersion, other.firmwareVersion)
                 && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
                 && Objects.equals(this.interfaceName, other.interfaceName)
                 && Objects.equals(this.interfaceIp4Addresses, other.interfaceIp4Addresses)
-                && Objects.equals(this.interfaceIp6Addresses, other.interfaceIp6Addresses) && this.mtu == other.mtu
-                && Objects.equals(this.interfaceId, other.interfaceId) && this.state == other.state
+                && Objects.equals(this.interfaceIp6Addresses, other.interfaceIp6Addresses)
+                && this.mtu == other.mtu
+                && Objects.equals(this.interfaceId, other.interfaceId)
+                && this.state == other.state
                 && this.type == other.type
                 && this.virtual == other.virtual;
     }
-
 }

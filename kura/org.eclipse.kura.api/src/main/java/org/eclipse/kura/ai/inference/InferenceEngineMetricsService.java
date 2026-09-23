@@ -13,15 +13,14 @@
 package org.eclipse.kura.ai.inference;
 
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * 
+ *
  * The InferenceEngineMetricsService interface provides APIs to get performance
  * and status metrics from an Inference Engine.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 3.0
  */
@@ -31,10 +30,9 @@ public interface InferenceEngineMetricsService extends InferenceEngineService {
     /**
      * Retrieve the performance and status metrics from the Inference Engine
      * as a map of key-value pairs. Typically the keys are the names of the metrics.
-     * 
+     *
      * @return a Map containing the metrics. The key of the entries are the metric names.
      * @throws KuraException
      */
     public Map<String, String> getMetrics() throws KuraException;
-
 }

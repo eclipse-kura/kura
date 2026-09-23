@@ -14,7 +14,6 @@
 package org.eclipse.kura.net.dhcp;
 
 import java.util.List;
-
 import org.eclipse.kura.net.IPAddress;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -75,8 +74,18 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      */
     @Deprecated
     @SuppressWarnings("checkstyle:parameterNumber")
-    public DhcpServerConfigIP(String interfaceName, boolean enabled, T subnet, T routerAddress, T subnetMask,
-            int defaultLeaseTime, int maximumLeaseTime, short prefix, T rangeStart, T rangeEnd, boolean passDns,
+    public DhcpServerConfigIP(
+            String interfaceName,
+            boolean enabled,
+            T subnet,
+            T routerAddress,
+            T subnetMask,
+            int defaultLeaseTime,
+            int maximumLeaseTime,
+            short prefix,
+            T rangeStart,
+            T rangeEnd,
+            boolean passDns,
             List<T> dnsServers) {
         super();
 

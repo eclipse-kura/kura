@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
+import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.Map;
-
 import org.eclipse.kura.KuraInvalidMetricTypeException;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric;
@@ -23,8 +23,6 @@ import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.protobuf.ByteString;
 
 /**
  * Encodes an KuraPayload class using the Google ProtoBuf binary format.
@@ -75,7 +73,9 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
                     protoMsg.addMetric(metricB);
                 }
             } catch (KuraInvalidMetricTypeException e) {
-                logger.error("During serialization, ignoring metric named: {}. Unrecognized value type: {}.", name,
+                logger.error(
+                        "During serialization, ignoring metric named: {}. Unrecognized value type: {}.",
+                        name,
                         value != null ? value.getClass().getName() : "<null>");
                 throw new RuntimeException(e);
             }
@@ -93,8 +93,8 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
     // Helper methods to convert the KuraMetrics
     //
     private KuraPayloadProto.KuraPayload.KuraPosition buildPositionProtoBuf() {
-        KuraPayloadProto.KuraPayload.KuraPosition.Builder protoPos = KuraPayloadProto.KuraPayload.KuraPosition
-                .newBuilder();
+        KuraPayloadProto.KuraPayload.KuraPosition.Builder protoPos =
+                KuraPayloadProto.KuraPayload.KuraPosition.newBuilder();
 
         KuraPosition position = this.kuraPayload.getPosition();
         if (position.getLatitude() != null) {

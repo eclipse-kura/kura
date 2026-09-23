@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -28,11 +28,11 @@ import org.osgi.annotation.versioning.ProviderType;
 public class NetworkPair<T extends IPAddress> {
 
     /** The IP Address portion of the NetworkPair **/
-    @SuppressWarnings({ "checkstyle:memberName", "checkstyle:visibilityModifier" })
+    @SuppressWarnings({"checkstyle:memberName", "checkstyle:visibilityModifier"})
     public T m_ipAddress;
 
     /** The prefix portion of the NetworkPair **/
-    @SuppressWarnings({ "checkstyle:memberName", "checkstyle:visibilityModifier" })
+    @SuppressWarnings({"checkstyle:memberName", "checkstyle:visibilityModifier"})
     public short m_prefix;
 
     public NetworkPair(T ipAddress, short prefix) {

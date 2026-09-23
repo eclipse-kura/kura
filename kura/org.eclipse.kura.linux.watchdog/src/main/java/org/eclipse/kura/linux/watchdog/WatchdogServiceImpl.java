@@ -28,31 +28,34 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.watchdog.WatchdogService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.watchdog.WatchdogService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.watchdog.WatchdogService.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        })
 @Designate(ocd = WatchdogServiceMetatype.class)
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
-    private static final String[] STOP_WATCHDOGD_COMMANDS = { "systemctl stop watchdog", "service watchdog stop",
-            "/etc/init.d/watchdog stop", "/etc/init.d/watchdog.sh stop" };
+    private static final String[] STOP_WATCHDOGD_COMMANDS = {
+        "systemctl stop watchdog", "service watchdog stop", "/etc/init.d/watchdog stop", "/etc/init.d/watchdog.sh stop"
+    };
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
@@ -153,10 +156,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
         this.options = newOptions;
 
-        this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
-            Thread.currentThread().setName("WatchdogServiceImpl");
-            checkCriticalComponents();
-        }, 0, this.options.getPingInterval(), TimeUnit.MILLISECONDS);
+        this.pollTask = this.pollExecutor.scheduleAtFixedRate(
+                () -> {
+                    Thread.currentThread().setName("WatchdogServiceImpl");
+                    checkCriticalComponents();
+                },
+                0,
+                this.options.getPingInterval(),
+                TimeUnit.MILLISECONDS);
     }
 
     protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
@@ -166,8 +173,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void deleteWatchdogEnabledTemporaryFile(WatchdogServiceOptions currentOptions) {
         File watchdogEnabledFile = new File(currentOptions.getWatchdogEnabledTemporaryFilePath());
         if (watchdogEnabledFile.exists() && !watchdogEnabledFile.delete()) {
-            logger.warn("Unable to delete watchdog enabled temporary file '{}'",
-                    watchdogEnabledFile.getAbsolutePath());
+            logger.warn("Unable to delete watchdog enabled temporary file '{}'", watchdogEnabledFile.getAbsolutePath());
         }
     }
 
@@ -177,13 +183,11 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     @Deprecated
-    public void startWatchdog() {
-    }
+    public void startWatchdog() {}
 
     @Override
     @Deprecated
-    public void stopWatchdog() {
-    }
+    public void stopWatchdog() {}
 
     @Override
     public int getHardwareTimeout() {
@@ -246,8 +250,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 this.timedOutOn = System.nanoTime();
                 logger.warn("Critical component '{}' timed out. System will reboot", ccr.getCriticalComponentName());
 
-                RebootCauseFileWriter rebootCauseWriter = new RebootCauseFileWriter(
-                        this.options.getRebootCauseFilePath());
+                RebootCauseFileWriter rebootCauseWriter =
+                        new RebootCauseFileWriter(this.options.getRebootCauseFilePath());
                 rebootCauseWriter.writeRebootCause(ccr.getCriticalComponentName());
 
                 try {
@@ -317,8 +321,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         try {
             writeWatchdogDevice("V");
         } catch (IOException e) {
-            logger.error("Failed to write magic character to watchdog device '{}'", this.options.getWatchdogDevice(),
-                    e);
+            logger.error(
+                    "Failed to write magic character to watchdog device '{}'", this.options.getWatchdogDevice(), e);
         }
         closeWatchdogFileWriter();
     }

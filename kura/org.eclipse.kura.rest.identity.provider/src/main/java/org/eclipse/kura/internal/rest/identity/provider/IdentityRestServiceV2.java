@@ -14,13 +14,24 @@
 
 package org.eclipse.kura.internal.rest.identity.provider;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -50,23 +61,14 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
 @Path("identity/v2")
-@Component(immediate = true, property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2",
-        "osgi.jakartars.resource=true" }, service = IdentityRestServiceV2.class)
+@Component(
+        immediate = true,
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2",
+            "osgi.jakartars.resource=true"
+        },
+        service = IdentityRestServiceV2.class)
 public class IdentityRestServiceV2 {
 
     private static final String NAME_REQUEST_FIELD = "name";
@@ -129,8 +131,8 @@ public class IdentityRestServiceV2 {
 
             StringUtils.validateField(NAME_REQUEST_FIELD, identity.getName());
 
-            boolean created = this.identityService
-                    .createIdentity(new IdentityConfiguration(identity.getName(), List.of()));
+            boolean created =
+                    this.identityService.createIdentity(new IdentityConfiguration(identity.getName(), List.of()));
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT, "Identity already exists");
             }
@@ -149,10 +151,11 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
-            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
+            StringUtils.validateField(
+                    NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
 
-            this.identityService
-                    .updateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
+            this.identityService.updateIdentityConfiguration(
+                    IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (Exception e) {
             throw toWebApplicationException(e);
         }
@@ -170,7 +173,9 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
 
-            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationRequestDTO.getIdentity().getName());
+            StringUtils.validateField(
+                    NAME_REQUEST_FIELD,
+                    identityConfigurationRequestDTO.getIdentity().getName());
 
             String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
@@ -186,7 +191,6 @@ public class IdentityRestServiceV2 {
         } catch (Exception e) {
             throw toWebApplicationException(e);
         }
-
     }
 
     @POST
@@ -213,7 +217,6 @@ public class IdentityRestServiceV2 {
         } catch (KuraException e) {
             throw toWebApplicationException(e);
         }
-
     }
 
     @DELETE
@@ -243,7 +246,8 @@ public class IdentityRestServiceV2 {
     public Set<PermissionDTO> getDefinedPermissions() {
         logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
         try {
-            return this.identityService.getPermissions().stream().map(IdentityDTOUtils::fromPermission)
+            return this.identityService.getPermissions().stream()
+                    .map(IdentityDTOUtils::fromPermission)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
             throw toWebApplicationException(e);
@@ -258,7 +262,8 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "getIdentities");
         try {
             return this.identityService.getIdentitiesConfiguration(allIdentitiesConfiguration()).stream()
-                    .map(IdentityDTOUtils::fromIdentityConfiguration).collect(Collectors.toList());
+                    .map(IdentityDTOUtils::fromIdentityConfiguration)
+                    .collect(Collectors.toList());
 
         } catch (Exception e) {
             throw toWebApplicationException(e);
@@ -291,8 +296,8 @@ public class IdentityRestServiceV2 {
 
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT,
-                        "Permission already exists");
+                throw DefaultExceptionHandler.buildWebApplicationException(
+                        Status.CONFLICT, "Permission already exists");
             }
         } catch (KuraException e) {
             throw toWebApplicationException(e);
@@ -331,10 +336,11 @@ public class IdentityRestServiceV2 {
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
 
-            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
+            StringUtils.validateField(
+                    NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
 
-            this.identityService
-                    .validateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
+            this.identityService.validateIdentityConfiguration(
+                    IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (KuraException e) {
             throw toWebApplicationException(e);
         }
@@ -354,5 +360,4 @@ public class IdentityRestServiceV2 {
             return DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
-
 }

@@ -16,7 +16,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Test;
 
 public class SqliteDbServiceOptionsTest {
@@ -85,5 +84,4 @@ public class SqliteDbServiceOptionsTest {
     private void thenDbUrlIs(final String expectedDbUrl) {
         assertEquals(expectedDbUrl, this.options.getDbUrl());
     }
-
 }

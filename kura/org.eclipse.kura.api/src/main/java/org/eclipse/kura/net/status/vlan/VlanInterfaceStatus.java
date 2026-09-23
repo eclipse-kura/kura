@@ -14,7 +14,6 @@
 package org.eclipse.kura.net.status.vlan;
 
 import java.util.Objects;
-
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.osgi.annotation.versioning.ProviderType;
@@ -29,7 +28,7 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
 
     private final String parentInterface;
     private final int vlanId;
-    
+
     private VlanInterfaceStatus(VlanInterfaceStatusBuilder builder) {
         super(builder);
         this.vlanId = builder.vlanId;
@@ -43,37 +42,36 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
     public String getParentInterface() {
         return this.parentInterface;
     }
-    
+
     public static VlanInterfaceStatusBuilder builder() {
         return new VlanInterfaceStatusBuilder();
     }
 
-    public static class VlanInterfaceStatusBuilder
-        extends NetworkInterfaceStatusBuilder<VlanInterfaceStatusBuilder> {
-        
+    public static class VlanInterfaceStatusBuilder extends NetworkInterfaceStatusBuilder<VlanInterfaceStatusBuilder> {
+
         private String parentInterface;
         private int vlanId;
-        
+
         public VlanInterfaceStatusBuilder withParentInterface(String parentInterface) {
             this.parentInterface = parentInterface;
             return getThis();
         }
-        
+
         public VlanInterfaceStatusBuilder withVlanId(int vlanId) {
             this.vlanId = vlanId;
             return getThis();
         }
-        
+
         public VlanInterfaceStatus build() {
             withType(NetworkInterfaceType.VLAN);
             return new VlanInterfaceStatus(this);
         }
-        
+
         public VlanInterfaceStatusBuilder getThis() {
             return this;
         }
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -81,7 +79,7 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
         result = prime * result + Objects.hash(this.vlanId, this.parentInterface);
         return result;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -91,8 +89,6 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
             return false;
         }
         VlanInterfaceStatus other = (VlanInterfaceStatus) obj;
-        return this.vlanId == other.vlanId 
-                && Objects.equals(this.parentInterface, other.getParentInterface());
+        return this.vlanId == other.vlanId && Objects.equals(this.parentInterface, other.getParentInterface());
     }
-    
 }

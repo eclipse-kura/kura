@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.net.NetInterface;
@@ -44,7 +43,8 @@ public class LifeCyclePayloadBuilderTest {
     private LifeCyclePayloadBuilder lifeCyclePayloadBuilder;
     private KuraDeviceProfile kuraDeviceProfile;
 
-    private final List<NetInterface<? extends NetInterfaceAddress>> emptyNetInterfacesList = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+    private final List<NetInterface<? extends NetInterfaceAddress>> emptyNetInterfacesList =
+            new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
 
     @Test
     public void shoudBuildDeviceProfileWithPositionIfPositionServiceIsAvaiable() throws KuraException {
@@ -125,9 +125,12 @@ public class LifeCyclePayloadBuilderTest {
 
     private void givenPositionService() {
         this.positionService = Optional.of(mock(PositionService.class));
-        Position position = new Position(new Measurement(Math.toRadians(1.0), Unit.rad),
-                new Measurement(Math.toRadians(2.0), Unit.rad), new Measurement(3.0, Unit.m),
-                new Measurement(4.0, Unit.m_s), new Measurement(Math.toRadians(5.0), Unit.rad));
+        Position position = new Position(
+                new Measurement(Math.toRadians(1.0), Unit.rad),
+                new Measurement(Math.toRadians(2.0), Unit.rad),
+                new Measurement(3.0, Unit.m),
+                new Measurement(4.0, Unit.m_s),
+                new Measurement(Math.toRadians(5.0), Unit.rad));
         when(this.positionService.get().getPosition()).thenReturn(position);
     }
 

@@ -34,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
@@ -55,8 +54,8 @@ public class SqliteDbServiceTestBase {
     protected Optional<Exception> exception = Optional.empty();
 
     public SqliteDbServiceTestBase() throws InterruptedException, ExecutionException, TimeoutException {
-        this.configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty()).get(60,
-                TimeUnit.SECONDS);
+        this.configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty())
+                .get(60, TimeUnit.SECONDS);
     }
 
     @After
@@ -71,8 +70,9 @@ public class SqliteDbServiceTestBase {
 
         final String pid = "testDb" + currentId.incrementAndGet();
 
-        this.dbService = ServiceUtil.createFactoryConfiguration(configurationService, BaseDbService.class, pid,
-                SQLITE_DB_SERVICE_FACTORY_PID, properties).get(30, TimeUnit.SECONDS);
+        this.dbService = ServiceUtil.createFactoryConfiguration(
+                        configurationService, BaseDbService.class, pid, SQLITE_DB_SERVICE_FACTORY_PID, properties)
+                .get(30, TimeUnit.SECONDS);
 
         createdPids.add(pid);
     }
@@ -96,7 +96,8 @@ public class SqliteDbServiceTestBase {
     }
 
     protected void whenQueryIsPerformed(final String query) {
-        try (final Connection conn = dbService.getConnection(); final Statement statement = conn.createStatement()) {
+        try (final Connection conn = dbService.getConnection();
+                final Statement statement = conn.createStatement()) {
             statement.executeUpdate(query);
         } catch (final Exception e) {
             this.exception = Optional.of(e);
@@ -108,8 +109,8 @@ public class SqliteDbServiceTestBase {
 
         final String pid = "testDb" + currentId.get();
 
-        ServiceUtil.updateComponentConfiguration(configurationService, pid, properties).get(30, TimeUnit.SECONDS);
-
+        ServiceUtil.updateComponentConfiguration(configurationService, pid, properties)
+                .get(30, TimeUnit.SECONDS);
     }
 
     protected void whenTimePasses(final long duration, final TimeUnit timeUnit) throws InterruptedException {
@@ -144,7 +145,6 @@ public class SqliteDbServiceTestBase {
         final long after = Files.size(path);
 
         assertEquals("file size decreased, before " + before + " after " + after, before, after);
-
     }
 
     protected void thenFileDoesNotExist(final String path) {

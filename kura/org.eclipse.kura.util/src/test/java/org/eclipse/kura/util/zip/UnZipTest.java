@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -255,13 +254,10 @@ public class UnZipTest {
         if (!workDir.exists()) {
             workDir.mkdirs();
         }
-        
+
         File symlink = new File(WORK_FOLDER + "symlink_to_outside");
         try {
-            java.nio.file.Files.createSymbolicLink(
-                symlink.toPath(),
-                new File("/tmp").toPath()
-            );
+            java.nio.file.Files.createSymbolicLink(symlink.toPath(), new File("/tmp").toPath());
         } catch (UnsupportedOperationException e) {
             // Skip test if symlinks are not supported (e.g., on Windows without admin rights)
             org.junit.Assume.assumeNoException("Symbolic links not supported on this platform", e);
@@ -273,8 +269,9 @@ public class UnZipTest {
 
         if (java.nio.file.Files.isSymbolicLink(symlink.toPath())) {
             java.nio.file.Path target = java.nio.file.Files.readSymbolicLink(symlink.toPath());
-            assertTrue("Symlink should still be a link, not a regular file", 
-                java.nio.file.Files.isSymbolicLink(symlink.toPath()));
+            assertTrue(
+                    "Symlink should still be a link, not a regular file",
+                    java.nio.file.Files.isSymbolicLink(symlink.toPath()));
         }
     }
 }

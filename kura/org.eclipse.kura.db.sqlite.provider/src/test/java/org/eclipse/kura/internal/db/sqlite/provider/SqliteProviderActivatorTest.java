@@ -19,7 +19,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Optional;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;

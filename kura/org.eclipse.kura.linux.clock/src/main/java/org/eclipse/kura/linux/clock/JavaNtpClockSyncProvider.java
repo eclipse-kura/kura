@@ -18,7 +18,6 @@ import java.net.InetAddress;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.eclipse.kura.KuraErrorCode;
@@ -49,7 +48,8 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
             this.lastSync = new Date();
             info.computeDetails();
             info.getComments().forEach(comment -> logger.debug("Clock sync compute comment: {}", comment));
-            List<String> computeErrors = info.getComments().stream().filter(comment -> comment.contains("Error:"))
+            List<String> computeErrors = info.getComments().stream()
+                    .filter(comment -> comment.contains("Error:"))
                     .collect(Collectors.toList());
             Long delayValue = info.getDelay();
             if (delayValue != null && delayValue.longValue() < 1000 && computeErrors.isEmpty()) {

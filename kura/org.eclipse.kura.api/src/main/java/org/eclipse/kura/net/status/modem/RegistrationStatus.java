@@ -17,7 +17,6 @@ package org.eclipse.kura.net.status.modem;
  *
  */
 public enum RegistrationStatus {
-
     IDLE,
     HOME,
     SEARCHING,
@@ -30,5 +29,4 @@ public enum RegistrationStatus {
     HOME_CSFB_NOT_PREFERRED,
     ROAMING_CSFB_NOT_PREFERRED,
     ATTACHED_RLOS;
-
 }

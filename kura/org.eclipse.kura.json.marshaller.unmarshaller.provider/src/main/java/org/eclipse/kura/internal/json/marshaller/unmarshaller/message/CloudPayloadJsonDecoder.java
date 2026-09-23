@@ -13,9 +13,6 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.message;
 
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.BODY;
-import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.METRICS;
-import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.POSITION;
-import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.SENTON;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
@@ -24,21 +21,22 @@ import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.Clo
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.METRICS;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.POSITION;
+import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.SENTON;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
-
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 /**
  * This class contains all the necessary methods that can be used to decode a Json payload into a {@link KuraPayload}.
@@ -48,8 +46,7 @@ public class CloudPayloadJsonDecoder {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudPayloadJsonDecoder.class);
 
-    private CloudPayloadJsonDecoder() {
-    }
+    private CloudPayloadJsonDecoder() {}
 
     /**
      * Builds a {@link KuraPayload} from a Json string. The method will try to parse the received Json in order to
@@ -126,7 +123,9 @@ public class CloudPayloadJsonDecoder {
                 position.setSatellites(value.asInt());
             } else if (SPEED.value().equalsIgnoreCase(name) && value.isNumber()) {
                 position.setSpeed(value.asDouble());
-            } else if (CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value().equalsIgnoreCase(name)
+            } else if (CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP
+                            .value()
+                            .equalsIgnoreCase(name)
                     && value.isNumber()) {
                 position.setTimestamp(new Date(value.asLong()));
             } else if (STATUS.value().equalsIgnoreCase(name) && value.isNumber()) {

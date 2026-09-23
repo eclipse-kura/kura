@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Locale;
 import java.util.Properties;
-
 import org.eclipse.kura.core.status.GpioLedManager.GpioIdentifier;
 import org.eclipse.kura.core.status.GpioLedManager.GpioName;
 import org.eclipse.kura.core.status.GpioLedManager.GpioTerminal;
@@ -37,8 +36,7 @@ public class CloudConnectionStatusURL {
     private static final String CASE_INSENSITIVE_PREFIX = "(?i)";
     private static final String CCS_NOTIFICATION_URLS_SEPARATOR = ";";
 
-    private CloudConnectionStatusURL() {
-    }
+    private CloudConnectionStatusURL() {}
 
     public static Properties parseURL(String ccsUrl) {
         requireNonNull(ccsUrl);

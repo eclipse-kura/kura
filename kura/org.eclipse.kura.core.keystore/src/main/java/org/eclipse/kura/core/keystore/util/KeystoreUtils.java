@@ -28,7 +28,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
@@ -36,8 +35,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
 public class KeystoreUtils {
 
-    private KeystoreUtils() {
-    }
+    private KeystoreUtils() {}
 
     public static PrivateKeyEntry createPrivateKey(String privateKey, String publicKey)
             throws IOException, GeneralSecurityException {
@@ -47,13 +45,16 @@ public class KeystoreUtils {
         PEMParser pemParser = new PEMParser(new StringReader(privateKey));
         Object object = pemParser.readObject();
         pemParser.close();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC")
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter()
+                .setProvider("BC")
                 .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
         PrivateKey privkey = null;
         if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
             privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
         } else if (object instanceof org.bouncycastle.openssl.PEMKeyPair) {
-            privkey = converter.getKeyPair((org.bouncycastle.openssl.PEMKeyPair) object).getPrivate();
+            privkey = converter
+                    .getKeyPair((org.bouncycastle.openssl.PEMKeyPair) object)
+                    .getPrivate();
         } else {
             throw new IOException("PrivateKey not recognized.");
         }
@@ -85,5 +86,4 @@ public class KeystoreUtils {
         X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
         return new TrustedCertificateEntry(cert);
     }
-
 }

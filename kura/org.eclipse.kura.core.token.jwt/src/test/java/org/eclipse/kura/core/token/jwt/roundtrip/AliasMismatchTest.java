@@ -63,5 +63,4 @@ public class AliasMismatchTest extends AbstractJwtScenario {
         givenTheVerifierIsActivatedWith(VerificationConfig.defaults() //
                 .withVerificationKeyAliases(TRUSTSTORE_ALIAS));
     }
-
 }

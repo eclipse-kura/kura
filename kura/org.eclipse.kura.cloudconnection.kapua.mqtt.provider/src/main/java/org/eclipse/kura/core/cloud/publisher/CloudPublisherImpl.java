@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
@@ -46,26 +45,30 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloud.publisher.CloudPublisher",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.cloud.publisher.CloudPublisher",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = CloudPublisherMetatype.class, factory = true)
 public class CloudPublisherImpl
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudPublisherDeliveryListener {
@@ -80,8 +83,8 @@ public class CloudPublisherImpl
             if (tempCloudService instanceof CloudServiceImpl) {
                 CloudPublisherImpl.this.cloudServiceImpl = (CloudServiceImpl) tempCloudService;
                 CloudPublisherImpl.this.cloudServiceImpl.registerCloudConnectionListener(CloudPublisherImpl.this);
-                CloudPublisherImpl.this.cloudServiceImpl
-                        .registerCloudPublisherDeliveryListener(CloudPublisherImpl.this);
+                CloudPublisherImpl.this.cloudServiceImpl.registerCloudPublisherDeliveryListener(
+                        CloudPublisherImpl.this);
                 return tempCloudService;
             } else {
                 CloudPublisherImpl.this.bundleContext.ungetService(reference);
@@ -91,16 +94,16 @@ public class CloudPublisherImpl
         }
 
         @Override
-        public void removedService(final ServiceReference<CloudConnectionManager> reference,
-                final CloudConnectionManager service) {
+        public void removedService(
+                final ServiceReference<CloudConnectionManager> reference, final CloudConnectionManager service) {
             CloudPublisherImpl.this.cloudServiceImpl.unregisterCloudConnectionListener(CloudPublisherImpl.this);
             CloudPublisherImpl.this.cloudServiceImpl.unregisterCloudPublisherDeliveryListener(CloudPublisherImpl.this);
             CloudPublisherImpl.this.cloudServiceImpl = null;
         }
 
         @Override
-        public void modifiedService(ServiceReference<CloudConnectionManager> reference,
-                CloudConnectionManager service) {
+        public void modifiedService(
+                ServiceReference<CloudConnectionManager> reference, CloudConnectionManager service) {
             // Not needed
         }
     }
@@ -113,7 +116,8 @@ public class CloudPublisherImpl
     private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
     private final Set<CloudDeliveryListener> cloudDeliveryListeners = new CopyOnWriteArraySet<>();
 
-    private ServiceTrackerCustomizer<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTrackerCustomizer;
+    private ServiceTrackerCustomizer<CloudConnectionManager, CloudConnectionManager>
+            cloudConnectionManagerTrackerCustomizer;
     private ServiceTracker<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTracker;
 
     private CloudPublisherOptions cloudPublisherOptions;
@@ -214,16 +218,17 @@ public class CloudPublisherImpl
 
     private void initCloudConnectionManagerTracking() {
         String selectedCloudServicePid = this.cloudPublisherOptions.getCloudServicePid();
-        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
-                CloudConnectionManager.class.getName(), selectedCloudServicePid);
+        String filterString = String.format(
+                "(&(%s=%s)(kura.service.pid=%s))",
+                Constants.OBJECTCLASS, CloudConnectionManager.class.getName(), selectedCloudServicePid);
         Filter filter = null;
         try {
             filter = this.bundleContext.createFilter(filterString);
         } catch (InvalidSyntaxException e) {
             logger.error("Filter setup exception ", e);
         }
-        this.cloudConnectionManagerTracker = new ServiceTracker<>(this.bundleContext, filter,
-                this.cloudConnectionManagerTrackerCustomizer);
+        this.cloudConnectionManagerTracker =
+                new ServiceTracker<>(this.bundleContext, filter, this.cloudConnectionManagerTrackerCustomizer);
         this.cloudConnectionManagerTracker.open();
     }
 
@@ -265,8 +270,8 @@ public class CloudPublisherImpl
     @Override
     public void onMessageConfirmed(String messageId, String topic) {
         if (topic.contains(this.cloudPublisherOptions.getAppId())) {
-            this.cloudDeliveryListeners.forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
+            this.cloudDeliveryListeners.forEach(
+                    listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
         }
     }
-
 }

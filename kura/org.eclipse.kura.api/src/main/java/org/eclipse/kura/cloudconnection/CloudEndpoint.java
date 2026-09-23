@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.cloudconnection;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -68,8 +67,8 @@ public interface CloudEndpoint {
      *            a {@link CloudSubscriberListener} object that will be notified when a message is received in a context
      *            that matches the one identified by the subscription properties.
      */
-    public void registerSubscriber(Map<String, Object> subscriptionProperties,
-            CloudSubscriberListener cloudSubscriberListener);
+    public void registerSubscriber(
+            Map<String, Object> subscriptionProperties, CloudSubscriberListener cloudSubscriberListener);
 
     /**
      * Unregisters the provided {@code cloudSubscriberListener}.
@@ -106,5 +105,4 @@ public interface CloudEndpoint {
      * @param cloudConnectionListener
      */
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener);
-
 }

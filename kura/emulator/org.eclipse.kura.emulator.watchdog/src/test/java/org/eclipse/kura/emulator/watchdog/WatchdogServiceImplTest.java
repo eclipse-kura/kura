@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.junit.Test;
@@ -216,5 +215,4 @@ public class WatchdogServiceImplTest {
         svc.stopWatchdog();
         assertFalse((boolean) TestUtil.getFieldValue(svc, "enabled"));
     }
-
 }

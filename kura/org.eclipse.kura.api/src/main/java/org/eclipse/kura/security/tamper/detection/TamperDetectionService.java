@@ -32,7 +32,7 @@ public interface TamperDetectionService {
 
     /**
      * Returns an user friendly name describing this service.
-     * 
+     *
      * @return an user friendly name describing this service.
      */
     public String getDisplayName();

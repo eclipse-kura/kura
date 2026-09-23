@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -23,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.system.SystemService;
 import org.junit.After;
@@ -222,13 +220,13 @@ public class CryptoServiceImplCustomKeyTest {
     }
 
     private void given24ByteCustomKey() {
-        this.testPlaintext = Base64.getEncoder()
-                .encodeToString("123456789012345678901234".getBytes(StandardCharsets.UTF_8));
+        this.testPlaintext =
+                Base64.getEncoder().encodeToString("123456789012345678901234".getBytes(StandardCharsets.UTF_8));
     }
 
     private void given32ByteCustomKey() {
-        this.testPlaintext = Base64.getEncoder()
-                .encodeToString("12345678901234567890123456789012".getBytes(StandardCharsets.UTF_8));
+        this.testPlaintext =
+                Base64.getEncoder().encodeToString("12345678901234567890123456789012".getBytes(StandardCharsets.UTF_8));
     }
 
     private void givenDefaultKey() {
@@ -263,8 +261,8 @@ public class CryptoServiceImplCustomKeyTest {
     }
 
     private void givenDifferentSystemPropertyKey() {
-        String differentKey = Base64.getEncoder()
-                .encodeToString("different-key-32-bytes-long!".getBytes(StandardCharsets.UTF_8));
+        String differentKey =
+                Base64.getEncoder().encodeToString("different-key-32-bytes-long!".getBytes(StandardCharsets.UTF_8));
         System.setProperty("org.eclipse.kura.crypto.secretKey", differentKey);
     }
 

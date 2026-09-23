@@ -14,9 +14,8 @@ package org.eclipse.kura.util.wire.test;
 
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.util.wire.test.TestEmitterReceiver", name = "Test Emitter Receiver", description = "")
-public @interface TestEmitterReceiverOptions {
-
-}
-
-
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.util.wire.test.TestEmitterReceiver",
+        name = "Test Emitter Receiver",
+        description = "")
+public @interface TestEmitterReceiverOptions {}

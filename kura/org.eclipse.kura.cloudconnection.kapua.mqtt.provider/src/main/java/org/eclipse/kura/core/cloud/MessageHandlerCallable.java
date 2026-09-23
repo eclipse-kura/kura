@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditConstants;
@@ -74,8 +73,8 @@ public class MessageHandlerCallable implements Callable<Void> {
     private final CloudServiceImpl cloudService;
     private final RequestHandlerContext requestHandlerContext;
 
-    public MessageHandlerCallable(RequestHandler cloudApp, String appId, String appTopic, KuraPayload msg,
-            CloudServiceImpl cloudService) {
+    public MessageHandlerCallable(
+            RequestHandler cloudApp, String appId, String appTopic, KuraPayload msg, CloudServiceImpl cloudService) {
         super();
         this.cloudApp = cloudApp;
         this.appId = appId;
@@ -100,10 +99,10 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         String requestId = (String) this.kuraMessage.getMetric(METRIC_REQUEST_ID);
         String requesterClientId = (String) this.kuraMessage.getMetric(REQUESTER_CLIENT_ID);
-        if ( requestId == null || requesterClientId == null ) {
-        if(logger.isDebugEnabled()) {
-            logger.debug("Request Id or Requester Cliend Id is null"); 
-        }
+        if (requestId == null || requesterClientId == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Request Id or Requester Cliend Id is null");
+            }
             throw new ParseException("Not a valid request payload", 0);
         }
 
@@ -120,7 +119,8 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         try (final Scope scope = AuditContext.openScope(new AuditContext(auditProperties))) {
             try {
-                Iterator<String> resources = RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
+                Iterator<String> resources =
+                        RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
 
                 if (!resources.hasNext()) {
                     throw new IllegalArgumentException();
@@ -133,36 +133,36 @@ public class MessageHandlerCallable implements Callable<Void> {
                 KuraMessage reqMessage = new KuraMessage(reqPayload, reqResources);
 
                 switch (method) {
-                case "GET":
-                    logger.debug("Handling GET request topic: {}", this.appTopic);
-                    response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "GET":
+                        logger.debug("Handling GET request topic: {}", this.appTopic);
+                        response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "PUT":
-                    logger.debug("Handling PUT request topic: {}", this.appTopic);
-                    response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "PUT":
+                        logger.debug("Handling PUT request topic: {}", this.appTopic);
+                        response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "POST":
-                    logger.debug("Handling POST request topic: {}", this.appTopic);
-                    response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "POST":
+                        logger.debug("Handling POST request topic: {}", this.appTopic);
+                        response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "DEL":
-                    logger.debug("Handling DEL request topic: {}", this.appTopic);
-                    response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "DEL":
+                        logger.debug("Handling DEL request topic: {}", this.appTopic);
+                        response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
+                        break;
 
-                case "EXEC":
-                    logger.debug("Handling EXEC request topic: {}", this.appTopic);
-                    response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
-                    break;
+                    case "EXEC":
+                        logger.debug("Handling EXEC request topic: {}", this.appTopic);
+                        response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
+                        break;
 
-                default:
-                    logger.error("Bad request topic: {}", this.appTopic);
-                    KuraPayload payload = new KuraPayload();
-                    response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
-                    break;
+                    default:
+                        logger.error("Bad request topic: {}", this.appTopic);
+                        KuraPayload payload = new KuraPayload();
+                        response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
+                        break;
                 }
             } catch (IllegalArgumentException e) {
                 logger.error("Bad request topic: {}", this.appTopic);
@@ -181,11 +181,11 @@ public class MessageHandlerCallable implements Callable<Void> {
             final boolean isSuccessful = responseCode instanceof Integer && (Integer) responseCode / 200 == 1;
 
             if (isSuccessful) {
-                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call",
-                        AuditContext.currentOrInternal());
+                auditLogger.info(
+                        "{} CloudCall - Success - Execute RequestHandler call", AuditContext.currentOrInternal());
             } else {
-                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call",
-                        AuditContext.currentOrInternal());
+                auditLogger.warn(
+                        "{} CloudCall - Failure - Execute RequestHandler call", AuditContext.currentOrInternal());
             }
 
             buildResponseMessage(requestId, requesterClientId, response);
@@ -206,8 +206,12 @@ public class MessageHandlerCallable implements Callable<Void> {
             byte[] appPayload = this.cloudService.encodePayload(response.getPayload());
             dataService.publish(fullTopic, appPayload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
-            logger.error("Error publishing response for request {} from client {} on topic: {}", requestId,
-                    requesterClientId, this.appTopic, e);
+            logger.error(
+                    "Error publishing response for request {} from client {} on topic: {}",
+                    requestId,
+                    requesterClientId,
+                    this.appTopic,
+                    e);
         }
     }
 
@@ -259,8 +263,11 @@ public class MessageHandlerCallable implements Callable<Void> {
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
 
-        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(this.appId);
+        sb.append(CloudServiceOptions.getTopicAccountToken())
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(deviceId)
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(this.appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
             sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);

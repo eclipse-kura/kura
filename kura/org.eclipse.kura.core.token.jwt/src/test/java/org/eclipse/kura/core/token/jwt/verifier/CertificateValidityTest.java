@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.token.jwt.verifier;
 
 import java.time.Instant;
-
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.token.jwt.common.AbstractJwtScenario;
 import org.eclipse.kura.core.token.jwt.common.TestKeys;
@@ -109,5 +108,4 @@ public class CertificateValidityTest extends AbstractJwtScenario {
                 .subject(TEST_IDENTITY) //
                 .signedWith(TestKeys.rsaPrivateKey(keyIndex)));
     }
-
 }

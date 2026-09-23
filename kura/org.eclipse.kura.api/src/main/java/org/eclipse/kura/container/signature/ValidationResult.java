@@ -14,12 +14,11 @@ package org.eclipse.kura.container.signature;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Class representing the result of the signature validation performed by {@link:ContainerSignatureValidationService}
- * 
+ *
  * The validation result is composed of two main parts: whether or not the container image signature was
  * validated and the container image digest (in the "algorithm:encoded" format, @see
  * <a href="https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests">Opencontainers specs</a>)

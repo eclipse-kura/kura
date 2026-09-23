@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.message.KuraPayload;
@@ -36,19 +35,19 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
     private boolean controlPublished;
     private boolean controlConfirmed;
     private boolean controlArrived;
-    
+
     private CountDownLatch eventLatch;
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(CloudServiceTest.cloudService);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testService() throws Exception {
-    	this.publishPublished = false;
+        this.publishPublished = false;
         this.publishConfirmed = false;
         this.publishArrived = false;
         this.controlPublished = false;

@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
@@ -36,24 +35,28 @@ import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.SparkplugCloudEndpo
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+        name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true"
+        })
 @Designate(ocd = SparkplugDeviceOptions.class, factory = true)
 public class SparkplugDevice
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
@@ -78,11 +81,14 @@ public class SparkplugDevice
     @Activate
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
-        String endpointPid = (String) properties
-                .get(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
+        String endpointPid =
+                (String) properties.get(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
 
-        this.endpointTracker = new SparkplugCloudEndpointTracker(componentContext.getBundleContext(),
-                this::setSparkplugCloudEndpoint, this::unsetSparkplugCloudEndpoint, endpointPid);
+        this.endpointTracker = new SparkplugCloudEndpointTracker(
+                componentContext.getBundleContext(),
+                this::setSparkplugCloudEndpoint,
+                this::unsetSparkplugCloudEndpoint,
+                endpointPid);
         this.endpointTracker.startEndpointTracker();
 
         update(properties);
@@ -131,8 +137,8 @@ public class SparkplugDevice
     @Override
     public void onConnectionEstablished() {
         this.deviceMetrics.clear();
-        this.cloudConnectionListeners
-                .forEach(listener -> this.executorService.execute(listener::onConnectionEstablished));
+        this.cloudConnectionListeners.forEach(
+                listener -> this.executorService.execute(listener::onConnectionEstablished));
     }
 
     /*
@@ -148,7 +154,8 @@ public class SparkplugDevice
         final Map<String, Object> newMessageProperties = new HashMap<>();
         newMessageProperties.put(KEY_DEVICE_ID, this.deviceId);
 
-        if (this.deviceMetrics.isEmpty() || !this.deviceMetrics.equals(message.getPayload().metricNames())) {
+        if (this.deviceMetrics.isEmpty()
+                || !this.deviceMetrics.equals(message.getPayload().metricNames())) {
             this.deviceMetrics.clear();
             this.deviceMetrics.addAll(message.getPayload().metricNames());
             newMessageProperties.put(KEY_MESSAGE_TYPE, SparkplugMessageType.DBIRTH);
@@ -186,8 +193,8 @@ public class SparkplugDevice
 
     @Override
     public void onMessageConfirmed(final String messageId) {
-        this.cloudDeliveryListeners.forEach(listener -> this.executorService
-                .execute(() -> InvocationUtils.callSafely(listener::onMessageConfirmed, messageId)));
+        this.cloudDeliveryListeners.forEach(listener -> this.executorService.execute(
+                () -> InvocationUtils.callSafely(listener::onMessageConfirmed, messageId)));
     }
 
     /*
@@ -207,5 +214,4 @@ public class SparkplugDevice
             this.sparkplugCloudEndpoint = Optional.empty();
         }
     }
-
 }

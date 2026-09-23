@@ -12,15 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import junit.framework.TestCase;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
 public class NetUtilTest extends TestCase {
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetPrimaryMacAddress() {
         assertNotNull(NetUtil.getPrimaryMacAddress());

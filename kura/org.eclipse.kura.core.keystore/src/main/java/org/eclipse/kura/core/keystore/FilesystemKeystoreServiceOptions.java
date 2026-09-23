@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
@@ -128,8 +127,8 @@ public class FilesystemKeystoreServiceOptions {
         }
         FilesystemKeystoreServiceOptions other = (FilesystemKeystoreServiceOptions) obj;
         return Arrays.equals(keystorePassword.getPassword(), other.keystorePassword.getPassword())
-                && Objects.equals(keystorePath, other.keystorePath) && Objects.equals(pid, other.pid)
+                && Objects.equals(keystorePath, other.keystorePath)
+                && Objects.equals(pid, other.pid)
                 && randomPassword == other.randomPassword;
     }
-
 }

@@ -14,11 +14,6 @@ package org.eclipse.kura.internal.rest.inventory;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -27,7 +22,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -35,21 +33,22 @@ import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 @Path("/inventory/v1")
 @Component(
-    name = "org.eclipse.kura.internal.rest.inventory.InventoryRestService",
-    immediate = true,
-    service = { org.eclipse.kura.internal.rest.inventory.InventoryRestService.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.inventory.InventoryRestService",
-        "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.internal.rest.inventory.InventoryRestService",
+        immediate = true,
+        service = {org.eclipse.kura.internal.rest.inventory.InventoryRestService.class},
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.inventory.InventoryRestService",
+            "osgi.jakartars.resource=true"
+        })
 public class InventoryRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryRestService.class);
@@ -63,10 +62,12 @@ public class InventoryRestService {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
     }
 
-    @Reference(name = "InventoryHandlerV1", service = org.eclipse.kura.core.inventory.InventoryHandlerV1.class, unbind = "-")
+    @Reference(
+            name = "InventoryHandlerV1",
+            service = org.eclipse.kura.core.inventory.InventoryHandlerV1.class,
+            unbind = "-")
     public void setInventoryHandlerV1(InventoryHandlerV1 inventoryHandlerV1) {
         this.inventoryHandlerV1 = inventoryHandlerV1;
-
     }
 
     /**
@@ -298,11 +299,11 @@ public class InventoryRestService {
     private Response buildResponse(KuraPayload kuraPayload) throws KuraException {
         if (kuraPayload instanceof KuraResponsePayload) {
             KuraResponsePayload kuraResponsePayload = (KuraResponsePayload) kuraPayload;
-            return Response.status(kuraResponsePayload.getResponseCode()).entity(kuraPayload.getBody()).build();
+            return Response.status(kuraResponsePayload.getResponseCode())
+                    .entity(kuraPayload.getBody())
+                    .build();
         } else {
             throw new KuraException(KuraErrorCode.INVALID_MESSAGE_EXCEPTION);
         }
-
     }
-
 }

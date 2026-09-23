@@ -26,7 +26,6 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.junit.Test;
 
@@ -126,10 +125,13 @@ public class KeystoreUtilsTest {
 
         assertNotNull(entry);
         assertEquals("DSA", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
-        assertEquals(2048,
-                ((DSAPublicKey) entry.getTrustedCertificate().getPublicKey()).getParams().getP().bitLength());
+        assertEquals(
+                2048,
+                ((DSAPublicKey) entry.getTrustedCertificate().getPublicKey())
+                        .getParams()
+                        .getP()
+                        .bitLength());
         assertEquals("X.509", entry.getTrustedCertificate().getType());
-
     }
 
     @Test
@@ -138,9 +140,12 @@ public class KeystoreUtilsTest {
 
         assertNotNull(entry);
         assertEquals("RSA", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
-        assertEquals(1024, ((RSAPublicKey) entry.getTrustedCertificate().getPublicKey()).getModulus().bitLength());
+        assertEquals(
+                1024,
+                ((RSAPublicKey) entry.getTrustedCertificate().getPublicKey())
+                        .getModulus()
+                        .bitLength());
         assertEquals("X.509", entry.getTrustedCertificate().getType());
-
     }
 
     @Test
@@ -149,10 +154,13 @@ public class KeystoreUtilsTest {
 
         assertNotNull(entry);
         assertEquals("EC", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
-        assertEquals(256,
-                ((ECPublicKey) entry.getTrustedCertificate().getPublicKey()).getParams().getOrder().bitLength());
+        assertEquals(
+                256,
+                ((ECPublicKey) entry.getTrustedCertificate().getPublicKey())
+                        .getParams()
+                        .getOrder()
+                        .bitLength());
         assertEquals("X.509", entry.getTrustedCertificate().getType());
-
     }
 
     @Test
@@ -161,9 +169,13 @@ public class KeystoreUtilsTest {
 
         assertNotNull(entry);
         assertEquals("EC", entry.getCertificate().getPublicKey().getAlgorithm());
-        assertEquals(256, ((ECPublicKey) entry.getCertificate().getPublicKey()).getParams().getOrder().bitLength());
+        assertEquals(
+                256,
+                ((ECPublicKey) entry.getCertificate().getPublicKey())
+                        .getParams()
+                        .getOrder()
+                        .bitLength());
         assertEquals("X.509", entry.getCertificate().getType());
-
     }
 
     @Test
@@ -172,7 +184,12 @@ public class KeystoreUtilsTest {
 
         assertNotNull(entry);
         assertEquals("DSA", entry.getCertificate().getPublicKey().getAlgorithm());
-        assertEquals(2048, ((DSAPublicKey) entry.getCertificate().getPublicKey()).getParams().getP().bitLength());
+        assertEquals(
+                2048,
+                ((DSAPublicKey) entry.getCertificate().getPublicKey())
+                        .getParams()
+                        .getP()
+                        .bitLength());
         assertEquals("X.509", entry.getCertificate().getType());
         assertEquals("DSA", entry.getPrivateKey().getAlgorithm());
     }
@@ -183,7 +200,11 @@ public class KeystoreUtilsTest {
 
         assertNotNull(entry);
         assertEquals("RSA", entry.getCertificate().getPublicKey().getAlgorithm());
-        assertEquals(1024, ((RSAPublicKey) entry.getCertificate().getPublicKey()).getModulus().bitLength());
+        assertEquals(
+                1024,
+                ((RSAPublicKey) entry.getCertificate().getPublicKey())
+                        .getModulus()
+                        .bitLength());
         assertEquals("X.509", entry.getCertificate().getType());
         assertEquals("RSA", entry.getPrivateKey().getAlgorithm());
     }
@@ -231,7 +252,7 @@ public class KeystoreUtilsTest {
         final String resultPEM;
 
         try (final StringWriter stringWriter = new StringWriter();
-                final JcaPEMWriter writer = new JcaPEMWriter(stringWriter);) {
+                final JcaPEMWriter writer = new JcaPEMWriter(stringWriter); ) {
             writer.writeObject(result[index]);
             writer.flush();
             resultPEM = stringWriter.toString();

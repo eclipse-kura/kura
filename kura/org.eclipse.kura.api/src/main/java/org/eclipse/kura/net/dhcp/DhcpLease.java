@@ -58,7 +58,12 @@ public class DhcpLease {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        sb.append("MacAddress:").append(macAddress).append(", IpAddress:").append(ipAddress).append(", Hostname:").append(hostname);
+        sb.append("MacAddress:")
+                .append(macAddress)
+                .append(", IpAddress:")
+                .append(ipAddress)
+                .append(", Hostname:")
+                .append(hostname);
         sb.append("]");
         return sb.toString();
     }

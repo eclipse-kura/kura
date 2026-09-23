@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -24,8 +24,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class RouteConfigIP4 extends RouteConfigIP<IP4Address> implements RouteConfig4 {
 
-    public RouteConfigIP4(IP4Address destination, IP4Address gateway, IP4Address netmask, String interfaceName,
-            int metric) {
+    public RouteConfigIP4(
+            IP4Address destination, IP4Address gateway, IP4Address netmask, String interfaceName, int metric) {
         super(destination, gateway, netmask, interfaceName, metric);
     }
 
@@ -57,10 +57,16 @@ public class RouteConfigIP4 extends RouteConfigIP<IP4Address> implements RouteCo
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("destination: ").append(getDestination() != null ? getDestination().getHostAddress() : "null")
-                .append(", gateway: ").append(getGateway() != null ? getGateway().getHostAddress() : "null")
-                .append(", netmask: ").append(getNetmask() != null ? getNetmask().getHostAddress() : "null")
-                .append(", interfaceName: ").append(getInterfaceName()).append(", metric: ").append(getMetric());
+        sb.append("destination: ")
+                .append(getDestination() != null ? getDestination().getHostAddress() : "null")
+                .append(", gateway: ")
+                .append(getGateway() != null ? getGateway().getHostAddress() : "null")
+                .append(", netmask: ")
+                .append(getNetmask() != null ? getNetmask().getHostAddress() : "null")
+                .append(", interfaceName: ")
+                .append(getInterfaceName())
+                .append(", metric: ")
+                .append(getMetric());
 
         return sb.toString();
     }

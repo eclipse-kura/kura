@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.testutil.event.EventAdminUtil;
@@ -50,15 +49,21 @@ public class MqttDataTransportTest extends BaseCloudTests {
     private static final String TEST_SSL_MANAGER_SERVICE_PID = "testSsl";
     private static final String TEST_KEYSTORE_PID = "testKeystore";
     private static final String TEST_TRUSTSTORE_PID = "testTruststore";
-    private static final String KEYSTORE_SERVICE_FACTORY_PID = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl";
-    private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String KEYSTORE_SERVICE_FACTORY_PID =
+            "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl";
+    private static final String MQTT_DATA_TRANSPORT_FACTORY_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     @Test
     public void shouldConnectOverPlainMqtt() throws Exception {
         try (final Fixture fixture = new Fixture()) {
-            final DataTransportService test = fixture.createFactoryConfiguration(DataTransportService.class,
-                    TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID,
-                    MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTT).toProperties())
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTT)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -69,9 +74,13 @@ public class MqttDataTransportTest extends BaseCloudTests {
     @Test
     public void shouldNotConnectOverMqttsWithoutKeystore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
-            final DataTransportService test = fixture.createFactoryConfiguration(DataTransportService.class,
-                    TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID,
-                    MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS).toProperties())
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -89,22 +98,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverMqttsWithHostnameIdentificationEnabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withHostnameVerification(true)
-                            .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withHostnameVerification(true)
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -122,22 +142,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverWssWithHostnameIdentificationEnabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withHostnameVerification(true)
-                            .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withHostnameVerification(true)
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -155,22 +186,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverMqttsWithHostnameIdentificationDisabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -180,50 +222,66 @@ public class MqttDataTransportTest extends BaseCloudTests {
 
     @Test
     public void shouldSupportRevocation() throws Exception {
-        final BundleContext bundleContext = FrameworkUtil.getBundle(MqttDataTransportTest.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(MqttDataTransportTest.class).getBundleContext();
 
         final TestServer server = new TestServer(8087, Optional.empty());
 
-        server.setResource("/crl.pem", encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
+        server.setResource(
+                "/crl.pem",
+                encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
 
         try (final Fixture fixture = new Fixture()) {
 
             CompletableFuture<KeystoreChangedEvent> nextEvent = EventAdminUtil.nextEvent(
-                    new String[] { KeystoreChangedEvent.EVENT_TOPIC }, KeystoreChangedEvent.class, bundleContext);
+                    new String[] {KeystoreChangedEvent.EVENT_TOPIC}, KeystoreChangedEvent.class, bundleContext);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID,
-                    KeystoreServiceOptions.defaultConfiguration().withKeystorePath(mqttTrustStore.getAbsolutePath())
-                            .withCrlManagerEnabled(true).withCrlUrls(new String[] { "http://localhost:8087/crl.pem" })
-                            .toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .withCrlManagerEnabled(true)
+                                    .withCrlUrls(new String[] {"http://localhost:8087/crl.pem"})
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             nextEvent.get(10, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).withRevocationCheckEnabled(true)
-                            .withRevocationCheckMode(SslManagerServiceOptions.RevocationCheckMode.CRL_ONLY)
-                            .toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .withRevocationCheckEnabled(true)
+                                    .withRevocationCheckMode(SslManagerServiceOptions.RevocationCheckMode.CRL_ONLY)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
 
             test.connect();
 
-            nextEvent = EventAdminUtil.nextEvent(new String[] { KeystoreChangedEvent.EVENT_TOPIC },
-                    KeystoreChangedEvent.class, bundleContext);
+            nextEvent = EventAdminUtil.nextEvent(
+                    new String[] {KeystoreChangedEvent.EVENT_TOPIC}, KeystoreChangedEvent.class, bundleContext);
 
             brokerCA.revokeCertificate(brokerCertificate);
-            server.setResource("/crl.pem", encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
+            server.setResource(
+                    "/crl.pem",
+                    encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
 
             nextEvent.get(60, TimeUnit.SECONDS);
 
@@ -256,22 +314,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverWssWithHostnameIdentificationDisabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -284,22 +353,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverMqttsWithClientSideAuthWithoutKey() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -318,22 +398,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverWssWithClientSideAuthWithoutKey() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -351,22 +442,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverMqttsWithClientSideAuth() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttKeyStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttKeyStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -378,22 +480,33 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverWssWithClientSideAuth() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttKeyStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttKeyStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -405,29 +518,43 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverWssWithClientSideAuthWithSeparateTruststore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_TRUSTSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID,
-                    KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER).withHostnameVerification(false)
-                            .toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -439,23 +566,34 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverWssWithClientSideAuthWithWrongTruststore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_TRUSTSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withTruststoreTargetFilter(TEST_KEYSTORE_FILTER).withHostnameVerification(false)
-                            .toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withTruststoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -473,29 +611,43 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverMqttsWithClientSideAuthWithSeparateTruststore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_TRUSTSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID,
-                    KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER).withHostnameVerification(false)
-                            .toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -507,35 +659,51 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void connectionShouldFailIfSeparateTruststoreIsUnset() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_TRUSTSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID,
-                    KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER).withHostnameVerification(false)
-                            .toProperties())
-                    .get(30, TimeUnit.SECONDS);
-
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
-                            MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
-                    .get(30, TimeUnit.SECONDS);
-
-            WireTestUtil
-                    .updateComponentConfiguration(configurationService, TEST_SSL_MANAGER_SERVICE_PID,
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
                             SslManagerServiceOptions.defaultConfiguration()
-                                    .withTruststoreTargetFilter("(kura.service.pid=changeit)").toProperties())
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            WireTestUtil.updateComponentConfiguration(
+                            configurationService,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withTruststoreTargetFilter("(kura.service.pid=changeit)")
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -553,23 +721,34 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverMqttsWithClientSideAuthWithWrongTruststore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_TRUSTSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttTrustStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withTruststoreTargetFilter(TEST_KEYSTORE_FILTER).withHostnameVerification(false)
-                            .toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withTruststoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_MQTTS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -587,22 +766,34 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void connectionShouldFailWithRevocationChechEnabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
-                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
-                            .withKeystorePath(mqttKeyStore.getAbsolutePath()).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_KEYSTORE_PID,
+                            KEYSTORE_SERVICE_FACTORY_PID,
+                            KeystoreServiceOptions.defaultConfiguration()
+                                    .withKeystorePath(mqttKeyStore.getAbsolutePath())
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
-                    SSL_MANAGER_SERVICE_FACTORY_PID,
-                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
-                            .withHostnameVerification(false).withRevocationCheckEnabled(true).toProperties())
+            fixture.createFactoryConfiguration(
+                            ConfigurableComponent.class,
+                            TEST_SSL_MANAGER_SERVICE_PID,
+                            SSL_MANAGER_SERVICE_FACTORY_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                                    .withHostnameVerification(false)
+                                    .withRevocationCheckEnabled(true)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
-            final DataTransportService test = fixture
-                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+            final DataTransportService test = fixture.createFactoryConfiguration(
+                            DataTransportService.class,
+                            TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
-                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                            MqttDataTransportOptions.defaultConfiguration()
+                                    .withBrokerUrl(BROKER_ADDR_WSS)
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER)
+                                    .toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -617,8 +808,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
         private Optional<String> password = Optional.empty();
         private Optional<String> sslManagerTargetFilter = Optional.empty();
 
-        private MqttDataTransportOptions() {
-        }
+        private MqttDataTransportOptions() {}
 
         static MqttDataTransportOptions defaultConfiguration() {
             return new MqttDataTransportOptions().withUsername("mqtt").withPassword("bar");
@@ -670,8 +860,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
         private Optional<Boolean> revocationCheckEnabled = Optional.empty();
         private Optional<RevocationCheckMode> revocationCheckMode = Optional.empty();
 
-        private SslManagerServiceOptions() {
-        }
+        private SslManagerServiceOptions() {}
 
         static SslManagerServiceOptions defaultConfiguration() {
             return new SslManagerServiceOptions();
@@ -722,8 +911,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
         private boolean crlManagerEnabled = false;
         private Optional<String[]> crlUrls = Optional.empty();
 
-        private KeystoreServiceOptions() {
-        }
+        private KeystoreServiceOptions() {}
 
         static KeystoreServiceOptions defaultConfiguration() {
             return new KeystoreServiceOptions();
@@ -764,8 +952,11 @@ public class MqttDataTransportTest extends BaseCloudTests {
 
         private final Set<String> createdPids = new HashSet<>();
 
-        public <T> CompletableFuture<T> createFactoryConfiguration(final Class<T> classz, final String pid,
-                final String factoryPid, final Map<String, Object> properties) {
+        public <T> CompletableFuture<T> createFactoryConfiguration(
+                final Class<T> classz,
+                final String pid,
+                final String factoryPid,
+                final Map<String, Object> properties) {
             return WireTestUtil.createFactoryConfiguration(configurationService, classz, pid, factoryPid, properties)
                     .whenComplete((ok, ex) -> {
                         if (ex == null) {
@@ -778,10 +969,9 @@ public class MqttDataTransportTest extends BaseCloudTests {
         public void close() throws Exception {
 
             for (final String pid : this.createdPids) {
-                WireTestUtil.deleteFactoryConfiguration(configurationService, pid).get(30, TimeUnit.SECONDS);
+                WireTestUtil.deleteFactoryConfiguration(configurationService, pid)
+                        .get(30, TimeUnit.SECONDS);
             }
-
         }
     }
-
 }

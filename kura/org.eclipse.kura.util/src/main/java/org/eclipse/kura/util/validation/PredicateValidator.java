@@ -32,5 +32,4 @@ public class PredicateValidator implements Validator<String> {
             errorMessageConsumer.accept(this.message);
         }
     }
-
 }

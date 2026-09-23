@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -95,10 +94,9 @@ public class Channel {
      *             if any of the arguments is null
      * @deprecated Use {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
      */
-
     @Deprecated
-    public Channel(final String name, final ChannelType type, final DataType valueType,
-            final Map<String, Object> config) {
+    public Channel(
+            final String name, final ChannelType type, final DataType valueType, final Map<String, Object> config) {
 
         requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
         requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
@@ -133,8 +131,13 @@ public class Channel {
      *
      * @since 2.8
      */
-    public Channel(final String name, final ChannelType type, final DataType valueType,
-            final ScaleOffsetType scaleOffsetType, final Number valueScale, final Number valueOffset,
+    public Channel(
+            final String name,
+            final ChannelType type,
+            final DataType valueType,
+            final ScaleOffsetType scaleOffsetType,
+            final Number valueScale,
+            final Number valueOffset,
             final Map<String, Object> config) {
 
         requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
@@ -154,7 +157,6 @@ public class Channel {
         this.scaleOffsetType = scaleOffsetType;
         this.valueScale = valueScale;
         this.valueOffset = valueOffset;
-
     }
 
     /**
@@ -210,7 +212,6 @@ public class Channel {
      * @since 1.4
      * @return a boolean indicating if this channel is enabled or not
      */
-
     public boolean isEnabled() {
         return this.isEnabled;
     }
@@ -443,8 +444,15 @@ public class Channel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.isEnabled, this.name, this.scaleOffsetType, this.type, this.unit, this.valueOffset,
-                this.valueScale, this.valueType);
+        return Objects.hash(
+                this.isEnabled,
+                this.name,
+                this.scaleOffsetType,
+                this.type,
+                this.unit,
+                this.valueOffset,
+                this.valueScale,
+                this.valueType);
     }
 
     @Override
@@ -456,10 +464,13 @@ public class Channel {
             return false;
         }
         Channel other = (Channel) obj;
-        return this.isEnabled == other.isEnabled && Objects.equals(this.name, other.name)
-                && this.scaleOffsetType == other.scaleOffsetType && this.type == other.type
-                && Objects.equals(this.unit, other.unit) && Objects.equals(this.valueOffset, other.valueOffset)
-                && Objects.equals(this.valueScale, other.valueScale) && this.valueType == other.valueType;
+        return this.isEnabled == other.isEnabled
+                && Objects.equals(this.name, other.name)
+                && this.scaleOffsetType == other.scaleOffsetType
+                && this.type == other.type
+                && Objects.equals(this.unit, other.unit)
+                && Objects.equals(this.valueOffset, other.valueOffset)
+                && Objects.equals(this.valueScale, other.valueScale)
+                && this.valueType == other.valueType;
     }
-
 }

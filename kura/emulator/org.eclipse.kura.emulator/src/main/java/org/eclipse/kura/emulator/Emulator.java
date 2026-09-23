@@ -20,19 +20,18 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.emulator.Emulator",
-    service = { org.eclipse.kura.emulator.Emulator.class })
+        name = "org.eclipse.kura.emulator.Emulator",
+        service = {org.eclipse.kura.emulator.Emulator.class})
 public class Emulator {
 
     private static final Logger logger = LoggerFactory.getLogger(Emulator.class);
@@ -82,7 +81,8 @@ public class Emulator {
     }
 
     private void copySnapshot(String snapshotFolderPath) throws IOException {
-        URL internalSnapshotURL = this.componentContext.getBundleContext().getBundle().getResource(SNAPSHOT_0_NAME);
+        URL internalSnapshotURL =
+                this.componentContext.getBundleContext().getBundle().getResource(SNAPSHOT_0_NAME);
 
         try (InputStream fileInput = internalSnapshotURL.openStream();
                 OutputStream fileOutput = new FileOutputStream(snapshotFolderPath + File.separator + SNAPSHOT_0_NAME)) {

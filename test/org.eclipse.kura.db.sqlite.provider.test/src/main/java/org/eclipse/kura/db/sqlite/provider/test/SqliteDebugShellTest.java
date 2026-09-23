@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
@@ -106,18 +105,21 @@ public class SqliteDebugShellTest extends SqliteDbServiceTestBase {
 
     public SqliteDebugShellTest() throws InterruptedException, ExecutionException, TimeoutException {
         super();
-        this.commandProcessor = ServiceUtil.trackService(CommandProcessor.class, Optional.empty()).get(30,
-                TimeUnit.SECONDS);
+        this.commandProcessor = ServiceUtil.trackService(CommandProcessor.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
     }
 
     private void whenCommandIsExecuted(String command) {
-        final CommandSession session = commandProcessor.createSession(new InputStream() {
+        final CommandSession session = commandProcessor.createSession(
+                new InputStream() {
 
-            @Override
-            public int read() throws IOException {
-                return -1;
-            }
-        }, out, err);
+                    @Override
+                    public int read() throws IOException {
+                        return -1;
+                    }
+                },
+                out,
+                err);
 
         try {
             session.execute(command);
@@ -129,7 +131,8 @@ public class SqliteDebugShellTest extends SqliteDbServiceTestBase {
     private void thenCommandOutputContains(String string) {
         final String errString = err.toString();
         final String outString = out.toString();
-        assertTrue(string + " not found in out, out : \"" + outString + "\" err : \"" + errString + "\"",
+        assertTrue(
+                string + " not found in out, out : \"" + outString + "\" err : \"" + errString + "\"",
                 outString.contains(string));
     }
 

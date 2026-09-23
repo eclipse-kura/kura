@@ -55,5 +55,4 @@ public class SigningKeyHeaderTest extends AbstractJwtScenario {
         givenTheIssuerIsBoundToTheKeystore();
         givenTheIssuerIsActivatedWith(IssuingConfig.defaults().withSigningKeyAlias(alias));
     }
-
 }

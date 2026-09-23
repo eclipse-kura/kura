@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ClockProviderType {
-
     JAVA_NTP("java-ntp"),
     NTPD("ntpd"),
     CHRONY_ADVANCED("chrony-advanced");
@@ -42,5 +41,4 @@ public enum ClockProviderType {
     public static ClockProviderType fromValue(String value) {
         return valuesMap.get(value);
     }
-
 }

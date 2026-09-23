@@ -19,10 +19,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
@@ -41,8 +41,6 @@ import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Template;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.osgi.service.event.EventAdmin;
-
-import com.google.protobuf.ByteString;
 
 public class SparkplugSubscriberTest {
 
@@ -114,9 +112,9 @@ public class SparkplugSubscriberTest {
     @Test
     public void shouldNotifyCloudConnectionListenerOnDisconnected() {
         givenCloudConnectionListener(this.sub1, this.cloudConnectionListener);
-        
+
         whenOnDisconnected(this.sub1);
-        
+
         thenConnectionListenerNotifiedOnDisconnected(this.cloudConnectionListener);
     }
 
@@ -149,7 +147,7 @@ public class SparkplugSubscriberTest {
     private void givenInitialSetup(boolean isConnected) {
         when(this.dataService.isConnected()).thenReturn(isConnected);
         this.endpoint.setDataService(this.dataService);
-        
+
         EventAdmin mockEventAdmin = mock(EventAdmin.class);
         this.endpoint.setEventAdmin(mockEventAdmin);
     }
@@ -223,23 +221,22 @@ public class SparkplugSubscriberTest {
      * Then
      */
 
-    private void thenSubscriberListenerNotifiedOnMessageArrived(CloudSubscriberListener subscriberListener,
-            int expectedTimes) {
+    private void thenSubscriberListenerNotifiedOnMessageArrived(
+            CloudSubscriberListener subscriberListener, int expectedTimes) {
         verify(subscriberListener, timeout(1000L).times(expectedTimes))
                 .onMessageArrived(argThat(new ArgumentMatcher<KuraMessage>() {
 
-            @Override
-            public boolean matches(KuraMessage message) {
-                KuraPayload payload = message.getPayload();
-                
-                boolean bodyMatches = Arrays.equals(payload.getBody(), "example".getBytes());
-                boolean timestampMatches = payload.getTimestamp().getTime() == 1000L;
-                boolean seqMatches = ((long) payload.getMetric("seq")) == 100L;
-                
-                return bodyMatches && timestampMatches && seqMatches;
-            }
+                    @Override
+                    public boolean matches(KuraMessage message) {
+                        KuraPayload payload = message.getPayload();
 
-        }));
+                        boolean bodyMatches = Arrays.equals(payload.getBody(), "example".getBytes());
+                        boolean timestampMatches = payload.getTimestamp().getTime() == 1000L;
+                        boolean seqMatches = ((long) payload.getMetric("seq")) == 100L;
+
+                        return bodyMatches && timestampMatches && seqMatches;
+                    }
+                }));
     }
 
     private void thenConnectionListenerNotifiedOnDisconnected(CloudConnectionListener subscriberListener) {
@@ -257,8 +254,6 @@ public class SparkplugSubscriberTest {
     private void thenSubscribed(String expectedTopicFilter, int expectedQos) throws KuraException {
         verify(this.dataService, times(1)).subscribe(expectedTopicFilter, expectedQos);
     }
-
-
 
     /*
      * Utils
@@ -319,7 +314,7 @@ public class SparkplugSubscriberTest {
         metricBuilder.setLongValue(value);
         return metricBuilder.build();
     }
-    
+
     private Metric getStringMetric(String name, String value) {
         Payload.Metric.Builder metricBuilder = Payload.Metric.newBuilder();
         metricBuilder.setName(name);
@@ -333,5 +328,4 @@ public class SparkplugSubscriberTest {
         metricBuilder.setTemplateValue(value);
         return metricBuilder.build();
     }
-
 }

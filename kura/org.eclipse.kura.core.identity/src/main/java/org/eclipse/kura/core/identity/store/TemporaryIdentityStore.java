@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,12 +196,15 @@ public class TemporaryIdentityStore {
      * @param lifetime the duration before expiration
      */
     private void scheduleExpiration(String name, Duration lifetime) {
-        expirationScheduler.schedule(() -> {
-            boolean removed = identities.remove(name) != null;
-            if (removed) {
-                logger.info("Temporary identity '{}' expired and was removed", name);
-            }
-        }, lifetime.toMillis(), TimeUnit.MILLISECONDS);
+        expirationScheduler.schedule(
+                () -> {
+                    boolean removed = identities.remove(name) != null;
+                    if (removed) {
+                        logger.info("Temporary identity '{}' expired and was removed", name);
+                    }
+                },
+                lifetime.toMillis(),
+                TimeUnit.MILLISECONDS);
     }
 
     /**

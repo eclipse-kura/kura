@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -16,7 +16,6 @@ package org.eclipse.kura.type;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Objects;
-
 import org.eclipse.kura.annotation.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -158,21 +157,21 @@ public final class TypedValues {
         Objects.requireNonNull(value, "value cannot be null");
         try {
             switch (type) {
-            case BOOLEAN:
-                return newBooleanValue(Boolean.parseBoolean(value));
-            case BYTE_ARRAY:
-                return TypedValues.newByteArrayValue(BASE64_DECODER.decode(value));
-            case DOUBLE:
-                return newDoubleValue(Double.parseDouble(value));
-            case FLOAT:
-                return newFloatValue(Float.parseFloat(value));
-            case INTEGER:
-                return newIntegerValue(Integer.parseInt(value));
-            case LONG:
-                return newLongValue(Long.parseLong(value));
-            case STRING:
-                return newStringValue(value);
-            default:
+                case BOOLEAN:
+                    return newBooleanValue(Boolean.parseBoolean(value));
+                case BYTE_ARRAY:
+                    return TypedValues.newByteArrayValue(BASE64_DECODER.decode(value));
+                case DOUBLE:
+                    return newDoubleValue(Double.parseDouble(value));
+                case FLOAT:
+                    return newFloatValue(Float.parseFloat(value));
+                case INTEGER:
+                    return newIntegerValue(Integer.parseInt(value));
+                case LONG:
+                    return newLongValue(Long.parseLong(value));
+                case STRING:
+                    return newStringValue(value);
+                default:
             }
         } catch (Exception e) {
         }

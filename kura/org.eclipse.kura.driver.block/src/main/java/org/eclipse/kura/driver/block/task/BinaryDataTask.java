@@ -1,21 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.task;
 
 import java.io.IOException;
 import java.util.function.Function;
-
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.binary.BinaryData;
 import org.eclipse.kura.driver.binary.Buffer;
@@ -40,14 +38,24 @@ public class BinaryDataTask<T> extends ChannelBlockTask {
         this(record, offset, dataType, TypedValues::newTypedValue, typedValue -> (T) typedValue.getValue(), mode);
     }
 
-    public BinaryDataTask(ChannelRecord record, int offset, BinaryData<T> binaryDataType, DataType dataType,
-            Mode mode) {
-        this(record, offset, binaryDataType, TypeUtil.toTypedValue(binaryDataType.getValueType(), dataType),
-                TypeUtil.fromTypedValue(binaryDataType.getValueType(), dataType), mode);
+    public BinaryDataTask(
+            ChannelRecord record, int offset, BinaryData<T> binaryDataType, DataType dataType, Mode mode) {
+        this(
+                record,
+                offset,
+                binaryDataType,
+                TypeUtil.toTypedValue(binaryDataType.getValueType(), dataType),
+                TypeUtil.fromTypedValue(binaryDataType.getValueType(), dataType),
+                mode);
     }
 
-    public BinaryDataTask(ChannelRecord record, int offset, BinaryData<T> dataType,
-            Function<T, TypedValue<?>> toTypedValue, Function<TypedValue<?>, T> fromTypedValue, Mode mode) {
+    public BinaryDataTask(
+            ChannelRecord record,
+            int offset,
+            BinaryData<T> dataType,
+            Function<T, TypedValue<?>> toTypedValue,
+            Function<TypedValue<?>, T> fromTypedValue,
+            Mode mode) {
         super(record, offset, offset + dataType.getSize(), mode);
         this.dataType = dataType;
         this.toTypedValue = toTypedValue;
@@ -74,5 +82,4 @@ public class BinaryDataTask<T> extends ChannelBlockTask {
             this.dataType.write(buffer, getStart() - parent.getStart(), value);
         }
     }
-
 }

@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
@@ -36,7 +35,7 @@ public class CommandRunningTest {
 
     private static CommandExecutorService executor;
     private static Pid pid = new LinuxPid(1234);
-    private static String[] commandLine = { "find", "/", "-name", "foo" };
+    private static String[] commandLine = {"find", "/", "-name", "foo"};
     private boolean isRunning;
 
     public CommandRunningTest(CommandExecutorService executor) {
@@ -45,8 +44,8 @@ public class CommandRunningTest {
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getExecutors() {
-        return Arrays.asList(new UnprivilegedExecutorServiceImpl(mock(SystemService.class)),
-                new PrivilegedExecutorServiceImpl());
+        return Arrays.asList(
+                new UnprivilegedExecutorServiceImpl(mock(SystemService.class)), new PrivilegedExecutorServiceImpl());
     }
 
     @Test
@@ -93,5 +92,4 @@ public class CommandRunningTest {
     private void thenCommandIsNotRunning() {
         assertFalse(this.isRunning);
     }
-
 }

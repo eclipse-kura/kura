@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.core.testutil.TestUtil;
@@ -66,8 +65,8 @@ public class CloudClientImplTest {
         CloudClientListener mocktListener = mock(CloudClientListener.class);
         cloudClient.addCloudClientListener(mocktListener);
 
-        List<CloudClientListenerAdapter> listeners = (List<CloudClientListenerAdapter>) TestUtil
-                .getFieldValue(cloudClient, "listeners");
+        List<CloudClientListenerAdapter> listeners =
+                (List<CloudClientListenerAdapter>) TestUtil.getFieldValue(cloudClient, "listeners");
 
         assertEquals(1, listeners.size());
         assertEquals(mocktListener, listeners.get(0).getCloudClientListenerAdapted());
@@ -83,8 +82,8 @@ public class CloudClientImplTest {
         cloudClient.addCloudClientListener(mocktListener);
         cloudClient.removeCloudClientListener(mocktListener);
 
-        List<CloudClientListenerAdapter> listeners = (List<CloudClientListenerAdapter>) TestUtil
-                .getFieldValue(cloudClient, "listeners");
+        List<CloudClientListenerAdapter> listeners =
+                (List<CloudClientListenerAdapter>) TestUtil.getFieldValue(cloudClient, "listeners");
 
         assertEquals(0, listeners.size());
     }
@@ -120,11 +119,13 @@ public class CloudClientImplTest {
         // Prepare data service and cloud service mocks
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
-        byte[] appPayload = { 1, 2, 3 };
+        byte[] appPayload = {1, 2, 3};
         int priority = 5;
         int expectedValue = 42;
 
@@ -155,11 +156,13 @@ public class CloudClientImplTest {
         // Prepare data service and cloud service mocks
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
-        byte[] appPayload = { 1, 2, 3 };
+        byte[] appPayload = {1, 2, 3};
         int expectedValue = 42;
 
         doReturn(appPayload).when(mockCloudService).encodePayload(payload);
@@ -181,7 +184,7 @@ public class CloudClientImplTest {
 
         // Parameters for publish method
         String appTopic = "appTopic";
-        byte[] payload = { 1, 2, 3 };
+        byte[] payload = {1, 2, 3};
         int qos = 0;
         boolean retain = false;
         int priority = 6;
@@ -189,7 +192,9 @@ public class CloudClientImplTest {
         // Prepare data service mock
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
@@ -222,11 +227,13 @@ public class CloudClientImplTest {
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
-        byte[] appPayload = { 1, 2, 3 };
+        byte[] appPayload = {1, 2, 3};
         int expectedValue = 42;
 
         doReturn(appPayload).when(mockCloudService).encodePayload(payload);
@@ -252,7 +259,9 @@ public class CloudClientImplTest {
 
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
@@ -278,7 +287,9 @@ public class CloudClientImplTest {
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
@@ -302,7 +313,9 @@ public class CloudClientImplTest {
 
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
@@ -327,7 +340,9 @@ public class CloudClientImplTest {
         StringBuilder sb = new StringBuilder();
         sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator());
-        sb.append(options.getTopicClientIdToken()).append(options.getTopicSeparator()).append("appId");
+        sb.append(options.getTopicClientIdToken())
+                .append(options.getTopicSeparator())
+                .append("appId");
         sb.append(options.getTopicSeparator()).append(appTopic);
 
         String fullTopic = sb.toString();
@@ -349,7 +364,9 @@ public class CloudClientImplTest {
         // Prepare data service mock
         StringBuilder sb = new StringBuilder();
         sb.append("^(").append("\\$EDC").append(options.getTopicSeparator()).append(")?");
-        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+");
+        sb.append(options.getTopicAccountToken())
+                .append(options.getTopicSeparator())
+                .append(".+");
         sb.append(options.getTopicSeparator()).append("appId").append("(/.+)?");
 
         String topicRegex = sb.toString();
@@ -377,7 +394,9 @@ public class CloudClientImplTest {
         // Prepare data service mock
         StringBuilder sb = new StringBuilder();
         sb.append("^(").append("\\$EDC").append(options.getTopicSeparator()).append(")?");
-        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+");
+        sb.append(options.getTopicAccountToken())
+                .append(options.getTopicSeparator())
+                .append(".+");
         sb.append(options.getTopicSeparator()).append("appId").append("(/.+)?");
 
         String topicRegex = sb.toString();
@@ -405,7 +424,9 @@ public class CloudClientImplTest {
         // Prepare data service mock
         StringBuilder sb = new StringBuilder();
         sb.append("^(").append("\\$EDC").append(options.getTopicSeparator()).append(")?");
-        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+");
+        sb.append(options.getTopicAccountToken())
+                .append(options.getTopicSeparator())
+                .append(".+");
         sb.append(options.getTopicSeparator()).append("appId").append("(/.+)?");
 
         String topicRegex = sb.toString();

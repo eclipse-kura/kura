@@ -23,25 +23,27 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.watchdog.WatchdogService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.watchdog.WatchdogService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.watchdog.WatchdogService.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        })
 @Designate(ocd = WatchdogServiceOptions.class)
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
@@ -83,12 +85,16 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
         this.executor = Executors.newSingleThreadScheduledExecutor();
 
-        this.future = this.executor.scheduleAtFixedRate(() -> {
-            Thread.currentThread().setName(getClass().getSimpleName());
-            if (WatchdogServiceImpl.this.configEnabled) {
-                doWatchdogLoop();
-            }
-        }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
+        this.future = this.executor.scheduleAtFixedRate(
+                () -> {
+                    Thread.currentThread().setName(getClass().getSimpleName());
+                    if (WatchdogServiceImpl.this.configEnabled) {
+                        doWatchdogLoop();
+                    }
+                },
+                0,
+                this.pingInterval,
+                TimeUnit.MILLISECONDS);
     }
 
     @Deactivate
@@ -132,12 +138,16 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                         }
                     }
                 }
-                this.future = this.executor.scheduleAtFixedRate(() -> {
-                    Thread.currentThread().setName(getClass().getSimpleName());
-                    if (WatchdogServiceImpl.this.configEnabled) {
-                        doWatchdogLoop();
-                    }
-                }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
+                this.future = this.executor.scheduleAtFixedRate(
+                        () -> {
+                            Thread.currentThread().setName(getClass().getSimpleName());
+                            if (WatchdogServiceImpl.this.configEnabled) {
+                                doWatchdogLoop();
+                            }
+                        },
+                        0,
+                        this.pingInterval,
+                        TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -159,8 +169,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public void registerCriticalComponent(CriticalComponent criticalComponent) {
-        final CriticalServiceImpl service = new CriticalServiceImpl(criticalComponent.getCriticalComponentName(),
-                criticalComponent.getCriticalComponentTimeout());
+        final CriticalServiceImpl service = new CriticalServiceImpl(
+                criticalComponent.getCriticalComponentName(), criticalComponent.getCriticalComponentTimeout());
         synchronized (criticalServiceList) {
             // avoid to add same component twice (eg in case of a package updating)
             boolean existing = false;
@@ -174,8 +184,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             }
         }
 
-        logger.debug("Added {} , with timeout = {}, list contains {} critical services",
-                criticalComponent.getCriticalComponentName(), criticalComponent.getCriticalComponentTimeout(),
+        logger.debug(
+                "Added {} , with timeout = {}, list contains {} critical services",
+                criticalComponent.getCriticalComponentName(),
+                criticalComponent.getCriticalComponentTimeout(),
                 criticalServiceList.size());
     }
 
@@ -192,9 +204,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     public void unregisterCriticalComponent(CriticalComponent criticalComponent) {
         synchronized (criticalServiceList) {
             for (int i = 0; i < criticalServiceList.size(); i++) {
-                if (criticalComponent.getCriticalComponentName().compareTo(criticalServiceList.get(i).getName()) == 0) {
+                if (criticalComponent
+                                .getCriticalComponentName()
+                                .compareTo(criticalServiceList.get(i).getName())
+                        == 0) {
                     criticalServiceList.remove(i);
-                    logger.debug("Critical service {} removed, {}", criticalComponent.getCriticalComponentName(),
+                    logger.debug(
+                            "Critical service {} removed, {}",
+                            criticalComponent.getCriticalComponentName(),
                             System.currentTimeMillis());
                 }
             }
@@ -251,7 +268,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void refreshWatchdog() {
         File f = new File("/dev/watchdog");
         if (f.exists()) {
-            try (FileOutputStream fos = new FileOutputStream(f); PrintWriter pw = new PrintWriter(fos);) {
+            try (FileOutputStream fos = new FileOutputStream(f);
+                    PrintWriter pw = new PrintWriter(fos); ) {
                 pw.write("w");
                 pw.flush();
                 fos.getFD().sync();

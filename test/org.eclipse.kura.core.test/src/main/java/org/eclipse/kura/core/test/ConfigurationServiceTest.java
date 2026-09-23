@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
+import junit.framework.TestCase;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudletTopic;
@@ -49,8 +49,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import junit.framework.TestCase;
-
 public class ConfigurationServiceTest extends TestCase implements IConfigurationServiceTest, ConfigurableComponent {
 
     private static final Logger s_logger = LoggerFactory.getLogger(ConfigurationServiceTest.class);
@@ -60,7 +58,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
     private static final String RESOURCE_SNAPSHOT = "snapshot";
     private static final String RESOURCE_ROLLBACK = "rollback";
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(4);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(4); // initialize with number of dependencies
     private static Object lock = new Object(); // initialize with number of dependencies
     private static ConfigurationService configService;
     private static SystemService systemService;
@@ -122,7 +120,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         ConfigurationServiceTest.dataService = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(ConfigurationServiceTest.configService);
@@ -153,7 +151,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testLocalConfiguration() throws Exception {
         String pid = "org.eclipse.kura.core.test.IConfigurationServiceTest";
@@ -278,7 +276,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testRemoteConfiguration() throws Exception {
         if (!dataService.isConnected()) {
@@ -294,8 +292,11 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         // load the current configuration
         s_logger.info("loading the current configuration");
 
-        StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
-                .append(RESOURCE_CONFIGURATIONS).append("/").append(pid);
+        StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString())
+                .append("/")
+                .append(RESOURCE_CONFIGURATIONS)
+                .append("/")
+                .append(pid);
 
         KuraResponsePayload resp = cloudEndpointPublisher.call(APP_ID, sb.toString(), null, 10000);
 
@@ -353,8 +354,11 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             payload.setBody(result.getBytes());
         }
 
-        sb = new StringBuilder(CloudletTopic.Method.PUT.toString()).append("/")
-                .append(RESOURCE_CONFIGURATIONS).append("/").append(pid);
+        sb = new StringBuilder(CloudletTopic.Method.PUT.toString())
+                .append("/")
+                .append(RESOURCE_CONFIGURATIONS)
+                .append("/")
+                .append(pid);
 
         long previousUpdateTime = this.updateTime;
 
@@ -371,8 +375,11 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         // reload the current configuration
         s_logger.info("reloading the current configuration");
 
-        sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
-                .append(RESOURCE_CONFIGURATIONS).append("/").append(pid);
+        sb = new StringBuilder(CloudletTopic.Method.GET.toString())
+                .append("/")
+                .append(RESOURCE_CONFIGURATIONS)
+                .append("/")
+                .append(pid);
 
         resp = cloudEndpointPublisher.call(APP_ID, sb.toString(), null, 10000);
 
@@ -388,13 +395,16 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         s_logger.info("validating modified configuration");
         assertNotNull(xmlConfigs);
         ComponentConfiguration ccmod = xmlConfigs.getConfigurations().get(0);
-        s_logger.info("Checking these are equal: " + ccmod.getConfigurationProperties().get("prop.string") + " AND "
-                + "modified_value");
+        s_logger.info("Checking these are equal: "
+                + ccmod.getConfigurationProperties().get("prop.string") + " AND " + "modified_value");
         assertEquals("modified_value", ccmod.getConfigurationProperties().get("prop.string"));
 
         // rollback
-        sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
-                .append(RESOURCE_ROLLBACK).append("/").append(sid);
+        sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
+                .append("/")
+                .append(RESOURCE_ROLLBACK)
+                .append("/")
+                .append(sid);
 
         previousUpdateTime = System.currentTimeMillis();
 
@@ -407,7 +417,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         assertDefaultValues(properties);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testSnapshotsMaxCount() throws Exception {
         int maxCount = ConfigurationServiceTest.systemService.getKuraSnapshotsCount();
@@ -436,43 +446,43 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         assertEquals(b, properties.get("prop.byte"));
 
         // array properties
-        String[] stringValues = new String[] { "value1", "value2", "value3" };
+        String[] stringValues = new String[] {"value1", "value2", "value3"};
         assertTrue(Arrays.equals(stringValues, (String[]) properties.get("prop.string.array")));
 
-        Long[] longValues = new Long[] { 1351589588L, 1351589589L, 1351589590L };
+        Long[] longValues = new Long[] {1351589588L, 1351589589L, 1351589590L};
         assertTrue(Arrays.equals(longValues, (Long[]) properties.get("prop.long.array")));
 
-        Double[] doubleValues = new Double[] { 13515895.88, 13515895.89, 13515895.90 };
+        Double[] doubleValues = new Double[] {13515895.88, 13515895.89, 13515895.90};
         assertTrue(Arrays.equals(doubleValues, (Double[]) properties.get("prop.double.array")));
 
-        Float[] floatValues = new Float[] { 3.14F, 3.15F, 3.16F };
+        Float[] floatValues = new Float[] {3.14F, 3.15F, 3.16F};
         assertTrue(Arrays.equals(floatValues, (Float[]) properties.get("prop.float.array")));
 
-        Integer[] intValues = new Integer[] { 314, 315, 316 };
+        Integer[] intValues = new Integer[] {314, 315, 316};
         assertTrue(Arrays.equals(intValues, (Integer[]) properties.get("prop.integer.array")));
 
-        Character[] charValues = new Character[] { 'c', 'd', 'e' };
+        Character[] charValues = new Character[] {'c', 'd', 'e'};
         assertTrue(Arrays.equals(charValues, (Character[]) properties.get("prop.character.array")));
 
-        Boolean[] boolValues = new Boolean[] { true, false, true };
+        Boolean[] boolValues = new Boolean[] {true, false, true};
         assertTrue(Arrays.equals(boolValues, (Boolean[]) properties.get("prop.boolean.array")));
 
-        Short[] shortValues = new Short[] { (short) 253, (short) 254, (short) 255 };
+        Short[] shortValues = new Short[] {(short) 253, (short) 254, (short) 255};
         assertTrue(Arrays.equals(shortValues, (Short[]) properties.get("prop.short.array")));
 
-        Byte[] byteValues = new Byte[] { (byte) 7, (byte) 8, (byte) 9 };
+        Byte[] byteValues = new Byte[] {(byte) 7, (byte) 8, (byte) 9};
         assertTrue(Arrays.equals(byteValues, (Byte[]) properties.get("prop.byte.array")));
     }
 
     private ServiceReference<Marshaller>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        String filterString =
+                String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Marshaller.class, filterString);
     }
 
     private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        String filterString =
+                String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Unmarshaller.class, filterString);
     }
 

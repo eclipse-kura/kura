@@ -13,7 +13,6 @@
 package org.eclipse.kura.net.status;
 
 import java.util.Objects;
-
 import org.eclipse.kura.net.IPAddress;
 import org.osgi.annotation.versioning.ProviderType;
 

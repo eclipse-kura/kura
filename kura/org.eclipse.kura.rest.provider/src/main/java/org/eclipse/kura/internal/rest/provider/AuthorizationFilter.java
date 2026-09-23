@@ -14,12 +14,6 @@
 
 package org.eclipse.kura.internal.rest.provider;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.annotation.Priority;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +26,10 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 @Priority(Priorities.AUTHORIZATION)
@@ -54,15 +52,21 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             final String rolesAllowedValue = Arrays.toString(rolesAllowed.value());
 
             if (securityContext == null) {
-                logger.warn("Rest request rejected: missing authentication for {} {} (required roles: {})",
-                        request.getMethod(), request.getRequestURI(), rolesAllowedValue);
+                logger.warn(
+                        "Rest request rejected: missing authentication for {} {} (required roles: {})",
+                        request.getMethod(),
+                        request.getRequestURI(),
+                        rolesAllowedValue);
                 context.abortWith(Response.status(Status.FORBIDDEN).build());
                 return;
             }
 
             if (securityContext.getUserPrincipal() == null) {
-                logger.warn("Rest request rejected: missing user principal for {} {} (required roles: {})",
-                        request.getMethod(), request.getRequestURI(), rolesAllowedValue);
+                logger.warn(
+                        "Rest request rejected: missing user principal for {} {} (required roles: {})",
+                        request.getMethod(),
+                        request.getRequestURI(),
+                        rolesAllowedValue);
                 context.abortWith(Response.status(Status.FORBIDDEN).build());
                 return;
             }
@@ -73,11 +77,13 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 }
             }
 
-            logger.warn("Rest request rejected: user '{}' not authorized for {} {} (required roles: {})",
-                    securityContext.getUserPrincipal().getName(), request.getMethod(), request.getRequestURI(),
+            logger.warn(
+                    "Rest request rejected: user '{}' not authorized for {} {} (required roles: {})",
+                    securityContext.getUserPrincipal().getName(),
+                    request.getMethod(),
+                    request.getRequestURI(),
                     rolesAllowedValue);
             context.abortWith(Response.status(Status.FORBIDDEN).build());
         }
     }
-
 }

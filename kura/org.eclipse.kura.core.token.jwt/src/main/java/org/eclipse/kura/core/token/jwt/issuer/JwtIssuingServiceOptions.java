@@ -43,5 +43,4 @@ class JwtIssuingServiceOptions {
     Optional<Duration> getMaximumLifetime() {
         return this.maximumLifetime;
     }
-
 }

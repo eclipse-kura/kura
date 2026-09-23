@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.emulator.Emulator;
@@ -32,17 +31,17 @@ import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.net.NetworkService",
-    immediate = true,
-    service = { org.eclipse.kura.net.NetworkService.class })
+        name = "org.eclipse.kura.net.NetworkService",
+        immediate = true,
+        service = {org.eclipse.kura.net.NetworkService.class})
 public class EmulatedNetworkServiceImpl implements NetworkService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmulatedNetworkServiceImpl.class);
@@ -131,7 +130,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         return interfaceNames;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public List<NetInterface<? extends NetInterfaceAddress>> getNetworkInterfaces() throws KuraException {
         IPAddress netAddress = null;
@@ -167,7 +166,9 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                     isP2p = jnInterface.isPointToPoint();
                     multi = jnInterface.supportsMulticast();
                 } catch (Exception e) {
-                    logger.warn("Exception while getting information for interface {}:{}", jnInterface.getName(),
+                    logger.warn(
+                            "Exception while getting information for interface {}:{}",
+                            jnInterface.getName(),
                             e.getMessage());
                 }
                 ethInterface.setHardwareAddress(hwAddr);
@@ -182,12 +183,13 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                 for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 
-                    netAddress = IPAddress.getByAddress(jnInterfaceAddress.getAddress().getAddress());
+                    netAddress = IPAddress.getByAddress(
+                            jnInterfaceAddress.getAddress().getAddress());
                     addressImpl = new NetInterfaceAddressImpl();
                     addressImpl.setAddress(netAddress);
                     if (jnInterfaceAddress.getBroadcast() != null) {
-                        addressImpl
-                                .setBroadcast(IPAddress.getByAddress(jnInterfaceAddress.getBroadcast().getAddress()));
+                        addressImpl.setBroadcast(IPAddress.getByAddress(
+                                jnInterfaceAddress.getBroadcast().getAddress()));
                     }
                     addressImpl.setNetworkPrefixLength(jnInterfaceAddress.getNetworkPrefixLength());
 
@@ -212,7 +214,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         return Collections.emptyList();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public List<NetInterface<? extends NetInterfaceAddress>> getActiveNetworkInterfaces() throws KuraException {
         IPAddress netAddress = null;
@@ -230,8 +232,11 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
                 try {
                     jnInterface = jnInterfaces.nextElement();
-                    if (jnInterface.isUp() && !jnInterface.isVirtual() && !jnInterface.isLoopback()
-                            && !jnInterface.isPointToPoint() && jnInterface.getHardwareAddress() != null
+                    if (jnInterface.isUp()
+                            && !jnInterface.isVirtual()
+                            && !jnInterface.isLoopback()
+                            && !jnInterface.isPointToPoint()
+                            && jnInterface.getHardwareAddress() != null
                             && !jnInterface.getInterfaceAddresses().isEmpty()) {
 
                         ethInterface = new EthernetInterfaceImpl(jnInterface.getName());
@@ -253,8 +258,8 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                             isP2p = jnInterface.isPointToPoint();
                             multi = jnInterface.supportsMulticast();
                         } catch (Exception e) {
-                            logger.warn("Exception while getting information for interface " + jnInterface.getName(),
-                                    e);
+                            logger.warn(
+                                    "Exception while getting information for interface " + jnInterface.getName(), e);
                         }
                         ethInterface.setHardwareAddress(hwAddr);
                         ethInterface.setLinkUp(isUp);
@@ -268,12 +273,13 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                         jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                         for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 
-                            netAddress = IPAddress.getByAddress(jnInterfaceAddress.getAddress().getAddress());
+                            netAddress = IPAddress.getByAddress(
+                                    jnInterfaceAddress.getAddress().getAddress());
                             addressImpl = new NetInterfaceAddressImpl();
                             addressImpl.setAddress(netAddress);
                             if (jnInterfaceAddress.getBroadcast() != null) {
-                                addressImpl.setBroadcast(
-                                        IPAddress.getByAddress(jnInterfaceAddress.getBroadcast().getAddress()));
+                                addressImpl.setBroadcast(IPAddress.getByAddress(
+                                        jnInterfaceAddress.getBroadcast().getAddress()));
                             }
                             addressImpl.setNetworkPrefixLength(jnInterfaceAddress.getNetworkPrefixLength());
 

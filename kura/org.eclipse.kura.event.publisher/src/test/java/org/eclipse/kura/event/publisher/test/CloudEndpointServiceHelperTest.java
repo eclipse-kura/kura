@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.event.publisher.test;
 
 import static org.junit.Assert.assertNull;
@@ -126,7 +125,7 @@ public class CloudEndpointServiceHelperTest {
     private void whenPublish() {
         try {
             this.helper.publish(new KuraMessage(new KuraPayload()));
-        }catch(Exception e) {
+        } catch (Exception e) {
             this.occurredException = e;
         }
     }
@@ -155,5 +154,4 @@ public class CloudEndpointServiceHelperTest {
     public void cleanup() {
         this.occurredException = null;
     }
-
 }

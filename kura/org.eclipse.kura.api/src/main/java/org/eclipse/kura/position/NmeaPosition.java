@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -70,19 +70,57 @@ public class NmeaPosition {
     }
 
     @SuppressWarnings("checkstyle:parameterNumber")
-    public NmeaPosition(double latDegrees, double lonDegrees, double altDegrees, double speedMps, double trackDegrees,
-            int fixQuality, int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D) {
-        this(latDegrees, lonDegrees, altDegrees, speedMps, trackDegrees, fixQuality, nrSatellites, dop, pdop, hdop,
-                vdop, fix3D, '0', '0', '0');
+    public NmeaPosition(
+            double latDegrees,
+            double lonDegrees,
+            double altDegrees,
+            double speedMps,
+            double trackDegrees,
+            int fixQuality,
+            int nrSatellites,
+            double dop,
+            double pdop,
+            double hdop,
+            double vdop,
+            int fix3D) {
+        this(
+                latDegrees,
+                lonDegrees,
+                altDegrees,
+                speedMps,
+                trackDegrees,
+                fixQuality,
+                nrSatellites,
+                dop,
+                pdop,
+                hdop,
+                vdop,
+                fix3D,
+                '0',
+                '0',
+                '0');
     }
 
     /**
      * @since 2.0
      */
     @SuppressWarnings("checkstyle:parameterNumber")
-    public NmeaPosition(double latDegrees, double lonDegrees, double altDegrees, double speedMps, double trackDegrees,
-            int fixQuality, int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D, char validF,
-            char hemiLat, char hemiLon) {
+    public NmeaPosition(
+            double latDegrees,
+            double lonDegrees,
+            double altDegrees,
+            double speedMps,
+            double trackDegrees,
+            int fixQuality,
+            int nrSatellites,
+            double dop,
+            double pdop,
+            double hdop,
+            double vdop,
+            int fix3D,
+            char validF,
+            char hemiLat,
+            char hemiLon) {
         this.latitudeDegrees = latDegrees;
         this.longitudeDegrees = lonDegrees;
         this.altitudeMeters = altDegrees;
@@ -266,5 +304,4 @@ public class NmeaPosition {
     public void setLongitudeHemisphere(char longitudeHemisphere) {
         this.longitudeHemisphere = longitudeHemisphere;
     }
-
 }

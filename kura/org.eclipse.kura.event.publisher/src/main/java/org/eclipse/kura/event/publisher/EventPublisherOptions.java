@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,12 +14,11 @@ package org.eclipse.kura.event.publisher;
 
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.util.configuration.Property;
 
 public class EventPublisherOptions {
-    
+
     public static final String TOPIC_PREFIX_PROP_NAME = "topic.prefix";
     public static final String TOPIC_PROP_NAME = "topic";
     public static final String QOS_PROP_NAME = "qos";
@@ -32,8 +31,8 @@ public class EventPublisherOptions {
     public static final int DEFAULT_PRIORITY = 7;
     public static final String DEFAULT_ENDPOINT_PID = "org.eclipse.kura.cloud.CloudService";
 
-    private static final Property<String> PROPERTY_CLOUD_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), DEFAULT_ENDPOINT_PID);
+    private static final Property<String> PROPERTY_CLOUD_SERVICE_PID =
+            new Property<>(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), DEFAULT_ENDPOINT_PID);
     private static final Property<String> PROPERTY_TOPIC_PREFIX = new Property<>(TOPIC_PREFIX_PROP_NAME, String.class);
     private static final Property<String> PROPERTY_TOPIC = new Property<>(TOPIC_PROP_NAME, DEFAULT_TOPIC);
     private static final Property<Integer> PROPERTY_QOS = new Property<>(QOS_PROP_NAME, DEFAULT_QOS);

@@ -18,13 +18,11 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -52,9 +50,12 @@ public class XmlEncoderDecoderTest {
     private static final String string = "String";
     private static final String pid = "Pid";
     private static final String hashmapValues = "Hashmap values";
-    private static final String differentInstanceMessage = "Unmarshalled Object from String is not of type %s, but was %s";
-    private static final String missingItemsMessage = "Unmarshalled object does not contain all the value from the marshalled object. Missing value : %s ;";
-    private static final String propertyValueDiffersMessage = "Property value  %s of unmarshalled object from %s differs from original. Orignal : %s ; Received : %s ;";
+    private static final String differentInstanceMessage =
+            "Unmarshalled Object from String is not of type %s, but was %s";
+    private static final String missingItemsMessage =
+            "Unmarshalled object does not contain all the value from the marshalled object. Missing value : %s ;";
+    private static final String propertyValueDiffersMessage =
+            "Property value  %s of unmarshalled object from %s differs from original. Orignal : %s ; Received : %s ;";
 
     @Test
     public void testXmlComponentConfigurationsUnmarshalling() {
@@ -66,116 +67,273 @@ public class XmlEncoderDecoderTest {
 
             // test String unmarshalling
             String marshalledString = xmlMarshallerImpl.marshal(xmlComponentConfigurations);
-            Object unmarshalledObjectFromString = xmlMarshallerImpl.unmarshal(marshalledString,
-                    XmlComponentConfigurations.class);
+            Object unmarshalledObjectFromString =
+                    xmlMarshallerImpl.unmarshal(marshalledString, XmlComponentConfigurations.class);
             assertTrue(
-                    String.format(differentInstanceMessage, XmlComponentConfigurations.class,
+                    String.format(
+                            differentInstanceMessage,
+                            XmlComponentConfigurations.class,
                             unmarshalledObjectFromString.getClass()),
                     unmarshalledObjectFromString instanceof XmlComponentConfigurations);
 
-            XmlComponentConfigurations outputXmlComponentConfigurations = (XmlComponentConfigurations) unmarshalledObjectFromString;
+            XmlComponentConfigurations outputXmlComponentConfigurations =
+                    (XmlComponentConfigurations) unmarshalledObjectFromString;
 
-            assertValuesForEquality(pid, xmlComponentConfigurations.getConfigurations().get(0).getPid(),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getPid(), false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"),
+            assertValuesForEquality(
+                    pid,
+                    xmlComponentConfigurations.getConfigurations().get(0).getPid(),
+                    outputXmlComponentConfigurations.getConfigurations().get(0).getPid(),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("long"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("int"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("int"),
+                    false);
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("long"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("long"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("string"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("string"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("string"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("boolean"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("boolean"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("boolean"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("double"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("double"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("double"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("float"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("float"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("float"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("char"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("char"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("char"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("short"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("short"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("short"),
                     false);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("byte"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("byte"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("byte"),
                     false);
 
             // test Reader unmarshalling
-            Object unmarshalledObjectFromStringReader = xmlMarshallerImpl.unmarshal(marshalledString,
-                    XmlComponentConfigurations.class);
+            Object unmarshalledObjectFromStringReader =
+                    xmlMarshallerImpl.unmarshal(marshalledString, XmlComponentConfigurations.class);
             assertTrue(
-                    String.format(differentInstanceMessage, XmlComponentConfigurations.class,
+                    String.format(
+                            differentInstanceMessage,
+                            XmlComponentConfigurations.class,
                             unmarshalledObjectFromStringReader.getClass()),
                     unmarshalledObjectFromStringReader instanceof XmlComponentConfigurations);
 
             outputXmlComponentConfigurations = (XmlComponentConfigurations) unmarshalledObjectFromStringReader;
 
-            assertValuesForEquality(pid, xmlComponentConfigurations.getConfigurations().get(0).getPid(),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getPid(), true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"),
+            assertValuesForEquality(
+                    pid,
+                    xmlComponentConfigurations.getConfigurations().get(0).getPid(),
+                    outputXmlComponentConfigurations.getConfigurations().get(0).getPid(),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("long"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("int"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("int"),
+                    true);
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("long"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("long"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("string"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("string"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("string"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("boolean"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("boolean"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("boolean"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("double"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("double"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("double"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("float"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("float"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("float"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("char"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("char"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("char"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("short"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("short"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("short"),
                     true);
-            assertValuesForEquality(hashmapValues,
-                    xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("byte"),
-                    outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties()
+            assertValuesForEquality(
+                    hashmapValues,
+                    xmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
+                            .get("byte"),
+                    outputXmlComponentConfigurations
+                            .getConfigurations()
+                            .get(0)
+                            .getConfigurationProperties()
                             .get("byte"),
                     true);
 
@@ -184,7 +342,6 @@ public class XmlEncoderDecoderTest {
             e.printStackTrace();
             fail(e.getMessage());
         }
-
     }
 
     @Test
@@ -204,7 +361,6 @@ public class XmlEncoderDecoderTest {
             e.printStackTrace();
             fail(e.getMessage());
         }
-
     }
 
     @Test
@@ -214,18 +370,21 @@ public class XmlEncoderDecoderTest {
 
             SystemDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
             String marshalledString = xmlMarshallerImpl.marshal(xmlDeploymentPackages);
-            assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()),
+            assertTrue(
+                    String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()),
                     marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
             assertTrue(
                     String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()),
                     marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()));
             assertTrue(
-                    String.format(missingItemsMessage,
+                    String.format(
+                            missingItemsMessage,
                             xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()),
-                    marshalledString
-                            .contains(xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()));
+                    marshalledString.contains(
+                            xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()));
             assertTrue(
-                    String.format(missingItemsMessage,
+                    String.format(
+                            missingItemsMessage,
                             xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()),
                     marshalledString.contains(
                             xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()));
@@ -243,13 +402,17 @@ public class XmlEncoderDecoderTest {
 
             SystemBundles xmlBundles = getSampleBundlesObject();
             String marshalledString = xmlMarshallerImpl.marshal(xmlBundles);
-            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()),
+            assertTrue(
+                    String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()),
                     marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
-            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()),
+            assertTrue(
+                    String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()),
                     marshalledString.contains(xmlBundles.getBundles()[0].getName()));
-            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()),
+            assertTrue(
+                    String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()),
                     marshalledString.contains(xmlBundles.getBundles()[0].getState()));
-            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()),
+            assertTrue(
+                    String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()),
                     marshalledString.contains(xmlBundles.getBundles()[0].getVersion()));
 
         } catch (Exception e) {
@@ -265,7 +428,7 @@ public class XmlEncoderDecoderTest {
         SystemBundle inputXmlBundle = new SystemBundle("raspberry", "3.0.1");
         inputXmlBundle.setId(1);
         inputXmlBundle.setState("New York");
-        xmlBundles.setBundles(new SystemBundle[] { inputXmlBundle });
+        xmlBundles.setBundles(new SystemBundle[] {inputXmlBundle});
 
         return xmlBundles;
     }
@@ -276,12 +439,11 @@ public class XmlEncoderDecoderTest {
         SystemBundle inputXmlBundleInfo = new SystemBundle("XmlBundleInfo", "3.0.1.201");
 
         SystemDeploymentPackage inputXmlDeploymentPackage = new SystemDeploymentPackage("raspberry", "3.0.1");
-        inputXmlDeploymentPackage.setBundleInfos(new SystemBundle[] { inputXmlBundleInfo });
+        inputXmlDeploymentPackage.setBundleInfos(new SystemBundle[] {inputXmlBundleInfo});
 
-        xmlDeploymentPackages.setDeploymentPackages(new SystemDeploymentPackage[] { inputXmlDeploymentPackage });
+        xmlDeploymentPackages.setDeploymentPackages(new SystemDeploymentPackage[] {inputXmlDeploymentPackage});
 
         return xmlDeploymentPackages;
-
     }
 
     private static Tocd getSampleTocdObject() {
@@ -347,11 +509,12 @@ public class XmlEncoderDecoderTest {
         return xmlComponentConfigurations;
     }
 
-    private static void assertValuesForEquality(String name, Object orignal, Object unmarshalled,
-            boolean isStringWriter) {
+    private static void assertValuesForEquality(
+            String name, Object orignal, Object unmarshalled, boolean isStringWriter) {
         String source = isStringWriter ? stringWriter : string;
 
-        assertTrue(String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled),
+        assertTrue(
+                String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled),
                 orignal.equals(unmarshalled));
     }
 
@@ -391,7 +554,7 @@ public class XmlEncoderDecoderTest {
     @Test
     @Ignore
     public void testOCDMarshallUnmarshall() throws Exception { // This test needs to be done as integration test not
-                                                               // unit.
+        // unit.
         XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
 
         String pid = "org.eclipse.kura.cloud.CloudService";
@@ -424,7 +587,7 @@ public class XmlEncoderDecoderTest {
         Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
         assertEquals(properties, properties1);
     }
-    
+
     @Test
     public void testPropertiesMarshallUnmarshallWithStream() throws Exception {
         XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
@@ -460,8 +623,9 @@ public class XmlEncoderDecoderTest {
 
     @Test
     @Ignore
-    public void testOCDMarshallUnmarshallWithStream() throws Exception { // This test needs to be done as integration test not
-                                                               // unit.
+    public void testOCDMarshallUnmarshallWithStream()
+            throws Exception { // This test needs to be done as integration test not
+        // unit.
         XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
 
         String pid = "org.eclipse.kura.cloud.CloudService";

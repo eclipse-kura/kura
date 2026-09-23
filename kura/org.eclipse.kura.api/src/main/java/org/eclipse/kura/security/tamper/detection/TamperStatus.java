@@ -14,7 +14,6 @@ package org.eclipse.kura.security.tamper.detection;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.eclipse.kura.type.TypedValue;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -62,5 +61,4 @@ public class TamperStatus {
     public Map<String, TypedValue<?>> getProperties() {
         return this.properties;
     }
-
 }

@@ -23,7 +23,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
@@ -51,7 +50,8 @@ class TokenFileManager {
         final Path basePath = Paths.get(base);
 
         if (!Files.isDirectory(basePath)) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ERROR,
                     "tmpfs base directory " + basePath.toAbsolutePath()
                             + " does not exist. The platform does not provide a tmpfs mount at this location:"
                             + " set the \"" + TMPFS_BASE_PROPERTY
@@ -84,7 +84,9 @@ class TokenFileManager {
             setPosixPermissions(tokenFile, "r--------");
         } catch (final IOException e) {
             deleteBestEffort(tokenFile, directory);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,
+            throw new KuraException(
+                    KuraErrorCode.INTERNAL_ERROR,
+                    e,
                     "failed to create token file " + tokenFile.toAbsolutePath() + ". Verify that "
                             + basePath.toAbsolutePath() + " is a writable tmpfs mount");
         }
@@ -110,8 +112,7 @@ class TokenFileManager {
 
     private static void setPosixPermissions(final Path path, final String permissions) throws IOException {
         try {
-            Files.setPosixFilePermissions(path,
-                    java.nio.file.attribute.PosixFilePermissions.fromString(permissions));
+            Files.setPosixFilePermissions(path, java.nio.file.attribute.PosixFilePermissions.fromString(permissions));
         } catch (final UnsupportedOperationException e) {
             // Non-POSIX platform (e.g. Windows during development): nothing we can do, warn and continue.
             logger.warn("POSIX file permissions are not supported, unable to restrict access to {}", path, e);

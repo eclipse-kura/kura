@@ -13,7 +13,6 @@
 package org.eclipse.kura.core.testutil;
 
 import java.io.File;
-
 import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;

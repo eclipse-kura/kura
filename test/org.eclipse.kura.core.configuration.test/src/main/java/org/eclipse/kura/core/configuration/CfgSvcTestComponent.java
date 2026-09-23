@@ -14,7 +14,6 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,11 @@ public class CfgSvcTestComponent implements ConfigurableComponent {
         if (logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             for (Entry<String, Object> entry : properties.entrySet()) {
-                sb.append("[").append(entry.getKey()).append("=").append(entry.getValue()).append("], ");
+                sb.append("[")
+                        .append(entry.getKey())
+                        .append("=")
+                        .append(entry.getValue())
+                        .append("], ");
             }
 
             logger.debug("Properties after update: " + sb.toString());

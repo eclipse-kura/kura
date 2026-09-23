@@ -14,13 +14,6 @@
 
 package org.eclipse.kura.internal.rest.provider;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.annotation.Priority;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Priorities;
@@ -29,6 +22,11 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION - 100)
@@ -57,10 +55,13 @@ class IncomingPortCheckFilter implements ContainerRequestFilter {
         final int port = request.getLocalPort();
 
         if (!allowedPorts.contains(port)) {
-            logger.warn("Rest request rejected on port {} for {} {} (allowed ports: {})", port, request.getMethod(),
-                    request.getRequestURI(), allowedPorts);
+            logger.warn(
+                    "Rest request rejected on port {} for {} {} (allowed ports: {})",
+                    port,
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    allowedPorts);
             requestContext.abortWith(Response.status(Response.Status.NOT_FOUND).build());
         }
     }
-
 }

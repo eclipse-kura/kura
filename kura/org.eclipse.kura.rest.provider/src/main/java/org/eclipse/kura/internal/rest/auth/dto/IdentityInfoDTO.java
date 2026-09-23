@@ -37,5 +37,4 @@ public class IdentityInfoDTO {
     public Set<String> getPermissions() {
         return permissions;
     }
-
 }

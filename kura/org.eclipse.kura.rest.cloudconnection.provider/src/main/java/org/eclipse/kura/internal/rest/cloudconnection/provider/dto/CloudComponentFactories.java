@@ -19,8 +19,8 @@ public class CloudComponentFactories {
     private final List<CloudConnectionFactoryInfo> cloudConnectionFactories;
     private final List<PubSubFactoryInfo> pubSubFactories;
 
-    public CloudComponentFactories(List<CloudConnectionFactoryInfo> cloudConnectionFactories,
-            List<PubSubFactoryInfo> pubSubFactories) {
+    public CloudComponentFactories(
+            List<CloudConnectionFactoryInfo> cloudConnectionFactories, List<PubSubFactoryInfo> pubSubFactories) {
 
         this.cloudConnectionFactories = cloudConnectionFactories;
         this.pubSubFactories = pubSubFactories;
@@ -33,5 +33,4 @@ public class CloudComponentFactories {
     public List<PubSubFactoryInfo> getPubSubFactories() {
         return this.pubSubFactories;
     }
-
 }

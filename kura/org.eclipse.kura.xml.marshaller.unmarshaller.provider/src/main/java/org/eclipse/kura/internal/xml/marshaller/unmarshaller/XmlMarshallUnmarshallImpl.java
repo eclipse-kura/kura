@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,7 +29,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.apache.commons.io.input.CharSequenceInputStream;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -46,18 +44,17 @@ import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import org.osgi.service.component.annotations.Component;
 @Component(
-    name = "org.eclipse.kura.xml.marshaller.unmarshaller.provider",
-    immediate = false,
-    service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider" })
+        name = "org.eclipse.kura.xml.marshaller.unmarshaller.provider",
+        immediate = false,
+        service = {org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class},
+        property = {"kura.service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider"})
 public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallUnmarshallImpl.class);
@@ -81,7 +78,6 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, VALUE_CONSTANT);
         }
-
     }
 
     private void marshal(Object object, StreamResult streamResult) throws Exception {
@@ -214,8 +210,11 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     // un-marshalling
     @Override
     public <T> T unmarshal(String stringInput, Class<T> clazz) throws KuraException {
-        CharSequenceInputStream stream = CharSequenceInputStream.builder().setBufferSize(8192)
-                .setCharset(StandardCharsets.UTF_8).setCharSequence(stringInput).get();
+        CharSequenceInputStream stream = CharSequenceInputStream.builder()
+                .setBufferSize(8192)
+                .setCharset(StandardCharsets.UTF_8)
+                .setCharSequence(stringInput)
+                .get();
         return doUnmarshal(stream, clazz);
     }
 

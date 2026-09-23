@@ -28,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.core.data.AutoConnectStrategy.ConnectionManager;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -102,31 +101,31 @@ public class ScheduleStrategyTest {
 
         thenConnectionTaskIsStarted();
     }
-    
+
     @Test
     public void shouldReconnectIfMessageIsSentDuringDisconnect() {
         givenTime("1/1/2000");
         givenCronExpression("0/2 * * * * ?");
         givenScheduleStrategy();
         givenTimeout();
-        
+
         whenScheduleStrategyIsCreatedWithAlternativeConstructor();
-        
+
         whenMessageIsSent();
-        
+
         thenConnectionTaskIsNotStarted();
-        
+
         whenPriorityMessageIsSent();
-        
+
         thenConnectionTaskIsStarted();
-        
-        //Create Minor Delay
+
+        // Create Minor Delay
         whenMessageIsSent();
         whenMessageIsSent();
         whenMessageIsSent();
-        
+
         whenPriorityMessageIsSent();
-        
+
         thenConnectionTaskIsStarted();
     }
 
@@ -143,7 +142,6 @@ public class ScheduleStrategyTest {
         } catch (ParseException e) {
             throw new IllegalStateException("failed to parse cron expression", e);
         }
-
     }
 
     private void givenTime(final String time) {
@@ -183,9 +181,13 @@ public class ScheduleStrategyTest {
 
         this.dataServiceOptions = new DataServiceOptions(properties);
 
-        this.strategy = new ScheduleStrategy(expression, disconnectTimeoutMs,
+        this.strategy = new ScheduleStrategy(
+                expression,
+                disconnectTimeoutMs,
                 this.connectionManagerState.connectionManager,
-                this.executorState.executor, () -> this.now, this.dataServiceOptions);
+                this.executorState.executor,
+                () -> this.now,
+                this.dataServiceOptions);
     }
 
     private void whenScheduleStrategyIsCreatedWithAlternativeConstructor() {
@@ -202,8 +204,8 @@ public class ScheduleStrategyTest {
 
         this.dataServiceOptions = new DataServiceOptions(properties);
 
-        this.strategy = new ScheduleStrategy(this.expression, this.dataServiceOptions,
-                this.connectionManagerState.connectionManager);
+        this.strategy = new ScheduleStrategy(
+                this.expression, this.dataServiceOptions, this.connectionManagerState.connectionManager);
     }
 
     private void whenConnectionIsEstablished() {
@@ -258,19 +260,25 @@ public class ScheduleStrategyTest {
 
         ConnectionManagerState() {
             doAnswer(i -> {
-                startConnectionTask.complete(null);
-                return null;
-            }).when(connectionManager).startConnectionTask();
+                        startConnectionTask.complete(null);
+                        return null;
+                    })
+                    .when(connectionManager)
+                    .startConnectionTask();
 
             doAnswer(i -> {
-                stopConnectionTask.complete(null);
-                return null;
-            }).when(connectionManager).stopConnectionTask();
+                        stopConnectionTask.complete(null);
+                        return null;
+                    })
+                    .when(connectionManager)
+                    .stopConnectionTask();
 
             doAnswer(i -> {
-                disconnect.complete(null);
-                return null;
-            }).when(connectionManager).disconnect();
+                        disconnect.complete(null);
+                        return null;
+                    })
+                    .when(connectionManager)
+                    .disconnect();
 
             when(connectionManager.isConnected()).thenReturn(false);
         }
@@ -284,7 +292,6 @@ public class ScheduleStrategyTest {
         public ExecutorState() {
             Mockito.when(executor.schedule((Runnable) Mockito.any(), Mockito.anyLong(), Mockito.any()))
                     .thenAnswer(i -> {
-
                         this.task.complete(i.getArgument(0, Runnable.class));
                         this.lastDelay.complete(i.getArgument(1, Long.class));
 
@@ -292,10 +299,12 @@ public class ScheduleStrategyTest {
                     });
 
             Mockito.doAnswer(i -> {
-                i.getArgument(0, Runnable.class).run();
+                        i.getArgument(0, Runnable.class).run();
 
-                return Mockito.mock(ScheduledFuture.class);
-            }).when(executor).execute(Mockito.any());
+                        return Mockito.mock(ScheduledFuture.class);
+                    })
+                    .when(executor)
+                    .execute(Mockito.any());
         }
 
         private void triggerTimeout() {

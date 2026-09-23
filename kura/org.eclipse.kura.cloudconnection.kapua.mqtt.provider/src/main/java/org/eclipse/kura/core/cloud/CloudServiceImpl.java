@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -105,13 +104,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -120,23 +112,39 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloud.CloudService",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloud.CloudService.class,
+        name = "org.eclipse.kura.cloud.CloudService",
+        immediate = false,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloud.CloudService.class,
             org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
             org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
             org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
-            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
-    property = { "kura.ui.service.hide:Boolean=true" })
+            org.eclipse.kura.cloudconnection.CloudEndpoint.class
+        },
+        property = {"kura.ui.service.hide:Boolean=true"})
 @Designate(ocd = CloudServiceMetatype.class, factory = true)
 public class CloudServiceImpl
-        implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
-        CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
+        implements CloudService,
+                DataServiceListener,
+                ConfigurableComponent,
+                EventHandler,
+                CloudPayloadProtoBufEncoder,
+                CloudPayloadProtoBufDecoder,
+                RequestHandlerRegistry,
+                CloudConnectionManager,
+                CloudEndpoint {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 
@@ -144,7 +152,8 @@ public class CloudServiceImpl
     private static final String TOPIC_MQTT_APP = "MQTT";
     private static final String CONNECTION_EVENT_PID_PROPERTY_KEY = "cloud.service.pid";
     private static final String SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE = "Cannot setup cloud service connection";
-    private static final String NOTIFICATION_PUBLISHER_PID = "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
+    private static final String NOTIFICATION_PUBLISHER_PID =
+            "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
     private static final String KURA_PAYLOAD = "KuraPayload";
     static final String EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL = "org/osgi/service/deployment/INSTALL";
     static final String EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL = "org/osgi/service/deployment/UNINSTALL";
@@ -233,7 +242,10 @@ public class CloudServiceImpl
         return this.dataService;
     }
 
-    @Reference(name = "SystemAdminService", service = org.eclipse.kura.system.SystemAdminService.class, unbind = "unsetSystemAdminService")
+    @Reference(
+            name = "SystemAdminService",
+            service = org.eclipse.kura.system.SystemAdminService.class,
+            unbind = "unsetSystemAdminService")
     public void setSystemAdminService(SystemAdminService systemAdminService) {
         this.systemAdminService = systemAdminService;
     }
@@ -248,7 +260,10 @@ public class CloudServiceImpl
         return this.systemAdminService;
     }
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -263,7 +278,8 @@ public class CloudServiceImpl
         return this.systemService;
     }
 
-    @Reference(name = "NetworkService",
+    @Reference(
+            name = "NetworkService",
             service = org.eclipse.kura.net.NetworkService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -282,7 +298,8 @@ public class CloudServiceImpl
         return this.networkService;
     }
 
-    @Reference(name = "PositionService",
+    @Reference(
+            name = "PositionService",
             service = org.eclipse.kura.position.PositionService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -312,7 +329,8 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "Unmarshaller",
+    @Reference(
+            name = "Unmarshaller",
             service = org.eclipse.kura.marshalling.Unmarshaller.class,
             target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
             unbind = "unsetJsonUnmarshaller")
@@ -326,7 +344,8 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "Marshaller",
+    @Reference(
+            name = "Marshaller",
             service = org.eclipse.kura.marshalling.Marshaller.class,
             target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
             unbind = "unsetJsonMarshaller")
@@ -340,7 +359,8 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "TamperDetectionService",
+    @Reference(
+            name = "TamperDetectionService",
             service = org.eclipse.kura.security.tamper.detection.TamperDetectionService.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -359,7 +379,8 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "NetworkStatusService",
+    @Reference(
+            name = "NetworkStatusService",
             service = org.eclipse.kura.net.status.NetworkStatusService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -369,7 +390,8 @@ public class CloudServiceImpl
     }
 
     public void unsetNetworkStatusService(NetworkStatusService networkStatusService) {
-        if (this.networkStatusService.isPresent() && this.networkStatusService.get().equals(networkStatusService)) {
+        if (this.networkStatusService.isPresent()
+                && this.networkStatusService.get().equals(networkStatusService)) {
             this.networkStatusService = Optional.empty();
         }
     }
@@ -396,19 +418,27 @@ public class CloudServiceImpl
         //
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
-        String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC,
-                EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL, EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL };
+        String[] eventTopics = {
+            PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
+            TamperEvent.TAMPER_EVENT_TOPIC,
+            EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL,
+            EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL
+        };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
-        this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
-                props);
+        this.cloudServiceRegistration =
+                this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 
         this.dataService.addDataServiceListener(this);
 
         Dictionary<String, Object> notificationPublisherProps = new Hashtable<>();
         notificationPublisherProps.put(KURA_SERVICE_PID, NOTIFICATION_PUBLISHER_PID);
         notificationPublisherProps.put(SERVICE_PID, NOTIFICATION_PUBLISHER_PID);
-        this.notificationPublisherRegistration = this.ctx.getBundleContext().registerService(
-                CloudNotificationPublisher.class.getName(), this.notificationPublisher, notificationPublisherProps);
+        this.notificationPublisherRegistration = this.ctx
+                .getBundleContext()
+                .registerService(
+                        CloudNotificationPublisher.class.getName(),
+                        this.notificationPublisher,
+                        notificationPublisherProps);
 
         //
         // Usually the cloud connection is setup in the
@@ -481,7 +511,8 @@ public class CloudServiceImpl
             return;
         }
 
-        if (TamperEvent.TAMPER_EVENT_TOPIC.equals(topic) && this.dataService.isConnected()
+        if (TamperEvent.TAMPER_EVENT_TOPIC.equals(topic)
+                && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
             logger.debug("CloudServiceImpl: received tamper event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
@@ -610,10 +641,14 @@ public class CloudServiceImpl
 
     private void setupDeviceSubscriptions(boolean subscribe) throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
-        sbDeviceSubscription.append(this.options.getTopicControlPrefix())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicAccountToken())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicClientIdToken())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicWildCard());
+        sbDeviceSubscription
+                .append(this.options.getTopicControlPrefix())
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicAccountToken())
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicClientIdToken())
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(CloudServiceOptions.getTopicWildCard());
 
         // restore or remove default subscriptions
         if (subscribe) {
@@ -678,7 +713,6 @@ public class CloudServiceImpl
                 logger.error("Error during CloudClientListener notification.", e);
             }
         }
-
     }
 
     private KuraPayload encodeKuraPayload(String topic, byte[] payload) {
@@ -707,13 +741,13 @@ public class CloudServiceImpl
                 return;
             }
 
-            callbackExecutor.submit(new MessageHandlerCallable(cloudlet, applicationId, kuraTopic.getApplicationTopic(),
-                    kuraPayload, this));
+            callbackExecutor.submit(new MessageHandlerCallable(
+                    cloudlet, applicationId, kuraTopic.getApplicationTopic(), kuraPayload, this));
         }
         this.cloudClients.stream()
                 .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudClient -> cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(),
-                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
+                .forEach(cloudClient -> cloudClient.onControlMessageArrived(
+                        kuraTopic.getDeviceId(), kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("deviceId", kuraTopic.getDeviceId());
@@ -729,8 +763,8 @@ public class CloudServiceImpl
     private void dispatchDataMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         this.cloudClients.stream()
                 .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudClient -> cloudClient.onMessageArrived(kuraTopic.getDeviceId(),
-                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
+                .forEach(cloudClient -> cloudClient.onMessageArrived(
+                        kuraTopic.getDeviceId(), kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("deviceId", kuraTopic.getDeviceId());
@@ -755,8 +789,8 @@ public class CloudServiceImpl
 
     private boolean isValidMessage(KuraApplicationTopic kuraTopic, KuraPayload kuraPayload) {
         if (this.certificatesService == null) {
-            ServiceReference<CertificatesService> sr = this.ctx.getBundleContext()
-                    .getServiceReference(CertificatesService.class);
+            ServiceReference<CertificatesService> sr =
+                    this.ctx.getBundleContext().getServiceReference(CertificatesService.class);
             if (sr != null) {
                 this.certificatesService = this.ctx.getBundleContext().getService(sr);
             }
@@ -803,11 +837,11 @@ public class CloudServiceImpl
                 .collect(Collectors.toList())
                 .forEach(cloudClient -> cloudClient.onMessageConfirmed(messageId, kuraTopic.getApplicationTopic()));
 
-        this.registeredCloudPublisherDeliveryListeners
-                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
+        this.registeredCloudPublisherDeliveryListeners.forEach(
+                deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
 
-        this.registeredCloudDeliveryListeners
-                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId)));
+        this.registeredCloudDeliveryListeners.forEach(
+                deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId)));
     }
 
     // ----------------------------------------------------------------
@@ -920,8 +954,8 @@ public class CloudServiceImpl
 
             logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
 
-            this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(this::publishDelayedMessage, 30L,
-                    TimeUnit.SECONDS);
+            this.scheduledBirthPublisherFuture =
+                    this.scheduledBirthPublisher.schedule(this::publishDelayedMessage, 30L, TimeUnit.SECONDS);
         }
     }
 
@@ -934,8 +968,12 @@ public class CloudServiceImpl
             KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
-            int id = this.dataService.publish(message.getTopic(), encodedPayload, message.getQos(),
-                    CloudServiceOptions.getLifeCycleMessageRetain(), CloudServiceOptions.getLifeCycleMessagePriority());
+            int id = this.dataService.publish(
+                    message.getTopic(),
+                    encodedPayload,
+                    message.getQos(),
+                    CloudServiceOptions.getLifeCycleMessageRetain(),
+                    CloudServiceOptions.getLifeCycleMessagePriority());
             this.messageId.set(id);
             try {
                 this.messageId.wait(1000);
@@ -997,8 +1035,8 @@ public class CloudServiceImpl
             kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
         } catch (Exception e) {
             // Wrap the received bytes payload into an KuraPayload
-            logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
-                    topic);
+            logger.debug(
+                    "Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.", topic);
             kuraPayload = new KuraPayload();
             kuraPayload.setBody(payload);
         }
@@ -1007,10 +1045,11 @@ public class CloudServiceImpl
 
     private void postConnectionStateChangeEvent(final boolean isConnected) {
 
-        final Map<String, Object> eventProperties = Collections.singletonMap(CONNECTION_EVENT_PID_PROPERTY_KEY,
-                (String) this.ctx.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
+        final Map<String, Object> eventProperties = Collections.singletonMap(CONNECTION_EVENT_PID_PROPERTY_KEY, (String)
+                this.ctx.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 
-        final Event event = isConnected ? new CloudConnectionEstablishedEvent(eventProperties)
+        final Event event = isConnected
+                ? new CloudConnectionEstablishedEvent(eventProperties)
                 : new CloudConnectionLostEvent(eventProperties);
         this.eventAdmin.postEvent(event);
     }
@@ -1194,8 +1233,11 @@ public class CloudServiceImpl
             sb.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
         }
 
-        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(appId);
+        sb.append(CloudServiceOptions.getTopicAccountToken())
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(deviceId)
+                .append(CloudServiceOptions.getTopicSeparator())
+                .append(appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
             sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
@@ -1207,7 +1249,6 @@ public class CloudServiceImpl
     @Override
     public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.add(cloudDeliveryListener);
-
     }
 
     @Override
@@ -1260,8 +1301,8 @@ public class CloudServiceImpl
         try {
             List<String> interfaceIds = networkStatusService.getInterfaceIds();
             for (String interfaceId : interfaceIds) {
-                Optional<NetworkInterfaceStatus> networkInterfaceStatus = networkStatusService
-                        .getNetworkStatus(interfaceId);
+                Optional<NetworkInterfaceStatus> networkInterfaceStatus =
+                        networkStatusService.getNetworkStatus(interfaceId);
                 networkInterfaceStatus.ifPresent(state -> {
                     NetworkInterfaceType type = state.getType();
                     if (NetworkInterfaceType.MODEM.equals(type)) {
@@ -1296,6 +1337,5 @@ public class CloudServiceImpl
         this.imei = modemStatus.getSerialNumber();
         this.rssi = String.valueOf(modemStatus.getSignalStrength());
         this.modemFwVer = modemStatus.getFirmwareVersion();
-
     }
 }

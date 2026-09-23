@@ -32,7 +32,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.junit.After;
@@ -66,7 +65,7 @@ public class WatchdogServiceImplTest {
         }
 
         public synchronized boolean waitForData(int delayMs) { // waits for some data to be written since the last call
-                                                               // to this method
+            // to this method
             if (toString().length() == this.lastLength) {
                 try {
                     this.wait(delayMs);
@@ -149,7 +148,7 @@ public class WatchdogServiceImplTest {
 
         assertTrue(watchdogWriter.waitForData(10000));
         assertTrue(watchdogWriter.toString().endsWith("ww")); // check that the watchdog has been kicked at least twice
-                                                              // and it has not been disabled
+        // and it has not been disabled
     }
 
     private Map<String, Object> getProperties(boolean enabled) {
@@ -362,8 +361,8 @@ public class WatchdogServiceImplTest {
         this.scenarioSvc.activate(getProperties(true));
         awaitPendingUpdate();
 
-        this.scenarioWatchdogEnabledFile = new File(
-                new WatchdogServiceOptions(getProperties(true)).getWatchdogEnabledTemporaryFilePath());
+        this.scenarioWatchdogEnabledFile =
+                new File(new WatchdogServiceOptions(getProperties(true)).getWatchdogEnabledTemporaryFilePath());
         assertTrue(this.scenarioWatchdogEnabledFile.exists());
     }
 
@@ -386,12 +385,10 @@ public class WatchdogServiceImplTest {
 
     private void awaitPendingUpdate()
             throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
-        ScheduledExecutorService pollExecutor = (ScheduledExecutorService) TestUtil.getFieldValue(this.scenarioSvc,
-                "pollExecutor");
-        pollExecutor.submit(() -> {
-        }).get(10, TimeUnit.SECONDS);
+        ScheduledExecutorService pollExecutor =
+                (ScheduledExecutorService) TestUtil.getFieldValue(this.scenarioSvc, "pollExecutor");
+        pollExecutor.submit(() -> {}).get(10, TimeUnit.SECONDS);
     }
-
 }
 
 class TestCC implements CriticalComponent {
@@ -413,5 +410,4 @@ class TestCC implements CriticalComponent {
     public int getCriticalComponentTimeout() {
         return this.timeout;
     }
-
 }

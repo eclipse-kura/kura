@@ -10,5 +10,4 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.util.store.listener;

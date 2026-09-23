@@ -13,7 +13,6 @@
 package org.eclipse.kura.core.testutil.requesthandler;
 
 public enum TransportType {
-
     MQTT("Mqtt"),
     REST("Rest");
 

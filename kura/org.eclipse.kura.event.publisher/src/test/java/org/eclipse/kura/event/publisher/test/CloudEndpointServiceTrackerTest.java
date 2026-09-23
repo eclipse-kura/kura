@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.event.publisher.test;
 
 import static org.mockito.Mockito.mock;
@@ -32,6 +31,7 @@ public class CloudEndpointServiceTrackerTest {
 
     private CloudEndpointServiceTracker tracker;
     private CloudEndpointTrackerListener listener = mock(CloudEndpointTrackerListener.class);
+
     @SuppressWarnings("unchecked")
     private ServiceReference<CloudEndpoint> reference = mock(ServiceReference.class);
 
@@ -106,5 +106,4 @@ public class CloudEndpointServiceTrackerTest {
     private void thenListenerOnCloudEndpointRemoved() {
         verify(this.listener, times(1)).onCloudEndpointRemoved(Mockito.any());
     }
-
 }

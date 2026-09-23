@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.type.TypedValue;
@@ -62,8 +61,8 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
         this.queries = buildSqlWireRecordStoreQueries();
     }
 
-    protected AbstractJdbcWireRecordStoreImpl(ConnectionProvider connectionProvider, String tableName,
-            Set<ConnectionListener> listeners) {
+    protected AbstractJdbcWireRecordStoreImpl(
+            ConnectionProvider connectionProvider, String tableName, Set<ConnectionListener> listeners) {
         this(connectionProvider, tableName);
 
         this.connectionListeners = listeners;
@@ -79,41 +78,46 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
     }
 
     protected void createTable() throws KuraStoreException {
-        this.connectionProvider.withConnection(c -> {
-            execute(c, this.queries.getSqlCreateTable());
-            return null;
-        }, "failed to create table");
+        this.connectionProvider.withConnection(
+                c -> {
+                    execute(c, this.queries.getSqlCreateTable());
+                    return null;
+                },
+                "failed to create table");
     }
 
     protected void createTimestampIndex() throws KuraStoreException {
-        this.connectionProvider.withConnection(c -> {
-            execute(c, this.queries.getSqlCreateTimestampIndex());
-            return null;
-        }, "failed to create index");
+        this.connectionProvider.withConnection(
+                c -> {
+                    execute(c, this.queries.getSqlCreateTimestampIndex());
+                    return null;
+                },
+                "failed to create index");
     }
 
     @Override
     public synchronized void truncate(final int noOfRecordsToKeep) throws KuraStoreException {
 
-        this.connectionProvider.withConnection(c -> {
-            if (noOfRecordsToKeep == 0) {
-                logger.info("Truncating table {}...", escapedTableName);
-                execute(c, this.queries.getSqlTruncateTable());
-            } else {
-                final int tableSize = getTableSize(c);
-                final int deleteCount = Math.max(0, tableSize - noOfRecordsToKeep);
+        this.connectionProvider.withConnection(
+                c -> {
+                    if (noOfRecordsToKeep == 0) {
+                        logger.info("Truncating table {}...", escapedTableName);
+                        execute(c, this.queries.getSqlTruncateTable());
+                    } else {
+                        final int tableSize = getTableSize(c);
+                        final int deleteCount = Math.max(0, tableSize - noOfRecordsToKeep);
 
-                if (deleteCount == 0) {
+                        if (deleteCount == 0) {
+                            return null;
+                        }
+
+                        logger.info("Partially emptying table {}", escapedTableName);
+                        execute(c, MessageFormat.format(this.queries.getSqlDeleteRangeTable(), deleteCount));
+                    }
+
                     return null;
-                }
-
-                logger.info("Partially emptying table {}", escapedTableName);
-                execute(c, MessageFormat.format(this.queries.getSqlDeleteRangeTable(), deleteCount));
-            }
-
-            return null;
-        }, "failed to truncate table");
-
+                },
+                "failed to truncate table");
     }
 
     @Override
@@ -123,22 +127,23 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
 
     @Override
     public synchronized void insertRecords(final List<WireRecord> records) throws KuraStoreException {
-        this.connectionProvider.withConnection(c -> {
+        this.connectionProvider.withConnection(
+                c -> {
+                    for (final WireRecord r : records) {
+                        try {
+                            createColumns(c, r);
+                            insertRecord(c, r);
+                        } catch (final SQLException e) {
+                            logger.info("Reconciling table and columns");
+                            execute(c, this.queries.getSqlCreateTable());
+                            createColumns(c, r);
+                            insertRecord(c, r);
+                        }
+                    }
 
-            for (final WireRecord r : records) {
-                try {
-                    createColumns(c, r);
-                    insertRecord(c, r);
-                } catch (final SQLException e) {
-                    logger.info("Reconciling table and columns");
-                    execute(c, this.queries.getSqlCreateTable());
-                    createColumns(c, r);
-                    insertRecord(c, r);
-                }
-            }
-
-            return null;
-        }, "failed to insert records");
+                    return null;
+                },
+                "failed to insert records");
     }
 
     @Override
@@ -153,12 +158,12 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
         for (Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
 
             createColumn(c, entry.getKey(), entry.getValue(), columnTypes);
-
         }
     }
 
-    protected void createColumn(final Connection c, final String name, final TypedValue<?> value,
-            final Map<String, String> columnTypes) throws SQLException {
+    protected void createColumn(
+            final Connection c, final String name, final TypedValue<?> value, final Map<String, String> columnTypes)
+            throws SQLException {
 
         final Optional<String> mappedType = getMappedSqlType(value);
 
@@ -245,7 +250,6 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
 
             logger.debug("Stored typed value");
         }
-
     }
 
     protected String buildInsertQuerySql(final Map<String, TypedValue<?>> properties) {
@@ -288,8 +292,8 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
     protected int getTableSize(final Connection c) throws SQLException {
         try (final Statement stmt = c.createStatement();
                 final ResultSet rset = stmt.executeQuery(this.queries.getSqlRowCount())) {
-            return JdbcUtil.getFirstColumnValue(() -> stmt.executeQuery(this.queries.getSqlRowCount()),
-                    ResultSet::getInt);
+            return JdbcUtil.getFirstColumnValue(
+                    () -> stmt.executeQuery(this.queries.getSqlRowCount()), ResultSet::getInt);
         }
     }
 
@@ -309,5 +313,4 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
     protected boolean isExplicitCommitEnabled() {
         return false;
     }
-
 }

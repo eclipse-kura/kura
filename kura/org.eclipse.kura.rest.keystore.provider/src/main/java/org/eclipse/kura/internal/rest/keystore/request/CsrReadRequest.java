@@ -35,8 +35,9 @@ public class CsrReadRequest extends CsrInfo implements Validable {
 
     @Override
     public boolean isValid() {
-        return this.getKeystoreServicePid() != null && this.getAlias() != null && this.getSignatureAlgorithm() != null
+        return this.getKeystoreServicePid() != null
+                && this.getAlias() != null
+                && this.getSignatureAlgorithm() != null
                 && this.getAttributes() != null;
     }
-
 }

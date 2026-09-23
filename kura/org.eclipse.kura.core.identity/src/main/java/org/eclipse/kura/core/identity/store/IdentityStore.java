@@ -17,7 +17,6 @@ package org.eclipse.kura.core.identity.store;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityConfigurationComponent;
@@ -26,8 +25,9 @@ interface IdentityStore {
 
     boolean exists(String identityName) throws KuraException;
 
-    Optional<IdentityConfiguration> getIdentityConfiguration(String identityName,
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
+    Optional<IdentityConfiguration> getIdentityConfiguration(
+            String identityName, Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
+            throws KuraException;
 
     List<IdentityConfiguration> getIdentitiesConfiguration(
             Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;

@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.system.SystemService;
 import org.junit.BeforeClass;

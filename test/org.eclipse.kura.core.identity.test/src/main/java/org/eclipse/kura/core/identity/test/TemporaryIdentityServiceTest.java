@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
@@ -55,8 +54,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     public TemporaryIdentityServiceTest() {
         super();
         try {
-            this.identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
+            this.identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail("failed to setup test environment");
             throw new IllegalStateException("unreachable");
@@ -230,8 +229,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         try {
             final AssignedPermissions assignedPermissions = new AssignedPermissions(
                     this.permissions.stream().map(Permission::new).collect(Collectors.toSet()));
-            final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
-                    List.of(assignedPermissions));
+            final IdentityConfiguration identityConfiguration =
+                    new IdentityConfiguration(this.identityName, List.of(assignedPermissions));
 
             this.identityService.createTemporaryIdentity(this.identityName, Duration.ofHours(1));
             this.identityService.updateIdentityConfiguration(identityConfiguration);
@@ -249,10 +248,10 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         try {
             final AssignedPermissions assignedPermissions = new AssignedPermissions(
                     this.permissions.stream().map(Permission::new).collect(Collectors.toSet()));
-            final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(
-                    false, true, Optional.of(this.password.toCharArray()), Optional.empty());
-            final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
-                    List.of(assignedPermissions, passwordConfiguration));
+            final PasswordConfiguration passwordConfiguration =
+                    new PasswordConfiguration(false, true, Optional.of(this.password.toCharArray()), Optional.empty());
+            final IdentityConfiguration identityConfiguration =
+                    new IdentityConfiguration(this.identityName, List.of(assignedPermissions, passwordConfiguration));
 
             this.identityService.createTemporaryIdentity(this.identityName, Duration.ofHours(1));
             this.identityService.updateIdentityConfiguration(identityConfiguration);
@@ -267,8 +266,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         call(() -> {
             final AssignedPermissions assignedPermissions = new AssignedPermissions(
                     this.permissions.stream().map(Permission::new).collect(Collectors.toSet()));
-            final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
-                    List.of(assignedPermissions));
+            final IdentityConfiguration identityConfiguration =
+                    new IdentityConfiguration(this.identityName, List.of(assignedPermissions));
 
             this.identityService.createTemporaryIdentity(this.identityName, Duration.ofHours(1));
             this.identityService.updateIdentityConfiguration(identityConfiguration);

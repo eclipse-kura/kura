@@ -12,6 +12,16 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.service.listing.provider;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response.Status;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -39,36 +48,26 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.runtime.ServiceComponentRuntime;
-import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Path("serviceListing/v1")
 @Component(
-    name = "org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider",
-    immediate = true,
-    service = { org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider",
-        "service.pid=org.eclipse.kura.internal.rest.services.provider.RestServicesProvider",
-        "osgi.jakartars.resource=true" })
+        name = "org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider",
+        immediate = true,
+        service = {org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider.class},
+        property = {
+            "kura.service.pid=org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider",
+            "service.pid=org.eclipse.kura.internal.rest.services.provider.RestServicesProvider",
+            "osgi.jakartars.resource=true"
+        })
 public class RestServiceListingProvider {
 
     private static final String OBJECT_CLASS = "objectClass";
@@ -85,7 +84,8 @@ public class RestServiceListingProvider {
     private ServiceComponentRuntime scr;
     private BundleContext bundleContext;
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -106,12 +106,18 @@ public class RestServiceListingProvider {
         }
     }
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
-    @Reference(name = "ServiceComponentRuntime", service = org.osgi.service.component.runtime.ServiceComponentRuntime.class, unbind = "-")
+    @Reference(
+            name = "ServiceComponentRuntime",
+            service = org.osgi.service.component.runtime.ServiceComponentRuntime.class,
+            unbind = "-")
     public void setServiceComponentRuntime(final ServiceComponentRuntime scr) {
         this.scr = scr;
     }
@@ -135,15 +141,14 @@ public class RestServiceListingProvider {
 
             expectAuthenticatedUser(requestContext);
 
-            final List<ServiceReference<?>> servicesList = Arrays
-                    .asList(bundleContext.getServiceReferences((String) null, (String) null));
+            final List<ServiceReference<?>> servicesList =
+                    Arrays.asList(bundleContext.getServiceReferences((String) null, (String) null));
 
             return new PidSet(getServicePids(servicesList));
 
         } catch (Exception ex) {
             throw DefaultExceptionHandler.toWebApplicationException(ex);
         }
-
     }
 
     /**
@@ -158,8 +163,8 @@ public class RestServiceListingProvider {
     @Path("/servicePids/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PidSet getServicePidsByInterface(final InterfaceNamesDTO interfacesList,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePidsByInterface(
+            final InterfaceNamesDTO interfacesList, @Context final ContainerRequestContext requestContext) {
         try {
 
             expectAuthenticatedUser(requestContext);
@@ -177,8 +182,8 @@ public class RestServiceListingProvider {
     @Path("/servicePids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PidSet getServicePidsByFilter(final FilterDTO filter,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePidsByFilter(
+            final FilterDTO filter, @Context final ContainerRequestContext requestContext) {
         try {
 
             expectAuthenticatedUser(requestContext);
@@ -196,8 +201,8 @@ public class RestServiceListingProvider {
     @Path("/servicePids/satisfyingReference")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PidSet getServicePidsSatisfyingReference(final RefDTO ref,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePidsSatisfyingReference(
+            final RefDTO ref, @Context final ContainerRequestContext requestContext) {
         try {
 
             expectAuthenticatedUser(requestContext);
@@ -238,8 +243,8 @@ public class RestServiceListingProvider {
     @POST
     @Path("/factoryPids/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getFactoryPidsByInterface(final InterfaceNamesDTO interfacesList,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getFactoryPidsByInterface(
+            final InterfaceNamesDTO interfacesList, @Context final ContainerRequestContext requestContext) {
         try {
 
             expectAuthenticatedUser(requestContext);
@@ -247,9 +252,10 @@ public class RestServiceListingProvider {
             interfacesList.validate();
 
             final Set<String> result = getFactoryComponentDescriptors()
-                    .filter(component -> Arrays.asList(component.serviceInterfaces)
-                            .containsAll(interfacesList.getInterfacesIds()))
-                    .map(component -> component.name).collect(Collectors.toSet());
+                    .filter(component ->
+                            Arrays.asList(component.serviceInterfaces).containsAll(interfacesList.getInterfacesIds()))
+                    .map(component -> component.name)
+                    .collect(Collectors.toSet());
 
             return new PidSet(result);
 
@@ -261,8 +267,8 @@ public class RestServiceListingProvider {
     @POST
     @Path("/factoryPids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getFactoryPidsByFilter(final FilterDTO filter,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getFactoryPidsByFilter(
+            final FilterDTO filter, @Context final ContainerRequestContext requestContext) {
         try {
 
             expectAuthenticatedUser(requestContext);
@@ -271,14 +277,17 @@ public class RestServiceListingProvider {
 
             final Filter osgiFilter = FrameworkUtil.createFilter(filter.toOSGIFilter());
 
-            final Set<String> result = getFactoryComponentDescriptors().filter(component -> {
-                final Map<String, Object> properties = new HashMap<>(component.properties);
-                if (component.serviceInterfaces.length != 0) {
-                    properties.put(OBJECT_CLASS, component.serviceInterfaces);
-                }
+            final Set<String> result = getFactoryComponentDescriptors()
+                    .filter(component -> {
+                        final Map<String, Object> properties = new HashMap<>(component.properties);
+                        if (component.serviceInterfaces.length != 0) {
+                            properties.put(OBJECT_CLASS, component.serviceInterfaces);
+                        }
 
-                return osgiFilter.matches(properties);
-            }).map(component -> component.name).collect(Collectors.toSet());
+                        return osgiFilter.matches(properties);
+                    })
+                    .map(component -> component.name)
+                    .collect(Collectors.toSet());
 
             return new PidSet(result);
 
@@ -304,7 +313,8 @@ public class RestServiceListingProvider {
 
     private Set<String> getServicesProvidingInterfaces(final Set<String> interfacesIds) throws InvalidSyntaxException {
 
-        final String filter = new FilterBuilder().and(f -> interfacesIds.forEach(i -> f.property(OBJECT_CLASS, i)))
+        final String filter = new FilterBuilder()
+                .and(f -> interfacesIds.forEach(i -> f.property(OBJECT_CLASS, i)))
                 .build();
 
         return getServicesMatchingFilter(filter);
@@ -312,8 +322,9 @@ public class RestServiceListingProvider {
 
     private Set<String> getServicesMatchingFilter(final String filter) throws InvalidSyntaxException {
 
-        List<ServiceReference<?>> servicesList = Optional
-                .ofNullable(bundleContext.getServiceReferences((String) null, filter)).map(Arrays::asList)
+        List<ServiceReference<?>> servicesList = Optional.ofNullable(
+                        bundleContext.getServiceReferences((String) null, filter))
+                .map(Arrays::asList)
                 .orElseGet(Collections::emptyList);
 
         return getServicePids(servicesList);
@@ -321,15 +332,16 @@ public class RestServiceListingProvider {
 
     private Set<String> getServicePids(final List<ServiceReference<?>> references) {
 
-        return references.stream().filter(s -> s.getProperty(KURA_SERVICE_PID) instanceof String)
-                .map(s -> (String) s.getProperty(KURA_SERVICE_PID)).collect(Collectors.toSet());
-
+        return references.stream()
+                .filter(s -> s.getProperty(KURA_SERVICE_PID) instanceof String)
+                .map(s -> (String) s.getProperty(KURA_SERVICE_PID))
+                .collect(Collectors.toSet());
     }
 
     private Optional<String> getComponentNameFromPid(final String pid) {
         try {
-            final ServiceReference<?>[] refs = bundleContext.getServiceReferences((String) null,
-                    "(kura.service.pid=" + pid + ")");
+            final ServiceReference<?>[] refs =
+                    bundleContext.getServiceReferences((String) null, "(kura.service.pid=" + pid + ")");
 
             if (refs == null || refs.length == 0) {
                 return Optional.empty();
@@ -338,7 +350,8 @@ public class RestServiceListingProvider {
             final ServiceReference<?> ref = refs[0];
 
             final String result = Optional.ofNullable(ref.getProperty("service.factoryPid"))
-                    .flatMap(s -> s instanceof String ? Optional.of((String) s) : Optional.empty()).orElse(pid);
+                    .flatMap(s -> s instanceof String ? Optional.of((String) s) : Optional.empty())
+                    .orElse(pid);
 
             return Optional.of(result);
 
@@ -350,12 +363,12 @@ public class RestServiceListingProvider {
 
     private Optional<String> getReferenceInterface(final String componentName, final String targetRef) {
         return scr.getComponentDescriptionDTOs().stream()
-                .filter(componentDescription -> componentDescription.name.equals(componentName)).findAny()
+                .filter(componentDescription -> componentDescription.name.equals(componentName))
+                .findAny()
                 .flatMap(componentDescription -> Arrays.stream(componentDescription.references)
-                        .filter(reference -> targetRef.equals(reference.name)).findAny()
-                        .map(reference -> reference.interfaceName)
-
-                );
+                        .filter(reference -> targetRef.equals(reference.name))
+                        .findAny()
+                        .map(reference -> reference.interfaceName));
     }
 
     private Stream<ComponentDescriptionDTO> getFactoryComponentDescriptors() {

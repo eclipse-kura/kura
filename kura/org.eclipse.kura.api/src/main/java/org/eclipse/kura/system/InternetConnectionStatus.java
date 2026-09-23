@@ -14,13 +14,11 @@ package org.eclipse.kura.system;
 
 /**
  * Represents the status of the internet connection.
- * 
+ *
  * @since 3.0
  */
 public enum InternetConnectionStatus {
-
     UNAVAILABLE,
     IP_ONLY,
     FULL
-
 }

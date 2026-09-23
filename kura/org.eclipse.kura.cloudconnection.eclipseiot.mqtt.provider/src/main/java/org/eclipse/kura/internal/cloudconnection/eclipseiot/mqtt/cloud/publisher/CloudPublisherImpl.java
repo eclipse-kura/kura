@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
@@ -45,28 +44,32 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true",
-        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
-        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\\-[a-zA-Z0-9]+)?$" })
+        name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {
+            "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+            "kura.ui.service.hide:Boolean=true",
+            "kura.ui.factory.hide=true",
+            "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+            "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\\-[a-zA-Z0-9]+)?$"
+        })
 @Designate(ocd = CloudPublisherMetatype.class, factory = true)
 public class CloudPublisherImpl
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudPublisherDeliveryListener {
@@ -81,8 +84,8 @@ public class CloudPublisherImpl
             if (tempCloudService instanceof CloudConnectionManagerImpl) {
                 CloudPublisherImpl.this.cloudConnectionImpl = (CloudConnectionManagerImpl) tempCloudService;
                 CloudPublisherImpl.this.cloudConnectionImpl.registerCloudConnectionListener(CloudPublisherImpl.this);
-                CloudPublisherImpl.this.cloudConnectionImpl
-                        .registerCloudPublisherDeliveryListener(CloudPublisherImpl.this);
+                CloudPublisherImpl.this.cloudConnectionImpl.registerCloudPublisherDeliveryListener(
+                        CloudPublisherImpl.this);
                 return tempCloudService;
             } else {
                 CloudPublisherImpl.this.bundleContext.ungetService(reference);
@@ -92,17 +95,17 @@ public class CloudPublisherImpl
         }
 
         @Override
-        public void removedService(final ServiceReference<CloudConnectionManager> reference,
-                final CloudConnectionManager service) {
+        public void removedService(
+                final ServiceReference<CloudConnectionManager> reference, final CloudConnectionManager service) {
             CloudPublisherImpl.this.cloudConnectionImpl.unregisterCloudConnectionListener(CloudPublisherImpl.this);
-            CloudPublisherImpl.this.cloudConnectionImpl
-                    .unregisterCloudPublisherDeliveryListener(CloudPublisherImpl.this);
+            CloudPublisherImpl.this.cloudConnectionImpl.unregisterCloudPublisherDeliveryListener(
+                    CloudPublisherImpl.this);
             CloudPublisherImpl.this.cloudConnectionImpl = null;
         }
 
         @Override
-        public void modifiedService(ServiceReference<CloudConnectionManager> reference,
-                CloudConnectionManager service) {
+        public void modifiedService(
+                ServiceReference<CloudConnectionManager> reference, CloudConnectionManager service) {
             // Not needed
         }
     }
@@ -115,7 +118,8 @@ public class CloudPublisherImpl
     private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
     private final Set<CloudDeliveryListener> cloudDeliveryListeners = new CopyOnWriteArraySet<>();
 
-    private ServiceTrackerCustomizer<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTrackerCustomizer;
+    private ServiceTrackerCustomizer<CloudConnectionManager, CloudConnectionManager>
+            cloudConnectionManagerTrackerCustomizer;
     private ServiceTracker<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTracker;
 
     private CloudPublisherOptions cloudPublisherOptions;
@@ -201,16 +205,17 @@ public class CloudPublisherImpl
 
     private void initCloudConnectionManagerTracking() {
         String selectedCloudServicePid = this.cloudPublisherOptions.getCloudServicePid();
-        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
-                CloudConnectionManager.class.getName(), selectedCloudServicePid);
+        String filterString = String.format(
+                "(&(%s=%s)(kura.service.pid=%s))",
+                Constants.OBJECTCLASS, CloudConnectionManager.class.getName(), selectedCloudServicePid);
         Filter filter = null;
         try {
             filter = this.bundleContext.createFilter(filterString);
         } catch (InvalidSyntaxException e) {
             logger.error("Filter setup exception ", e);
         }
-        this.cloudConnectionManagerTracker = new ServiceTracker<>(this.bundleContext, filter,
-                this.cloudConnectionManagerTrackerCustomizer);
+        this.cloudConnectionManagerTracker =
+                new ServiceTracker<>(this.bundleContext, filter, this.cloudConnectionManagerTrackerCustomizer);
         this.cloudConnectionManagerTracker.open();
     }
 
@@ -288,13 +293,14 @@ public class CloudPublisherImpl
         CloudConnectionManagerOptions options = this.cloudConnectionImpl.getCloudConnectionManagerOptions();
         String topicSeparator = options.getTopicSeparator();
 
-        String[] semanticTopicElements = this.cloudPublisherOptions.getSemanticTopic().split(topicSeparator);
+        String[] semanticTopicElements =
+                this.cloudPublisherOptions.getSemanticTopic().split(topicSeparator);
 
         int index = getSemanticTopicComparisonOffset(semanticTopicElements);
         String semanticTopicComparisonElement = semanticTopicElements[index];
 
-        String[] messageSemanticTopicElements = getMessageSemanticTopicElements(topic, topicSeparator,
-                semanticTopicComparisonElement);
+        String[] messageSemanticTopicElements =
+                getMessageSemanticTopicElements(topic, topicSeparator, semanticTopicComparisonElement);
         if (messageSemanticTopicElements.length == 0) {
             return;
         }
@@ -307,12 +313,12 @@ public class CloudPublisherImpl
             index++;
         }
 
-        this.cloudDeliveryListeners
-                .forEach(deliveryListener -> this.worker.execute(() -> deliveryListener.onMessageConfirmed(messageId)));
+        this.cloudDeliveryListeners.forEach(
+                deliveryListener -> this.worker.execute(() -> deliveryListener.onMessageConfirmed(messageId)));
     }
 
-    private String[] getMessageSemanticTopicElements(String topic, String topicSeparator,
-            String semanticTopicComparisonElement) {
+    private String[] getMessageSemanticTopicElements(
+            String topic, String topicSeparator, String semanticTopicComparisonElement) {
         int messagePostfixTopicOffset = topic.indexOf(semanticTopicComparisonElement);
         if (messagePostfixTopicOffset >= 0) {
             String messagePostfixTopic = topic.substring(messagePostfixTopicOffset, topic.length());

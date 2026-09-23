@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -52,8 +51,8 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         this.marshallDoc = doc;
         Element configurations = doc.createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS);
         configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf", "http://eurotech.com/esf/2.0");
-        configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd",
-                "http://www.osgi.org/xmlns/metatype/v1.2.0");
+        configurations.setAttributeNS(
+                "http://www.w3.org/2000/xmlns/", "xmlns:ocd", "http://www.osgi.org/xmlns/metatype/v1.2.0");
         doc.appendChild(configurations);
 
         XmlComponentConfigurations xmlCompConfig = (XmlComponentConfigurations) object;
@@ -97,8 +96,8 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         OCD configOCD = config.getDefinition();
 
         // create configuration element
-        Element configurationElement = this.marshallDoc
-                .createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION);
+        Element configurationElement =
+                this.marshallDoc.createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION);
         Attr propertiesAttribute = this.marshallDoc.createAttribute(CONFIGURATION_PID);
         propertiesAttribute.setNodeValue(configPid);
         configurationElement.setAttributeNode(propertiesAttribute);
@@ -140,8 +139,8 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         String[] values = propertyObj.getValues();
 
         if (values != null) {
-            Element property = this.marshallDoc
-                    .createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION_PROPERTY);
+            Element property =
+                    this.marshallDoc.createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION_PROPERTY);
             Attr attName = this.marshallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME);
             attName.setNodeValue(name);
             property.setAttributeNode(attName);
@@ -160,8 +159,8 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
             property.setAttributeNode(attType);
 
             for (String value : values) {
-                Element valueElem = this.marshallDoc
-                        .createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE);
+                Element valueElem = this.marshallDoc.createElement(
+                        ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE);
                 valueElem.setTextContent(value);
                 property.appendChild(valueElem);
             }

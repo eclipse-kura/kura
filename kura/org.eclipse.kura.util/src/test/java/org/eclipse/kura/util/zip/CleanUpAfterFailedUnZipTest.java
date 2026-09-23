@@ -26,7 +26,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;

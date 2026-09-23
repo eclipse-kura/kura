@@ -22,9 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.StringTokenizer;
-
 import javax.naming.OperationNotSupportedException;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
@@ -386,7 +384,8 @@ public class LinuxProcessUtil {
             return usingBusybox;
         }
 
-        final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
+        final BundleContext ctx =
+                FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
 
         final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
         if (systemServiceRef == null) {

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,7 +16,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.StringJoiner;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +24,7 @@ public class NetUtil {
     private static final String MAC_IS_INVALID_MESSAGE = "mac is invalid: ";
     private static final Logger logger = LoggerFactory.getLogger(NetUtil.class);
 
-    private NetUtil() {
-
-    }
+    private NetUtil() {}
 
     public static String hardwareAddressToString(byte[] macAddress) {
         if (macAddress == null) {
@@ -48,7 +45,7 @@ public class NetUtil {
 
     public static byte[] hardwareAddressToBytes(String macAddress) {
         if (macAddress == null || macAddress.isEmpty()) {
-            return new byte[] { 0, 0, 0, 0, 0, 0 };
+            return new byte[] {0, 0, 0, 0, 0, 0};
         }
 
         String[] items = macAddress.split("\\:");
@@ -129,7 +126,8 @@ public class NetUtil {
                         while (nadrs.hasMoreElements()) {
 
                             InetAddress adr = nadrs.nextElement();
-                            if (adr != null && !adr.isLoopbackAddress()
+                            if (adr != null
+                                    && !adr.isLoopbackAddress()
                                     && (nif.isPointToPoint() || !adr.isLinkLocalAddress())) {
                                 return adr;
                             }

@@ -16,7 +16,6 @@ package org.eclipse.kura.test;
 import java.util.Dictionary;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
@@ -29,15 +28,15 @@ import org.osgi.framework.BundleException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 @Component(
-    name = "org.eclipse.kura.test.RemoteTargetTest",
-    service = {})
+        name = "org.eclipse.kura.test.RemoteTargetTest",
+        service = {})
 public class RemoteTargetTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteTargetTest.class);
@@ -54,7 +53,10 @@ public class RemoteTargetTest {
     private BundleTracker<?> bundleTracker;
     private TestExtender testExtender;
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -77,7 +79,10 @@ public class RemoteTargetTest {
         this.cloudService = null;
     }
 
-    @Reference(name = "ConfigurationAdmin", service = org.osgi.service.cm.ConfigurationAdmin.class, unbind = "unsetConfigAdmin")
+    @Reference(
+            name = "ConfigurationAdmin",
+            service = org.osgi.service.cm.ConfigurationAdmin.class,
+            unbind = "unsetConfigAdmin")
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
     }
@@ -106,8 +111,10 @@ public class RemoteTargetTest {
         logger.debug("systemService.getPlatform(): " + this.systemService.getPlatform());
         this.testExtender = new TestExtender(this.systemService.getPlatform(), componentContext.getBundleContext());
 
-        this.bundleTracker = new BundleTracker<Object>(componentContext.getBundleContext(),
-                Bundle.RESOLVED | Bundle.ACTIVE | Bundle.INSTALLED, this.testExtender);
+        this.bundleTracker = new BundleTracker<Object>(
+                componentContext.getBundleContext(),
+                Bundle.RESOLVED | Bundle.ACTIVE | Bundle.INSTALLED,
+                this.testExtender);
         this.bundleTracker.open();
 
         Bundle[] currentBundles = this.bundleTracker.getBundles();
@@ -155,13 +162,12 @@ public class RemoteTargetTest {
             System.exit(0);
         }
 
-        componentContext.getBundleContext().registerService(CommandProvider.class.getName(),
-                new KuraTestCommandProvider(), null);
+        componentContext
+                .getBundleContext()
+                .registerService(CommandProvider.class.getName(), new KuraTestCommandProvider(), null);
     }
 
-    protected void deactivate(ComponentContext componentContext) {
-
-    }
+    protected void deactivate(ComponentContext componentContext) {}
 
     public static final boolean isTestFragment(Bundle bundle) {
         String header = bundle.getHeaders().get(TEST_HEADER) + "";
@@ -206,8 +212,8 @@ public class RemoteTargetTest {
     private void startingTests() {
         // hijack the settings
         try {
-            Configuration mqttConfig = this.configAdmin
-                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", "?");
+            Configuration mqttConfig = this.configAdmin.getConfiguration(
+                    "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", "?");
             Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
             mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
             mqttProps.put("topic.context.account-name", "EDC-KURA-CI");

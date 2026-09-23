@@ -1,25 +1,23 @@
 /*******************************************************************************
  * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.provider;
 
-import java.security.Principal;
-import java.util.Objects;
-import java.util.Optional;
-
 import jakarta.annotation.Priority;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
-
+import java.security.Principal;
+import java.util.Objects;
+import java.util.Optional;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +49,8 @@ class AuthenticationProviderHolder implements Comparable<AuthenticationProviderH
     }
 
     @Override
-    public Optional<Principal> authenticate(final HttpServletRequest request,
-            final ContainerRequestContext requestContext) {
+    public Optional<Principal> authenticate(
+            final HttpServletRequest request, final ContainerRequestContext requestContext) {
         try {
             return wrapped.authenticate(request, requestContext);
         } catch (final Exception e) {
@@ -100,5 +98,4 @@ class AuthenticationProviderHolder implements Comparable<AuthenticationProviderH
         AuthenticationProviderHolder other = (AuthenticationProviderHolder) obj;
         return priority == other.priority && Objects.equals(wrapped, other.wrapped);
     }
-
 }

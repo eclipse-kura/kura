@@ -13,8 +13,8 @@
 package org.eclipse.kura.core.internal.linux.executor;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
@@ -35,7 +33,6 @@ import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 
 public class ExecutorUtilExecutionTest {
 
@@ -134,28 +131,36 @@ public class ExecutorUtilExecutionTest {
         CommandStatus csSuccess = new CommandStatus(this.command, new LinuxExitStatus(0));
         CommandStatus csFailure = new CommandStatus(this.command, new LinuxExitStatus(1));
         String executableUnprivileged = "su";
-        String[] argumentsUnprivileged = { "kura", "-c", "ENV1=VALUE1 timeout -s SIGHUP 1000 " + COMMAND_STRING };
+        String[] argumentsUnprivileged = {"kura", "-c", "ENV1=VALUE1 timeout -s SIGHUP 1000 " + COMMAND_STRING};
         String executablePrivileged = "/bin/sh";
-        String[] argumentsPrivileged = { "-c", COMMAND_STRING };
+        String[] argumentsPrivileged = {"-c", COMMAND_STRING};
         try {
-            when(deMock.execute(argThat(new CommandLineMatcher(executableUnprivileged, argumentsUnprivileged)),
-                    anyMap())).thenReturn(1);
+            when(deMock.execute(
+                            argThat(new CommandLineMatcher(executableUnprivileged, argumentsUnprivileged)), anyMap()))
+                    .thenReturn(1);
             when(deMock.execute(argThat(new CommandLineMatcher(executablePrivileged, argumentsPrivileged)), anyMap()))
                     .thenReturn(0);
             doAnswer(invocation -> {
-                this.callback.accept(csFailure);
-                return null;
-            }).when(deMock).execute(argThat(new CommandLineMatcher(executableUnprivileged, argumentsUnprivileged)),
-                    anyMap(), any());
+                        this.callback.accept(csFailure);
+                        return null;
+                    })
+                    .when(deMock)
+                    .execute(
+                            argThat(new CommandLineMatcher(executableUnprivileged, argumentsUnprivileged)),
+                            anyMap(),
+                            any());
             doAnswer(invocation -> {
-                this.callback.accept(csSuccess);
-                return null;
-            }).when(deMock).execute(argThat(new CommandLineMatcher(executablePrivileged, argumentsPrivileged)),
-                    anyMap(), any());
+                        this.callback.accept(csSuccess);
+                        return null;
+                    })
+                    .when(deMock)
+                    .execute(
+                            argThat(new CommandLineMatcher(executablePrivileged, argumentsPrivileged)),
+                            anyMap(),
+                            any());
         } catch (IOException e) {
             // Do nothing...
         }
         when(deMock.getWatchdog()).thenReturn(new ExecuteWatchdog(1));
     }
-
 }

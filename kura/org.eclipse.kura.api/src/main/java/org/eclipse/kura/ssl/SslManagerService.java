@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -17,10 +17,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -104,8 +102,14 @@ public interface SslManagerService {
      * @deprecated The methods that allow to explicitly specify a keystore should not be used anymore.
      */
     @Deprecated
-    public SSLSocketFactory getSSLSocketFactory(String protocol, String cipherSuites, String trustStorePath,
-            String keyStorePath, char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException;
+    public SSLSocketFactory getSSLSocketFactory(
+            String protocol,
+            String cipherSuites,
+            String trustStorePath,
+            String keyStorePath,
+            char[] keyStorePassword,
+            String keyAlias)
+            throws GeneralSecurityException, IOException;
 
     /**
      * Shorthand for getSSLContext(String, String, String, String, char[], String, boolean).getSocketFactory().
@@ -130,8 +134,14 @@ public interface SslManagerService {
      * @deprecated The methods that allow to explicitly specify a keystore should not be used anymore.
      */
     @Deprecated
-    public SSLSocketFactory getSSLSocketFactory(String protocol, String cipherSuites, String trustStorePath,
-            String keyStorePath, char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
+    public SSLSocketFactory getSSLSocketFactory(
+            String protocol,
+            String cipherSuites,
+            String trustStorePath,
+            String keyStorePath,
+            char[] keyStorePassword,
+            String keyAlias,
+            boolean hostnameVerification)
             throws GeneralSecurityException, IOException;
 
     /**

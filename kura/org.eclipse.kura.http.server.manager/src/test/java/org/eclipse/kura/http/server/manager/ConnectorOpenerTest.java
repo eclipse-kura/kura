@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eclipse.jetty.server.ServerConnector;
 import org.junit.Test;
 
@@ -74,11 +73,13 @@ public class ConnectorOpenerTest {
     private void givenAConnectorWhosePortIsReleasedAfterFailures(final int failures) throws IOException {
         final AtomicInteger calls = new AtomicInteger();
         doAnswer(invocation -> {
-            if (calls.incrementAndGet() <= failures) {
-                throw this.portInUse;
-            }
-            return null;
-        }).when(this.connector).open();
+                    if (calls.incrementAndGet() <= failures) {
+                        throw this.portInUse;
+                    }
+                    return null;
+                })
+                .when(this.connector)
+                .open();
     }
 
     private void givenAConnectorWhosePortStaysInUse() throws IOException {

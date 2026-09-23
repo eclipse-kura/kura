@@ -10,7 +10,6 @@
  * Contributors:
  *   Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.core.keystore.util;
 
 import java.io.ByteArrayInputStream;
@@ -42,7 +41,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -71,23 +69,21 @@ import org.bouncycastle.util.io.pem.PemReader;
 
 public class CertificateUtil {
 
-    private CertificateUtil() {
-
-    }
+    private CertificateUtil() {}
 
     public static java.security.cert.X509Certificate toJavaX509Certificate(Object o) throws Exception {
         CertificateFactory fac = CertificateFactory.getInstance("X509");
         if (o instanceof X509CertificateHolder) {
-            return (java.security.cert.X509Certificate) fac
-                    .generateCertificate(new ByteArrayInputStream(((X509CertificateHolder) o).getEncoded()));
+            return (java.security.cert.X509Certificate)
+                    fac.generateCertificate(new ByteArrayInputStream(((X509CertificateHolder) o).getEncoded()));
         } else if (o instanceof X509Certificate) {
-            return (java.security.cert.X509Certificate) fac
-                    .generateCertificate(new ByteArrayInputStream(((X509Certificate) o).getEncoded()));
+            return (java.security.cert.X509Certificate)
+                    fac.generateCertificate(new ByteArrayInputStream(((X509Certificate) o).getEncoded()));
         } else if (o instanceof java.security.cert.X509Certificate) {
             return (java.security.cert.X509Certificate) o;
         } else if (o instanceof PemObject) {
-            return (java.security.cert.X509Certificate) fac
-                    .generateCertificate(new ByteArrayInputStream(((PemObject) o).getContent()));
+            return (java.security.cert.X509Certificate)
+                    fac.generateCertificate(new ByteArrayInputStream(((PemObject) o).getContent()));
         }
         throw new IllegalArgumentException("Object not one of X509CertificateHolder, X509Certificate or PemObject.");
     }
@@ -113,7 +109,8 @@ public class CertificateUtil {
 
     public static List<X509Certificate> readPemCertificates(String pemString) throws Exception {
         List<X509Certificate> certs = new ArrayList<>();
-        try (Reader r = new StringReader(pemString); PemReader reader = new PemReader(r);) {
+        try (Reader r = new StringReader(pemString);
+                PemReader reader = new PemReader(r); ) {
 
             PemObject o;
 
@@ -135,10 +132,12 @@ public class CertificateUtil {
      */
     public static PrivateKey readEncryptedPrivateKey(String pemString, String password)
             throws IOException, PKCSException {
-        try (Reader r = new StringReader(pemString); PEMParser pemParser = new PEMParser(r);) {
+        try (Reader r = new StringReader(pemString);
+                PEMParser pemParser = new PEMParser(r); ) {
 
             PrivateKeyInfo privateKeyInfo;
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC")
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter()
+                    .setProvider("BC")
                     .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
 
             Object o = pemParser.readObject();
@@ -147,8 +146,8 @@ public class CertificateUtil {
 
                 PKCS8EncryptedPrivateKeyInfo epki = (PKCS8EncryptedPrivateKeyInfo) o;
 
-                JcePKCSPBEInputDecryptorProviderBuilder builder = new JcePKCSPBEInputDecryptorProviderBuilder()
-                        .setProvider("BC");
+                JcePKCSPBEInputDecryptorProviderBuilder builder =
+                        new JcePKCSPBEInputDecryptorProviderBuilder().setProvider("BC");
 
                 InputDecryptorProvider idp = builder.build(password.toCharArray());
                 privateKeyInfo = epki.decryptPrivateKeyInfo(idp);
@@ -159,7 +158,8 @@ public class CertificateUtil {
 
                 privateKeyInfo = pkp.getPrivateKeyInfo();
             } else {
-                throw new PKCSException("Invalid encrypted private key class: " + o.getClass().getName());
+                throw new PKCSException(
+                        "Invalid encrypted private key class: " + o.getClass().getName());
             }
             return converter.getPrivateKey(privateKeyInfo);
         }
@@ -168,7 +168,8 @@ public class CertificateUtil {
     public static PublicKey readPublicKey(String pemString, String algorithm) throws Exception {
         KeyFactory factory = KeyFactory.getInstance(algorithm);
 
-        try (Reader r = new StringReader(pemString); PemReader pemReader = new PemReader(r)) {
+        try (Reader r = new StringReader(pemString);
+                PemReader pemReader = new PemReader(r)) {
 
             PemObject pemObject = pemReader.readPemObject();
             byte[] content = pemObject.getContent();
@@ -177,8 +178,9 @@ public class CertificateUtil {
         }
     }
 
-    public static X509Certificate[] generateCertificateChain(KeyPair keyPair, String signatureAlgorithm,
-            String attributes, Date startDate, Date endDate) throws OperatorCreationException, CertificateException {
+    public static X509Certificate[] generateCertificateChain(
+            KeyPair keyPair, String signatureAlgorithm, String attributes, Date startDate, Date endDate)
+            throws OperatorCreationException, CertificateException {
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);
         X500Name dnName = new X500Name(attributes);
@@ -186,14 +188,16 @@ public class CertificateUtil {
         // Use the timestamp as serial number
         BigInteger certSerialNumber = BigInteger.valueOf(System.currentTimeMillis());
 
-        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName, certSerialNumber, startDate,
-                endDate, dnName, subjectPublicKeyInfo);
-        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(bcProvider)
+        SubjectPublicKeyInfo subjectPublicKeyInfo =
+                SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
+                dnName, certSerialNumber, startDate, endDate, dnName, subjectPublicKeyInfo);
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm)
+                .setProvider(bcProvider)
                 .build(keyPair.getPrivate());
         X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
 
-        return new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(certificateHolder) };
+        return new X509Certificate[] {new JcaX509CertificateConverter().getCertificate(certificateHolder)};
     }
 
     @SuppressWarnings("unchecked")
@@ -201,25 +205,29 @@ public class CertificateUtil {
 
         List<X509Certificate> certs = readPemCertificates(pemString);
 
-        List<X509CertificateHolder> x509CertificateHolderCerts = certs.stream().map(cert -> {
-            try {
-                return new X509CertificateHolder(cert.getEncoded());
-            } catch (CertificateEncodingException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toList());
+        List<X509CertificateHolder> x509CertificateHolderCerts = certs.stream()
+                .map(cert -> {
+                    try {
+                        return new X509CertificateHolder(cert.getEncoded());
+                    } catch (CertificateEncodingException | IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
 
         return new JcaCertStore(x509CertificateHolderCerts);
     }
 
     public static CertStore toCertStore(Store<?> store) throws Exception {
-        List<?> certificatesX509 = store.getMatches(null).stream().map(t -> {
-            try {
-                return toJavaX509Certificate(t);
-            } catch (Exception ignore) {
-            }
-            return null;
-        }).collect(Collectors.toList());
+        List<?> certificatesX509 = store.getMatches(null).stream()
+                .map(t -> {
+                    try {
+                        return toJavaX509Certificate(t);
+                    } catch (Exception ignore) {
+                    }
+                    return null;
+                })
+                .collect(Collectors.toList());
 
         try {
             return CertStore.getInstance("Collection", new CollectionCertStoreParameters(certificatesX509));
@@ -227,5 +235,4 @@ public class CertificateUtil {
             throw new Exception(e);
         }
     }
-
 }

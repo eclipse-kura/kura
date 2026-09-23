@@ -12,12 +12,13 @@
  ******************************************************************************/
 package org.eclipse.kura.cloudconnection.raw.mqtt.cloud;
 
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Icon;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint", name = "RawMqttCloudEndpoint", description = "A CloudEndpoint that allows to publish MQTT messages without restrictions or assumptions on payload format.", icon = @Icon(resource = "CloudService", size = 32))
-public @interface RawMqttCloudEndpointOptions {
-
-}
-
-
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+        name = "RawMqttCloudEndpoint",
+        description =
+                "A CloudEndpoint that allows to publish MQTT messages without restrictions or assumptions on payload format.",
+        icon = @Icon(resource = "CloudService", size = 32))
+public @interface RawMqttCloudEndpointOptions {}

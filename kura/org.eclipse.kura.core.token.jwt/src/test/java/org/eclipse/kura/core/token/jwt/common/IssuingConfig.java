@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.token.jwt.common;
 
 import java.lang.annotation.Annotation;
-
 import org.eclipse.kura.core.token.jwt.issuer.JwtIssuingServiceOCD;
 
 public final class IssuingConfig {
@@ -24,8 +23,7 @@ public final class IssuingConfig {
     private String issuer = JwtIssuingServiceOCD.DEFAULT_ISSUER;
     private int maximumLifetimeSeconds = JwtIssuingServiceOCD.DEFAULT_MAX_TOKEN_LIFETIME_SEC;
 
-    private IssuingConfig() {
-    }
+    private IssuingConfig() {}
 
     public static IssuingConfig defaults() {
         return new IssuingConfig();
@@ -78,8 +76,6 @@ public final class IssuingConfig {
             public int maximum_lifetime_seconds() {
                 return IssuingConfig.this.maximumLifetimeSeconds;
             }
-
         };
     }
-
 }

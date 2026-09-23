@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.connection.listener;
 
 import org.osgi.annotation.versioning.ConsumerType;

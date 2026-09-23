@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
@@ -35,9 +34,6 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -47,19 +43,25 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.data.DataTransportService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide:Boolean=true" },
-    reference = {
-        @Reference(name = "DataTransportListener",
-                service = org.eclipse.kura.data.DataTransportListener.class,
-                cardinality = ReferenceCardinality.MULTIPLE,
-                policy = ReferencePolicy.DYNAMIC) })
+        name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.data.DataTransportService.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        },
+        property = {"kura.ui.service.hide:Boolean=true", "kura.ui.factory.hide:Boolean=true"},
+        reference = {
+            @Reference(
+                    name = "DataTransportListener",
+                    service = org.eclipse.kura.data.DataTransportListener.class,
+                    cardinality = ReferenceCardinality.MULTIPLE,
+                    policy = ReferencePolicy.DYNAMIC)
+        })
 @Designate(ocd = SparkplugDataTransportMetatype.class, factory = true)
 public class SparkplugDataTransport implements ConfigurableComponent, DataTransportService, MqttCallback {
 
@@ -78,7 +80,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
      * Activation APIs
      */
 
-    @Reference(name = "SslManagerService",
+    @Reference(
+            name = "SslManagerService",
             service = org.eclipse.kura.ssl.SslManagerService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -135,8 +138,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
             boolean wasConnected = isConnected();
 
-            this.dataTransportListeners
-                    .forEach(listener -> InvocationUtils.callSafely(listener::onConfigurationUpdating, wasConnected));
+            this.dataTransportListeners.forEach(
+                    listener -> InvocationUtils.callSafely(listener::onConfigurationUpdating, wasConnected));
 
             try {
                 applyConfiguration(wasConnected);
@@ -158,8 +161,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             connect();
         }
 
-        this.dataTransportListeners
-                .forEach(listener -> InvocationUtils.callSafely(listener::onConfigurationUpdated, wasConnected));
+        this.dataTransportListeners.forEach(
+                listener -> InvocationUtils.callSafely(listener::onConfigurationUpdated, wasConnected));
         logger.info("{} - Updated", this.kuraServicePid);
     }
 
@@ -232,7 +235,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             throws KuraException {
         checkConnected();
 
-        String topic = completeTopic.replace(SparkplugCloudEndpoint.PLACEHOLDER_GROUP_ID, this.options.getGroupId())
+        String topic = completeTopic
+                .replace(SparkplugCloudEndpoint.PLACEHOLDER_GROUP_ID, this.options.getGroupId())
                 .replace(SparkplugCloudEndpoint.PLACEHOLDER_NODE_ID, this.options.getNodeId());
 
         IMqttDeliveryToken deliveryToken = this.client.publish(topic, payload, qos, retain);
@@ -246,13 +250,19 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
     @Override
     public void addDataTransportListener(DataTransportListener listener) {
-        logger.debug("{} - Adding DataTransportListener {}", this.kuraServicePid, listener.getClass().getName());
+        logger.debug(
+                "{} - Adding DataTransportListener {}",
+                this.kuraServicePid,
+                listener.getClass().getName());
         this.dataTransportListeners.add(listener);
     }
 
     @Override
     public void removeDataTransportListener(DataTransportListener listener) {
-        logger.debug("{} - Removing DataTransportListener {}", this.kuraServicePid, listener.getClass().getName());
+        logger.debug(
+                "{} - Removing DataTransportListener {}",
+                this.kuraServicePid,
+                listener.getClass().getName());
         this.dataTransportListeners.remove(listener);
     }
 
@@ -271,12 +281,11 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void deliveryComplete(IMqttDeliveryToken deliveryToken) {
         try {
             if (deliveryToken.getMessage().getQos() > 0) {
-                DataTransportToken dataTransportToken = new DataTransportToken(deliveryToken.getMessageId(),
-                        this.sessionId);
+                DataTransportToken dataTransportToken =
+                        new DataTransportToken(deliveryToken.getMessageId(), this.sessionId);
 
-                this.dataTransportListeners
-                        .forEach(listener -> InvocationUtils.callSafely(listener::onMessageConfirmed,
-                                dataTransportToken));
+                this.dataTransportListeners.forEach(
+                        listener -> InvocationUtils.callSafely(listener::onMessageConfirmed, dataTransportToken));
             }
         } catch (MqttException e) {
             logger.error("{} - Error processing MQTTDeliveryToken", this.kuraServicePid, e);
@@ -287,8 +296,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void messageArrived(String topic, MqttMessage message) {
         logger.debug("{} - Message arrived on topic {} with QoS {}", this.kuraServicePid, topic, message.getQos());
 
-        this.executorService.submit(() -> this.dataTransportListeners.forEach(listener -> listener
-                .onMessageArrived(topic, message.getPayload(), message.getQos(), message.isRetained())));
+        this.executorService.submit(() -> this.dataTransportListeners.forEach(listener ->
+                listener.onMessageArrived(topic, message.getPayload(), message.getQos(), message.isRetained())));
         this.executorService.submit(this.client.getMessageDispatcher(topic, message));
     }
 
@@ -308,5 +317,4 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             this.executorService.shutdownNow();
         }
     }
-
 }

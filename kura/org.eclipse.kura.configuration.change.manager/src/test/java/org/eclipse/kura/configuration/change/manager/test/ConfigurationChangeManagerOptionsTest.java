@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.configuration.change.manager.test;
 
 import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.DEFAULT_ENABLED;
@@ -21,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions;
 import org.junit.Before;
 import org.junit.Test;
@@ -121,7 +119,6 @@ public class ConfigurationChangeManagerOptionsTest {
         assertEquals(expectedValue, (T) this.returnValue);
     }
 
-
     /*
      * Utility
      */
@@ -132,5 +129,4 @@ public class ConfigurationChangeManagerOptionsTest {
         this.options = null;
         this.returnValue = null;
     }
-
 }

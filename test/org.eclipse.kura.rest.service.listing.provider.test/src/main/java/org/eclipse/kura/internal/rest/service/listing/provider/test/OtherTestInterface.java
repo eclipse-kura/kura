@@ -12,5 +12,4 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.service.listing.provider.test;
 
-public interface OtherTestInterface {
-}
+public interface OtherTestInterface {}

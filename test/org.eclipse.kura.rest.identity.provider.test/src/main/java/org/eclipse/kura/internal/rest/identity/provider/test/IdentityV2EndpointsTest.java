@@ -17,6 +17,7 @@ package org.eclipse.kura.internal.rest.identity.provider.test;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +37,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -76,8 +76,6 @@ import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.util.promise.Promise;
 
-import com.google.gson.Gson;
-
 @RunWith(Parameterized.class)
 public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
@@ -105,16 +103,17 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     private AdditionalConfigurationsDTO additionalConfigurations;
     private PermissionConfigurationDTO permissionConfiguration;
 
-    private static PasswordStrengthVerificationService passwordStrengthVerificationServiceMock = mock(
-            PasswordStrengthVerificationService.class);
+    private static PasswordStrengthVerificationService passwordStrengthVerificationServiceMock =
+            mock(PasswordStrengthVerificationService.class);
 
     private final Map<String, MockExtensionHolder> extensions = new HashMap<>();
 
     @Parameterized.Parameters(name = "{0} - {1}")
     public static Collection<?> transports() {
         return Arrays.asList(new Object[][] { //
-                { new MqttTransport(MQTT_APP_ID), "test_user_for_mqtt", "test.permission.for.mqtt" }, //
-                { new RestTransport(REST_APP_ID), "test_user_for_rest", "test.permission.for.rest" } });
+            {new MqttTransport(MQTT_APP_ID), "test_user_for_mqtt", "test.permission.for.mqtt"}, //
+            {new RestTransport(REST_APP_ID), "test_user_for_rest", "test.permission.for.rest"}
+        });
     }
 
     @Test
@@ -148,7 +147,8 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         givenPermissionConfiguration(this.testPermissionName);
         givenPasswordConfiguration("Abcdef1234567@", true, false);
-        givenAdditionalConfigurations(TestComponentConfiguration.forPid("test.extension"),
+        givenAdditionalConfigurations(
+                TestComponentConfiguration.forPid("test.extension"),
                 TestComponentConfiguration.forPid("test2.extension"));
 
         givenIdentityConfigurationFor(new IdentityDTO(this.testUsername));
@@ -167,13 +167,16 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityConfigurationRequestDTO();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/byName",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/identities/byName",
                 gson.toJson(this.identityConfigurationRequestDTO));
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"identity\":{\"name\":\"" + this.testUsername
-                + "\"},\"permissionConfiguration\":{\"permissions\":[{\"name\":\"" + this.testPermissionName
-                + "\"}]},\"passwordConfiguration\":{\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":false},\"additionalConfigurations\":{\"configurations\":[]}}");
+        thenResponseBodyEqualsJson(
+                "{\"identity\":{\"name\":\"" + this.testUsername
+                        + "\"},\"permissionConfiguration\":{\"permissions\":[{\"name\":\"" + this.testPermissionName
+                        + "\"}]},\"passwordConfiguration\":{\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":false},\"additionalConfigurations\":{\"configurations\":[]}}");
     }
 
     @Test
@@ -182,46 +185,50 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
         givenExistingPermission(new PermissionDTO(this.testPermissionName));
         givenIdentityConfigurationRequestDTO();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/default/byName",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/identities/default/byName",
                 gson.toJson(this.identityConfigurationRequestDTO));
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"identity\":{\"name\":\"" + this.testUsername
-                + "\"},\"permissionConfiguration\":{\"permissions\":[]},\"passwordConfiguration\":{\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":false},\"additionalConfigurations\":{\"configurations\":[]}}");
+        thenResponseBodyEqualsJson(
+                "{\"identity\":{\"name\":\"" + this.testUsername
+                        + "\"},\"permissionConfiguration\":{\"permissions\":[]},\"passwordConfiguration\":{\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":false},\"additionalConfigurations\":{\"configurations\":[]}}");
     }
 
     @Test
     public void shouldDeleteExistingIdentity() {
         givenExistingIdentity(new IdentityDTO(this.testUsername));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/identities",
                 gson.toJson(new IdentityDTO(this.testUsername)));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
-
     }
 
     @Test
     public void shouldReturnErrorDeletingNonExistingIdentity() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/identities",
                 gson.toJson(new IdentityDTO(this.testUsername)));
 
         thenResponseCodeIs(404);
         thenResponseBodyEqualsJson("{\"message\":\"Identity not found\"}");
-
     }
 
     @Test
     public void shouldReturnErrorDeletingWithMalformedIdentityRequest() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
-                "{\"nm\":\"identity\"}");
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities", "{\"nm\":\"identity\"}");
 
         thenResponseCodeIs(400);
         thenResponseBodyEqualsJson("{\"message\":\"Missing 'name' property\"}");
-
     }
 
     @Test
@@ -230,7 +237,6 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyIsNotEmpty();
-
     }
 
     @Test
@@ -239,7 +245,6 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyIsNotEmpty();
-
     }
 
     @Test
@@ -251,58 +256,59 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyIsNotEmpty();
-
     }
 
     @Test
     public void shouldCreatePermission() {
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/permissions",
-                gson.toJson(new PermissionDTO(testPermissionName)));
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/permissions", gson.toJson(new PermissionDTO(testPermissionName)));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
-
     }
 
     @Test
     public void shouldDeleteExistingPermission() {
         givenExistingPermission(new PermissionDTO(this.testPermissionName));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/permissions",
                 gson.toJson(new PermissionDTO(this.testPermissionName)));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
-
     }
 
     @Test
     public void shouldReturnErrorDeletingNonExistingPermission() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/permissions",
                 gson.toJson(new PermissionDTO(this.testPermissionName)));
 
         thenResponseCodeIs(404);
         thenResponseBodyEqualsJson("{\"message\":\"Permission not found\"}");
-
     }
 
     @Test
     public void shouldReturnErrorDeletingWithMalformedPermissionRequest() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions",
-                "{\"nm\":\"permission\"}");
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions", "{\"nm\":\"permission\"}");
 
         thenResponseCodeIs(400);
         thenResponseBodyEqualsJson("{\"message\":\"Missing 'name' property\"}");
-
     }
 
     @Test
     public void shouldValidateIdentityConfiguration() {
         givenExistingIdentity(new IdentityDTO(this.testUsername));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/validate",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/identities/validate",
                 gson.toJson(new IdentityConfigurationDTO(new IdentityDTO(this.testUsername))));
 
         thenRequestSucceeds();
@@ -311,17 +317,21 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     @BeforeClass
     public static void setup() {
         try {
-            final ServiceComponentRuntime scr = ServiceUtil
-                    .trackService(ServiceComponentRuntime.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ServiceComponentRuntime scr = ServiceUtil.trackService(
+                            ServiceComponentRuntime.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             disableComponent(scr, "org.eclipse.kura.core.identity.PasswordStrengthVerificationServiceImpl");
 
-            FrameworkUtil.getBundle(IdentityV2EndpointsTest.class).getBundleContext().registerService(
-                    PasswordStrengthVerificationService.class, passwordStrengthVerificationServiceMock,
-                    new Hashtable<>());
+            FrameworkUtil.getBundle(IdentityV2EndpointsTest.class)
+                    .getBundleContext()
+                    .registerService(
+                            PasswordStrengthVerificationService.class,
+                            passwordStrengthVerificationServiceMock,
+                            new Hashtable<>());
 
-            identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
+            identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
@@ -357,15 +367,14 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         this.additionalConfigurations = new AdditionalConfigurationsDTO();
         this.additionalConfigurations.setConfigurations(Stream.of(componentConfigurations)
-                .map(IdentityDTOUtils::fromComponentConfiguration).collect(Collectors.toSet()));
-
+                .map(IdentityDTOUtils::fromComponentConfiguration)
+                .collect(Collectors.toSet()));
     }
 
     private void givenPermissionConfiguration(String... permissionNames) {
         this.permissionConfiguration = new PermissionConfigurationDTO();
         this.permissionConfiguration.setPermissions(new HashSet<PermissionDTO>(
                 Stream.of(permissionNames).map(PermissionDTO::new).collect(Collectors.toList())));
-
     }
 
     private void givenExistingPermission(PermissionDTO permissionDTO) {
@@ -377,8 +386,8 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void givenPasswordConfiguration(String password, boolean passwordAuthEnabled,
-            boolean passwordChangeEnabled) {
+    private void givenPasswordConfiguration(
+            String password, boolean passwordAuthEnabled, boolean passwordChangeEnabled) {
         this.passwordConfiguration = new PasswordConfigurationDTO();
 
         this.passwordConfiguration.setPassword(password);
@@ -418,13 +427,16 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
                 Arrays.asList("AdditionalConfigurations", "AssignedPermissions", "PasswordConfiguration")));
     }
 
-    private void givenPasswordStrenghtServiceMockConfiguration(int passwordMinimumLength, boolean digitsRequired,
-            boolean specialCharactersRequired, boolean bothCasesRequired) {
+    private void givenPasswordStrenghtServiceMockConfiguration(
+            int passwordMinimumLength,
+            boolean digitsRequired,
+            boolean specialCharactersRequired,
+            boolean bothCasesRequired) {
 
         try {
             Mockito.when(passwordStrengthVerificationServiceMock.getPasswordStrengthRequirements())
-                    .thenReturn(new PasswordStrengthRequirements(passwordMinimumLength, digitsRequired,
-                            specialCharactersRequired, bothCasesRequired));
+                    .thenReturn(new PasswordStrengthRequirements(
+                            passwordMinimumLength, digitsRequired, specialCharactersRequired, bothCasesRequired));
         } catch (Exception ex) {
             ex.printStackTrace();
             fail("Unable to configure password strenght requirements");
@@ -446,10 +458,13 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
         return withComponent(scr, componentName, scr::disableComponent);
     }
 
-    private static Future<?> withComponent(final ServiceComponentRuntime scr, final String componentName,
+    private static Future<?> withComponent(
+            final ServiceComponentRuntime scr,
+            final String componentName,
             final Function<ComponentDescriptionDTO, Promise<?>> func) {
         final Optional<ComponentDescriptionDTO> component = scr.getComponentDescriptionDTOs().stream()
-                .filter(d -> Objects.equals(componentName, d.name)).findAny();
+                .filter(d -> Objects.equals(componentName, d.name))
+                .findAny();
 
         final CompletableFuture<Void> result = new CompletableFuture<>();
 
@@ -474,26 +489,30 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
             this.extension = Mockito.mock(IdentityConfigurationExtension.class);
 
             try {
-                Mockito.when(this.extension.getConfiguration(ArgumentMatchers.anyString())).thenAnswer(a -> {
-                    final String name = a.getArgument(0, String.class);
+                Mockito.when(this.extension.getConfiguration(ArgumentMatchers.anyString()))
+                        .thenAnswer(a -> {
+                            final String name = a.getArgument(0, String.class);
 
-                    return Optional.ofNullable(this.configurations.get(name));
-                });
+                            return Optional.ofNullable(this.configurations.get(name));
+                        });
 
-                Mockito.when(this.extension.getDefaultConfiguration(ArgumentMatchers.anyString())).thenAnswer(a -> {
-                    final String name = a.getArgument(0, String.class);
+                Mockito.when(this.extension.getDefaultConfiguration(ArgumentMatchers.anyString()))
+                        .thenAnswer(a -> {
+                            final String name = a.getArgument(0, String.class);
 
-                    return Optional.ofNullable(this.defaultConfigurations.get(name));
-                });
+                            return Optional.ofNullable(this.defaultConfigurations.get(name));
+                        });
 
                 Mockito.doAnswer(i -> {
-                    final String identityName = i.getArgument(0, String.class);
-                    final ComponentConfiguration connfig = i.getArgument(1, ComponentConfiguration.class);
+                            final String identityName = i.getArgument(0, String.class);
+                            final ComponentConfiguration connfig = i.getArgument(1, ComponentConfiguration.class);
 
-                    this.configurations.put(identityName, connfig);
+                            this.configurations.put(identityName, connfig);
 
-                    return (Void) null;
-                }).when(this.extension).updateConfiguration(ArgumentMatchers.anyString(), ArgumentMatchers.any());
+                            return (Void) null;
+                        })
+                        .when(this.extension)
+                        .updateConfiguration(ArgumentMatchers.anyString(), ArgumentMatchers.any());
 
             } catch (KuraException e) {
                 // no need
@@ -502,13 +521,15 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
             final Dictionary<String, Object> properties = new Hashtable<>();
             properties.put("kura.service.pid", pid);
 
-            this.registration = FrameworkUtil.getBundle(IdentityV2EndpointsTest.class).getBundleContext()
+            this.registration = FrameworkUtil.getBundle(IdentityV2EndpointsTest.class)
+                    .getBundleContext()
                     .registerService(IdentityConfigurationExtension.class, this.extension, properties);
         }
 
         void throwOnIdentityValidation(final String identityName) {
             try {
-                Mockito.doThrow(new KuraException(KuraErrorCode.INVALID_PARAMETER)).when(this.extension)
+                Mockito.doThrow(new KuraException(KuraErrorCode.INVALID_PARAMETER))
+                        .when(this.extension)
                         .validateConfiguration(ArgumentMatchers.eq(identityName), ArgumentMatchers.any());
             } catch (KuraException e) {
                 // no need
@@ -561,7 +582,8 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
                 return false;
             }
             TestComponentConfiguration other = (TestComponentConfiguration) obj;
-            return Objects.equals(this.ocd, other.ocd) && Objects.equals(this.pid, other.pid)
+            return Objects.equals(this.ocd, other.ocd)
+                    && Objects.equals(this.pid, other.pid)
                     && Objects.equals(this.properties, other.properties);
         }
 
@@ -570,7 +592,5 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
             return "TestComponentConfiguration [pid=" + this.pid + ", ocd=" + this.ocd + ", properties="
                     + this.properties + "]";
         }
-
     }
-
 }

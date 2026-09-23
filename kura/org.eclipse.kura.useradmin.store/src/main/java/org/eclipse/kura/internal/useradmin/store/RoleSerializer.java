@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.useradmin.store;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonObject.Member;
+import com.eclipsesource.json.JsonValue;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -22,17 +26,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonObject.Member;
-import com.eclipsesource.json.JsonValue;
 
 class RoleSerializer {
 
@@ -46,8 +44,7 @@ class RoleSerializer {
     private static final String GROUP_BASIC_MEMBERS = "basicMembers";
     private static final String GROUP_REQUIRED_MEMBERS = "requiredMembers";
 
-    private RoleSerializer() {
-    }
+    private RoleSerializer() {}
 
     private static JsonArray serializeByteArray(final byte[] value) {
         final JsonArray result = new JsonArray();
@@ -157,7 +154,7 @@ class RoleSerializer {
         return result;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static void deserializeProperties(final JsonObject properties, final Dictionary target) {
         for (final Member member : properties) {
             final JsonValue value = member.getValue();
@@ -171,8 +168,9 @@ class RoleSerializer {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Role> T deserializeRole(final Class<T> classz, final JsonObject object,
-            final RoleBuilder roleBuilder) throws DeserializationException {
+    static <T extends Role> T deserializeRole(
+            final Class<T> classz, final JsonObject object, final RoleBuilder roleBuilder)
+            throws DeserializationException {
         try {
             final int type;
 
@@ -211,8 +209,8 @@ class RoleSerializer {
         }
     }
 
-    private static void assignMembers(final JsonArray members, final Map<String, Role> roles,
-            final Consumer<Role> consumer) {
+    private static void assignMembers(
+            final JsonArray members, final Map<String, Role> roles, final Consumer<Role> consumer) {
         for (final JsonValue value : members.asArray()) {
             final String roleName = value.asString();
 

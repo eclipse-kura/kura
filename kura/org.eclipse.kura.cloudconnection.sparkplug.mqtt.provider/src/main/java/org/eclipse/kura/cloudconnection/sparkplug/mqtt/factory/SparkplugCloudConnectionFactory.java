@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
@@ -28,38 +27,47 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory",
-    service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
-    property = {
-        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint[-optionalSuffix]",
-        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint(\\-[a-zA-Z0-9]+)?$"})
+        name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory",
+        service = {org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class},
+        property = {
+            "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint[-optionalSuffix]",
+            "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint(\\-[a-zA-Z0-9]+)?$"
+        })
 public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
 
-    private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
+    private static final String FACTORY_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
 
-    private static final String CLOUD_ENDPOINT_FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
+    private static final String CLOUD_ENDPOINT_FACTORY_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
     private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID =
             "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
 
-    private static final String CLOUD_ENDPOINT_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
-    private static final String DATA_SERVICE_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService";
-    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
+    private static final String CLOUD_ENDPOINT_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
+    private static final String DATA_SERVICE_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService";
+    private static final String DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
 
-    private static final String DATA_SERVICE_REFERENCE_NAME = "DataService"
-            + ComponentConstants.REFERENCE_TARGET_SUFFIX;
-    private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService"
-            + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+    private static final String DATA_SERVICE_REFERENCE_NAME =
+            "DataService" + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+    private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME =
+            "DataTransportService" + ComponentConstants.REFERENCE_TARGET_SUFFIX;
 
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
     private ConfigurationService configurationService;
 
-    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
+    @Reference(
+            name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -76,26 +84,28 @@ public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
 
         // CloudEndpoint
         Map<String, Object> cloudEndpointProperties = new HashMap<>();
-        cloudEndpointProperties.put(DATA_SERVICE_REFERENCE_NAME,
-                String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
+        cloudEndpointProperties.put(
+                DATA_SERVICE_REFERENCE_NAME, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
         cloudEndpointProperties.put(KURA_CLOUD_CONNECTION_FACTORY_PID, FACTORY_PID);
-        cloudEndpointProperties.put(DATA_TRANSPORT_SERVICE_REFERENCE_NAME,
+        cloudEndpointProperties.put(
+                DATA_TRANSPORT_SERVICE_REFERENCE_NAME,
                 String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
-        this.configurationService.createFactoryConfiguration(CLOUD_ENDPOINT_FACTORY_PID, pid, cloudEndpointProperties,
-                false);
+        this.configurationService.createFactoryConfiguration(
+                CLOUD_ENDPOINT_FACTORY_PID, pid, cloudEndpointProperties, false);
 
         // DataService
         Map<String, Object> dataServiceProperties = new HashMap<>();
-        dataServiceProperties.put(DATA_TRANSPORT_SERVICE_REFERENCE_NAME,
+        dataServiceProperties.put(
+                DATA_TRANSPORT_SERVICE_REFERENCE_NAME,
                 String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
-        this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid,
-                dataServiceProperties, false);
+        this.configurationService.createFactoryConfiguration(
+                DATA_SERVICE_FACTORY_PID, dataServicePid, dataServiceProperties, false);
 
         // DataTransportService
-        this.configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID,
-                dataTransportServicePid, null, true);
+        this.configurationService.createFactoryConfiguration(
+                DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, null, true);
     }
 
     @Override
@@ -123,13 +133,15 @@ public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
 
     @Override
     public Set<String> getManagedCloudConnectionPids() throws KuraException {
-        final BundleContext context = FrameworkUtil.getBundle(SparkplugCloudConnectionFactory.class).getBundleContext();
+        final BundleContext context =
+                FrameworkUtil.getBundle(SparkplugCloudConnectionFactory.class).getBundleContext();
 
         try {
             return context
-                    .getServiceReferences(CloudEndpoint.class,
-                            "(service.factoryPid=" + CLOUD_ENDPOINT_FACTORY_PID + ")")
-                    .stream().map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID))
+                    .getServiceReferences(
+                            CloudEndpoint.class, "(service.factoryPid=" + CLOUD_ENDPOINT_FACTORY_PID + ")")
+                    .stream()
+                    .map(ref -> (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID))
                     .collect(Collectors.toSet());
         } catch (InvalidSyntaxException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, e);
@@ -149,5 +161,4 @@ public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
             return componentPid;
         }
     }
-
 }

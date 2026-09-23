@@ -13,17 +13,18 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.keystore.request.handler;
 
-
 import org.osgi.service.component.annotations.Component;
+
 @Component(
-    name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV1",
-    immediate = true,
-    service = {},
-    property = { "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV1" })
+        name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV1",
+        immediate = true,
+        service = {},
+        property = {
+            "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV1"
+        })
 public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRequestHandler {
 
     public KeystoreServiceRequestHandlerV1() {
         super("KEYS-V1");
     }
-
 }

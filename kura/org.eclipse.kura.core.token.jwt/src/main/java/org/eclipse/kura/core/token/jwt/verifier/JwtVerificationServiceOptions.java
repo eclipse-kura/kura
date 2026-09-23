@@ -60,5 +60,4 @@ class JwtVerificationServiceOptions {
 
         return Collections.unmodifiableSet(result);
     }
-
 }

@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
@@ -37,8 +36,7 @@ public final class TestKeys {
 
     private static KeyPair ecdsaKeyPair;
 
-    private TestKeys() {
-    }
+    private TestKeys() {}
 
     public static synchronized KeyPair rsa(final int index) throws TestCAException {
         KeyPair keyPair = RSA_KEY_PAIRS.get(index);
@@ -75,16 +73,19 @@ public final class TestKeys {
         return certificate(commonName, keyPair, now.minus(DEFAULT_BACKDATE), now.plus(DEFAULT_VALIDITY));
     }
 
-    public static X509Certificate certificate(final String commonName, final KeyPair keyPair, final Instant validFrom,
-            final Instant validTo) throws TestCAException {
+    public static X509Certificate certificate(
+            final String commonName, final KeyPair keyPair, final Instant validFrom, final Instant validTo)
+            throws TestCAException {
 
         final boolean rsa = "RSA".equals(keyPair.getPrivate().getAlgorithm());
 
-        return new TestCA(CertificateCreationOptions.builder(new X500Name("cn=" + commonName + ", dn=kura.test")) //
-                .withSignatureAlgorithm(rsa ? "SHA256withRSA" : "SHA256withECDSA") //
-                .withStartDate(Date.from(validFrom)) //
-                .withEndDate(Date.from(validTo)) //
-                .build(), keyPair).getCertificate();
+        return new TestCA(
+                        CertificateCreationOptions.builder(new X500Name("cn=" + commonName + ", dn=kura.test")) //
+                                .withSignatureAlgorithm(rsa ? "SHA256withRSA" : "SHA256withECDSA") //
+                                .withStartDate(Date.from(validFrom)) //
+                                .withEndDate(Date.from(validTo)) //
+                                .build(),
+                        keyPair)
+                .getCertificate();
     }
-
 }

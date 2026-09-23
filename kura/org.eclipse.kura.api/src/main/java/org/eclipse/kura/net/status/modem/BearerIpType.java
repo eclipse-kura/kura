@@ -17,7 +17,6 @@ package org.eclipse.kura.net.status.modem;
  *
  */
 public enum BearerIpType {
-
     NONE,
     IPV4,
     IPV6,

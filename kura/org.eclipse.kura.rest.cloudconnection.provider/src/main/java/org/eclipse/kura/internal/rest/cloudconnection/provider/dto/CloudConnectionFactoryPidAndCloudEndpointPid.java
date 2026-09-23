@@ -30,5 +30,4 @@ public class CloudConnectionFactoryPidAndCloudEndpointPid {
     public String getCloudEndpointPid() {
         return this.cloudEndpointPid;
     }
-
 }

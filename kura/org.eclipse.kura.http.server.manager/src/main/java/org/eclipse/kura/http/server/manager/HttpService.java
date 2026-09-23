@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.http.server.manager;
 
+import jakarta.servlet.http.HttpServlet;
 import java.util.EventListener;
 import java.util.Map;
 import java.util.Optional;
@@ -20,18 +21,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.servlet.http.HttpServlet;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -40,15 +33,22 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.http.server.manager.HttpService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class, org.osgi.service.event.EventHandler.class },
-    property = {
-        "kura.ui.service.hide:Boolean=true",
-        "event.topics=org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED" })
+        name = "org.eclipse.kura.http.server.manager.HttpService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.configuration.ConfigurableComponent.class, org.osgi.service.event.EventHandler.class
+        },
+        property = {
+            "kura.ui.service.hide:Boolean=true",
+            "event.topics=org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED"
+        })
 @Designate(ocd = HttpServiceMetatype.class)
 public class HttpService implements ConfigurableComponent, EventHandler {
 
@@ -66,7 +66,8 @@ public class HttpService implements ConfigurableComponent, EventHandler {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Future<?> restartTask = CompletableFuture.completedFuture(null);
 
-    @Reference(name = "KeystoreService",
+    @Reference(
+            name = "KeystoreService",
             service = org.eclipse.kura.security.keystore.KeystoreService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policyOption = ReferencePolicyOption.GREEDY,
@@ -76,12 +77,20 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         this.keystoreServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
-    @Reference(name = "HttpServlet", service = jakarta.servlet.http.HttpServlet.class, target = "(http.felix.dispatcher=*)", unbind = "-")
+    @Reference(
+            name = "HttpServlet",
+            service = jakarta.servlet.http.HttpServlet.class,
+            target = "(http.felix.dispatcher=*)",
+            unbind = "-")
     public void setDispatcherServlet(HttpServlet dispatcherServlet) {
         this.dispatcherServlet = dispatcherServlet;
     }
 
-    @Reference(name = "EventListener", service = java.util.EventListener.class, target = "(http.felix.dispatcher=*)", unbind = "-")
+    @Reference(
+            name = "EventListener",
+            service = java.util.EventListener.class,
+            target = "(http.felix.dispatcher=*)",
+            unbind = "-")
     public void setEventListener(EventListener eventListener) {
         this.eventListener = eventListener;
     }
@@ -132,8 +141,8 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         this.executorService.submit(() -> {
             try {
                 logger.info("starting Jetty instance...");
-                this.jettyServerHolder = new JettyServerHolder(options, Optional.ofNullable(this.keystoreService),
-                        this.dispatcherServlet, this.eventListener);
+                this.jettyServerHolder = new JettyServerHolder(
+                        options, Optional.ofNullable(this.keystoreService), this.dispatcherServlet, this.eventListener);
                 logger.info("starting Jetty instance...done");
             } catch (final Exception e) {
                 logger.error("Could not start Jetty Web server", e);
@@ -194,5 +203,4 @@ public class HttpService implements ConfigurableComponent, EventHandler {
             scheduleDeferredRestart();
         }
     }
-
 }

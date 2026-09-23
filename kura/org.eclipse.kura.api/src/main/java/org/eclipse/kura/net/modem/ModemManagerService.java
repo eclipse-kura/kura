@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.net.modem;
 
 import java.util.Collection;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.annotation.versioning.ProviderType;
@@ -29,7 +28,7 @@ public interface ModemManagerService {
 
     /**
      * Returns the modem tracked with the given id.
-     * 
+     *
      * @deprecated since 2.2 use
      *             {@link ModemManagerService#withModemService(String, Function)}
      *             instead
@@ -48,7 +47,7 @@ public interface ModemManagerService {
 
     /**
      * Returns the list of currently tracked modems
-     * 
+     *
      * @deprecated since 2.2 use
      *             {@link ModemManagerService#withAllModemServices(Function)}
      *             instead
@@ -60,9 +59,9 @@ public interface ModemManagerService {
     /**
      * Applies the provided function to the modem named {@code id}.
      * The function will have exclusive access to the modem until it returns.
-     * 
+     *
      * @since 2.2
-     * 
+     *
      * @param <T>
      *             The return type of the function
      * @param id
@@ -80,10 +79,10 @@ public interface ModemManagerService {
     /**
      * Applies the provided function to all currently tracked modems.
      * The function will have exclusive access to the modems until it returns.
-     * 
-     * 
+     *
+     *
      * @since 2.2
-     * 
+     *
      * @param <T>
      *             The return type of the function
      * @param func
@@ -93,9 +92,9 @@ public interface ModemManagerService {
     public <T> T withAllModemServices(ModemFunction<Collection<CellularModem>, T> func) throws KuraException;
 
     /**
-     * 
+     *
      * @since 2.2
-     * 
+     *
      * @param <T>
      * @param <U>
      */

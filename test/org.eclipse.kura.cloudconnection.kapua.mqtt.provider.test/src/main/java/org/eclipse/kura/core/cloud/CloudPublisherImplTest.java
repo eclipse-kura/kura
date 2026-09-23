@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
@@ -73,9 +72,11 @@ public class CloudPublisherImplTest {
 
     public void bindCloudService(CloudService cloudService) throws KuraException {
         cloudServiceImpl = (CloudServiceImpl) cloudService;
-        cfgSvc.createFactoryConfiguration("org.eclipse.kura.cloud.publisher.CloudPublisher",
+        cfgSvc.createFactoryConfiguration(
+                "org.eclipse.kura.cloud.publisher.CloudPublisher",
                 "org.eclipse.kura.cloud.publisher.CloudPublisher-1",
-                Collections.singletonMap(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
+                Collections.singletonMap(
+                        CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
                         "org.eclipse.kura.cloud.CloudService"),
                 true);
         dependencyLatch.countDown();
@@ -98,7 +99,7 @@ public class CloudPublisherImplTest {
         CloudPublisherImplTest.cloudPublisher = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(CloudPublisherImplTest.cfgSvc);
@@ -107,13 +108,13 @@ public class CloudPublisherImplTest {
         assertNotNull(CloudPublisherImplTest.cloudPublisher);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test(expected = IllegalArgumentException.class)
     public void testPublishNullMessage() throws KuraException {
         cloudPublisher.publish(null);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testPublishQos0() throws KuraException {
         KuraPayload payload = new KuraPayload();
@@ -122,20 +123,20 @@ public class CloudPublisherImplTest {
         String result = cloudPublisher.publish(message);
         assertNull(result);
     }
-    
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testPublishQos1() throws KuraException {
         KuraPayload payload = new KuraPayload();
         KuraMessage message = new KuraMessage(payload);
 
-        ComponentConfiguration cloudPubConfig = cfgSvc.getComponentConfiguration("org.eclipse.kura.cloud.publisher.CloudPublisher-1");
+        ComponentConfiguration cloudPubConfig =
+                cfgSvc.getComponentConfiguration("org.eclipse.kura.cloud.publisher.CloudPublisher-1");
         Map<String, Object> cloudPubConfigProps = cloudPubConfig.getConfigurationProperties();
         cloudPubConfigProps.put("qos", 1);
         cfgSvc.updateConfiguration("org.eclipse.kura.cloud.publisher.CloudPublisher-1", cloudPubConfigProps);
-        
+
         String result = cloudPublisher.publish(message);
         assertNotNull(result);
     }
-
 }

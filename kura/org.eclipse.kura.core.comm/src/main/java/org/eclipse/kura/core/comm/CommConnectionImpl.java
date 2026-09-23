@@ -25,13 +25,11 @@ import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.StringJoiner;
-
 import javax.comm.CommPort;
 import javax.comm.CommPortIdentifier;
 import javax.comm.NoSuchPortException;
 import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
@@ -212,7 +210,8 @@ public class CommConnectionImpl implements CommConnection, Closeable {
 
         byte[] dataInBuffer = flushSerialBuffer();
         if (dataInBuffer != null && dataInBuffer.length > 0) {
-            logger.warn("eating bytes in the serial buffer input stream before sending command: {}",
+            logger.warn(
+                    "eating bytes in the serial buffer input stream before sending command: {}",
                     getBytesAsString(dataInBuffer));
         }
         this.outputStream.write(command, 0, command.length);
@@ -247,7 +246,8 @@ public class CommConnectionImpl implements CommConnection, Closeable {
 
         byte[] dataInBuffer = flushSerialBuffer();
         if (dataInBuffer != null && dataInBuffer.length > 0) {
-            logger.warn("eating bytes in the serial buffer input stream before sending command: {}",
+            logger.warn(
+                    "eating bytes in the serial buffer input stream before sending command: {}",
                     getBytesAsString(dataInBuffer));
         }
         this.outputStream.write(command, 0, command.length);

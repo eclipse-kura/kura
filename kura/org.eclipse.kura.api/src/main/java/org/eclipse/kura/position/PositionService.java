@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.position;
 
 import java.time.LocalDateTime;
 import java.util.Set;
-
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.util.position.Position;
 
@@ -63,33 +62,33 @@ public interface PositionService {
      * </ul>
      *
      * @see org.eclipse.kura.position.NmeaPosition NmeaPosition
-     * 
+     *
      * @deprecated Since 2.3 use {@link #getPosition()}. Access to underlying gps data layer is discouraged.
-     * 
+     *
      */
     @Deprecated
     public NmeaPosition getNmeaPosition();
 
     /**
      * Returns the current NMEA time from GGA or ZDA sentence
-     * 
+     *
      * @throws UnsupportedOperetaionException
      *             {@link PositionServiceProvider} could not support this method.
-     * 
+     *
      * @deprecated Since 2.3 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
-     * 
+     *
      */
     @Deprecated
     public String getNmeaTime();
 
     /**
      * Returns the current NMEA date from ZDA sentence
-     * 
+     *
      * @throws UnsupportedOperetaionException
      *             {@link PositionServiceProvider} could not support this method.
-     * 
+     *
      * @deprecated Since 2.3 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
-     * 
+     *
      */
     @Deprecated
     public String getNmeaDate();
@@ -116,9 +115,9 @@ public interface PositionService {
     /**
      * Returns the GNSS System used to get the position information @reference GNSSType. Could be one or more system
      * (eg: GPS + GLONASS).
-     * 
+     *
      * If empty, no recognized GNSS System Type is available.
-     * 
+     *
      * @since 2.8
      */
     public Set<GNSSType> getGnssTypes();

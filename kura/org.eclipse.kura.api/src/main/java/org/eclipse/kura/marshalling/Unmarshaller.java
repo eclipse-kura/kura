@@ -13,7 +13,6 @@
 package org.eclipse.kura.marshalling;
 
 import java.io.InputStream;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -41,7 +40,7 @@ public interface Unmarshaller {
 
     /**
      * Deserialises an object of the specified type from the provided {@link InputStream}
-     * 
+     *
      * @param in
      *            the input stream
      * @param clazz

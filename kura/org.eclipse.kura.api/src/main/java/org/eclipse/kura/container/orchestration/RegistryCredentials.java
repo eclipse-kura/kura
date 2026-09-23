@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 /**
@@ -19,6 +18,4 @@ package org.eclipse.kura.container.orchestration;
  * @since 2.3
  *
  */
-public interface RegistryCredentials {
-
-}
+public interface RegistryCredentials {}

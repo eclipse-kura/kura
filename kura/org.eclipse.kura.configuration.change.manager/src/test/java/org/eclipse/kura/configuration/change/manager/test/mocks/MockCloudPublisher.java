@@ -10,22 +10,19 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.configuration.change.manager.test.mocks;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 public class MockCloudPublisher implements CloudPublisher {
 
@@ -38,7 +35,8 @@ public class MockCloudPublisher implements CloudPublisher {
 
     @Override
     public String publish(KuraMessage message) throws KuraException {
-        JsonArray array = JsonParser.parseString(new String(message.getPayload().getBody())).getAsJsonArray();
+        JsonArray array = JsonParser.parseString(new String(message.getPayload().getBody()))
+                .getAsJsonArray();
         for (JsonElement element : array) {
             this.publishedPids.add(element.getAsJsonObject().get("pid").getAsString());
         }
@@ -69,7 +67,7 @@ public class MockCloudPublisher implements CloudPublisher {
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         // nothing to do
     }
-    
+
     public synchronized boolean isPidPublished(String pid) {
         return this.publishedPids.remove(pid);
     }

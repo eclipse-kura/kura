@@ -17,7 +17,6 @@ package org.eclipse.kura.net.status.modem;
  *
  */
 public enum SimType {
-
     UNKNOWN,
     PHYSICAL,
     ESIM;

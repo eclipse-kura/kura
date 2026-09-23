@@ -42,5 +42,4 @@ public interface ContainerOrchestrationServiceListener {
      * Notifies the listener that the connection to the orchestrator service has been disabled
      */
     public void onDisabled();
-
 }

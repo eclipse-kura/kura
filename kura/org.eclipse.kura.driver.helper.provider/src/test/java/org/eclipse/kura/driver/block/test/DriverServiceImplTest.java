@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.test;
 
 import static org.junit.Assert.assertEquals;
@@ -19,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverService;
@@ -68,8 +66,7 @@ public class DriverServiceImplTest {
             }
 
             @Override
-            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {
-            }
+            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {}
         };
     }
 
@@ -85,8 +82,7 @@ public class DriverServiceImplTest {
             }
 
             @Override
-            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {
-            }
+            protected void ungetDriverServiceReferences(final ServiceReference<Driver>[] refs) {}
         };
     }
 }

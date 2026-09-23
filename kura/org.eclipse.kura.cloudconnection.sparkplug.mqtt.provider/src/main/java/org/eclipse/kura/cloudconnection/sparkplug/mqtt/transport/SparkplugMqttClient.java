@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -21,9 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-
 import javax.net.SocketFactory;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
@@ -40,10 +41,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 public class SparkplugMqttClient {
 
@@ -88,8 +85,10 @@ public class SparkplugMqttClient {
                     newClientConnection();
                 }
 
-                subscribe(SparkplugTopics.getNodeCommandTopic(SparkplugMqttClient.this.groupId,
-                        SparkplugMqttClient.this.nodeId), 1);
+                subscribe(
+                        SparkplugTopics.getNodeCommandTopic(
+                                SparkplugMqttClient.this.groupId, SparkplugMqttClient.this.nodeId),
+                        1);
 
                 if (SparkplugMqttClient.this.primaryHostId.isPresent()) {
                     subscribe(SparkplugTopics.getStateTopic(SparkplugMqttClient.this.primaryHostId.get()), 1);
@@ -106,8 +105,8 @@ public class SparkplugMqttClient {
 
         SessionStatus toTerminated(boolean shouldDisconnectClient, long quiesceTimeout) {
             try {
-                SparkplugMqttClient.this.listeners
-                        .forEach(listener -> InvocationUtils.callSafely(listener::onDisconnecting));
+                SparkplugMqttClient.this.listeners.forEach(
+                        listener -> InvocationUtils.callSafely(listener::onDisconnecting));
 
                 if (SparkplugMqttClient.this.sessionStatus instanceof Established) {
                     sendEdgeNodeDeath();
@@ -117,8 +116,8 @@ public class SparkplugMqttClient {
                     disconnectClient(quiesceTimeout);
                 }
 
-                SparkplugMqttClient.this.listeners
-                        .forEach(listener -> InvocationUtils.callSafely(listener::onDisconnected));
+                SparkplugMqttClient.this.listeners.forEach(
+                        listener -> InvocationUtils.callSafely(listener::onDisconnected));
             } catch (MqttException e) {
                 logger.error("Error terminating Sparkplug Edge Node session", e);
                 return SparkplugMqttClient.this.sessionStatus;
@@ -129,8 +128,8 @@ public class SparkplugMqttClient {
 
         SessionStatus toEstablished() {
             sendEdgeNodeBirth();
-            SparkplugMqttClient.this.listeners
-                    .forEach(listener -> InvocationUtils.callSafely(listener::onConnectionEstablished, true));
+            SparkplugMqttClient.this.listeners.forEach(
+                    listener -> InvocationUtils.callSafely(listener::onConnectionEstablished, true));
             return new Established();
         }
 
@@ -152,8 +151,8 @@ public class SparkplugMqttClient {
                 throw new KuraConnectException(e, "Reconnection aborted: interrupted while waiting to reconnect");
             }
 
-            SparkplugMqttClient.this.client = new MqttAsyncClient(getNextServer(), SparkplugMqttClient.this.clientId,
-                    new MemoryPersistence());
+            SparkplugMqttClient.this.client =
+                    new MqttAsyncClient(getNextServer(), SparkplugMqttClient.this.clientId, new MemoryPersistence());
             SparkplugMqttClient.this.client.setCallback(SparkplugMqttClient.this.callback);
 
             IMqttToken token = SparkplugMqttClient.this.client.connect(SparkplugMqttClient.this.options);
@@ -172,24 +171,24 @@ public class SparkplugMqttClient {
         }
 
         private void setWillMessage() {
-            String topic = SparkplugTopics.getNodeDeathTopic(SparkplugMqttClient.this.groupId,
-                    SparkplugMqttClient.this.nodeId);
+            String topic = SparkplugTopics.getNodeDeathTopic(
+                    SparkplugMqttClient.this.groupId, SparkplugMqttClient.this.nodeId);
             byte[] payload = SparkplugPayloads.getNodeDeathPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent());
             SparkplugMqttClient.this.options.setWill(topic, payload, 1, false);
         }
 
         private void sendEdgeNodeBirth() {
-            String topic = SparkplugTopics.getNodeBirthTopic(SparkplugMqttClient.this.groupId,
-                    SparkplugMqttClient.this.nodeId);
-            byte[] payload = SparkplugPayloads.getNodeBirthPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent(),
-                    0);
+            String topic = SparkplugTopics.getNodeBirthTopic(
+                    SparkplugMqttClient.this.groupId, SparkplugMqttClient.this.nodeId);
+            byte[] payload =
+                    SparkplugPayloads.getNodeBirthPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent(), 0);
             publish(topic, payload, 0, false);
             logger.debug("Published Edge Node BIRTH with bdSeq {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
         }
 
         private void sendEdgeNodeDeath() {
-            String topic = SparkplugTopics.getNodeDeathTopic(SparkplugMqttClient.this.groupId,
-                    SparkplugMqttClient.this.nodeId);
+            String topic = SparkplugTopics.getNodeDeathTopic(
+                    SparkplugMqttClient.this.groupId, SparkplugMqttClient.this.nodeId);
             byte[] payload = SparkplugPayloads.getNodeDeathPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent());
             publish(topic, payload, 0, false);
             logger.debug("Published Edge Node DEATH with bdSeq {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
@@ -212,13 +211,12 @@ public class SparkplugMqttClient {
 
         private void setSocketFactory(String server) throws GeneralSecurityException, IOException {
             if (server.startsWith("ssl")) {
-                SparkplugMqttClient.this.options
-                        .setSocketFactory(SparkplugMqttClient.this.sslManagerService.getSSLSocketFactory());
+                SparkplugMqttClient.this.options.setSocketFactory(
+                        SparkplugMqttClient.this.sslManagerService.getSSLSocketFactory());
             } else {
                 SparkplugMqttClient.this.options.setSocketFactory(SocketFactory.getDefault());
             }
         }
-
     }
 
     private class Terminated extends SessionStatus {
@@ -237,7 +235,6 @@ public class SparkplugMqttClient {
         public SessionStatus confirmSession() {
             return this;
         }
-
     }
 
     private class Establishing extends SessionStatus {
@@ -256,7 +253,6 @@ public class SparkplugMqttClient {
         public SessionStatus confirmSession() {
             return toEstablished();
         }
-
     }
 
     private class Established extends SessionStatus {
@@ -275,15 +271,17 @@ public class SparkplugMqttClient {
         public SessionStatus confirmSession() {
             return toEstablished();
         }
-
     }
 
     /*
      * Public methods
      */
 
-    public SparkplugMqttClient(SparkplugDataTransportOptions options, MqttCallback callback,
-            Set<DataTransportListener> listeners, SslManagerService sslManagerService) {
+    public SparkplugMqttClient(
+            SparkplugDataTransportOptions options,
+            MqttCallback callback,
+            Set<DataTransportListener> listeners,
+            SslManagerService sslManagerService) {
         this.servers = options.getServers();
         this.serversIterator = this.servers.iterator();
         this.clientId = options.getClientId();
@@ -301,12 +299,16 @@ public class SparkplugMqttClient {
         logger.info(
                 "Sparkplug MQTT client updated" + "\n\tServers: {}" + "\n\tClient ID: {}" + "\n\tGroup ID: {}"
                         + "\n\tNode ID: {}" + "\n\tPrimary Host Application ID: {}" + "\n\tConnection Timeout (ms): {}",
-                this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs);
+                this.servers,
+                this.clientId,
+                this.groupId,
+                this.nodeId,
+                this.primaryHostId,
+                this.connectionTimeoutMs);
     }
 
     public synchronized boolean isSessionEstablished() {
-        return this.sessionStatus instanceof Established && Objects.nonNull(this.client)
-                && this.client.isConnected();
+        return this.sessionStatus instanceof Established && Objects.nonNull(this.client) && this.client.isConnected();
     }
 
     public synchronized void handleConnectionLost() {
@@ -317,7 +319,7 @@ public class SparkplugMqttClient {
         logger.debug("Requested session establishment");
         doSessionTransition(this.sessionStatus.establishSession(shouldConnectClient));
     }
-    
+
     public synchronized void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
         logger.debug("Requested session termination");
         doSessionTransition(this.sessionStatus.terminateSession(shouldDisconnectClient, quiesceTimeout));
@@ -348,7 +350,7 @@ public class SparkplugMqttClient {
             logger.error("Error subscribing to topic {} with QoS {}", topic, qos, e);
         }
     }
-    
+
     public synchronized void unsubscribe(String topic) {
         try {
             IMqttToken token = this.client.unsubscribe(topic);
@@ -382,8 +384,8 @@ public class SparkplugMqttClient {
     }
 
     private synchronized void dispatchMessage(String topic, MqttMessage message) {
-        boolean isValidStateMessage = this.primaryHostId.isPresent()
-                && topic.equals(SparkplugTopics.getStateTopic(this.primaryHostId.get()));
+        boolean isValidStateMessage =
+                this.primaryHostId.isPresent() && topic.equals(SparkplugTopics.getStateTopic(this.primaryHostId.get()));
         boolean isValidNcmdMessage = topic.equals(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId));
 
         try {
@@ -422,8 +424,8 @@ public class SparkplugMqttClient {
         logger.debug("Handling NCMD message");
 
         try {
-            boolean nodeRebirth = SparkplugPayloads.getBooleanMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME,
-                    payload);
+            boolean nodeRebirth =
+                    SparkplugPayloads.getBooleanMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME, payload);
 
             if (nodeRebirth) {
                 logger.debug("{} requested", SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME);
@@ -437,5 +439,4 @@ public class SparkplugMqttClient {
             logger.debug("NMCD message ignored, it does not contain any Node Control/Rebirth metric");
         }
     }
-
 }

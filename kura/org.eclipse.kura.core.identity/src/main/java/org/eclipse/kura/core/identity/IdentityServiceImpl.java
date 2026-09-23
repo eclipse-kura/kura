@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
@@ -45,21 +44,21 @@ import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.eclipse.kura.util.useradmin.UserAdminHelper.AuthenticationException;
-import org.osgi.service.useradmin.UserAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.useradmin.UserAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("restriction")
 @Component(
-    name = "org.eclipse.kura.core.identity.IdentityServiceImpl",
-    immediate = true,
-    service = { org.eclipse.kura.identity.IdentityService.class })
+        name = "org.eclipse.kura.core.identity.IdentityServiceImpl",
+        immediate = true,
+        service = {org.eclipse.kura.identity.IdentityService.class})
 public class IdentityServiceImpl implements IdentityService {
 
     private static final String IDENTITY_SERVICE_FAILURE_FORMAT_STRING = "{} IdentityService - Failure - {}";
@@ -91,7 +90,8 @@ public class IdentityServiceImpl implements IdentityService {
         this.userAdmin = userAdmin;
     }
 
-    @Reference(name = "PasswordStrengthVerificationService",
+    @Reference(
+            name = "PasswordStrengthVerificationService",
             service = org.eclipse.kura.identity.PasswordStrengthVerificationService.class,
             unbind = "-")
     public void setPasswordStrengthVerificationService(
@@ -99,7 +99,8 @@ public class IdentityServiceImpl implements IdentityService {
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
-    @Reference(name = "IdentityConfigurationExtension",
+    @Reference(
+            name = "IdentityConfigurationExtension",
             service = org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -109,8 +110,10 @@ public class IdentityServiceImpl implements IdentityService {
         final Object kuraServicePid = properties.get(ConfigurationService.KURA_SERVICE_PID);
 
         if (!(kuraServicePid instanceof String)) {
-            logger.warn("found {} registered without setting the {} service property, service will not be tracked",
-                    IdentityConfigurationExtension.class.getSimpleName(), ConfigurationService.KURA_SERVICE_PID);
+            logger.warn(
+                    "found {} registered without setting the {} service property, service will not be tracked",
+                    IdentityConfigurationExtension.class.getSimpleName(),
+                    ConfigurationService.KURA_SERVICE_PID);
             return;
         }
 
@@ -129,10 +132,10 @@ public class IdentityServiceImpl implements IdentityService {
     @Activate
     public void activate() {
         this.userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);
-        this.temporaryIdentityStore = new TemporaryIdentityStoreAdapter(this.temporaryStore,
-                this.passwordStrengthVerificationService, this::computePasswordHash);
-        this.userAdminIdentityStore = new UserAdminIdentityStore(this.userAdminHelper, this.extensions, logger,
-                this::computePasswordHash);
+        this.temporaryIdentityStore = new TemporaryIdentityStoreAdapter(
+                this.temporaryStore, this.passwordStrengthVerificationService, this::computePasswordHash);
+        this.userAdminIdentityStore =
+                new UserAdminIdentityStore(this.userAdminHelper, this.extensions, logger, this::computePasswordHash);
     }
 
     @Deactivate
@@ -152,18 +155,21 @@ public class IdentityServiceImpl implements IdentityService {
 
         ValidationUtil.validateNewIdentityName(name);
 
-        if (this.temporaryIdentityStore.exists(name) || this.userAdminHelper.getUser(name).isPresent()) {
+        if (this.temporaryIdentityStore.exists(name)
+                || this.userAdminHelper.getUser(name).isPresent()) {
             return false;
         }
 
-        audit(() -> {
-            this.userAdminHelper.createUser(name);
+        audit(
+                () -> {
+                    this.userAdminHelper.createUser(name);
 
-            if (!configuration.getComponents().isEmpty()) {
-                validateIdentityConfiguration(configuration);
-                this.userAdminIdentityStore.updateIdentityConfiguration(configuration);
-            }
-        }, "Create identity " + name);
+                    if (!configuration.getComponents().isEmpty()) {
+                        validateIdentityConfiguration(configuration);
+                        this.userAdminIdentityStore.updateIdentityConfiguration(configuration);
+                    }
+                },
+                "Create identity " + name);
 
         return true;
     }
@@ -193,11 +199,11 @@ public class IdentityServiceImpl implements IdentityService {
     }
 
     @Override
-    public synchronized Optional<IdentityConfiguration> getIdentityConfiguration(String name,
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
+    public synchronized Optional<IdentityConfiguration> getIdentityConfiguration(
+            String name, Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
 
-        final Optional<IdentityConfiguration> temporaryIdentity = this.temporaryIdentityStore
-                .getIdentityConfiguration(name, componentsToReturn);
+        final Optional<IdentityConfiguration> temporaryIdentity =
+                this.temporaryIdentityStore.getIdentityConfiguration(name, componentsToReturn);
         if (temporaryIdentity.isPresent()) {
             return temporaryIdentity;
         }
@@ -206,8 +212,9 @@ public class IdentityServiceImpl implements IdentityService {
     }
 
     @Override
-    public IdentityConfiguration getIdentityDefaultConfiguration(String identityName,
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
+    public IdentityConfiguration getIdentityDefaultConfiguration(
+            String identityName, Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
+            throws KuraException {
         final List<IdentityConfigurationComponent> components = new ArrayList<>();
 
         if (componentsToReturn.contains(PasswordConfiguration.class)) {
@@ -227,52 +234,53 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     public void validateIdentityConfiguration(final IdentityConfiguration identityConfiguration) throws KuraException {
-        audit(() -> {
-            final Optional<PasswordConfiguration> passwordCofiguration = identityConfiguration
-                    .getComponent(PasswordConfiguration.class);
+        audit(
+                () -> {
+                    final Optional<PasswordConfiguration> passwordCofiguration =
+                            identityConfiguration.getComponent(PasswordConfiguration.class);
 
-            if (passwordCofiguration.isPresent()) {
-                validatePasswordConfiguration(identityConfiguration, passwordCofiguration.get());
-            }
+                    if (passwordCofiguration.isPresent()) {
+                        validatePasswordConfiguration(identityConfiguration, passwordCofiguration.get());
+                    }
 
-            final Optional<AdditionalConfigurations> additionalConfigurations = identityConfiguration
-                    .getComponent(AdditionalConfigurations.class);
+                    final Optional<AdditionalConfigurations> additionalConfigurations =
+                            identityConfiguration.getComponent(AdditionalConfigurations.class);
 
-            if (additionalConfigurations.isPresent()) {
-                validateAdditionalConfigurations(identityConfiguration, additionalConfigurations.get());
-            }
+                    if (additionalConfigurations.isPresent()) {
+                        validateAdditionalConfigurations(identityConfiguration, additionalConfigurations.get());
+                    }
 
-            final Optional<AssignedPermissions> assignedPermissions = identityConfiguration
-                    .getComponent(AssignedPermissions.class);
+                    final Optional<AssignedPermissions> assignedPermissions =
+                            identityConfiguration.getComponent(AssignedPermissions.class);
 
-            if (assignedPermissions.isPresent()) {
-                validateAssignedPermissions(assignedPermissions.get());
-            }
-
-        }, "Validate configuration for identity" + identityConfiguration.getName());
-
+                    if (assignedPermissions.isPresent()) {
+                        validateAssignedPermissions(assignedPermissions.get());
+                    }
+                },
+                "Validate configuration for identity" + identityConfiguration.getName());
     }
 
     @Override
     public synchronized void updateIdentityConfiguration(final IdentityConfiguration identityConfiguration)
             throws KuraException {
 
-        audit(() -> {
-            if (this.temporaryIdentityStore.exists(identityConfiguration.getName())) {
-                validateIdentityConfiguration(identityConfiguration);
-                this.temporaryIdentityStore.updateIdentityConfiguration(identityConfiguration);
-                return;
-            }
+        audit(
+                () -> {
+                    if (this.temporaryIdentityStore.exists(identityConfiguration.getName())) {
+                        validateIdentityConfiguration(identityConfiguration);
+                        this.temporaryIdentityStore.updateIdentityConfiguration(identityConfiguration);
+                        return;
+                    }
 
-            if (!this.userAdminIdentityStore.exists(identityConfiguration.getName())) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Identity does not exist");
-            }
+                    if (!this.userAdminIdentityStore.exists(identityConfiguration.getName())) {
+                        throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Identity does not exist");
+                    }
 
-            validateIdentityConfiguration(identityConfiguration);
+                    validateIdentityConfiguration(identityConfiguration);
 
-            this.userAdminIdentityStore.updateIdentityConfiguration(identityConfiguration);
-        }, "Update configuration for identity " + identityConfiguration.getName());
-
+                    this.userAdminIdentityStore.updateIdentityConfiguration(identityConfiguration);
+                },
+                "Update configuration for identity " + identityConfiguration.getName());
     }
 
     @Override
@@ -299,8 +307,8 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     public synchronized Set<Permission> getPermissions() {
-        return new UserAdminHelper(this.userAdmin, this.cryptoService).getDefinedPermissions().stream()
-                .map(Permission::new).collect(Collectors.toSet());
+        return new UserAdminHelper(this.userAdmin, this.cryptoService)
+                .getDefinedPermissions().stream().map(Permission::new).collect(Collectors.toSet());
     }
 
     @Override
@@ -320,14 +328,16 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     public void checkPassword(String identityName, char[] password) throws KuraException {
-        final PasswordConfiguration passwordConfiguration = getIdentityConfiguration(identityName,
-                Collections.singleton(PasswordConfiguration.class))
-                        .flatMap(i -> i.getComponent(PasswordConfiguration.class))
-                        .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
+        final PasswordConfiguration passwordConfiguration = getIdentityConfiguration(
+                        identityName, Collections.singleton(PasswordConfiguration.class))
+                .flatMap(i -> i.getComponent(PasswordConfiguration.class))
+                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
 
-        if (!passwordConfiguration.isPasswordAuthEnabled() || !Objects.equals(passwordConfiguration.getPasswordHash(),
-                Optional.of(computePasswordHash(password)))) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
+        if (!passwordConfiguration.isPasswordAuthEnabled()
+                || !Objects.equals(
+                        passwordConfiguration.getPasswordHash(), Optional.of(computePasswordHash(password)))) {
+            throw new KuraException(
+                    KuraErrorCode.SECURITY_EXCEPTION,
                     "Password authentication is not enabled or password does not match");
         }
     }
@@ -336,18 +346,20 @@ public class IdentityServiceImpl implements IdentityService {
     public void checkPermission(String identityName, Permission permission) throws KuraException {
         final Optional<IdentityConfiguration> temporaryIdentity = this.temporaryStore.getIdentity(identityName);
         if (temporaryIdentity.isPresent()) {
-            final Optional<AssignedPermissions> assignedPermissions = temporaryIdentity.get()
-                    .getComponent(AssignedPermissions.class);
+            final Optional<AssignedPermissions> assignedPermissions =
+                    temporaryIdentity.get().getComponent(AssignedPermissions.class);
 
             if (!assignedPermissions.isPresent()) {
-                throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
+                throw new KuraException(
+                        KuraErrorCode.SECURITY_EXCEPTION,
                         "The specified permission is not assigned to the given identity");
             }
 
             final boolean hasPermission = assignedPermissions.get().getPermissions().stream()
                     .anyMatch(p -> Objects.equals(p.getName(), permission.getName()));
             if (!hasPermission) {
-                throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
+                throw new KuraException(
+                        KuraErrorCode.SECURITY_EXCEPTION,
                         "The specified permission is not assigned to the given identity");
             }
 
@@ -357,8 +369,8 @@ public class IdentityServiceImpl implements IdentityService {
         try {
             this.userAdminHelper.requirePermissions(identityName, permission.getName());
         } catch (AuthenticationException e) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
-                    "The specified permission is not assigned to the given identity");
+            throw new KuraException(
+                    KuraErrorCode.SECURITY_EXCEPTION, "The specified permission is not assigned to the given identity");
         }
     }
 
@@ -376,8 +388,9 @@ public class IdentityServiceImpl implements IdentityService {
         return new AdditionalConfigurations(additionalConfigurations);
     }
 
-    private void validatePasswordConfiguration(final IdentityConfiguration identityConfiguration,
-            final PasswordConfiguration passwordCofiguration) throws KuraException {
+    private void validatePasswordConfiguration(
+            final IdentityConfiguration identityConfiguration, final PasswordConfiguration passwordCofiguration)
+            throws KuraException {
         if (!passwordCofiguration.isPasswordAuthEnabled()) {
             return;
         }
@@ -386,17 +399,22 @@ public class IdentityServiceImpl implements IdentityService {
 
         if (newPassword.isPresent()) {
 
-            ValidationUtil.validateNewPassword(identityConfiguration.getName(), newPassword.get(),
-                    passwordStrengthVerificationService);
+            ValidationUtil.validateNewPassword(
+                    identityConfiguration.getName(), newPassword.get(), passwordStrengthVerificationService);
 
         } else {
-            final boolean hasPersistedPasswordHash = this.userAdminHelper.getUser(identityConfiguration.getName())
-                    .filter(u -> u.getCredentials().get(PASSWORD_PROPERTY) != null).isPresent();
-            final boolean hasTemporaryPasswordHash = this.temporaryStore.getIdentity(identityConfiguration.getName())
+            final boolean hasPersistedPasswordHash = this.userAdminHelper
+                    .getUser(identityConfiguration.getName())
+                    .filter(u -> u.getCredentials().get(PASSWORD_PROPERTY) != null)
+                    .isPresent();
+            final boolean hasTemporaryPasswordHash = this.temporaryStore
+                    .getIdentity(identityConfiguration.getName())
                     .flatMap(config -> config.getComponent(PasswordConfiguration.class))
-                    .flatMap(PasswordConfiguration::getPasswordHash).isPresent();
+                    .flatMap(PasswordConfiguration::getPasswordHash)
+                    .isPresent();
             if (!hasPersistedPasswordHash && !hasTemporaryPasswordHash) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                throw new KuraException(
+                        KuraErrorCode.INVALID_PARAMETER,
                         "Password authentication is enabled but no password has been provided or is currently assigned");
             }
         }
@@ -410,20 +428,20 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
-    private void validateAdditionalConfigurations(final IdentityConfiguration identityConfiguration,
-            final AdditionalConfigurations additionalConfigurations) throws KuraException {
+    private void validateAdditionalConfigurations(
+            final IdentityConfiguration identityConfiguration, final AdditionalConfigurations additionalConfigurations)
+            throws KuraException {
         for (final ComponentConfiguration config : additionalConfigurations.getConfigurations()) {
 
-            final Optional<IdentityConfigurationExtension> extension = Optional
-                    .ofNullable(this.extensions.get(config.getPid()));
+            final Optional<IdentityConfigurationExtension> extension =
+                    Optional.ofNullable(this.extensions.get(config.getPid()));
 
             if (!extension.isPresent()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                        "Configuration extension pid is not registered");
+                throw new KuraException(
+                        KuraErrorCode.INVALID_PARAMETER, "Configuration extension pid is not registered");
             }
 
             extension.get().validateConfiguration(identityConfiguration.getName(), config);
-
         }
     }
 
@@ -435,8 +453,8 @@ public class IdentityServiceImpl implements IdentityService {
     }
 
     @Override
-    public synchronized void createTemporaryIdentity(final IdentityConfiguration identityConfiguration,
-            final Duration lifetime) throws KuraException {
+    public synchronized void createTemporaryIdentity(
+            final IdentityConfiguration identityConfiguration, final Duration lifetime) throws KuraException {
 
         final String identityName = identityConfiguration.getName();
 
@@ -444,24 +462,26 @@ public class IdentityServiceImpl implements IdentityService {
 
         // Check if identity already exists (temporary or regular)
         if (this.temporaryStore.exists(identityName)) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER,
                     "A temporary identity with name '" + identityName + "' already exists");
         }
         if (this.userAdminHelper.getUser(identityName).isPresent()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                    "An identity with name '" + identityName + "' already exists");
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER, "An identity with name '" + identityName + "' already exists");
         }
 
-        audit(() -> {
-            if (lifetime == null || lifetime.isZero() || lifetime.isNegative()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                        "Temporary identity lifetime must be positive");
-            }
+        audit(
+                () -> {
+                    if (lifetime == null || lifetime.isZero() || lifetime.isNegative()) {
+                        throw new KuraException(
+                                KuraErrorCode.INVALID_PARAMETER, "Temporary identity lifetime must be positive");
+                    }
 
-            validateIdentityConfiguration(identityConfiguration);
-            this.temporaryIdentityStore.createIdentity(identityConfiguration, lifetime);
-
-        }, "Create temporary identity " + identityName);
+                    validateIdentityConfiguration(identityConfiguration);
+                    this.temporaryIdentityStore.createIdentity(identityConfiguration, lifetime);
+                },
+                "Create temporary identity " + identityName);
     }
 
     public static <T, E extends Throwable> T audit(final FallibleSupplier<T, E> task, final String message) throws E {
@@ -494,5 +514,4 @@ public class IdentityServiceImpl implements IdentityService {
 
         public void run() throws E;
     }
-
 }

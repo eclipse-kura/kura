@@ -24,6 +24,8 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.eclipse.kura.KuraAuthenticationFailedException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -42,9 +43,6 @@ import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.security.token.TokenIssueRequest;
 import org.eclipse.kura.security.token.TokenVerifyRequest;
 import org.eclipse.kura.security.token.VerificationProof;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public abstract class AbstractJwtScenario {
 
@@ -98,8 +96,9 @@ public abstract class AbstractJwtScenario {
         this.keystore.withTrustedCertificate(alias, TestKeys.rsa(keyIndex));
     }
 
-    protected void givenKeystoreTrustedCertificate(final String alias, final int keyIndex, final Instant validFrom,
-            final Instant validTo) throws TestCAException {
+    protected void givenKeystoreTrustedCertificate(
+            final String alias, final int keyIndex, final Instant validFrom, final Instant validTo)
+            throws TestCAException {
 
         this.keystore.withTrustedCertificate(alias, TestKeys.rsa(keyIndex), validFrom, validTo);
     }
@@ -210,7 +209,9 @@ public abstract class AbstractJwtScenario {
     }
 
     protected void whenATokenIsVerifiedFor(final String token, final String intendedConsumer) {
-        whenTheRequestIsVerified(TokenVerifyRequest.builder(token).intendedConsumer(intendedConsumer).build());
+        whenTheRequestIsVerified(TokenVerifyRequest.builder(token)
+                .intendedConsumer(intendedConsumer)
+                .build());
     }
 
     protected void whenTheIssuedTokenIsVerified() {
@@ -292,14 +293,17 @@ public abstract class AbstractJwtScenario {
 
     protected void thenIssuingFailedWith(final KuraErrorCode expectedErrorCode) {
         assertNotNull("expected issuing to fail", this.issuingFailure);
-        assertTrue("expected a KuraException but got " + this.issuingFailure.getClass().getName(),
+        assertTrue(
+                "expected a KuraException but got "
+                        + this.issuingFailure.getClass().getName(),
                 this.issuingFailure instanceof KuraException);
         assertEquals(expectedErrorCode, ((KuraException) this.issuingFailure).getCode());
     }
 
     protected void thenIssuingFailedWithBadRequestMentioning(final String expectedFragment) {
         thenIssuingFailedWith(KuraErrorCode.BAD_REQUEST);
-        assertTrue("failure message '" + this.issuingFailure.getMessage() + "' does not mention " + expectedFragment,
+        assertTrue(
+                "failure message '" + this.issuingFailure.getMessage() + "' does not mention " + expectedFragment,
                 this.issuingFailure.getMessage().contains(expectedFragment));
     }
 
@@ -311,7 +315,8 @@ public abstract class AbstractJwtScenario {
 
     protected void thenIssuedTokenHasNoClaim(final String name) {
         thenATokenIsIssued();
-        assertFalse("claim '" + name + "' should not be present in " + this.issuedTokenInspector.payload(),
+        assertFalse(
+                "claim '" + name + "' should not be present in " + this.issuedTokenInspector.payload(),
                 this.issuedTokenInspector.claim(name).isPresent());
     }
 
@@ -325,7 +330,8 @@ public abstract class AbstractJwtScenario {
     protected void thenIssuedTokenHasBooleanClaim(final String name, final boolean expectedValue) {
         final JsonElement claim = requireClaim(name);
 
-        assertTrue("claim '" + name + "' is not a JSON boolean but " + claim,
+        assertTrue(
+                "claim '" + name + "' is not a JSON boolean but " + claim,
                 claim.isJsonPrimitive() && claim.getAsJsonPrimitive().isBoolean());
         assertEquals(expectedValue, claim.getAsBoolean());
     }
@@ -361,8 +367,8 @@ public abstract class AbstractJwtScenario {
         assertEquals(expectedValues, actualValues);
     }
 
-    protected void thenIssuedTokenHasObjectClaimWithEntry(final String name, final String key,
-            final String expectedValue) {
+    protected void thenIssuedTokenHasObjectClaimWithEntry(
+            final String name, final String key, final String expectedValue) {
 
         final JsonElement claim = requireClaim(name);
 
@@ -394,7 +400,8 @@ public abstract class AbstractJwtScenario {
         final long latest = this.issuedNoLaterThan.plus(expectedLifetime).getEpochSecond();
         final long actual = claim.getAsLong();
 
-        assertTrue("exp is " + actual + " but was expected between " + earliest + " and " + latest,
+        assertTrue(
+                "exp is " + actual + " but was expected between " + earliest + " and " + latest,
                 actual >= earliest && actual <= latest);
     }
 
@@ -416,8 +423,9 @@ public abstract class AbstractJwtScenario {
 
     protected void thenVerificationFailedAsAuthenticationFailure() {
         assertNotNull("expected verification to fail", this.verificationFailure);
-        assertTrue("expected a KuraAuthenticationFailedException but got "
-                + this.verificationFailure.getClass().getName(),
+        assertTrue(
+                "expected a KuraAuthenticationFailedException but got "
+                        + this.verificationFailure.getClass().getName(),
                 this.verificationFailure instanceof KuraAuthenticationFailedException);
     }
 
@@ -427,7 +435,9 @@ public abstract class AbstractJwtScenario {
         final Throwable cause = this.verificationFailure.getCause();
 
         assertNotNull("expected the failure to carry a cause", cause);
-        assertTrue("expected a cause of type " + expectedCauseClass.getName() + " but got " + cause.getClass().getName(),
+        assertTrue(
+                "expected a cause of type " + expectedCauseClass.getName() + " but got "
+                        + cause.getClass().getName(),
                 expectedCauseClass.isInstance(cause));
     }
 
@@ -439,21 +449,25 @@ public abstract class AbstractJwtScenario {
 
     protected void thenVerificationFailedWith(final KuraErrorCode expectedErrorCode) {
         assertNotNull("expected verification to fail", this.verificationFailure);
-        assertTrue("expected a KuraException but got " + this.verificationFailure.getClass().getName(),
+        assertTrue(
+                "expected a KuraException but got "
+                        + this.verificationFailure.getClass().getName(),
                 this.verificationFailure instanceof KuraException);
         assertEquals(expectedErrorCode, ((KuraException) this.verificationFailure).getCode());
     }
 
     protected void thenTheProofHasStringClaim(final String name, final String expectedValue) {
         assertNotNull("expected a verification proof", this.proof);
-        assertTrue("proof has no claim '" + name + "' in " + this.proof.getClaims(),
+        assertTrue(
+                "proof has no claim '" + name + "' in " + this.proof.getClaims(),
                 this.proof.getClaims().containsKey(name));
         assertEquals(expectedValue, this.proof.getClaims().get(name));
     }
 
     protected void thenTheProofHasNullClaim(final String name) {
         assertNotNull("expected a verification proof", this.proof);
-        assertTrue("proof has no claim '" + name + "' in " + this.proof.getClaims(),
+        assertTrue(
+                "proof has no claim '" + name + "' in " + this.proof.getClaims(),
                 this.proof.getClaims().containsKey(name));
         assertNull("claim '" + name + "' should be null", this.proof.getClaims().get(name));
     }
@@ -479,7 +493,8 @@ public abstract class AbstractJwtScenario {
 
     protected void thenTheProofExposesNoExpiresAt() {
         assertNotNull("expected a verification proof", this.proof);
-        assertFalse("expected the proof to expose no exp", this.proof.getExpiresAt().isPresent());
+        assertFalse(
+                "expected the proof to expose no exp", this.proof.getExpiresAt().isPresent());
     }
 
     protected void thenTheProofExposesNotBefore(final Instant expected) {
@@ -490,7 +505,8 @@ public abstract class AbstractJwtScenario {
 
     protected void thenTheProofExposesNoNotBefore() {
         assertNotNull("expected a verification proof", this.proof);
-        assertFalse("expected the proof to expose no nbf", this.proof.getNotBefore().isPresent());
+        assertFalse(
+                "expected the proof to expose no nbf", this.proof.getNotBefore().isPresent());
     }
 
     protected void thenTheProofExposesIssuedAt(final Instant expected) {
@@ -501,7 +517,8 @@ public abstract class AbstractJwtScenario {
 
     protected void thenTheProofExposesNoIssuedAt() {
         assertNotNull("expected a verification proof", this.proof);
-        assertFalse("expected the proof to expose no iat", this.proof.getIssuedAt().isPresent());
+        assertFalse(
+                "expected the proof to expose no iat", this.proof.getIssuedAt().isPresent());
     }
 
     protected void thenTheProofExposesTokenId(final String expected) {
@@ -512,7 +529,8 @@ public abstract class AbstractJwtScenario {
 
     protected void thenTheProofExposesNoTokenId() {
         assertNotNull("expected a verification proof", this.proof);
-        assertFalse("expected the proof to expose no jti", this.proof.getTokenID().isPresent());
+        assertFalse(
+                "expected the proof to expose no jti", this.proof.getTokenID().isPresent());
     }
 
     protected void thenTheIssuerReportsMaximumLifetime(final Duration expected) {
@@ -562,17 +580,19 @@ public abstract class AbstractJwtScenario {
     private JsonElement requireClaim(final String name) {
         thenATokenIsIssued();
 
-        return this.issuedTokenInspector.claim(name)
-                .orElseThrow(() -> new AssertionError("claim '" + name + "' not found in "
-                        + this.issuedTokenInspector.payload()));
+        return this.issuedTokenInspector
+                .claim(name)
+                .orElseThrow(() ->
+                        new AssertionError("claim '" + name + "' not found in " + this.issuedTokenInspector.payload()));
     }
 
     private JsonElement requireHeaderEntry(final String name) {
         thenATokenIsIssued();
 
-        return this.issuedTokenInspector.headerEntry(name)
-                .orElseThrow(() -> new AssertionError("header entry '" + name + "' not found in "
-                        + this.issuedTokenInspector.header()));
+        return this.issuedTokenInspector
+                .headerEntry(name)
+                .orElseThrow(() -> new AssertionError(
+                        "header entry '" + name + "' not found in " + this.issuedTokenInspector.header()));
     }
 
     private static boolean isPrimitiveString(final JsonElement element) {
@@ -582,5 +602,4 @@ public abstract class AbstractJwtScenario {
     private static boolean isPrimitiveNumber(final JsonElement element) {
         return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
     }
-
 }

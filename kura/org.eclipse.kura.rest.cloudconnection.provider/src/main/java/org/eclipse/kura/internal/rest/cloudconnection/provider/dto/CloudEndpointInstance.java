@@ -48,5 +48,4 @@ public class CloudEndpointInstance {
     public void setConnectionType(CloudEndpointType connectionType) {
         this.cloudEndpointType = connectionType;
     }
-
 }

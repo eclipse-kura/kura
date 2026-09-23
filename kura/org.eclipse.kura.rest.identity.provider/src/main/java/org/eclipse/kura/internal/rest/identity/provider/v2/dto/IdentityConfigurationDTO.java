@@ -57,5 +57,4 @@ public class IdentityConfigurationDTO {
                 + this.permissionConfiguration + ", passwordConfiguration=" + this.passwordConfiguration
                 + ", additionalConfigurations=" + this.additionalConfigurations + "]";
     }
-
 }

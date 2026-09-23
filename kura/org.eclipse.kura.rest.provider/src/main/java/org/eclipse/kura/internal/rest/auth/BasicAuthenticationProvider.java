@@ -15,6 +15,12 @@ package org.eclipse.kura.internal.rest.auth;
 
 import static java.util.Objects.isNull;
 
+import jakarta.annotation.Priority;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -22,9 +28,6 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Optional;
 import java.util.StringTokenizer;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
@@ -33,17 +36,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Priority;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.ext.Provider;
-
 @SuppressWarnings("restriction")
 @Priority(200)
 public class BasicAuthenticationProvider implements AuthenticationProvider {
 
-    private static final String PASSWORD_AUTH_FAILED_MSG = "{} Rest - Failure - Authentication failed as username or password not matching";
+    private static final String PASSWORD_AUTH_FAILED_MSG =
+            "{} Rest - Failure - Authentication failed as username or password not matching";
 
     private static final Logger logger = LoggerFactory.getLogger(BasicAuthenticationProvider.class);
 
@@ -62,8 +60,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     }
 
     @Override
-    public Optional<Principal> authenticate(final HttpServletRequest request,
-            final ContainerRequestContext requestContext) {
+    public Optional<Principal> authenticate(
+            final HttpServletRequest request, final ContainerRequestContext requestContext) {
         final AuditContext auditContext = AuditContext.currentOrInternal();
 
         final String authHeader = requestContext.getHeaderString("Authorization");
@@ -134,7 +132,6 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
                 response.getHeaders().add("WWW-Authenticate", "Basic realm=\"kura-rest-api\"");
             }
         }
-
     }
 
     private static class RequestCredentials {
@@ -157,8 +154,6 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
             String password = credentials.substring(colonIndex + 1);
 
             return new RequestCredentials(username, password);
-
         }
     }
-
 }

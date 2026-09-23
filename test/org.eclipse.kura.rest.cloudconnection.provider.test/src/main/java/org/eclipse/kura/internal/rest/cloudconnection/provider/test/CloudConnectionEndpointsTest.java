@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.test;
 
 import static org.junit.Assert.fail;
 
+import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
@@ -45,8 +45,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import com.google.gson.Gson;
 
 @RunWith(Parameterized.class)
 public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
@@ -76,16 +74,23 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     private CloudEndpointPidRequest cloudEndpointPidRequest;
 
     private static final String EXPECTED_GET_STACK_COMPONENT_PIDS_RESPONSE = new Scanner(
-            CloudConnectionEndpointsTest.class.getResourceAsStream("/getStackComponentPidsResponse.json"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    CloudConnectionEndpointsTest.class.getResourceAsStream("/getStackComponentPidsResponse.json"),
+                    "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String UPDATE_COMPONENT_CONFIGURATION_REQUEST = new Scanner(
-            CloudConnectionEndpointsTest.class.getResourceAsStream("/updateConfigurationRequest.json"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    CloudConnectionEndpointsTest.class.getResourceAsStream("/updateConfigurationRequest.json"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String EXPECTED_IS_ENDPOINT_CONNECTED_RESPONSE = new Scanner(
-            CloudConnectionEndpointsTest.class.getResourceAsStream("/isConnectedResponse.json"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    CloudConnectionEndpointsTest.class.getResourceAsStream("/isConnectedResponse.json"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Transport> transports() {
@@ -94,16 +99,15 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     public CloudConnectionEndpointsTest(Transport transport) {
         super(transport);
-
     }
 
     @BeforeClass
     public static void setup() {
         try {
-            configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
-            cloudConnectionFactory = ServiceUtil.trackService(CloudConnectionFactory.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
+            configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
+            cloudConnectionFactory = ServiceUtil.trackService(CloudConnectionFactory.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
             cloudConnectionFactory.createConfiguration(CLOUD_ENDPOINT_INSTANCE_TEST);
         } catch (Exception e) {
             fail("Unable to create the test CloudEndpoint");
@@ -121,10 +125,12 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldGetStackComponentPids() {
-        givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
-                CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenCloudConnectionFactoryPidAndCloudEndpointPid(
+                "org.eclipse.kura.cloud.CloudService", CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/stackComponentPids",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/cloudEndpoint/stackComponentPids",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
 
         thenRequestSucceeds();
@@ -133,10 +139,13 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateCloudEndpoint() {
-        givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
+        givenCloudConnectionFactoryPidAndCloudEndpointPid(
+                "org.eclipse.kura.cloud.CloudService",
                 "org.eclipse.kura.cloud.CloudService-createTest" + this.getTransportType());
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/cloudEndpoint",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
 
         thenRequestSucceeds();
@@ -145,12 +154,16 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldDeleteCloudEndpoint() throws InterruptedException, ExecutionException, TimeoutException {
         givenNewCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
-        givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
+        givenCloudConnectionFactoryPidAndCloudEndpointPid(
+                "org.eclipse.kura.cloud.CloudService",
                 "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
-        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService",
+        givenExistingCloudEndpoint(
+                "org.eclipse.kura.cloud.CloudService",
                 "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/cloudEndpoint",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/cloudEndpoint",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
 
         thenRequestSucceeds();
@@ -167,22 +180,26 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreatePublisherInstance() {
-        givenPidAndFactoryPidAndCloudEndpointPid("test-pub-" + this.getTransportType(),
-                "org.eclipse.kura.cloud.publisher.CloudPublisher", CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPidAndFactoryPidAndCloudEndpointPid(
+                "test-pub-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.publisher.CloudPublisher",
+                CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/pubSub",
-                gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/pubSub", gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
 
         thenRequestSucceeds();
     }
 
     @Test
     public void shouldCreateSubscriberInstance() {
-        givenPidAndFactoryPidAndCloudEndpointPid("test-sub-" + this.getTransportType(),
-                "org.eclipse.kura.cloud.subscriber.CloudSubscriber", CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPidAndFactoryPidAndCloudEndpointPid(
+                "test-sub-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+                CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/pubSub",
-                gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/pubSub", gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
 
         thenRequestSucceeds();
     }
@@ -190,10 +207,14 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldDeletePublisherInstance()
             throws KuraException, InterruptedException, ExecutionException, TimeoutException {
-        givenPubSubInstance("pub-to-delete-" + this.getTransportType(),
-                "org.eclipse.kura.cloud.publisher.CloudPublisher", CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPubSubInstance(
+                "pub-to-delete-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.publisher.CloudPublisher",
+                CLOUD_ENDPOINT_INSTANCE_TEST);
         givenPid("pub-to-delete-" + this.getTransportType());
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/pubSub",
                 gson.toJson(this.pidAndFactoryPid));
 
         thenRequestSucceeds();
@@ -202,11 +223,15 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldDeleteSubscriberInstance()
             throws KuraException, InterruptedException, ExecutionException, TimeoutException {
-        givenPubSubInstance("sub-to-delete-" + this.getTransportType(),
-                "org.eclipse.kura.cloud.subscriber.CloudSubscriber", CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPubSubInstance(
+                "sub-to-delete-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+                CLOUD_ENDPOINT_INSTANCE_TEST);
         givenPid("sub-to-delete-" + this.getTransportType());
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/pubSub",
                 gson.toJson(this.pidAndFactoryPid));
 
         thenRequestSucceeds();
@@ -214,7 +239,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldGetConfigurations() {
-        givenPidSet(CLOUD_ENDPOINT_INSTANCE_TEST, "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test", //
+        givenPidSet(
+                CLOUD_ENDPOINT_INSTANCE_TEST,
+                "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test", //
                 "org.eclipse.kura.data.DataService-test");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/configurations", gson.toJson(this.pidSet));
@@ -228,7 +255,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
         givenUpdateComponentConfigurationRequest(UPDATE_COMPONENT_CONFIGURATION_REQUEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/configurations",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_PUT),
+                "/configurations",
                 gson.toJson(this.updateComponentConfigurationRequest));
 
         thenRequestSucceeds();
@@ -238,8 +267,8 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldConnectEndpoint() {
         givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/connect",
-                gson.toJson(this.cloudEndpointPidRequest));
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/connect", gson.toJson(this.cloudEndpointPidRequest));
 
         thenRequestSucceeds();
     }
@@ -248,7 +277,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldDisconnectEndpoint() {
         givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/disconnect",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/cloudEndpoint/disconnect",
                 gson.toJson(this.cloudEndpointPidRequest));
 
         thenRequestSucceeds();
@@ -258,7 +289,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldCheckEndpointStatus() {
         givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/isConnected",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/cloudEndpoint/isConnected",
                 gson.toJson(this.cloudEndpointPidRequest));
 
         thenRequestSucceeds();
@@ -269,21 +302,20 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         this.cloudEndpointPidRequest = new CloudEndpointPidRequest(pid);
     }
 
-    private void givenCloudConnectionFactoryPidAndCloudEndpointPid(String cloudConnectionFactoryPid,
-            String cloudEndpointPid) {
-        this.cloudConnectionFactoryPidAndCloudEndpointPid = new CloudConnectionFactoryPidAndCloudEndpointPid(
-                cloudConnectionFactoryPid, cloudEndpointPid);
+    private void givenCloudConnectionFactoryPidAndCloudEndpointPid(
+            String cloudConnectionFactoryPid, String cloudEndpointPid) {
+        this.cloudConnectionFactoryPidAndCloudEndpointPid =
+                new CloudConnectionFactoryPidAndCloudEndpointPid(cloudConnectionFactoryPid, cloudEndpointPid);
     }
 
     private void givenUpdateComponentConfigurationRequest(String jsonFileContent) {
-        this.updateComponentConfigurationRequest = this.gson.fromJson(jsonFileContent,
-                UpdateComponentConfigurationRequest.class);
-
+        this.updateComponentConfigurationRequest =
+                this.gson.fromJson(jsonFileContent, UpdateComponentConfigurationRequest.class);
     }
 
     private void givenPidAndFactoryPidAndCloudEndpointPid(String pid, String factoryPid, String cloudEndpointPid) {
-        this.pidAndFactoryPidAndCloudEndpointPid = new PidAndFactoryPidAndCloudEndpointPid(pid, factoryPid,
-                cloudEndpointPid);
+        this.pidAndFactoryPidAndCloudEndpointPid =
+                new PidAndFactoryPidAndCloudEndpointPid(pid, factoryPid, cloudEndpointPid);
     }
 
     private void givenPid(String pid) {
@@ -306,19 +338,22 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     private void givenExistingCloudEndpoint(String cloudConnectionFactoryPid, String cloudEndpointPid)
             throws InterruptedException, ExecutionException, TimeoutException {
-        CompletableFuture<Object> trackFuture = ServiceUtil.trackService(cloudConnectionFactoryPid,
-                Optional.of(String.format("(kura.service.pid=%s)", cloudEndpointPid)));
+        CompletableFuture<Object> trackFuture = ServiceUtil.trackService(
+                cloudConnectionFactoryPid, Optional.of(String.format("(kura.service.pid=%s)", cloudEndpointPid)));
         trackFuture.get(5, TimeUnit.SECONDS);
     }
 
     private void givenPubSubInstance(String pid, String factoryPid, String cloudEndpointPid)
             throws KuraException, InterruptedException, ExecutionException, TimeoutException {
-        configurationService.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
-                CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid), true);
+        configurationService.createFactoryConfiguration(
+                factoryPid,
+                pid,
+                Collections.singletonMap(
+                        CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid),
+                true);
         CompletableFuture<Object> trackFuture = ServiceUtil.trackService(
                 "org.eclipse.kura.configuration.ConfigurableComponent",
                 Optional.of(String.format("(kura.service.pid=%s)", pid)));
         trackFuture.get(5, TimeUnit.SECONDS);
     }
-
 }

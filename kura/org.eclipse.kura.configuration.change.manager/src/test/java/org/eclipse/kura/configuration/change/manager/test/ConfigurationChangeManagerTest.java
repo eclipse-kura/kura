@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.configuration.change.manager.test;
 
 import static org.junit.Assert.assertFalse;
@@ -22,7 +21,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager;
 import org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions;
 import org.eclipse.kura.configuration.change.manager.test.mocks.MockCloudPublisher;
@@ -102,8 +100,7 @@ public class ConfigurationChangeManagerTest {
      * Then
      */
 
-    private void thenNoMessagesPublished(long sendDelaySec)
-            throws InterruptedException, ExecutionException {
+    private void thenNoMessagesPublished(long sendDelaySec) throws InterruptedException, ExecutionException {
         CountDownLatch waitForSendDelay = new CountDownLatch(1);
         this.mockPublisher.addPublishCountLatch(waitForSendDelay);
         assertFalse(waitForSendDelay.await(sendDelaySec + 5, TimeUnit.SECONDS));
@@ -129,5 +126,4 @@ public class ConfigurationChangeManagerTest {
         this.configurationChangeManager.setCloudPublisher(this.mockPublisher);
         this.mockServiceTracker.setServiceTrackerListener(this.configurationChangeManager);
     }
-
 }

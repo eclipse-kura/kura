@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.configuration.change.manager.test;
 
 import static org.mockito.Mockito.mock;
@@ -153,7 +152,7 @@ public class ComponentsServiceTrackerTest {
         @SuppressWarnings("unchecked")
         ServiceReference<Object> ref = (ServiceReference<Object>) mock(ServiceReference.class);
         when(ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID)).thenReturn(serviceFactoryPid);
-        
+
         callAddingService(ref);
     }
 
@@ -204,5 +203,4 @@ public class ComponentsServiceTrackerTest {
     private void thenListenerIsNotNotified() {
         verify(this.listener, times(0)).onConfigurationChanged(Mockito.any());
     }
-
 }

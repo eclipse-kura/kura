@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -39,6 +38,7 @@ public class SystemdCredentialLoaderTest {
     private SystemdCredentialLoader loader;
     private Optional<SystemdCredentialLoader> result;
     private byte[] credentialData;
+
     @Test
     public void createFromEnvironmentVariableSuccess() {
         givenCredentialRootDirectory();
@@ -71,12 +71,12 @@ public class SystemdCredentialLoaderTest {
     @Test
     public void loadCredentialWithBinaryData() {
         givenCredentialRootDirectory();
-        givenCredentialFileWithBytes("binary-cred", new byte[]{0x01, 0x02, 0x03, 0x04});
+        givenCredentialFileWithBytes("binary-cred", new byte[] {0x01, 0x02, 0x03, 0x04});
         givenLoader();
 
         whenLoadingCredential("binary-cred");
 
-        thenCredentialDataEquals(new byte[]{0x01, 0x02, 0x03, 0x04});
+        thenCredentialDataEquals(new byte[] {0x01, 0x02, 0x03, 0x04});
     }
 
     @Test

@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * A service interface that allows to retrieve and verify the password strength
  * requirements that the framework should enforce for new password.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.7.0
  */
@@ -28,7 +28,7 @@ public interface PasswordStrengthVerificationService {
     /**
      * Checks whether the provided password satisfies the password strength
      * requirements currently configured on the system.
-     * 
+     *
      * @param password
      *            the password to be verified.
      * @throws KuraException
@@ -42,7 +42,7 @@ public interface PasswordStrengthVerificationService {
      * the provided password satisfies the password strength requirements currently configured
      * on the system and in addition verifies that the password
      * does not match the identityName ignoring the characters case.
-     * 
+     *
      * @param identityName
      *            the name of the identity
      * @param password
@@ -57,7 +57,7 @@ public interface PasswordStrengthVerificationService {
     /**
      * Returns the password strength requirements that the framework should enforce
      * for new passwords.
-     * 
+     *
      * @return the password strength requirements.
      * @throws KuraException
      *             if a failure occurs while retrieving the password

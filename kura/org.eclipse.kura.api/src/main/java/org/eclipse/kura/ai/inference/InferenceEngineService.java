@@ -14,7 +14,6 @@ package org.eclipse.kura.ai.inference;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -22,9 +21,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * An Inference Engine is a library or a server that accepts multiple files
  * describing an Artificial Intelligence and Machine Learning models
  * and allows to perform inference on data.
- * 
+ *
  * The InferenceEngineService interface is a service API for managing an Inference Engine.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
  */
@@ -37,7 +36,7 @@ public interface InferenceEngineService {
      * ones in the provided {@link ModelInfo}.
      *
      * This will fail if the model is not loaded or the engine is not ready.
-     * 
+     *
      * @param modelInfo
      *            the {@link ModelInfo} of the model to be used
      * @param inputData

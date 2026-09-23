@@ -42,7 +42,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -87,13 +86,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -102,24 +94,37 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+        name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
             org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
             org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
             org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
-            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
-    property = {
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide:Boolean=true" })
+            org.eclipse.kura.cloudconnection.CloudEndpoint.class
+        },
+        property = {"kura.ui.service.hide:Boolean=true", "kura.ui.factory.hide:Boolean=true"})
 @Designate(ocd = ConnectionManagerOptions.class, factory = true)
 public class CloudConnectionManagerImpl
-        implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
-        CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
+        implements DataServiceListener,
+                ConfigurableComponent,
+                EventHandler,
+                CloudPayloadProtoBufEncoder,
+                CloudPayloadProtoBufDecoder,
+                RequestHandlerRegistry,
+                CloudConnectionManager,
+                CloudEndpoint {
 
     private static final String KURA_PAYLOAD = "KuraPayload";
 
@@ -202,7 +207,10 @@ public class CloudConnectionManagerImpl
         return this.dataService;
     }
 
-    @Reference(name = "SystemAdminService", service = org.eclipse.kura.system.SystemAdminService.class, unbind = "unsetSystemAdminService")
+    @Reference(
+            name = "SystemAdminService",
+            service = org.eclipse.kura.system.SystemAdminService.class,
+            unbind = "unsetSystemAdminService")
     public void setSystemAdminService(SystemAdminService systemAdminService) {
         this.systemAdminService = systemAdminService;
     }
@@ -217,7 +225,10 @@ public class CloudConnectionManagerImpl
         return this.systemAdminService;
     }
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -232,7 +243,8 @@ public class CloudConnectionManagerImpl
         return this.systemService;
     }
 
-    @Reference(name = "NetworkService",
+    @Reference(
+            name = "NetworkService",
             service = org.eclipse.kura.net.NetworkService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -251,7 +263,8 @@ public class CloudConnectionManagerImpl
         return this.networkService;
     }
 
-    @Reference(name = "PositionService",
+    @Reference(
+            name = "PositionService",
             service = org.eclipse.kura.position.PositionService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -281,7 +294,8 @@ public class CloudConnectionManagerImpl
         }
     }
 
-    @Reference(name = "Unmarshaller",
+    @Reference(
+            name = "Unmarshaller",
             service = org.eclipse.kura.marshalling.Unmarshaller.class,
             target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
             unbind = "unsetJsonUnmarshaller")
@@ -295,7 +309,8 @@ public class CloudConnectionManagerImpl
         }
     }
 
-    @Reference(name = "Marshaller",
+    @Reference(
+            name = "Marshaller",
             service = org.eclipse.kura.marshalling.Marshaller.class,
             target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
             unbind = "unsetJsonMarshaller")
@@ -309,7 +324,8 @@ public class CloudConnectionManagerImpl
         }
     }
 
-    @Reference(name = "NetworkStatusService",
+    @Reference(
+            name = "NetworkStatusService",
             service = org.eclipse.kura.net.status.NetworkStatusService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -319,7 +335,8 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetNetworkStatusService(NetworkStatusService networkStatusService) {
-        if (this.networkStatusService.isPresent() && this.networkStatusService.get().equals(networkStatusService)) {
+        if (this.networkStatusService.isPresent()
+                && this.networkStatusService.get().equals(networkStatusService)) {
             this.networkStatusService = Optional.empty();
         }
     }
@@ -347,11 +364,14 @@ public class CloudConnectionManagerImpl
         //
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
-        String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL,
-                EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL };
+        String[] eventTopics = {
+            PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
+            EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL,
+            EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL
+        };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
-        this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
-                props);
+        this.cloudServiceRegistration =
+                this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 
         this.dataService.addDataServiceListener(this);
 
@@ -554,7 +574,6 @@ public class CloudConnectionManagerImpl
         } catch (Exception e) {
             logger.error("Error during CloudClientListener notification.", e);
         }
-
     }
 
     private void dispatchControlMessage(ControlTopic kuraTopic, KuraPayload kuraPayload) {
@@ -566,15 +585,15 @@ public class CloudConnectionManagerImpl
         RequestHandler cloudlet = this.registeredRequestHandlers.get(applicationId);
         if (cloudlet != null) {
 
-            callbackExecutor
-                    .submit(new MessageHandlerCallable(cloudlet, kuraTopic.getApplicationTopic(), kuraPayload, this));
+            callbackExecutor.submit(
+                    new MessageHandlerCallable(cloudlet, kuraTopic.getApplicationTopic(), kuraPayload, this));
         }
     }
 
     private boolean isValidMessage(KuraApplicationTopic kuraAppTopic, KuraPayload kuraPayload) {
         if (this.certificatesService == null) {
-            ServiceReference<CertificatesService> sr = this.ctx.getBundleContext()
-                    .getServiceReference(CertificatesService.class);
+            ServiceReference<CertificatesService> sr =
+                    this.ctx.getBundleContext().getServiceReference(CertificatesService.class);
             if (sr != null) {
                 this.certificatesService = this.ctx.getBundleContext().getService(sr);
             }
@@ -607,11 +626,11 @@ public class CloudConnectionManagerImpl
             }
         }
 
-        this.registeredCloudPublisherDeliveryListeners
-                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
+        this.registeredCloudPublisherDeliveryListeners.forEach(
+                deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
 
-        this.registeredCloudDeliveryListeners
-                .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId)));
+        this.registeredCloudDeliveryListeners.forEach(
+                deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId)));
     }
 
     // ----------------------------------------------------------------
@@ -668,9 +687,15 @@ public class CloudConnectionManagerImpl
 
     private void setupDeviceSubscriptions() throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
-        sbDeviceSubscription.append(MessageType.CONTROL.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append("+").append(this.options.getTopicSeparator()).append("+")
-                .append(this.options.getTopicSeparator()).append("req").append(this.options.getTopicSeparator())
+        sbDeviceSubscription
+                .append(MessageType.CONTROL.getTopicPrefix())
+                .append(this.options.getTopicSeparator())
+                .append("+")
+                .append(this.options.getTopicSeparator())
+                .append("+")
+                .append(this.options.getTopicSeparator())
+                .append("req")
+                .append(this.options.getTopicSeparator())
                 .append(this.options.getTopicWildCard());
 
         this.dataService.subscribe(sbDeviceSubscription.toString(), 0);
@@ -704,14 +729,17 @@ public class CloudConnectionManagerImpl
 
         logger.debug("CloudConnectionManagerImpl: BIRTH message cached for 30s.");
 
-        this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
-            try {
-                logger.debug("CloudConnectionManagerImpl: publishing cached BIRTH message.");
-                publishLifeCycleMessage(message);
-            } catch (KuraException e) {
-                logger.error("Error sending cached BIRTH/APP certificate.", e);
-            }
-        }, 30L, TimeUnit.SECONDS);
+        this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(
+                () -> {
+                    try {
+                        logger.debug("CloudConnectionManagerImpl: publishing cached BIRTH message.");
+                        publishLifeCycleMessage(message);
+                    } catch (KuraException e) {
+                        logger.error("Error sending cached BIRTH/APP certificate.", e);
+                    }
+                },
+                30L,
+                TimeUnit.SECONDS);
     }
 
     private void publishLifeCycleMessage(LifecycleMessage message) throws KuraException {
@@ -723,8 +751,11 @@ public class CloudConnectionManagerImpl
             KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
-            int localMessageId = this.dataService.publish(message.getTopic(), encodedPayload,
-                    this.options.getLifeCycleMessageQos(), this.options.getLifeCycleMessageRetain(),
+            int localMessageId = this.dataService.publish(
+                    message.getTopic(),
+                    encodedPayload,
+                    this.options.getLifeCycleMessageQos(),
+                    this.options.getLifeCycleMessageRetain(),
                     this.options.getLifeCycleMessagePriority());
             this.messageId.set(localMessageId);
             try {
@@ -770,8 +801,8 @@ public class CloudConnectionManagerImpl
             kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
         } catch (Exception e) {
             // Wrap the received bytes payload into an KuraPayload
-            logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
-                    topic);
+            logger.debug(
+                    "Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.", topic);
             kuraPayload = new KuraPayload();
             kuraPayload.setBody(payload);
         }
@@ -780,10 +811,11 @@ public class CloudConnectionManagerImpl
 
     private void postConnectionStateChangeEvent(final boolean isConnected) {
 
-        final Map<String, Object> eventProperties = Collections.singletonMap(CONNECTION_EVENT_PID_PROPERTY_KEY,
-                (String) this.ctx.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
+        final Map<String, Object> eventProperties = Collections.singletonMap(CONNECTION_EVENT_PID_PROPERTY_KEY, (String)
+                this.ctx.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 
-        final Event event = isConnected ? new CloudConnectionEstablishedEvent(eventProperties)
+        final Event event = isConnected
+                ? new CloudConnectionEstablishedEvent(eventProperties)
                 : new CloudConnectionLostEvent(eventProperties);
         this.eventAdmin.postEvent(event);
     }
@@ -880,7 +912,6 @@ public class CloudConnectionManagerImpl
     @Override
     public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.add(cloudDeliveryListener);
-
     }
 
     @Override
@@ -923,8 +954,8 @@ public class CloudConnectionManagerImpl
         try {
             List<String> interfaceIds = networkStatusService.getInterfaceIds();
             for (String interfaceId : interfaceIds) {
-                Optional<NetworkInterfaceStatus> networkInterfaceStatus = networkStatusService
-                        .getNetworkStatus(interfaceId);
+                Optional<NetworkInterfaceStatus> networkInterfaceStatus =
+                        networkStatusService.getNetworkStatus(interfaceId);
                 networkInterfaceStatus.ifPresent(state -> {
                     NetworkInterfaceType type = state.getType();
                     if (NetworkInterfaceType.MODEM.equals(type)) {
@@ -959,6 +990,5 @@ public class CloudConnectionManagerImpl
         this.imei = modemStatus.getSerialNumber();
         this.rssi = String.valueOf(modemStatus.getSignalStrength());
         this.modemFwVer = modemStatus.getFirmwareVersion();
-
     }
 }

@@ -14,7 +14,6 @@ package org.eclipse.kura.emulator.net;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.kura.net.EthernetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;

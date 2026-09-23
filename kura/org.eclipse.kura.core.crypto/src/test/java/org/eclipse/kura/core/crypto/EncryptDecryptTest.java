@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.system.SystemService;
@@ -37,12 +36,13 @@ public class EncryptDecryptTest {
     public void setup() {
         final SystemService mockSystemService = Mockito.mock(SystemService.class);
         try {
-            Mockito.when(mockSystemService.getKuraDataDirectory()).thenReturn(Files.createTempDirectory(null).toString());
+            Mockito.when(mockSystemService.getKuraDataDirectory())
+                    .thenReturn(Files.createTempDirectory(null).toString());
         } catch (IOException e) {
             throw new IllegalStateException("cannot create temporary directory");
         }
 
-this.cryptoService = new CryptoServiceImpl();
+        this.cryptoService = new CryptoServiceImpl();
         this.cryptoService.setSystemService(mockSystemService);
         this.cryptoService.activate();
     }
@@ -53,7 +53,7 @@ this.cryptoService = new CryptoServiceImpl();
         String dataToEncrypt = "testingcrypto";
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out);) {
+        try (OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out); ) {
 
             cryptoOut.write(dataToEncrypt.getBytes(StandardCharsets.UTF_8));
             cryptoOut.flush();
@@ -61,12 +61,11 @@ this.cryptoService = new CryptoServiceImpl();
         }
 
         try (ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
-                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input);) {
+                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input); ) {
             String dataDecrypted = IOUtils.toString(cryptoInput, StandardCharsets.UTF_8);
 
             assertEquals(dataToEncrypt, dataDecrypted);
         }
-
     }
 
     @Test
@@ -75,7 +74,7 @@ this.cryptoService = new CryptoServiceImpl();
         String dataToEncrypt = "testingcrypto";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        try (OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out);) {
+        try (OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out); ) {
 
             cryptoOut.write(dataToEncrypt.getBytes(StandardCharsets.UTF_8));
             cryptoOut.flush();
@@ -85,9 +84,10 @@ this.cryptoService = new CryptoServiceImpl();
         char[] charEncryptedData = this.cryptoService.encryptAes(dataToEncrypt.toCharArray());
 
         try (ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
-                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input);) {
+                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input); ) {
 
-            assertEquals(new String(this.cryptoService.decryptAes(charEncryptedData)),
+            assertEquals(
+                    new String(this.cryptoService.decryptAes(charEncryptedData)),
                     IOUtils.toString(cryptoInput, StandardCharsets.UTF_8));
         }
     }
@@ -97,7 +97,7 @@ this.cryptoService = new CryptoServiceImpl();
         String dataToEncrypt = "testingcrypto";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        try (OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out);) {
+        try (OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out); ) {
 
             cryptoOut.write(dataToEncrypt.getBytes(StandardCharsets.UTF_8));
             cryptoOut.flush();
@@ -118,9 +118,9 @@ this.cryptoService = new CryptoServiceImpl();
 
         char[] cryptedData = this.cryptoService.encryptAes(dataToEncrypt.toCharArray());
 
-        try (ByteArrayInputStream input = new ByteArrayInputStream(
-                new String(cryptedData).getBytes(StandardCharsets.UTF_8));
-                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input);) {
+        try (ByteArrayInputStream input =
+                        new ByteArrayInputStream(new String(cryptedData).getBytes(StandardCharsets.UTF_8));
+                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input); ) {
 
             String decryptedData = IOUtils.toString(cryptoInput, StandardCharsets.UTF_8);
             assertEquals(dataToEncrypt, decryptedData);

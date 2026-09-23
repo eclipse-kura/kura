@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
-
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
@@ -83,12 +82,13 @@ public class SystemServiceTest {
 
         String key_proper = "property.proper";
         String val_proper = "proper property value";
-        File f1 = writeFile(props,
-                String.format("%s = %s\n%s = test ver", key_proper, val_proper, SystemService.KEY_KURA_VERSION));
+        File f1 = writeFile(
+                props, String.format("%s = %s\n%s = test ver", key_proper, val_proper, SystemService.KEY_KURA_VERSION));
         String key_custom = "property.custom";
         String val_custom = "custom property value";
         String val_test = "test ver override";
-        File f2 = writeFile(customProps,
+        File f2 = writeFile(
+                customProps,
                 String.format("%s = %s\n%s = %s", key_custom, val_custom, SystemService.KEY_KURA_VERSION, val_test));
 
         systemService.activate(ctxMock);
@@ -131,12 +131,13 @@ public class SystemServiceTest {
 
         String key_proper = "property.proper";
         String val_proper = "proper property value";
-        File f1 = writeFile(props,
-                String.format("%s = %s\n%s = test ver", key_proper, val_proper, SystemService.KEY_KURA_VERSION));
+        File f1 = writeFile(
+                props, String.format("%s = %s\n%s = test ver", key_proper, val_proper, SystemService.KEY_KURA_VERSION));
         String key_custom = "property.custom";
         String val_custom = "custom property value";
         String val_test = "test ver override";
-        File f2 = writeFile(customProps,
+        File f2 = writeFile(
+                customProps,
                 String.format("%s = %s\n%s = %s", key_custom, val_custom, SystemService.KEY_KURA_VERSION, val_test));
 
         systemService.activate(ctxMock);
@@ -180,9 +181,13 @@ public class SystemServiceTest {
         System.clearProperty(SystemService.KURA_CUSTOM_CONFIG);
         System.clearProperty(SystemService.KEY_KURA_HOME_DIR);
 
-        File f1 = writeFile(props,
-                String.format("%s = kura\n%s = kura/plugins\n%s = kura/packages", SystemService.KEY_KURA_HOME_DIR,
-                        SystemService.KEY_KURA_PLUGINS_DIR, SystemService.KEY_KURA_PACKAGES_DIR));
+        File f1 = writeFile(
+                props,
+                String.format(
+                        "%s = kura\n%s = kura/plugins\n%s = kura/packages",
+                        SystemService.KEY_KURA_HOME_DIR,
+                        SystemService.KEY_KURA_PLUGINS_DIR,
+                        SystemService.KEY_KURA_PACKAGES_DIR));
 
         systemService.activate(ctxMock);
 
@@ -224,7 +229,8 @@ public class SystemServiceTest {
         System.setProperty(SystemService.KEY_FILE_COMMAND_ZIP_MAX_NUMBER, "KEY_FILE_COMMAND_ZIP_MAX_NUMBER");
         System.setProperty(SystemService.KEY_OS_DISTRO, "KEY_OS_DISTRO");
         System.setProperty(SystemService.KEY_OS_DISTRO_VER, "KEY_OS_DISTRO_VER");
-        System.setProperty(SystemService.CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE,
+        System.setProperty(
+                SystemService.CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE,
                 "CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE");
         System.setProperty(SystemService.DB_URL_PROPNAME, "DB_URL_PROPNAME");
         System.setProperty(SystemService.DB_CACHE_ROWS_PROPNAME, "DB_CACHE_ROWS_PROPNAME");
@@ -268,11 +274,12 @@ public class SystemServiceTest {
         assertEquals("KEY_KURA_KEY_STORE_PWD", props.getProperty(SystemService.KEY_KURA_KEY_STORE_PWD));
         assertEquals("KEY_KURA_TRUST_STORE_PWD", props.getProperty(SystemService.KEY_KURA_TRUST_STORE_PWD));
         assertEquals("KEY_FILE_COMMAND_ZIP_MAX_SIZE", props.getProperty(SystemService.KEY_FILE_COMMAND_ZIP_MAX_SIZE));
-        assertEquals("KEY_FILE_COMMAND_ZIP_MAX_NUMBER",
-                props.getProperty(SystemService.KEY_FILE_COMMAND_ZIP_MAX_NUMBER));
+        assertEquals(
+                "KEY_FILE_COMMAND_ZIP_MAX_NUMBER", props.getProperty(SystemService.KEY_FILE_COMMAND_ZIP_MAX_NUMBER));
         assertEquals("KEY_OS_DISTRO", props.getProperty(SystemService.KEY_OS_DISTRO));
         assertEquals("KEY_OS_DISTRO_VER", props.getProperty(SystemService.KEY_OS_DISTRO_VER));
-        assertEquals("CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE",
+        assertEquals(
+                "CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE",
                 props.getProperty(SystemService.CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE));
         assertEquals("DB_URL_PROPNAME", props.getProperty(SystemService.DB_URL_PROPNAME));
         assertEquals("DB_CACHE_ROWS_PROPNAME", props.getProperty(SystemService.DB_CACHE_ROWS_PROPNAME));
@@ -281,28 +288,28 @@ public class SystemServiceTest {
         assertEquals("DB_LOG_DATA_PROPNAME", props.getProperty(SystemService.DB_LOG_DATA_PROPNAME));
         assertEquals("DB_LOG_SIZE_PROPNAME", props.getProperty(SystemService.DB_LOG_SIZE_PROPNAME));
         assertEquals("DB_NIO_PROPNAME", props.getProperty(SystemService.DB_NIO_PROPNAME));
-        assertEquals("DB_WRITE_DELAY_MILLIES_PROPNAME",
-                props.getProperty(SystemService.DB_WRITE_DELAY_MILLIES_PROPNAME));
+        assertEquals(
+                "DB_WRITE_DELAY_MILLIES_PROPNAME", props.getProperty(SystemService.DB_WRITE_DELAY_MILLIES_PROPNAME));
     }
 
     @Test
     public void testGetSystemPackages() throws IOException, KuraProcessExecutionErrorException {
         CommandExecutorService cesMock = mock(CommandExecutorService.class);
 
-        Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
+        Command dpkgCommand = new Command(new String[] {"dpkg-query", "-W"});
         dpkgCommand.setExecuteInAShell(true);
         CommandStatus dpkgSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(0));
         dpkgSuccessfulStatus.setOutputStream(writeToOutputStream("package1 1.0.0\npackage2"));
         when(cesMock.execute(dpkgCommand)).thenReturn(dpkgSuccessfulStatus);
 
-        Command rpmCommand = new Command(
-                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        Command rpmCommand =
+                new Command(new String[] {"rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'"});
         rpmCommand.setExecuteInAShell(true);
         CommandStatus rpmSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(0));
         rpmSuccessfulStatus.setOutputStream(writeToOutputStream("package3 2.0.0\npackage4"));
         when(cesMock.execute(rpmCommand)).thenReturn(rpmSuccessfulStatus);
 
-        Command apkCommand = new Command(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
+        Command apkCommand = new Command(new String[] {"apk", "list", "-I", "|", "awk", "'{ print $1 }'"});
         apkCommand.setExecuteInAShell(true);
         CommandStatus apkSuccessfulStatus = new CommandStatus(apkCommand, new LinuxExitStatus(0));
         apkSuccessfulStatus.setOutputStream(writeToOutputStream("dos2unix-7.4.1-r0\nkmod-26-r0"));
@@ -336,17 +343,17 @@ public class SystemServiceTest {
 
         CommandExecutorService cesMock = mock(CommandExecutorService.class);
 
-        Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
+        Command dpkgCommand = new Command(new String[] {"dpkg-query", "-W"});
         dpkgCommand.setExecuteInAShell(true);
         CommandStatus unSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(1));
         when(cesMock.execute(dpkgCommand)).thenReturn(unSuccessfulStatus);
 
-        Command rpmCommand = new Command(
-                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        Command rpmCommand =
+                new Command(new String[] {"rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'"});
         rpmCommand.setExecuteInAShell(true);
         when(cesMock.execute(rpmCommand)).thenReturn(unSuccessfulStatus);
 
-        Command apkCommand = new Command(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
+        Command apkCommand = new Command(new String[] {"apk", "list", "-I", "|", "awk", "'{ print $1 }'"});
         apkCommand.setExecuteInAShell(true);
         when(cesMock.execute(apkCommand)).thenReturn(unSuccessfulStatus);
 
@@ -379,5 +386,4 @@ public class SystemServiceTest {
 
         return file;
     }
-
 }

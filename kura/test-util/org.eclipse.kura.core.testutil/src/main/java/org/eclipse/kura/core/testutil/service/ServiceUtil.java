@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.BundleContext;
@@ -29,32 +28,32 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class ServiceUtil {
 
-    private ServiceUtil() {
-    }
+    private ServiceUtil() {}
 
     @SuppressWarnings("unchecked")
     public static <T> CompletableFuture<T> trackService(final Class<T> classz, final Optional<String> filter) {
         return trackService(classz.getName(), filter).thenApply(c -> (T) c);
     }
 
-    public static CompletableFuture<Object> trackService(final String serviceInterfaceName,
-            final Optional<String> filter) {
+    public static CompletableFuture<Object> trackService(
+            final String serviceInterfaceName, final Optional<String> filter) {
         try {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
+            final BundleContext bundleContext =
+                    FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
 
             final CompletableFuture<Object> result = new CompletableFuture<>();
 
             final Filter osgiFilter;
 
             if (filter.isPresent()) {
-                osgiFilter = FrameworkUtil
-                        .createFilter("(&(objectClass=" + serviceInterfaceName + ")" + filter.get() + ")");
+                osgiFilter =
+                        FrameworkUtil.createFilter("(&(objectClass=" + serviceInterfaceName + ")" + filter.get() + ")");
             } else {
                 osgiFilter = FrameworkUtil.createFilter("(objectClass=" + serviceInterfaceName + ")");
             }
 
-            final ServiceTracker<Object, Object> tracker = new ServiceTracker<>(bundleContext, osgiFilter,
-                    new ServiceTrackerCustomizer<Object, Object>() {
+            final ServiceTracker<Object, Object> tracker =
+                    new ServiceTracker<>(bundleContext, osgiFilter, new ServiceTrackerCustomizer<Object, Object>() {
 
                         @Override
                         public Object addingService(final ServiceReference<Object> ref) {
@@ -63,7 +62,6 @@ public class ServiceUtil {
                             result.complete(obj);
 
                             return obj;
-
                         }
 
                         @Override
@@ -85,18 +83,23 @@ public class ServiceUtil {
         }
     }
 
-    public static <T> CompletableFuture<T> createFactoryConfiguration(final ConfigurationService configurationService,
-            final Class<T> classz, final String pid, final String factoryPid, final Map<String, Object> properties) {
+    public static <T> CompletableFuture<T> createFactoryConfiguration(
+            final ConfigurationService configurationService,
+            final Class<T> classz,
+            final String pid,
+            final String factoryPid,
+            final Map<String, Object> properties) {
         try {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
+            final BundleContext bundleContext =
+                    FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
 
             final CompletableFuture<T> result = new CompletableFuture<>();
 
-            final Filter filter = FrameworkUtil
-                    .createFilter("(&(objectClass=" + classz.getName() + ")(kura.service.pid=" + pid + "))");
+            final Filter filter = FrameworkUtil.createFilter(
+                    "(&(objectClass=" + classz.getName() + ")(kura.service.pid=" + pid + "))");
 
-            final ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, filter,
-                    new ServiceTrackerCustomizer<T, T>() {
+            final ServiceTracker<T, T> tracker =
+                    new ServiceTracker<>(bundleContext, filter, new ServiceTrackerCustomizer<T, T>() {
 
                         @Override
                         public T addingService(final ServiceReference<T> ref) {
@@ -105,7 +108,6 @@ public class ServiceUtil {
                             result.complete(obj);
 
                             return obj;
-
                         }
 
                         @Override
@@ -129,19 +131,20 @@ public class ServiceUtil {
         }
     }
 
-    public static CompletableFuture<Void> deleteFactoryConfiguration(final ConfigurationService configurationService,
-            final String pid) {
+    public static CompletableFuture<Void> deleteFactoryConfiguration(
+            final ConfigurationService configurationService, final String pid) {
 
         try {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
+            final BundleContext bundleContext =
+                    FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
 
             final CompletableFuture<Void> tracked = new CompletableFuture<>();
             final CompletableFuture<Void> removed = new CompletableFuture<>();
 
             final Filter filter = FrameworkUtil.createFilter("(kura.service.pid=" + pid + ")");
 
-            final ServiceTracker<Object, Object> tracker = new ServiceTracker<>(bundleContext, filter,
-                    new ServiceTrackerCustomizer<Object, Object>() {
+            final ServiceTracker<Object, Object> tracker =
+                    new ServiceTracker<>(bundleContext, filter, new ServiceTrackerCustomizer<Object, Object>() {
 
                         @Override
                         public Object addingService(final ServiceReference<Object> ref) {
@@ -178,8 +181,9 @@ public class ServiceUtil {
         }
     }
 
-    public static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
-            final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
+    public static CompletableFuture<Void> updateComponentConfiguration(
+            final ConfigurationService configurationService, final String pid, final Map<String, Object> properties)
+            throws KuraException, InvalidSyntaxException {
 
         final CompletableFuture<Void> result = modified("(kura.service.pid=" + pid + ")");
 
@@ -193,8 +197,8 @@ public class ServiceUtil {
         final CompletableFuture<Void> result = new CompletableFuture<>();
         final BundleContext context = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
 
-        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(context, FrameworkUtil.createFilter(filter),
-                new ServiceTrackerCustomizer<Object, Object>() {
+        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(
+                context, FrameworkUtil.createFilter(filter), new ServiceTrackerCustomizer<Object, Object>() {
 
                     @Override
                     public Object addingService(ServiceReference<Object> reference) {
@@ -222,8 +226,8 @@ public class ServiceUtil {
         final CompletableFuture<Void> result = new CompletableFuture<>();
         final BundleContext context = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
 
-        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(context, FrameworkUtil.createFilter(filter),
-                new ServiceTrackerCustomizer<Object, Object>() {
+        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(
+                context, FrameworkUtil.createFilter(filter), new ServiceTrackerCustomizer<Object, Object>() {
 
                     @Override
                     public Object addingService(ServiceReference<Object> reference) {

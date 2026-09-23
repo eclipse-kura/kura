@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.core.data;
 
 import static org.junit.Assert.assertEquals;
@@ -19,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.db.H2DbService;
 import org.junit.Test;
 
@@ -43,9 +41,12 @@ public class DataServiceOptionsTest {
     private static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
     private static final String CONNECTION_SCHEDULE_ENABLED = "connection.schedule.enabled";
     private static final String CONNECTION_SCHECULE_EXPRESSION = "connection.schedule.expression";
-    private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS = "connection.schedule.inactivity.interval.seconds";
-    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE = "connection.schedule.priority.override.enable";
-    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD = "connection.schedule.priority.override.threshold";
+    private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS =
+            "connection.schedule.inactivity.interval.seconds";
+    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE =
+            "connection.schedule.priority.override.enable";
+    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD =
+            "connection.schedule.priority.override.threshold";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
@@ -101,7 +102,6 @@ public class DataServiceOptionsTest {
         givenEmptyProperties();
         whenDataServiceOptionsIsCreated();
         thenCheckIfAllDefaultsAreSet();
-
     }
 
     @Test
@@ -109,7 +109,6 @@ public class DataServiceOptionsTest {
         givenFullChangedProperties();
         whenDataServiceOptionsIsCreated();
         thenCheckIfAllChangesAreSet();
-
     }
 
     @Test
@@ -186,11 +185,13 @@ public class DataServiceOptionsTest {
         properties.put(RECOVERY_MAX_FAILURES_PROP_NAME, RECOVERY_MAX_FAILURES_CHANGED);
         properties.put(CONNECTION_SCHEDULE_ENABLED, CONNECTION_SCHEDULE_ENABLED_CHANGED);
         properties.put(CONNECTION_SCHECULE_EXPRESSION, CONNECTION_SCHECULE_EXPRESSION_CHANGED);
-        properties.put(CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
+        properties.put(
+                CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
                 CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_CHANGED);
-        properties.put(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE,
-                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_CHANGED);
-        properties.put(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
+        properties.put(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE, CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_CHANGED);
+        properties.put(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
                 CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_CHANGED);
     }
 
@@ -228,7 +229,8 @@ public class DataServiceOptionsTest {
         assertEquals(STORE_CAPACITY_DEFAULT, this.dataServiceOptions.getStoreCapacity());
         assertEquals(REPUBLISH_IN_FLIGHT_MSGS_DEFAULT, this.dataServiceOptions.isPublishInFlightMessages());
         assertEquals(MAX_IN_FLIGHT_MSGS_DEFAULT, this.dataServiceOptions.getMaxInFlightMessages());
-        assertEquals(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT,
+        assertEquals(
+                IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT,
                 this.dataServiceOptions.getInFlightMessagesCongestionTimeout());
         assertEquals(RATE_LIMIT_ENABLE_DEFAULT, this.dataServiceOptions.isRateLimitEnabled());
         assertEquals(RATE_LIMIT_AVERAGE_RATE_DEFAULT, this.dataServiceOptions.getRateLimitAverageRate());
@@ -236,9 +238,11 @@ public class DataServiceOptionsTest {
         assertEquals(RECOVERY_ENABLE_DEFAULT, this.dataServiceOptions.isConnectionRecoveryEnabled());
         assertEquals(RECOVERY_MAX_FAILURES_DEFAULT, this.dataServiceOptions.getRecoveryMaximumAllowedFailures());
         assertEquals(CONNECTION_SCHEDULE_ENABLED_DEFAULT, this.dataServiceOptions.isConnectionScheduleEnabled());
-        assertEquals(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT,
+        assertEquals(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT,
                 this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled());
-        assertEquals(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT,
+        assertEquals(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT,
                 this.dataServiceOptions.getConnectionSchedulePriorityOverridePriority());
     }
 
@@ -253,7 +257,8 @@ public class DataServiceOptionsTest {
         assertEquals(STORE_CAPACITY_CHANGED, this.dataServiceOptions.getStoreCapacity());
         assertEquals(REPUBLISH_IN_FLIGHT_MSGS_CHANGED, this.dataServiceOptions.isPublishInFlightMessages());
         assertEquals(MAX_IN_FLIGHT_MSGS_CHANGED, this.dataServiceOptions.getMaxInFlightMessages());
-        assertEquals(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_CHANGED,
+        assertEquals(
+                IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_CHANGED,
                 this.dataServiceOptions.getInFlightMessagesCongestionTimeout());
         assertEquals(RATE_LIMIT_ENABLE_CHANGED, this.dataServiceOptions.isRateLimitEnabled());
         assertEquals(RATE_LIMIT_AVERAGE_RATE_CHANGED, this.dataServiceOptions.getRateLimitAverageRate());
@@ -261,9 +266,11 @@ public class DataServiceOptionsTest {
         assertEquals(RECOVERY_ENABLE_CHANGED, this.dataServiceOptions.isConnectionRecoveryEnabled());
         assertEquals(RECOVERY_MAX_FAILURES_CHANGED, this.dataServiceOptions.getRecoveryMaximumAllowedFailures());
         assertEquals(CONNECTION_SCHEDULE_ENABLED_CHANGED, this.dataServiceOptions.isConnectionScheduleEnabled());
-        assertEquals(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_CHANGED,
+        assertEquals(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_CHANGED,
                 this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled());
-        assertEquals(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_CHANGED,
+        assertEquals(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_CHANGED,
                 this.dataServiceOptions.getConnectionSchedulePriorityOverridePriority());
     }
 }

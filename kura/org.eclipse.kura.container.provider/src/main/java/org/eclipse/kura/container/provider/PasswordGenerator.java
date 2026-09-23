@@ -15,21 +15,21 @@ package org.eclipse.kura.container.provider;
 
 import java.security.SecureRandom;
 import java.util.Random;
-
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
 
 public class PasswordGenerator {
 
-    private static final char[] SPECIAL_CHARS = { '!', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
-            ':', ';', '?', '@', '[', ']', '^', '_', '{', '|', '~' };
+    private static final char[] SPECIAL_CHARS = {
+        '!', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '?', '@', '[', ']', '^', '_',
+        '{', '|', '~'
+    };
     private static final int SPECIAL_CHARS_BOUND = SPECIAL_CHARS.length;
     private static final int DIGITS_BOUND = SPECIAL_CHARS_BOUND + ('9' - '0' + 1);
     private static final int LOWERCASE_BOUND = DIGITS_BOUND + ('z' - 'a' + 1);
     private static final int UPPERCASE_BOUND = LOWERCASE_BOUND + ('Z' - 'A' + 1);
     private static final Random RANDOM = new SecureRandom();
 
-    private PasswordGenerator() {
-    }
+    private PasswordGenerator() {}
 
     private static char charInRange(final Random random, final char lower, final char upper) {
         return (char) random.nextInt(lower, (upper) + 1);

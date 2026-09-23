@@ -12,18 +12,16 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Optional;
-
-import org.eclipse.kura.core.inventory.resources.ContainerImage;
-import org.eclipse.kura.core.inventory.resources.ContainerImages;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Optional;
+import org.eclipse.kura.core.inventory.resources.ContainerImage;
+import org.eclipse.kura.core.inventory.resources.ContainerImages;
 
 public class JsonJavaContainerImagesMapper {
 
@@ -87,5 +85,4 @@ public class JsonJavaContainerImagesMapper {
         return getOptionalStringValue(object, name)
                 .orElseThrow(() -> new IllegalArgumentException(name + " is required"));
     }
-
 }

@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransportOptions;
 import org.eclipse.kura.crypto.CryptoService;
@@ -113,14 +112,14 @@ public class SparkplugDataTransportOptionsTest {
         public static Collection<Object[]> params() {
             Collection<Object[]> data = new LinkedList<>();
 
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_GROUP_ID, null });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_GROUP_ID, "" });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_NODE_ID, null });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_NODE_ID, "" });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_CLIENT_ID, null });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_CLIENT_ID, "" });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_KEEP_ALIVE, null });
-            data.add(new Object[] { SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, null });
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_GROUP_ID, null});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_GROUP_ID, ""});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_NODE_ID, null});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_NODE_ID, ""});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_CLIENT_ID, null});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_CLIENT_ID, ""});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_KEEP_ALIVE, null});
+            data.add(new Object[] {SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, null});
 
             return data;
         }
@@ -141,7 +140,6 @@ public class SparkplugDataTransportOptionsTest {
 
             thenExceptionOccurred(KuraException.class);
         }
-
     }
 
     public static class GettersTest extends Steps {
@@ -285,7 +283,6 @@ public class SparkplugDataTransportOptionsTest {
 
             thenMqttConnectOptionsHasAutoReconnectDisabled();
         }
-
     }
 
     /*
@@ -313,7 +310,8 @@ public class SparkplugDataTransportOptionsTest {
             givenProperty(SparkplugDataTransportOptions.KEY_KEEP_ALIVE, 60);
             givenProperty(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 30);
             this.cryptoServiceMock = mock(CryptoService.class);
-            doAnswer(invocation -> (char[]) invocation.getArgument(0)).when(cryptoServiceMock)
+            doAnswer(invocation -> (char[]) invocation.getArgument(0))
+                    .when(cryptoServiceMock)
                     .decryptAes(any(char[].class));
         }
 
@@ -379,7 +377,9 @@ public class SparkplugDataTransportOptionsTest {
 
         <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
             assertNotNull(this.occurredException);
-            assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+            assertEquals(
+                    expectedException.getName(),
+                    this.occurredException.getClass().getName());
         }
 
         void thenReturnedStringEquals(String expectedResult) {
@@ -433,5 +433,4 @@ public class SparkplugDataTransportOptionsTest {
             assertEquals(expectedConnectionTimeout, this.mqttConnectOptions.getConnectionTimeout());
         }
     }
-
 }

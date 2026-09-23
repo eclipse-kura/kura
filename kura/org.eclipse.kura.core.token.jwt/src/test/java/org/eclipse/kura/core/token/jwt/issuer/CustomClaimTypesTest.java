@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.token.jwt.common.AbstractJwtScenario;
 import org.eclipse.kura.core.token.jwt.common.IssuingConfig;
@@ -150,5 +149,4 @@ public class CustomClaimTypesTest extends AbstractJwtScenario {
 
         return map;
     }
-
 }

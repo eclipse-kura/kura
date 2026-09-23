@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -37,7 +36,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 public class GraphBuilder {
 
-    private static final String TEST_EMITTER_RECEIVER_FACTORY_PID = "org.eclipse.kura.util.wire.test.TestEmitterReceiver";
+    private static final String TEST_EMITTER_RECEIVER_FACTORY_PID =
+            "org.eclipse.kura.util.wire.test.TestEmitterReceiver";
 
     private static final String PROP_WIRE_COMP_POS_X = "position.x";
     private static final String PROP_WIRE_COMP_POS_Y = "position.y";
@@ -57,13 +57,17 @@ public class GraphBuilder {
         return addWireComponent(pid, factoryPid, Collections.emptyMap(), 1, 1);
     }
 
-    public GraphBuilder addWireComponent(final String pid, final String factoryPid, final int inputPortCount,
-            final int outputPortCount) {
+    public GraphBuilder addWireComponent(
+            final String pid, final String factoryPid, final int inputPortCount, final int outputPortCount) {
         return addWireComponent(pid, factoryPid, Collections.emptyMap(), inputPortCount, outputPortCount);
     }
 
-    public GraphBuilder addWireComponent(final String pid, final String factoryPid,
-            final Map<String, Object> configuration, final int inputPortCount, final int outputPortCount) {
+    public GraphBuilder addWireComponent(
+            final String pid,
+            final String factoryPid,
+            final Map<String, Object> configuration,
+            final int inputPortCount,
+            final int outputPortCount) {
         Map<String, Object> props = new HashMap<>();
         props.put(PROP_WIRE_COMP_POS_X, 0f);
         props.put(PROP_WIRE_COMP_POS_Y, 0f);
@@ -72,8 +76,11 @@ public class GraphBuilder {
         return addWireComponent(pid, factoryPid, configuration, props);
     }
 
-    public GraphBuilder addWireComponent(final String pid, final String factoryPid,
-            final Map<String, Object> configuration, final Map<String, Object> renderingProperties) {
+    public GraphBuilder addWireComponent(
+            final String pid,
+            final String factoryPid,
+            final Map<String, Object> configuration,
+            final Map<String, Object> renderingProperties) {
 
         final ComponentConfiguration componentConfiguration = new ComponentConfiguration() {
 
@@ -95,8 +102,8 @@ public class GraphBuilder {
             }
         };
 
-        final WireComponentConfiguration wireComponentConfiguration = new WireComponentConfiguration(
-                componentConfiguration, renderingProperties);
+        final WireComponentConfiguration wireComponentConfiguration =
+                new WireComponentConfiguration(componentConfiguration, renderingProperties);
 
         this.configurations.add(wireComponentConfiguration);
 
@@ -111,24 +118,25 @@ public class GraphBuilder {
         return addWire(emitterPid, 0, receiverPid, receiverPort);
     }
 
-    public GraphBuilder addWire(final String emitterPid, final int emitterPort, final String receiverPid,
-            final int receiverPort) {
-        final MultiportWireConfiguration multiportWireConfiguration = new MultiportWireConfiguration(emitterPid,
-                receiverPid, emitterPort, receiverPort);
+    public GraphBuilder addWire(
+            final String emitterPid, final int emitterPort, final String receiverPid, final int receiverPort) {
+        final MultiportWireConfiguration multiportWireConfiguration =
+                new MultiportWireConfiguration(emitterPid, receiverPid, emitterPort, receiverPort);
         wires.add(multiportWireConfiguration);
 
         return this;
     }
 
-    public CompletableFuture<Void> replaceExistingGraph(final BundleContext context,
-            final WireGraphService wireGraphService) throws KuraException {
+    public CompletableFuture<Void> replaceExistingGraph(
+            final BundleContext context, final WireGraphService wireGraphService) throws KuraException {
 
-        final WireGraphConfiguration wireGraph = new WireGraphConfiguration(this.configurations,
-                new ArrayList<>(this.wires));
+        final WireGraphConfiguration wireGraph =
+                new WireGraphConfiguration(this.configurations, new ArrayList<>(this.wires));
 
         wireGraphService.delete();
 
-        final Set<String> expectedPids = this.configurations.stream().map(c -> c.getConfiguration().getPid())
+        final Set<String> expectedPids = this.configurations.stream()
+                .map(c -> c.getConfiguration().getPid())
                 .collect(Collectors.toSet());
 
         final CompletableFuture<Void> result = wiresConnected(context, this.wires)
@@ -143,5 +151,4 @@ public class GraphBuilder {
     public <T> T getTrackedWireComponent(final String pid) {
         return (T) trackedObjects.get(pid);
     }
-
 }

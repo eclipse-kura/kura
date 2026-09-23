@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -15,7 +15,6 @@ package org.eclipse.kura.net;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -39,14 +38,24 @@ public class NetConfigIP4 extends NetConfigIP<IP4Address> implements NetConfig4 
         this.winsServers = new ArrayList<>();
     }
 
-    public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, short networkPrefixLength,
-            IP4Address gateway) throws KuraException {
+    public NetConfigIP4(
+            NetInterfaceStatus status,
+            boolean autoConnect,
+            IP4Address address,
+            short networkPrefixLength,
+            IP4Address gateway)
+            throws KuraException {
         super(status, autoConnect, address, networkPrefixLength, gateway);
         this.winsServers = new ArrayList<>();
     }
 
-    public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, IP4Address subnetMask,
-            IP4Address gateway) throws KuraException {
+    public NetConfigIP4(
+            NetInterfaceStatus status,
+            boolean autoConnect,
+            IP4Address address,
+            IP4Address subnetMask,
+            IP4Address gateway)
+            throws KuraException {
         super(status, autoConnect, address, subnetMask, gateway);
         this.winsServers = new ArrayList<>();
     }

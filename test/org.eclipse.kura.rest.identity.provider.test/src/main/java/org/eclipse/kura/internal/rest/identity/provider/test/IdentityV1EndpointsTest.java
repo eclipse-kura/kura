@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +28,6 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
@@ -50,8 +50,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import com.google.gson.Gson;
-
 @SuppressWarnings("restriction")
 @RunWith(Parameterized.class)
 public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
@@ -72,20 +70,27 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
     private Gson gson = new Gson();
 
     private static final String EXPECTED_GET_USER_CONFIG_RESPONSE = new Scanner(
-            IdentityV1EndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    IdentityV1EndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String EXPECTED_GET_USER_RESPONSE = new Scanner(
-            IdentityV1EndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8").useDelimiter("\\A")
-                    .next().replace(" ", "");
+                    IdentityV1EndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String EXPECTED_GET_PASSWORD_REQUIREMENTS_RESPONSE = new Scanner(
-            IdentityV1EndpointsTest.class.getResourceAsStream("/getPasswordRequirementsResponse.json"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    IdentityV1EndpointsTest.class.getResourceAsStream("/getPasswordRequirementsResponse.json"), "UTF-8")
+            .useDelimiter("\\A")
+            .next()
+            .replace(" ", "");
 
     private static final String EXPECTED_NON_EXISTING_USER_RESPONSE = new Scanner(
-            IdentityV1EndpointsTest.class.getResourceAsStream("/getNonExistingUserResponse.json"), "UTF-8")
-                    .useDelimiter("\\A").next();
+                    IdentityV1EndpointsTest.class.getResourceAsStream("/getNonExistingUserResponse.json"), "UTF-8")
+            .useDelimiter("\\A")
+            .next();
 
     private static Set<UserDTO> userConfigs;
 
@@ -130,8 +135,8 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
-                gson.toJson(user));
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
@@ -151,7 +156,8 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnUserConfig() throws KuraException {
-        givenUserConfigs(new UserDTO("testuser2", //
+        givenUserConfigs(new UserDTO(
+                "testuser2", //
                 new HashSet<String>(Arrays.asList("perm1", "perm2")), //
                 false, //
                 true));
@@ -188,7 +194,9 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnNonExistingUserDeleteResponse() throws KuraException {
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/identities",
                 gson.toJson(new UserDTO("nonExistingUser", null, false, false)));
 
         thenResponseCodeIs(404);
@@ -199,7 +207,9 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnNonExistingUserPostResponse() throws KuraException {
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/byName",
+        whenRequestIsPerformed(
+                new MethodSpec(METHOD_SPEC_POST),
+                "/identities/byName",
                 gson.toJson(new UserDTO("nonExistingUser", null, false, false)));
 
         thenResponseCodeIs(404);
@@ -228,13 +238,13 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
 
             when(identityServiceMock.getUser("testuser"))
                     .thenReturn(new UserDTO("testuser", Collections.emptySet(), true, false));
-
         }
 
         when(identityServiceMock.getUser("nonExistingUser"))
                 .thenThrow(new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist"));
 
-        doThrow(new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist")).when(identityServiceMock)
+        doThrow(new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist"))
+                .when(identityServiceMock)
                 .deleteUser("nonExistingUser");
 
         when(identityServiceMock.getValidatorOptions()).thenReturn(new ValidatorOptions(8, false, false, false));
@@ -257,7 +267,8 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "identityServiceMock");
-        identityServiceRegistration = FrameworkUtil.getBundle(IdentityV1EndpointsTest.class).getBundleContext()
+        identityServiceRegistration = FrameworkUtil.getBundle(IdentityV1EndpointsTest.class)
+                .getBundleContext()
                 .registerService(LegacyIdentityService.class, identityServiceMock, configurationServiceProperties);
     }
 
@@ -265,15 +276,14 @@ public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("IdentityService.target", "(kura.service.pid=identityServiceMock)");
 
-        final ConfigurationAdmin configurationAdmin = WireTestUtil
-                .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(
+                        ConfigurationAdmin.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(IdentityRestServiceV1.class.getName(), "?");
         config.update(properties);
     }
 
     private static void unregisterIdentityServiceMock() {
         identityServiceRegistration.unregister();
-
     }
-
 }

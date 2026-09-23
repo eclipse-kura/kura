@@ -14,6 +14,7 @@
 
 package org.eclipse.kura.core.identity.store;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.time.Duration;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.identity.PasswordHasher;
@@ -39,7 +38,8 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
     private final PasswordStrengthVerificationService passwordStrengthVerificationService;
     private final PasswordHasher passwordHasher;
 
-    public TemporaryIdentityStoreAdapter(final TemporaryIdentityStore temporaryStore,
+    public TemporaryIdentityStoreAdapter(
+            final TemporaryIdentityStore temporaryStore,
             final PasswordStrengthVerificationService passwordStrengthVerificationService,
             final PasswordHasher passwordHasher) {
         this.temporaryStore = temporaryStore;
@@ -53,9 +53,10 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
     }
 
     @Override
-    public Optional<IdentityConfiguration> getIdentityConfiguration(final String identityName,
-            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
-        return this.temporaryStore.getIdentity(identityName)
+    public Optional<IdentityConfiguration> getIdentityConfiguration(
+            final String identityName, final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
+        return this.temporaryStore
+                .getIdentity(identityName)
                 .map(config -> filterIdentityConfiguration(config, componentsToReturn));
     }
 
@@ -65,7 +66,8 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
         final List<IdentityConfiguration> result = new ArrayList<>();
 
         for (final String identityName : this.temporaryStore.getAllIdentityNames()) {
-            this.temporaryStore.getIdentity(identityName)
+            this.temporaryStore
+                    .getIdentity(identityName)
                     .map(config -> filterIdentityConfiguration(config, componentsToReturn))
                     .ifPresent(result::add);
         }
@@ -79,8 +81,8 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
                 .getIdentity(identityConfiguration.getName())
                 .orElseGet(() -> new IdentityConfiguration(identityConfiguration.getName(), Collections.emptyList()));
 
-        final IdentityConfiguration processedConfiguration = processConfigurationForTemporaryStorage(
-                identityConfiguration, Optional.of(existingConfiguration));
+        final IdentityConfiguration processedConfiguration =
+                processConfigurationForTemporaryStorage(identityConfiguration, Optional.of(existingConfiguration));
 
         final Map<Class<? extends IdentityConfigurationComponent>, IdentityConfigurationComponent> merged =
                 new HashMap<>();
@@ -92,8 +94,8 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
         }
 
         final List<IdentityConfigurationComponent> mergedComponents = new ArrayList<>(merged.values());
-        final IdentityConfiguration mergedConfiguration = new IdentityConfiguration(identityConfiguration.getName(),
-                mergedComponents);
+        final IdentityConfiguration mergedConfiguration =
+                new IdentityConfiguration(identityConfiguration.getName(), mergedComponents);
 
         if (!this.temporaryStore.updateIdentity(identityConfiguration.getName(), mergedConfiguration)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Temporary identity does not exist");
@@ -105,13 +107,15 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
         return this.temporaryStore.deleteIdentity(identityName);
     }
 
-    public void createIdentity(final IdentityConfiguration configuration, final Duration lifetime) throws KuraException {
-        final IdentityConfiguration processedConfiguration = processConfigurationForTemporaryStorage(configuration,
-                Optional.empty());
+    public void createIdentity(final IdentityConfiguration configuration, final Duration lifetime)
+            throws KuraException {
+        final IdentityConfiguration processedConfiguration =
+                processConfigurationForTemporaryStorage(configuration, Optional.empty());
         this.temporaryStore.createIdentity(configuration.getName(), processedConfiguration, lifetime);
     }
 
-    private IdentityConfiguration filterIdentityConfiguration(final IdentityConfiguration configuration,
+    private IdentityConfiguration filterIdentityConfiguration(
+            final IdentityConfiguration configuration,
             final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
         if (componentsToReturn.isEmpty()) {
             return new IdentityConfiguration(configuration.getName(), Collections.emptyList());
@@ -124,42 +128,37 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
         return new IdentityConfiguration(configuration.getName(), filteredComponents);
     }
 
-    private PasswordConfiguration processPasswordForStorage(final String identityName,
-            final PasswordConfiguration passwordConfiguration, final Optional<PasswordHash> existingPasswordHash)
+    private PasswordConfiguration processPasswordForStorage(
+            final String identityName,
+            final PasswordConfiguration passwordConfiguration,
+            final Optional<PasswordHash> existingPasswordHash)
             throws KuraException {
 
         if (!passwordConfiguration.isPasswordAuthEnabled()) {
             return new PasswordConfiguration(
-                    passwordConfiguration.isPasswordChangeNeeded(),
-                    false,
-                    Optional.empty(),
-                    Optional.empty());
+                    passwordConfiguration.isPasswordChangeNeeded(), false, Optional.empty(), Optional.empty());
         }
 
         final Optional<char[]> newPassword = passwordConfiguration.getNewPassword();
 
         if (newPassword.isPresent()) {
-            ValidationUtil.validateNewPassword(identityName, newPassword.get(), this.passwordStrengthVerificationService);
+            ValidationUtil.validateNewPassword(
+                    identityName, newPassword.get(), this.passwordStrengthVerificationService);
 
             final PasswordHash hash = this.passwordHasher.hash(newPassword.get());
 
             return new PasswordConfiguration(
-                    passwordConfiguration.isPasswordChangeNeeded(),
-                    true,
-                    Optional.empty(),
-                    Optional.of(hash));
+                    passwordConfiguration.isPasswordChangeNeeded(), true, Optional.empty(), Optional.of(hash));
         }
 
         if (!existingPasswordHash.isPresent()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER,
                     "Password authentication is enabled but no password has been provided");
         }
 
         return new PasswordConfiguration(
-                passwordConfiguration.isPasswordChangeNeeded(),
-                true,
-                Optional.empty(),
-                existingPasswordHash);
+                passwordConfiguration.isPasswordChangeNeeded(), true, Optional.empty(), existingPasswordHash);
     }
 
     private IdentityConfiguration processConfigurationForTemporaryStorage(
@@ -174,8 +173,8 @@ public class TemporaryIdentityStoreAdapter implements IdentityStore {
 
         for (final IdentityConfigurationComponent component : configuration.getComponents()) {
             if (component instanceof PasswordConfiguration) {
-                processedComponents.add(
-                        processPasswordForStorage(identityName, (PasswordConfiguration) component, existingPasswordHash));
+                processedComponents.add(processPasswordForStorage(
+                        identityName, (PasswordConfiguration) component, existingPasswordHash));
             } else {
                 processedComponents.add(component);
             }

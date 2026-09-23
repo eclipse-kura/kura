@@ -17,6 +17,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import jakarta.annotation.Priority;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,12 +52,10 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -74,21 +81,11 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-
-import jakarta.annotation.Priority;
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
-
 public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private static final String LOGIN_BANNER_SERVICE_PID = "org.eclipse.kura.identity.LoginBannerService";
-    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID = "org.eclipse.kura.identity.PasswordStrengthVerificationService";
+    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID =
+            "org.eclipse.kura.identity.PasswordStrengthVerificationService";
 
     public RestServiceTest() {
         super(new RestTransport("testservice"));
@@ -226,7 +223,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportCertificateAuthenticationOnResourcePath() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -248,7 +245,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectRequestIfCertCommonNameDoesNotMatchIdentity() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenService(new RequiresAssetsRole());
         givenCA("clientCA");
@@ -269,14 +266,21 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateSessionWithUsernameAndPassword() {
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false, //
-                "post.login.banner.enabled", false);
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled",
+                false, //
+                "post.login.banner.enabled",
+                false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
 
         thenResponseCodeIs(200);
@@ -290,7 +294,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"baz\"}");
 
         thenResponseCodeIs(401);
@@ -303,7 +311,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"bar\",\"password\":\"bar\"}");
 
         thenResponseCodeIs(401);
@@ -312,7 +324,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateSessionWithCertificate() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -335,10 +347,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateSessionWithCertificateAndReturnPostLoginMessage() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "post.login.banner.enabled", true, //
-                "post.login.banner.content", "foo");
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "post.login.banner.enabled",
+                true, //
+                "post.login.banner.content",
+                "foo");
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -362,7 +377,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldNotCreateSessionWithCertificateIfCNDoesNotMatchIdentity() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -388,7 +403,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
 
@@ -410,7 +429,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
@@ -424,7 +447,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
@@ -437,7 +464,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfTokenHeader("not-the-session-token");
 
@@ -451,7 +482,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
         givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
@@ -467,7 +502,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/logout", null);
 
@@ -479,7 +518,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
@@ -490,20 +533,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithSamePassword() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 1, //
-                "new.password.require.digits", false, //
-                "new.password.require.special.characters", false, //
-                "new.password.require.both.cases", false //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                1, //
+                "new.password.require.digits",
+                false, //
+                "new.password.require.special.characters",
+                false, //
+                "new.password.require.both.cases",
+                false //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"bar\"}");
 
         thenResponseCodeIs(400);
@@ -511,21 +567,38 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldAllowResourceAccessAfterPasswordChange() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 1, //
-                "new.password.require.digits", false, //
-                "new.password.require.special.characters", false, //
-                "new.password.require.both.cases", false //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                1, //
+                "new.password.require.digits",
+                false, //
+                "new.password.require.special.characters",
+                false, //
+                "new.password.require.both.cases",
+                false //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"baz\"}");
         givenXsrfToken();
 
@@ -540,7 +613,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
         givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
@@ -557,7 +634,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
         givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
@@ -574,7 +655,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
         givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
@@ -593,7 +678,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldIgnorePasswordChangeNeededWithCertificateAuth() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
         givenService(new RequiresAssetsRole());
@@ -630,8 +715,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportDisablingCertificateAuthenticationOnResourcePath() {
-        givenRestServiceConfiguration(map("allowed.ports", new Integer[] { 8080, 9999 }, //
-                "auth.certificate.stateless.enabled", false));
+        givenRestServiceConfiguration(map(
+                "allowed.ports",
+                new Integer[] {8080, 9999}, //
+                "auth.certificate.stateless.enabled",
+                false));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -657,7 +745,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
@@ -668,8 +760,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldAllowAccessingResourceThroughSessionAuthEvenIfLegacyCertificateAuthIsDisabled() {
-        givenRestServiceConfiguration(map("allowed.ports", new Integer[] { 8080, 9999 }, //
-                "auth.certificate.stateless.enabled", false));
+        givenRestServiceConfiguration(map(
+                "allowed.ports",
+                new Integer[] {8080, 9999}, //
+                "auth.certificate.stateless.enabled",
+                false));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
         givenService(new RequiresAssetsRole());
@@ -698,7 +793,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
         givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
@@ -711,20 +810,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithTooShort() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 4, //
-                "new.password.require.digits", false, //
-                "new.password.require.special.characters", false, //
-                "new.password.require.both.cases", false //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                4, //
+                "new.password.require.digits",
+                false, //
+                "new.password.require.special.characters",
+                false, //
+                "new.password.require.both.cases",
+                false //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
 
         thenResponseCodeIs(400);
@@ -732,20 +844,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithoutDigits() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 4, //
-                "new.password.require.digits", true, //
-                "new.password.require.special.characters", false, //
-                "new.password.require.both.cases", false //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                4, //
+                "new.password.require.digits",
+                true, //
+                "new.password.require.special.characters",
+                false, //
+                "new.password.require.both.cases",
+                false //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"nodigits\"}");
 
         thenResponseCodeIs(400);
@@ -753,20 +878,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithoutSpecialCharacters() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 4, //
-                "new.password.require.digits", true, //
-                "new.password.require.special.characters", true, //
-                "new.password.require.both.cases", false //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                4, //
+                "new.password.require.digits",
+                true, //
+                "new.password.require.special.characters",
+                true, //
+                "new.password.require.both.cases",
+                false //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"nospecialcharacters1\"}");
 
         thenResponseCodeIs(400);
@@ -774,20 +912,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithoutBothCases() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 4, //
-                "new.password.require.digits", true, //
-                "new.password.require.special.characters", true, //
-                "new.password.require.both.cases", true //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                4, //
+                "new.password.require.digits",
+                true, //
+                "new.password.require.special.characters",
+                true, //
+                "new.password.require.both.cases",
+                true //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"nobothcases1@\"}");
 
         thenResponseCodeIs(400);
@@ -795,20 +946,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldAcceptPasswordThatFullfillsRequirements() {
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 4, //
-                "new.password.require.digits", true, //
-                "new.password.require.special.characters", true, //
-                "new.password.require.both.cases", true //
-        );
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                4, //
+                "new.password.require.digits",
+                true, //
+                "new.password.require.special.characters",
+                true, //
+                "new.password.require.both.cases",
+                true //
+                );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"1validPW@\"}");
 
         thenRequestSucceeds();
@@ -819,7 +983,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets", "rest.foo", "rest.bar"), false);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
 
@@ -835,7 +1003,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("nopermissions", Optional.of("bar"), Collections.emptyList(), false);
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"nopermissions\",\"password\":\"bar\"}");
         givenXsrfToken();
 
@@ -849,8 +1021,10 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     public void shouldReturnCurrentAuthenticationMethodInfo() {
         givenHttpServiceClientCertAuthDisabled();
         givenService(new RequiresAssetsRole());
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "access.banner.enabled", false);
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "access.banner.enabled",
+                false);
         givenNoBasicCredentials();
 
         whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
@@ -863,9 +1037,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnMessageIfLoginBannnerIsEnabled() {
         givenHttpServiceClientCertAuthDisabled();
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", true, //
-                "pre.login.banner.content", "foo");
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled",
+                true, //
+                "pre.login.banner.content",
+                "foo");
         givenNoBasicCredentials();
 
         whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
@@ -878,13 +1055,20 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnPostLoginMessageIfLoginBannnerIsEnabled() {
         givenHttpServiceClientCertAuthDisabled();
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "post.login.banner.enabled", true, //
-                "post.login.banner.content", "foo");
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "post.login.banner.enabled",
+                true, //
+                "post.login.banner.content",
+                "foo");
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         thenRequestSucceeds();
 
@@ -893,19 +1077,30 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieRepeatingPasswordAuthentication() {
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false, //
-                "post.login.banner.enabled", false);
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled",
+                false, //
+                "post.login.banner.enabled",
+                false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
 
         thenResponseCodeIs(200);
@@ -915,25 +1110,40 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAfterPasswordChange() {
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false);
-        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
-                "new.password.min.length", 1, //
-                "new.password.require.digits", false, //
-                "new.password.require.special.characters", false, //
-                "new.password.require.both.cases", false);
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled",
+                false);
+        givenConfiguration(
+                PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
+                "new.password.min.length",
+                1, //
+                "new.password.require.digits",
+                false, //
+                "new.password.require.special.characters",
+                false, //
+                "new.password.require.both.cases",
+                false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList(), true);
         givenNoBasicCredentials();
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
 
         givenXsrfToken("http", 8080);
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/changePassword",
                 "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
 
         thenRequestSucceeds();
@@ -942,7 +1152,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieRepeatingCertificateAuthentication() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -969,7 +1179,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithPasswordAndThenWithCertificateOnDifferentPort() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -984,7 +1194,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
         givenClientKeystore("clientKeystore");
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
@@ -997,7 +1211,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithCertificateAndThenWithPasswordOnDifferentPort() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -1016,7 +1230,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         thenRequestSucceeds();
         thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
@@ -1024,7 +1242,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithPasswordAndThenWithCertificateOnSamePort() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -1039,7 +1257,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
         givenClientKeystore("clientKeystore");
 
-        givenSuccessfulRequest("https", 9999, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "https",
+                9999,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
@@ -1052,7 +1274,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithCertificateAndThenWithPasswordOnSamePort() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -1071,7 +1293,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
 
-        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "https",
+                9999,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         thenRequestSucceeds();
         thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
@@ -1079,43 +1305,62 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldNotLoginWithOldCookieAfterNewLogin() {
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false);
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled",
+                false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
 
         whenCookieIsRestoredFromSnapshot("JSESSIONID");
         whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
 
         thenResponseCodeIs(401);
-
     }
 
     @Test
     public void shouldInvalidateSessionAfterFailedPasswordLogin() {
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false);
+        givenConfiguration(
+                LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled",
+                false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
 
         givenXsrfToken();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        whenRequestIsPerformed(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"baz\"}");
 
         whenCookieIsRestoredFromSnapshot("JSESSIONID");
@@ -1126,7 +1371,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvalidateSessionAfterFailedCertificateLogin() {
-        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] {8080, 9999}));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenService(new RequiresAssetsRole());
@@ -1141,7 +1386,11 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
         givenClientKeystore("clientKeystore");
 
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+        givenSuccessfulRequest(
+                "http",
+                8080,
+                new MethodSpec("POST"),
+                "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenSnapshotOfCurrentCookies();
         givenCookieInSnapshot("JSESSIONID");
@@ -1180,8 +1429,10 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnBadRequestOnMalformedJSON() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", false);
+        givenConfiguration(
+                "org.eclipse.kura.web.Console", //
+                "access.banner.enabled",
+                false);
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
@@ -1223,12 +1474,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenRestServiceConfiguration(final Map<String, Object> properties) {
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
-            ServiceUtil
-                    .updateComponentConfiguration(configurationService,
-                            "org.eclipse.kura.internal.rest.provider.RestService", properties)
+            ServiceUtil.updateComponentConfiguration(
+                            configurationService, "org.eclipse.kura.internal.rest.provider.RestService", properties)
                     .get(30, TimeUnit.SECONDS);
 
             customizedConfig = true;
@@ -1236,22 +1487,25 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
             fail("failed to update rest service configuration");
             return;
         }
-
     }
 
     private void givenKeystoreService(final String pid) {
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             final java.nio.file.Path directoryPath = Files.createTempDirectory(null);
 
-            final Map<String, Object> properties = Collections.singletonMap("keystore.path",
-                    new File(directoryPath.toFile(), System.nanoTime() + ".ks").getAbsolutePath());
+            final Map<String, Object> properties = Collections.singletonMap(
+                    "keystore.path", new File(directoryPath.toFile(), System.nanoTime() + ".ks").getAbsolutePath());
 
-            final KeystoreService keystoreService = ServiceUtil
-                    .createFactoryConfiguration(configurationService, KeystoreService.class, pid,
-                            "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl", properties)
+            final KeystoreService keystoreService = ServiceUtil.createFactoryConfiguration(
+                            configurationService,
+                            KeystoreService.class,
+                            pid,
+                            "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
+                            properties)
                     .get(30, TimeUnit.SECONDS);
 
             this.keystoreServices.put(pid, keystoreService);
@@ -1264,8 +1518,9 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenCA(final String cn) {
         try {
-            final TestCA testCA = new TestCA(
-                    CertificateCreationOptions.builder(new X500Name("cn=" + cn + ", dc=bar.com")).build());
+            final TestCA testCA =
+                    new TestCA(CertificateCreationOptions.builder(new X500Name("cn=" + cn + ", dc=bar.com"))
+                            .build());
             this.testCAs.put(cn, testCA);
         } catch (Exception e) {
             fail("cannot cerate test CA");
@@ -1290,10 +1545,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
             final KeyPair keyPair = TestCA.generateKeyPair();
             final X509Certificate clientCertificate = testCA.createAndSignCertificate(
-                    CertificateCreationOptions.builder(new X500Name("cn=" + certCN + ", dc=bar.com")).build(), keyPair);
+                    CertificateCreationOptions.builder(new X500Name("cn=" + certCN + ", dc=bar.com"))
+                            .build(),
+                    keyPair);
 
-            keystoreService.setEntry(certCN, new PrivateKeyEntry(keyPair.getPrivate(),
-                    new Certificate[] { clientCertificate, testCA.getCertificate() }));
+            keystoreService.setEntry(certCN, new PrivateKeyEntry(keyPair.getPrivate(), new Certificate[] {
+                clientCertificate, testCA.getCertificate()
+            }));
         } catch (Exception e) {
             fail("cannot create client key pair");
         }
@@ -1301,12 +1559,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenHttpServiceClientCertAuthEnabled(final String keystorePid, final int port) {
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             final Map<String, Object> properties = new HashMap<>();
             properties.put("KeystoreService.target", "(kura.service.pid=" + keystorePid + ")");
-            properties.put("https.client.auth.ports", new Integer[] { port });
+            properties.put("https.client.auth.ports", new Integer[] {port});
 
             this.httpsClientAuthPorts.add(port);
             this.httpServiceCustomized = true;
@@ -1322,11 +1581,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenHttpServiceClientCertAuthDisabled() {
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
-            final Map<String, Object> properties = Collections.singletonMap("https.client.auth.ports",
-                    new Integer[] {});
+            final Map<String, Object> properties =
+                    Collections.singletonMap("https.client.auth.ports", new Integer[] {});
 
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
 
@@ -1343,8 +1603,9 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         }
 
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             final Map<String, Object> properties = new HashMap<>();
             properties.put("KeystoreService.target", "(kura.service.pid=changeme)");
@@ -1376,8 +1637,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
             final Configuration configuration = configAdmin.getConfiguration(pid, "?");
 
-            final Dictionary<String, Object> configurationProperties = Optional
-                    .ofNullable(configuration.getProperties()).orElseGet(Hashtable::new);
+            final Dictionary<String, Object> configurationProperties =
+                    Optional.ofNullable(configuration.getProperties()).orElseGet(Hashtable::new);
 
             final Iterator<Object> iter = Arrays.asList(properties).iterator();
 
@@ -1399,14 +1660,17 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         try {
             final KeystoreService keystoreService = this.keystoreServices.get(keystorePid);
 
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            TrustManagerFactory trustManagerFactory =
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keystoreService.getKeyStore());
             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
 
             sslContext.init(
-                    keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm()).toArray(new KeyManager[0]),
-                    trustManagerFactory.getTrustManagers(), new SecureRandom());
+                    keystoreService
+                            .getKeyManagers(KeyManagerFactory.getDefaultAlgorithm())
+                            .toArray(new KeyManager[0]),
+                    trustManagerFactory.getTrustManagers(),
+                    new SecureRandom());
 
             ((RestTransport) this.transport).setSslContext(sslContext);
         } catch (Exception e) {
@@ -1416,7 +1680,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @SuppressWarnings("unchecked")
     private <T extends TestService> void givenService(final T service) {
-        final BundleContext bundleContext = FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
 
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("osgi.jakartars.resource", true);
@@ -1448,12 +1713,16 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void givenIdentity(final String username, final Optional<String> password, final List<String> roles,
+    private void givenIdentity(
+            final String username,
+            final Optional<String> password,
+            final List<String> roles,
             final boolean needsPasswordChange) {
         final UserAdmin userAdmin;
 
         try {
-            userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            userAdmin =
+                    ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail("failed to track UserAdmin");
             return;
@@ -1485,7 +1754,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenAuthenticationProvider(final AuthenticationProvider provider) {
-        final BundleContext bundleContext = FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
+        final BundleContext bundleContext =
+                FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
 
         this.registeredServices.add(bundleContext.registerService(AuthenticationProvider.class, provider, null));
 
@@ -1496,8 +1766,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void givenSuccessfulRequest(final String proto, final int port, final MethodSpec method,
-            final String resource, final String body) {
+    private void givenSuccessfulRequest(
+            final String proto, final int port, final MethodSpec method, final String resource, final String body) {
         whenRequestIsPerformed(proto, port, method, resource, body);
         thenRequestSucceeds();
     }
@@ -1523,12 +1793,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         whenDelayPasses(amount, timeUnit);
     }
 
-    private void whenRequestIsPerformed(final String proto, final int port, final MethodSpec method,
-            final String resource, final String body) {
+    private void whenRequestIsPerformed(
+            final String proto, final int port, final MethodSpec method, final String resource, final String body) {
         final RestTransport restTransport = (RestTransport) this.transport;
 
-        this.response = Optional
-                .of(restTransport.runRequest(proto + "://localhost:" + port + "/services", resource, method, body));
+        this.response = Optional.of(
+                restTransport.runRequest(proto + "://localhost:" + port + "/services", resource, method, body));
     }
 
     private void whenXsrfTokenIsObtained() {
@@ -1538,11 +1808,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     private void whenXsrfTokenIsObtained(final String protocol, final int port) {
         final RestTransport restTransport = (RestTransport) this.transport;
 
-        final Response response = restTransport.runRequest(protocol + "://localhost:" + port + "/services",
-                "/session/v1/xsrfToken", new MethodSpec("GET"), null);
+        final Response response = restTransport.runRequest(
+                protocol + "://localhost:" + port + "/services", "/session/v1/xsrfToken", new MethodSpec("GET"), null);
 
-        final JsonObject object = Json
-                .parse(response.getBody().orElseThrow(() -> new IllegalStateException("no response body"))).asObject();
+        final JsonObject object = Json.parse(
+                        response.getBody().orElseThrow(() -> new IllegalStateException("no response body")))
+                .asObject();
 
         final String token = object.get("xsrfToken").asString();
 
@@ -1567,8 +1838,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         this.registeredServices.remove(this.registeredServices.size() - 1).unregister();
     }
 
-    private void whenIdentityIsUpdated(final String username, final Optional<String> password,
-            final List<String> roles) {
+    private void whenIdentityIsUpdated(
+            final String username, final Optional<String> password, final List<String> roles) {
         givenIdentity(username, password, roles, false);
     }
 
@@ -1646,11 +1917,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                 return;
             }
 
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationService configurationService = ServiceUtil.trackService(
+                            ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             for (final String pid : createdFactoryPids) {
-                ServiceUtil.deleteFactoryConfiguration(configurationService, pid).get(30, TimeUnit.SECONDS);
+                ServiceUtil.deleteFactoryConfiguration(configurationService, pid)
+                        .get(30, TimeUnit.SECONDS);
             }
         } catch (final Exception e) {
             fail("failed to cleanup registered factory components");
@@ -1672,14 +1945,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         return result;
     }
 
-    public static abstract class TestService {
+    public abstract static class TestService {
 
         @GET
         @Path("/ping")
         public String ping() {
             return "ok";
         }
-
     }
 
     @Path("testservice")
@@ -1718,8 +1990,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         final String expectedCredentials;
         final String targetIdentity;
 
-        public DummyAuthenticationProvider(final String expectedUsername, final String expectedPassword,
-                final String targetIdentity) {
+        public DummyAuthenticationProvider(
+                final String expectedUsername, final String expectedPassword, final String targetIdentity) {
             this.expectedCredentials = expectedUsername + ":" + expectedPassword;
             this.targetIdentity = targetIdentity;
         }
@@ -1748,8 +2020,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                 return Optional.empty();
             }
 
-            final String credentials = new String(Base64.getDecoder().decode(tokens.nextToken()),
-                    StandardCharsets.UTF_8);
+            final String credentials =
+                    new String(Base64.getDecoder().decode(tokens.nextToken()), StandardCharsets.UTF_8);
 
             if (expectedCredentials.equals(credentials)) {
                 providerAuthenticated.complete(null);
@@ -1763,8 +2035,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Priority(1000)
     private class LowPriorityAuthenticationProvider extends DummyAuthenticationProvider {
 
-        public LowPriorityAuthenticationProvider(String expectedUsername, String expectedPassword,
-                String targetIdentity) {
+        public LowPriorityAuthenticationProvider(
+                String expectedUsername, String expectedPassword, String targetIdentity) {
             super(expectedUsername, expectedPassword, targetIdentity);
         }
     }
@@ -1772,8 +2044,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Priority(1)
     private class HighPriorityAuthenticationProvider extends DummyAuthenticationProvider {
 
-        public HighPriorityAuthenticationProvider(String expectedUsername, String expectedPassword,
-                String targetIdentity) {
+        public HighPriorityAuthenticationProvider(
+                String expectedUsername, String expectedPassword, String targetIdentity) {
             super(expectedUsername, expectedPassword, targetIdentity);
         }
     }
@@ -1797,17 +2069,16 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void thenAuditContextIpIsNotXffSpoofedValue(final String xffValue) {
-        final String body = expectResponse().getBody()
-                .orElseThrow(() -> new IllegalStateException("no response body"));
-        assertFalse("Audit context ip must not be the XFF-spoofed value '" + xffValue + "', got: " + body,
+        final String body = expectResponse().getBody().orElseThrow(() -> new IllegalStateException("no response body"));
+        assertFalse(
+                "Audit context ip must not be the XFF-spoofed value '" + xffValue + "', got: " + body,
                 body.contains(xffValue));
     }
 
     private void thenAuditContextIpIsLoopback() {
-        final String body = expectResponse().getBody()
-                .orElseThrow(() -> new IllegalStateException("no response body"));
-        final boolean isLoopback = body.contains("127.0.0.1") || body.contains("::1")
-                || body.contains("0:0:0:0:0:0:0:1");
+        final String body = expectResponse().getBody().orElseThrow(() -> new IllegalStateException("no response body"));
+        final boolean isLoopback =
+                body.contains("127.0.0.1") || body.contains("::1") || body.contains("0:0:0:0:0:0:0:1");
         assertTrue("Expected loopback address in audit context ip, got: " + body, isLoopback);
     }
 }

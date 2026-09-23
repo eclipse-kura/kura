@@ -12,6 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.core.token.jwt.verifier;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.Verification;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
@@ -24,26 +31,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraAuthenticationFailedException;
 import org.eclipse.kura.security.token.VerificationProof;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.Verification;
-
 final class JwtVerifier {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtVerifier.class);
 
-    private record TrustAnchor(String alias, X509Certificate certificate) {
-    }
+    private record TrustAnchor(String alias, X509Certificate certificate) {}
 
     private final List<TrustAnchor> trustAnchors;
     private final Map<String, TrustAnchor> trustAnchorsByAlias;
@@ -83,7 +80,8 @@ final class JwtVerifier {
             }
 
             try {
-                return asVerificationProof(verification(candidate, intendedConsumer).build().verify(decodedJwt));
+                return asVerificationProof(
+                        verification(candidate, intendedConsumer).build().verify(decodedJwt));
             } catch (final SignatureVerificationException e) {
                 // this certificate does not hold the signing key, try the next one
                 lastSignatureFailure = e;
@@ -94,8 +92,8 @@ final class JwtVerifier {
         }
 
         if (lastSignatureFailure != null) {
-            throw new KuraAuthenticationFailedException(lastSignatureFailure,
-                    "No trusted certificate can verify the token signature");
+            throw new KuraAuthenticationFailedException(
+                    lastSignatureFailure, "No trusted certificate can verify the token signature");
         }
 
         throw new KuraAuthenticationFailedException("No usable trusted certificate is available to verify the token");
@@ -131,7 +129,8 @@ final class JwtVerifier {
 
     private Verification verification(final TrustAnchor anchor, final Optional<String> intendedConsumer) {
 
-        final Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) anchor.certificate().getPublicKey(), null);
+        final Algorithm algorithm =
+                Algorithm.RSA256((RSAPublicKey) anchor.certificate().getPublicKey(), null);
 
         Verification verification = JWT.require(algorithm) //
                 .acceptLeeway(this.clockSkewToleranceSec);
@@ -233,7 +232,5 @@ final class JwtVerifier {
 
             return result;
         }
-
     }
-
 }

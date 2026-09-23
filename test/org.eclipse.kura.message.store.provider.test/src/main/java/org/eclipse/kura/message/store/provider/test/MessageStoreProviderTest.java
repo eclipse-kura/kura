@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
@@ -478,11 +477,15 @@ public class MessageStoreProviderTest {
         this.storePid = "db" + this.id;
         this.storeName = "store" + this.id;
 
-        final ConfigurationService configurationService = ServiceUtil
-                .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-        this.messageStoreProvider = ServiceUtil
-                .createFactoryConfiguration(configurationService, MessageStoreProvider.class, this.storePid,
-                        this.target.storeFactoryPid(), target.getConfigurationForPid(this.storePid))
+        final ConfigurationService configurationService = ServiceUtil.trackService(
+                        ConfigurationService.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
+        this.messageStoreProvider = ServiceUtil.createFactoryConfiguration(
+                        configurationService,
+                        MessageStoreProvider.class,
+                        this.storePid,
+                        this.target.storeFactoryPid(),
+                        target.getConfigurationForPid(this.storePid))
                 .get(30, TimeUnit.SECONDS);
     }
 
@@ -494,13 +497,14 @@ public class MessageStoreProviderTest {
         this.target.setMessageId(storePid, storeName, value);
     }
 
-    private void givenStoredMessage(final String topic, final byte[] payload, final int qos, final boolean retain,
-            final int priority) throws KuraStoreException {
+    private void givenStoredMessage(
+            final String topic, final byte[] payload, final int qos, final boolean retain, final int priority)
+            throws KuraStoreException {
         messageIds.add(this.messageStore.store(topic, payload, qos, retain, priority));
     }
 
-    private void whenMessageIsStored(final String topic, final byte[] payload, final int qos, final boolean retain,
-            final int priority) {
+    private void whenMessageIsStored(
+            final String topic, final byte[] payload, final int qos, final boolean retain, final int priority) {
         try {
             givenStoredMessage(topic, payload, qos, retain, priority);
         } catch (final Exception e) {
@@ -538,8 +542,8 @@ public class MessageStoreProviderTest {
     }
 
     private void thenRetrievedMessageIdSetIs(final int... ids) {
-        final List<StoredMessage> messages = this.retrievedMessages
-                .orElseThrow(() -> new IllegalStateException("no messages have been retrieved"));
+        final List<StoredMessage> messages =
+                this.retrievedMessages.orElseThrow(() -> new IllegalStateException("no messages have been retrieved"));
 
         assertEquals(ids.length, messages.size());
 
@@ -686,24 +690,31 @@ public class MessageStoreProviderTest {
 
     private void thenIsInTheRecentPast(final Optional<Date> maybeDate) {
         final long now = System.currentTimeMillis();
-        final long date = maybeDate.orElseThrow(() -> new IllegalStateException("Date is not set")).toInstant()
+        final long date = maybeDate
+                .orElseThrow(() -> new IllegalStateException("Date is not set"))
+                .toInstant()
                 .toEpochMilli();
 
         assertTrue(date <= now && now - date < TimeUnit.SECONDS.toMillis(5));
     }
 
     private void thenKuraStoreExceptionIsThrown() {
-        assertEquals(KuraStoreException.class,
-                this.exception.orElseThrow(() -> new IllegalStateException("expected exception")).getClass());
+        assertEquals(
+                KuraStoreException.class,
+                this.exception
+                        .orElseThrow(() -> new IllegalStateException("expected exception"))
+                        .getClass());
     }
 
     private StoredMessage getStoredMessage(final int index) throws KuraStoreException {
-        return this.messageStore.get(this.messageIds.get(index))
+        return this.messageStore
+                .get(this.messageIds.get(index))
                 .orElseThrow(() -> new IllegalStateException("no stored message"));
     }
 
     private StoredMessage getNextMessage() throws IllegalStateException, KuraStoreException {
-        return this.messageStore.getNextMessage()
+        return this.messageStore
+                .getNextMessage()
                 .orElseThrow(() -> new IllegalStateException("no next message returned"));
     }
 

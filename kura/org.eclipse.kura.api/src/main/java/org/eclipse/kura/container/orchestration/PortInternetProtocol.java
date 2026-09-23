@@ -13,9 +13,9 @@
 package org.eclipse.kura.container.orchestration;
 
 /**
- * 
+ *
  * This is an enum containing all supported internet protocols that can be run at a port in a container.
- * 
+ *
  * @since 2.5
  *
  */
@@ -23,5 +23,4 @@ public enum PortInternetProtocol {
     TCP,
     UDP,
     SCTP
-
 }

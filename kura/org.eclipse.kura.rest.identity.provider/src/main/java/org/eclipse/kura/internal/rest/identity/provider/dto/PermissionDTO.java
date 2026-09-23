@@ -25,5 +25,4 @@ public class PermissionDTO {
     public Set<String> getPermissions() {
         return this.permissions;
     }
-
 }

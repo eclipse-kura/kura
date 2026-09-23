@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -24,9 +24,7 @@ public class UsbSerial {
 
     private static ArrayList<UsbSerialEntry> entries = null;
 
-    private UsbSerial() {
-
-    }
+    private UsbSerial() {}
 
     /*
      * (non-Javadoc)
@@ -36,7 +34,7 @@ public class UsbSerial {
     private static void getInfo() throws IOException {
 
         try (FileReader fr = new FileReader(FILENAME);
-                BufferedReader in = new BufferedReader(fr);) {
+                BufferedReader in = new BufferedReader(fr); ) {
             entries = new ArrayList<>();
 
             int ttyUsbNo = 0;
@@ -61,10 +59,12 @@ public class UsbSerial {
                         product = token.substring(token.indexOf(':') + 1).trim();
                     }
                     if (token.startsWith("num_ports:")) {
-                        numPorts = Integer.parseInt(token.substring(token.indexOf(':') + 1).trim());
+                        numPorts = Integer.parseInt(
+                                token.substring(token.indexOf(':') + 1).trim());
                     }
                     if (token.startsWith("port:")) {
-                        portEnum = Integer.parseInt(token.substring(token.indexOf(':') + 1).trim());
+                        portEnum = Integer.parseInt(
+                                token.substring(token.indexOf(':') + 1).trim());
                     }
                     if (token.startsWith("path:")) {
                         path = token.substring(token.indexOf(':') + 1).trim();
@@ -91,7 +91,8 @@ public class UsbSerial {
 
         for (int i = 0; i < entries.size(); i++) {
             entry = entries.get(i);
-            if (entry.getVendorID().compareTo(vendor) == 0 && entry.getProductID().compareTo(product) == 0) {
+            if (entry.getVendorID().compareTo(vendor) == 0
+                    && entry.getProductID().compareTo(product) == 0) {
                 matches.add(entry);
             }
         }

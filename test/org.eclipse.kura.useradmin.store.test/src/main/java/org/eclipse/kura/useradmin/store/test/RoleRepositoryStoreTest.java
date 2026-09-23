@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -44,8 +43,8 @@ public class RoleRepositoryStoreTest {
     public static void setUp() {
         try {
             // wait for spurious updates
-            WireTestUtil
-                    .modified("(kura.service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl)")
+            WireTestUtil.modified(
+                            "(kura.service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl)")
                     .get(30, TimeUnit.SECONDS);
         } catch (final Exception e) {
             // no need
@@ -55,11 +54,11 @@ public class RoleRepositoryStoreTest {
     public RoleRepositoryStoreTest()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
         userAdmin = WireTestUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-        configurationService = WireTestUtil.trackService(ConfigurationService.class, Optional.empty()).get(30,
-                TimeUnit.SECONDS);
+        configurationService = WireTestUtil.trackService(ConfigurationService.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
 
-        final CompletableFuture<Void> modified = WireTestUtil
-                .modified("(kura.service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl)");
+        final CompletableFuture<Void> modified = WireTestUtil.modified(
+                "(kura.service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl)");
 
         final Role[] roles = userAdmin.getRoles(null);
 
@@ -87,19 +86,22 @@ public class RoleRepositoryStoreTest {
     @Test
     public void shouldCreateEmptyUser()
             throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
-        testRoleKindConfig(k -> userAdmin.createRole("foo" + k, k), k -> "[{\"name\":\"foo" + k + "\"}]", Role.USER,
-                Role.GROUP);
+        testRoleKindConfig(
+                k -> userAdmin.createRole("foo" + k, k), k -> "[{\"name\":\"foo" + k + "\"}]", Role.USER, Role.GROUP);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void shouldSerializeRoleProperties()
             throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
-        testRoleKindConfig(k -> {
-            final Role role = userAdmin.createRole("foo" + k, k);
-            role.getProperties().put("foo", "bar");
-            role.getProperties().put("boo", new byte[] { 1, 2, 3, 4 });
-        }, k -> "[{\"name\":\"foo" + k + "\",\"properties\":{\"boo\":[1,2,3,4],\"foo\":\"bar\"}}]", Role.USER,
+        testRoleKindConfig(
+                k -> {
+                    final Role role = userAdmin.createRole("foo" + k, k);
+                    role.getProperties().put("foo", "bar");
+                    role.getProperties().put("boo", new byte[] {1, 2, 3, 4});
+                },
+                k -> "[{\"name\":\"foo" + k + "\",\"properties\":{\"boo\":[1,2,3,4],\"foo\":\"bar\"}}]",
+                Role.USER,
                 Role.GROUP);
     }
 
@@ -108,21 +110,28 @@ public class RoleRepositoryStoreTest {
             throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         shouldSerializeRoleProperties();
 
-        testRoleKindConfig(k -> {
-            final Role role = userAdmin.getRole("foo" + k);
-            role.getProperties().remove("boo");
-        }, k -> "[{\"name\":\"foo" + k + "\",\"properties\":{\"foo\":\"bar\"}}]", Role.USER, Role.GROUP);
+        testRoleKindConfig(
+                k -> {
+                    final Role role = userAdmin.getRole("foo" + k);
+                    role.getProperties().remove("boo");
+                },
+                k -> "[{\"name\":\"foo" + k + "\",\"properties\":{\"foo\":\"bar\"}}]",
+                Role.USER,
+                Role.GROUP);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void shouldSerializeRoleCredentials()
             throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
-        testRoleKindConfig(k -> {
-            final User role = (User) userAdmin.createRole("foo" + k, k);
-            role.getCredentials().put("foo", "bar");
-            role.getCredentials().put("boo", new byte[] { 1, 2, 3, 4 });
-        }, k -> "[{\"name\":\"foo" + k + "\",\"credentials\":{\"boo\":[1,2,3,4],\"foo\":\"bar\"}}]", Role.USER,
+        testRoleKindConfig(
+                k -> {
+                    final User role = (User) userAdmin.createRole("foo" + k, k);
+                    role.getCredentials().put("foo", "bar");
+                    role.getCredentials().put("boo", new byte[] {1, 2, 3, 4});
+                },
+                k -> "[{\"name\":\"foo" + k + "\",\"credentials\":{\"boo\":[1,2,3,4],\"foo\":\"bar\"}}]",
+                Role.USER,
                 Role.GROUP);
     }
 
@@ -131,10 +140,14 @@ public class RoleRepositoryStoreTest {
             throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         shouldSerializeRoleCredentials();
 
-        testRoleKindConfig(k -> {
-            final User role = (User) userAdmin.getRole("foo" + k);
-            role.getCredentials().remove("boo");
-        }, k -> "[{\"name\":\"foo" + k + "\",\"credentials\":{\"foo\":\"bar\"}}]", Role.USER, Role.GROUP);
+        testRoleKindConfig(
+                k -> {
+                    final User role = (User) userAdmin.getRole("foo" + k);
+                    role.getCredentials().remove("boo");
+                },
+                k -> "[{\"name\":\"foo" + k + "\",\"credentials\":{\"foo\":\"bar\"}}]",
+                Role.USER,
+                Role.GROUP);
     }
 
     @Test
@@ -145,12 +158,15 @@ public class RoleRepositoryStoreTest {
         final Role bar = userAdmin.createRole("bar", Role.USER);
         final Role baz = userAdmin.createRole("baz", Role.GROUP);
 
-        testRoleKindConfig(k -> {
-            final Group group = (Group) userAdmin.createRole("group", Role.GROUP);
-            group.addMember(foo);
-            group.addMember(bar);
-            group.addMember(baz);
-        }, k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"basicMembers\":[\"bar\",\"baz\",\"foo\"]}]", Role.GROUP);
+        testRoleKindConfig(
+                k -> {
+                    final Group group = (Group) userAdmin.createRole("group", Role.GROUP);
+                    group.addMember(foo);
+                    group.addMember(bar);
+                    group.addMember(baz);
+                },
+                k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"basicMembers\":[\"bar\",\"baz\",\"foo\"]}]",
+                Role.GROUP);
     }
 
     @Test
@@ -159,10 +175,13 @@ public class RoleRepositoryStoreTest {
 
         shouldSupportBasicMembers();
 
-        testRoleKindConfig(k -> {
-            final Group group = (Group) userAdmin.getRole("group");
-            group.removeMember(userAdmin.getRole("baz"));
-        }, k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"basicMembers\":[\"bar\",\"foo\"]}]", Role.GROUP);
+        testRoleKindConfig(
+                k -> {
+                    final Group group = (Group) userAdmin.getRole("group");
+                    group.removeMember(userAdmin.getRole("baz"));
+                },
+                k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"basicMembers\":[\"bar\",\"foo\"]}]",
+                Role.GROUP);
     }
 
     @Test
@@ -173,12 +192,15 @@ public class RoleRepositoryStoreTest {
         final Role bar = userAdmin.createRole("bar", Role.USER);
         final Role baz = userAdmin.createRole("baz", Role.GROUP);
 
-        testRoleKindConfig(k -> {
-            final Group group = (Group) userAdmin.createRole("group", Role.GROUP);
-            group.addRequiredMember(foo);
-            group.addRequiredMember(bar);
-            group.addRequiredMember(baz);
-        }, k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"requiredMembers\":[\"bar\",\"baz\",\"foo\"]}]", Role.GROUP);
+        testRoleKindConfig(
+                k -> {
+                    final Group group = (Group) userAdmin.createRole("group", Role.GROUP);
+                    group.addRequiredMember(foo);
+                    group.addRequiredMember(bar);
+                    group.addRequiredMember(baz);
+                },
+                k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"requiredMembers\":[\"bar\",\"baz\",\"foo\"]}]",
+                Role.GROUP);
     }
 
     @Test
@@ -187,19 +209,22 @@ public class RoleRepositoryStoreTest {
 
         shouldSupportRequiredMembers();
 
-        testRoleKindConfig(k -> {
-            final Group group = (Group) userAdmin.getRole("group");
-            group.removeMember(userAdmin.getRole("baz"));
-        }, k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"requiredMembers\":[\"bar\",\"foo\"]}]", Role.GROUP);
+        testRoleKindConfig(
+                k -> {
+                    final Group group = (Group) userAdmin.getRole("group");
+                    group.removeMember(userAdmin.getRole("baz"));
+                },
+                k -> "[{\"name\":\"baz\"},{\"name\":\"group\",\"requiredMembers\":[\"bar\",\"foo\"]}]",
+                Role.GROUP);
     }
 
-    private void testRoleKindConfig(final IntConsumer setup, final Function<Integer, String> expectedConfig,
-            final int... kinds)
+    private void testRoleKindConfig(
+            final IntConsumer setup, final Function<Integer, String> expectedConfig, final int... kinds)
             throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         for (final int type : kinds) {
 
-            final CompletableFuture<Void> modified = WireTestUtil
-                    .modified("(kura.service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl)");
+            final CompletableFuture<Void> modified = WireTestUtil.modified(
+                    "(kura.service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl)");
 
             setup.accept(type);
 
@@ -222,8 +247,8 @@ public class RoleRepositoryStoreTest {
     }
 
     private Options getCurrentRoleRepositoryStoreOptions() throws KuraException {
-        final ComponentConfiguration config = configurationService
-                .getComponentConfiguration("org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl");
+        final ComponentConfiguration config = configurationService.getComponentConfiguration(
+                "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl");
 
         return new Options(config.getConfigurationProperties());
     }
@@ -247,5 +272,4 @@ public class RoleRepositoryStoreTest {
             this.writeDelayMs = (Long) properties.getOrDefault(WRITE_DELAY_MS_ID, 5000L);
         }
     }
-
 }

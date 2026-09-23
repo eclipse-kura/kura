@@ -36,5 +36,4 @@ public class PidAndFactoryPidAndCloudEndpointPid {
     public String getCloudEndpointPid() {
         return this.cloudEndpointPid;
     }
-
 }

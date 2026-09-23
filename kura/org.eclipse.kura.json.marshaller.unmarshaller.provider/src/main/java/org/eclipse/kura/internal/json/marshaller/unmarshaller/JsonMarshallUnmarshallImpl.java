@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.input.CharSequenceInputStream;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -49,14 +48,13 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
-
 import org.osgi.service.component.annotations.Component;
+
 @Component(
-    name = "org.eclipse.kura.json.marshaller.unmarshaller.provider",
-    immediate = false,
-    service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
-    property = {
-        "kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider" })
+        name = "org.eclipse.kura.json.marshaller.unmarshaller.provider",
+        immediate = false,
+        service = {org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class},
+        property = {"kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider"})
 public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     @Override
@@ -73,8 +71,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
 
             if (object instanceof WireGraphConfiguration) {
-                WireGraphJsonMarshallUnmarshallImpl.marshalWireGraphConfiguration(writer,
-                        (WireGraphConfiguration) object);
+                WireGraphJsonMarshallUnmarshallImpl.marshalWireGraphConfiguration(
+                        writer, (WireGraphConfiguration) object);
             } else if (object instanceof KuraPayload) {
                 CloudPayloadJsonEncoder.marshal(writer, (KuraPayload) object);
             } else if (object instanceof SystemDeploymentPackages) {
@@ -101,8 +99,11 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     @Override
     public <T> T unmarshal(String inputString, Class<T> clazz) throws KuraException {
 
-        CharSequenceInputStream stream = CharSequenceInputStream.builder().setCharSequence(inputString)
-                .setBufferSize(8192).setCharset(StandardCharsets.UTF_8).get();
+        CharSequenceInputStream stream = CharSequenceInputStream.builder()
+                .setCharSequence(inputString)
+                .setBufferSize(8192)
+                .setCharset(StandardCharsets.UTF_8)
+                .get();
 
         return unmarshal(stream, clazz);
     }
@@ -132,5 +133,4 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
         throw new IllegalArgumentException("Invalid parameter!");
     }
-
 }

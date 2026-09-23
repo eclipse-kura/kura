@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.util.osgi.BundleUtil;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -32,13 +31,14 @@ public class BundleUtilTest {
     private Map<String, String> keyValueMap = new HashMap<>();
     private Class<?>[] servicesClasses;
     private Set<Bundle> bundles;
-    private BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+    private BundleContext bundleContext =
+            FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
     @Test
     public void shouldReturnGPIOBundle() {
 
         givenServicesPropertiesFilter("service.pid", "org.eclipse.kura.gpio.GPIOService");
-        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class });
+        givenServiceClasses(new Class<?>[] {org.eclipse.kura.gpio.GPIOService.class});
 
         whenBundleListIsRequested();
 
@@ -48,8 +48,9 @@ public class BundleUtilTest {
 
     @Test
     public void shouldReturnWatchdogAndGPIOBundles() {
-        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class,
-                org.eclipse.kura.watchdog.WatchdogService.class });
+        givenServiceClasses(
+                new Class<?>[] {org.eclipse.kura.gpio.GPIOService.class, org.eclipse.kura.watchdog.WatchdogService.class
+                });
 
         whenBundleListIsRequested();
 
@@ -61,7 +62,7 @@ public class BundleUtilTest {
     @Test
     public void shouldReturnNoBundleWithWrongProperty() {
         givenServicesPropertiesFilter("service.pid", "wrongServicePid");
-        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class });
+        givenServiceClasses(new Class<?>[] {org.eclipse.kura.gpio.GPIOService.class});
 
         whenBundleListIsRequested();
 
@@ -71,8 +72,9 @@ public class BundleUtilTest {
     @Test
     public void shouldReturnOnlyBundleWithRightProperty() {
         givenServicesPropertiesFilter("service.pid", "org.eclipse.kura.gpio.GPIOService");
-        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class,
-                org.eclipse.kura.watchdog.WatchdogService.class });
+        givenServiceClasses(
+                new Class<?>[] {org.eclipse.kura.gpio.GPIOService.class, org.eclipse.kura.watchdog.WatchdogService.class
+                });
 
         whenBundleListIsRequested();
 
@@ -123,7 +125,6 @@ public class BundleUtilTest {
 
     private void givenServiceClasses(Class<?>[] classes) {
         this.servicesClasses = classes;
-
     }
 
     private void whenBundleListIsRequested() {
@@ -140,24 +141,22 @@ public class BundleUtilTest {
 
     private void thenBundlesAre(int expectedNumberOfBundles) {
         assertEquals(expectedNumberOfBundles, this.bundles.size());
-
     }
 
     private void thenBundlesAreMany() {
         assertTrue("Too few Bundles", this.bundles.size() > 1);
-
     }
 
     private void thenBundleSymbolicNamesAre(String... symbolicNames) {
-        List<String> bundleSymbolicNames = this.bundles.stream().map(Bundle::getSymbolicName)
-                .collect(Collectors.toList());
+        List<String> bundleSymbolicNames =
+                this.bundles.stream().map(Bundle::getSymbolicName).collect(Collectors.toList());
 
         assertTrue("Not found all bundles", bundleSymbolicNames.containsAll(bundleSymbolicNames));
     }
 
     private void printBundlesSymbolicName(Set<Bundle> bundle) {
-        String bundlesSymbolicName = bundles.stream().map(Bundle::getSymbolicName)
-                .collect(Collectors.joining("", ",", ""));
+        String bundlesSymbolicName =
+                bundles.stream().map(Bundle::getSymbolicName).collect(Collectors.joining("", ",", ""));
 
         System.out.println("Bundles Found: " + bundlesSymbolicName);
     }

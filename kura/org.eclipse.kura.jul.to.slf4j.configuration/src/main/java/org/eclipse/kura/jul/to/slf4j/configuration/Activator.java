@@ -28,5 +28,4 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         SLF4JBridgeHandler.uninstall();
     }
-
 }

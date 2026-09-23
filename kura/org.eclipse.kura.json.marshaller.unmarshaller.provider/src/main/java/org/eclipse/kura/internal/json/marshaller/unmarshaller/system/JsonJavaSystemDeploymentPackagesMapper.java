@@ -12,17 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-
-import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
-import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 
 public class JsonJavaSystemDeploymentPackagesMapper {
 
@@ -83,5 +81,4 @@ public class JsonJavaSystemDeploymentPackagesMapper {
         jsonObject.add(DP_SIGNED, dp.isSigned());
         return jsonObject;
     }
-
 }

@@ -263,6 +263,7 @@ public class CertificateAuthTest {
                         .setCommonName("Test server " + currentPort)
                         .setOrganization("Eclipse")
                         .setOrganizationalUnit("dev")
+                        .setCountryCode("US")
                         .setApplicationUri(applicationUri);
 
         serverCertificate = builder.build();
@@ -276,6 +277,7 @@ public class CertificateAuthTest {
                         .setCommonName("Test client " + currentPort)
                         .setOrganization("Eclipse")
                         .setOrganizationalUnit("dev")
+                        .setCountryCode("US")
                         .setApplicationUri(clientApplicationUri);
 
         clientCertificate = builder.build();

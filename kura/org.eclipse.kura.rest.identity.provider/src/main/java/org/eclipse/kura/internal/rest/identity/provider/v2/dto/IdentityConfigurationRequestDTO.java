@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class IdentityConfigurationRequestDTO {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private IdentityDTO identity;
 
     @ArraySchema(schema = @Schema(allowableValues = { "AdditionalConfigurations", "AssignedPermissions",

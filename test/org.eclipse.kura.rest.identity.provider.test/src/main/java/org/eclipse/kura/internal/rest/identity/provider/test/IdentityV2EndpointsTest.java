@@ -203,6 +203,18 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldReturnBadRequestForUnknownDefaultConfigurationComponent() {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenIdentityConfigurationRequestDTOWithUnknownComponent();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/default/byName",
+                gson.toJson(this.identityConfigurationRequestDTO));
+
+        thenResponseCodeIs(400);
+        thenResponseBodyEqualsJson("{\"message\":\"Unknown component name: Bogus\"}");
+    }
+
+    @Test
     public void shouldDeleteExistingIdentity() {
         givenExistingIdentity(new IdentityDTO(this.testUsername));
 

@@ -124,6 +124,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
                     schema = @Schema(implementation = CsrReadRequest.class))))
     @ApiResponse(responseCode = "200", description = "Requested entry.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CsrResponse.class)))
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/KeystoreBadRequest")
     public CsrResponse getCSR(CsrReadRequest csrReadRequest) {
         validate(csrReadRequest, BAD_GET_CSR_REQUEST_ERROR_MESSAGE);
         return new CsrResponse(getCSRInternal(csrReadRequest));
@@ -137,6 +138,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = TrustedCertificateWriteRequest.class))))
     @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/KeystoreBadRequest")
     public void storeTrustedCertificateEntry(TrustedCertificateWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         storeTrustedCertificateEntryInternal(writeRequest);
@@ -150,6 +152,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = KeyPairWriteRequest.class))))
     @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/KeystoreBadRequest")
     public void storeKeypairEntry(KeyPairWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         storeKeyPairEntryInternal(writeRequest);
@@ -163,6 +166,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = EntryRequest.class))))
     @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/KeystoreBadRequest")
     public void deleteKeyEntry(EntryRequest deleteRequest) {
         validate(deleteRequest, BAD_DELETE_REQUEST_ERROR_MESSAGE);
         deleteKeyEntryInternal(deleteRequest.getKeystoreServicePid(), deleteRequest.getAlias());

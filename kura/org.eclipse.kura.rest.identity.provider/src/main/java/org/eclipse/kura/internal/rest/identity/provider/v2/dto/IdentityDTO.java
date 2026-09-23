@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class IdentityDTO {
 
     @Schema(description = "Alphanumeric segments separated by '.' or '_'.", pattern = "^[a-zA-Z0-9]+([._][a-zA-Z0-9]+)*$",
-            minLength = 3, maxLength = 255)
+            minLength = 3, maxLength = 255, requiredMode = Schema.RequiredMode.REQUIRED)
     private final String name;
 
     public IdentityDTO(String name) {

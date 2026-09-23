@@ -2,6 +2,7 @@
 * text=auto
 
 # force LF-only line endings
+*.json text eol=lf
 *.java text eol=lf
 *.xml text eol=lf
 *.properties text eol=lf

@@ -83,15 +83,22 @@ the capabilities of a particular device. Installed bundles determine actual
 availability. Component-specific configuration constraints must still be
 obtained from component metadata. The embedded HTTP tests use a local servlet
 server and mocked services; they do not verify a full OSGi installation or
-the deployment's TLS and certificate configuration. Because the embedded
-server sets `jersey.config.server.response.setStatusOverSendError`, entity-less
-error responses (401/403 and entity-less 404s) have an empty body in the tests,
-while a production container generates its own error page when the client
-accepts JSON. Keystore and inventory services are mocked in the embedded tests;
-their contract checks do not exercise the real JSON marshaller or keystore
-implementations. Requests that fail request-object validation on those
-services answer with a plain-text body that is not yet reflected in the shared
-error responses.
+the deployment's TLS and certificate configuration. Entity-less error responses
+(401/403 and entity-less 404s) use normal servlet error handling in both the tests
+and production; their container-generated bodies remain unspecified.
+Keystore request validation errors are documented as plain text, while malformed
+JSON returns a JSON `Error`. Inventory container/image actions can return either
+a JSON `Error` for a missing resource or a container-generated 404 when
+orchestration is unavailable. The unavailable-orchestration scenario exercises
+the real inventory handler; the successful inventory payload tests still use
+mocked handler responses and do not exercise the real JSON marshaller.
+Keystore services are mocked, but the REST entry conversion and serializer are real.
+
+The identity v2 default-configuration endpoint returns 400 for unknown
+`configurationComponents`, consistently with the identity-configuration endpoint.
+This validation fix changes runtime behavior. A proposed filter to normalize
+entity-less REST errors to JSON is a separate follow-up; this module documents
+the existing container-generated responses until that runtime change lands.
 
 Next steps are embedded HTTP checks for the cloud connection and tamper
 resources, compatibility checks, and hosted documentation.

@@ -20,10 +20,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
+import org.eclipse.kura.rest.configuration.api.CreateFactoryComponentConfigurationsRequest;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
@@ -55,6 +57,17 @@ public class RequestSchemaTest {
         whenRequestIsValidated();
 
         thenRequestIsAccepted();
+    }
+
+    @Test
+    public void factoryCreationAllowsNullProperties() throws Exception {
+        givenRequest("CreateFactoryComponentConfigurationsRequest",
+                "{\"configs\":[{\"pid\":\"test\",\"factoryPid\":\"factory\",\"properties\":null}]}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsAccepted();
+        thenFactoryRequestPassesRuntimeValidation();
     }
 
     @Test
@@ -200,5 +213,9 @@ public class RequestSchemaTest {
 
     private void thenRequestIsRejected() {
         assertFalse(this.errors.isEmpty());
+    }
+
+    private void thenFactoryRequestPassesRuntimeValidation() {
+        new Gson().fromJson(this.request, CreateFactoryComponentConfigurationsRequest.class).validate();
     }
 }

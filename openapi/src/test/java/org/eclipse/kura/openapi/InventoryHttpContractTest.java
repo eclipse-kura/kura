@@ -59,6 +59,7 @@ public class InventoryHttpContractTest extends AbstractHttpContractTest {
 
     private final InventoryHandlerV1 inventoryHandler = mock(InventoryHandlerV1.class);
     private final Map<String, String> getPayloadsByResource = new HashMap<>();
+    private boolean orchestrationUnavailable;
 
     @Test
     public void inventorySummaryMatchesMarshallerPayload() throws Exception {
@@ -140,6 +141,25 @@ public class InventoryHttpContractTest extends AbstractHttpContractTest {
         thenLastResponsesMatchContract(400, 400);
     }
 
+    @Test
+    public void unavailableOrchestrationReturnsDocumentedNotFoundResponses() throws Exception {
+        givenInventoryPermission();
+        givenUnavailableOrchestration();
+        givenServer();
+
+        whenRequest("GET", "/inventory/v1/containers", null);
+        whenRequest("GET", "/inventory/v1/images", null);
+        whenRequest("POST", "/inventory/v1/containers/_start", "{\"name\":\"test\",\"version\":\"nginx:latest\"}");
+        whenRequest("POST", "/inventory/v1/containers/_stop", "{\"name\":\"test\",\"version\":\"nginx:latest\"}");
+        whenRequest("POST", "/inventory/v1/images/_delete", "{\"name\":\"nginx\",\"version\":\"latest\"}");
+
+        thenLastResponsesMatchContract(404, 404, 404, 404, 404);
+    }
+
+    private void givenUnavailableOrchestration() {
+        this.orchestrationUnavailable = true;
+    }
+
     private void givenInventoryPermission() {
         this.permissions = Set.of("rest.inventory");
     }
@@ -152,7 +172,7 @@ public class InventoryHttpContractTest extends AbstractHttpContractTest {
     protected void registerAdditionalResources(ResourceConfig application) throws Exception {
         final InventoryRestService inventory = new InventoryRestService();
         inventory.setUserAdmin(mock(UserAdmin.class));
-        inventory.setInventoryHandlerV1(this.inventoryHandler);
+        inventory.setInventoryHandlerV1(this.orchestrationUnavailable ? new InventoryHandlerV1() : this.inventoryHandler);
         application.register(inventory);
 
         doAnswer(invocation -> {

@@ -28,7 +28,7 @@ public class FactoryComponentConfigurationDTO implements Validable {
     private final String factoryPid;
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final String pid;
-    @Schema(description = "Initial typed properties. Omitted or null means an empty property map.")
+    @Schema(description = "Initial typed properties. Omitted or null means an empty property map.", nullable = true)
     private final Map<String, PropertyDTO> properties;
 
     public FactoryComponentConfigurationDTO(String factoryPid, String pid, Map<String, PropertyDTO> properties) {

@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class PermissionDTO {
 
     @Schema(description = "Alphanumeric segments separated by '.'.", pattern = "^[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)*$",
-            minLength = 3, maxLength = 255)
+            minLength = 3, maxLength = 255, requiredMode = Schema.RequiredMode.REQUIRED)
     private final String name;
 
     public PermissionDTO(String name) {

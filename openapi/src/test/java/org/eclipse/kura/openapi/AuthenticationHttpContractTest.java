@@ -32,7 +32,7 @@ public class AuthenticationHttpContractTest extends AbstractHttpContractTest {
     }
 
     @Test
-    public void missingAuthenticationReturnsEmptyUnauthorized() throws Exception {
+    public void missingAuthenticationReturnsDocumentedUnauthorized() throws Exception {
         givenServer();
         givenNoBasicAuthentication();
 
@@ -42,7 +42,7 @@ public class AuthenticationHttpContractTest extends AbstractHttpContractTest {
     }
 
     @Test
-    public void missingPermissionReturnsEmptyForbidden() throws Exception {
+    public void missingPermissionReturnsDocumentedForbidden() throws Exception {
         givenServer();
         givenNoPermissions();
 
@@ -62,7 +62,7 @@ public class AuthenticationHttpContractTest extends AbstractHttpContractTest {
     }
 
     @Test
-    public void invalidBasicCredentialsReturnEmptyUnauthorized() throws Exception {
+    public void invalidBasicCredentialsReturnDocumentedUnauthorized() throws Exception {
         givenServer();
         givenInvalidBasicCredentials();
 
@@ -166,7 +166,7 @@ public class AuthenticationHttpContractTest extends AbstractHttpContractTest {
     }
 
     @Test
-    public void disabledSessionLoginReturnsEmptyNotFound() throws Exception {
+    public void disabledSessionLoginReturnsDocumentedNotFound() throws Exception {
         givenSessionsDisabled();
         givenServer();
         givenNoBasicAuthentication();

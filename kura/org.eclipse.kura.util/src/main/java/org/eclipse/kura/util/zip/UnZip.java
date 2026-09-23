@@ -148,19 +148,22 @@ public class UnZip {
         Deque<File> createdEntries = new ConcurrentLinkedDeque<>();
         Thread extraction = Thread.currentThread();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Thread shutdownHook = new Thread(() -> {
             aborted = true;
 
             awaitTermination(extraction);
             deleteCreatedEntries(createdEntries);
-        }));
+        });
+
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         try {
             unZipZipInputStream(new ZipInputStream(System.in), args[0], createdEntries);
             createdEntries.clear();
         } catch (IOException | RuntimeException e) {
             if (!aborted) {
-                System.err.println("Unable to extract the archive in " + args[0] + ": " + e.getMessage());
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+                System.err.println("Unable to extract the archive in " + args[0] + ": " + e.toString());
                 System.exit(1);
             }
         }

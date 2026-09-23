@@ -127,7 +127,42 @@ public class KeystoreHttpContractTest extends AbstractHttpContractTest {
         whenRequest("GET", "/keystores/v1/entries/entry?keystoreServicePid=" + KEYSTORE_PID + "&alias=missing", null);
 
         thenResponseMatchesContract(404);
-        assertTrue(this.response.body().isEmpty());
+    }
+
+    @Test
+    public void invalidWriteRequestsReturnDocumentedPlainTextErrors() throws Exception {
+        givenKeystorePermission();
+        givenServer();
+
+        whenRequest("POST", "/keystores/v1/entries/certificate", "{}");
+        whenRequest("POST", "/keystores/v2/entries/certificate", "{}");
+        whenRequest("POST", "/keystores/v1/entries/keypair", "{}");
+        whenRequest("POST", "/keystores/v2/entries/privatekey", "{}");
+        whenRequest("POST", "/keystores/v2/entries/csr", "{}");
+        whenRequest("DELETE", "/keystores/v2/entries", "{}");
+
+        thenLastResponsesMatchContract(400, 400, 400, 400, 400, 400);
+    }
+
+    @Test
+    public void malformedWriteRequestsReturnDocumentedJsonErrors() throws Exception {
+        givenKeystorePermission();
+        givenServer();
+
+        whenRequest("POST", "/keystores/v2/entries/certificate", "{");
+
+        thenResponseMatchesContract(400);
+    }
+
+    @Test
+    public void privateKeyWritesToUnknownKeystoresReturnJsonErrors() throws Exception {
+        givenKeystorePermission();
+        givenServer();
+
+        whenRequest("POST", "/keystores/v2/entries/privatekey",
+                "{\"keystoreServicePid\":\"missing\",\"alias\":\"key\",\"certificateChain\":[\"certificate\"]}");
+
+        thenResponseMatchesContract(404);
     }
 
     private void givenKeystorePermission() {

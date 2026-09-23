@@ -85,8 +85,10 @@ public class IdentityHttpContractTest extends AbstractHttpContractTest {
 
         whenRequest("POST", "/identity/v2/identities/byName",
                 "{\"identity\":{\"name\":\"alice\"},\"configurationComponents\":[\"Bogus\"]}");
+        whenRequest("POST", "/identity/v2/identities/default/byName",
+                "{\"identity\":{\"name\":\"alice\"},\"configurationComponents\":[\"Bogus\"]}");
 
-        thenResponseMatchesContract(400);
+        thenLastResponsesMatchContract(400, 400);
     }
 
     private void givenIdentityPermission() {

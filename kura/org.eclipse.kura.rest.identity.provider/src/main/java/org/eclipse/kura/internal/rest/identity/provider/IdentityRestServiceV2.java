@@ -252,7 +252,7 @@ public class IdentityRestServiceV2 {
                             identityConfigurationRequestDTO.getConfigurationComponents()));
 
             return IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration);
-        } catch (KuraException e) {
+        } catch (Exception e) {
             throw toWebApplicationException(e);
         }
 

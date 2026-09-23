@@ -63,6 +63,8 @@ public class KeystoreRestServiceV2 extends KeystoreRestService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = PrivateKeyWriteRequest.class))))
     @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/KeystoreBadRequest")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     public void storeKeypairEntry(PrivateKeyWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         try {

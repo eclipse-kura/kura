@@ -379,23 +379,18 @@ public class UnZip {
     }
 
     private static File getFile(String expectedFilePath, File folder) throws IOException {
-        String fileName;
-        try {
-            fileName = validateFileName(expectedFilePath, folder.getPath());
-        } catch (KuraException e) {
-            throw new IOException("File is outside extraction target directory.");
-        }
+        String fileName = validateFileName(expectedFilePath, folder.getPath());
         return new File(fileName);
     }
 
-    private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
+    private static String validateFileName(String zipFileName, String intendedDir) throws IOException {
         final Path filePath = new File(zipFileName).getCanonicalFile().toPath();
         final Path intendedCanonicalPath = new File(intendedDir).getCanonicalFile().toPath();
 
         if (filePath.startsWith(intendedCanonicalPath)) {
             return filePath.toString();
         } else {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
+            throw new IOException("File is outside extraction target directory.");
         }
     }
 

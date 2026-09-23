@@ -34,20 +34,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.executor.ExitStatus;
 import org.junit.Test;
 
 public class ExtractInADedicatedProcessTest {
 
     private static final String OUTPUT_FOLDER = "/tmp/kura_dedicated_process_test/out";
     private static final String PROCESS_ERROR_OUTPUT = "Too many files to unzip.";
-    private static final int TIMEOUT_EXIT_CODE = 124;
 
     private CommandExecutorService executorService;
     private Command executedCommand;
@@ -92,14 +91,14 @@ public class ExtractInADedicatedProcessTest {
     }
 
     @Test
-    public void extractionProcessIsGivenATimeout() throws IOException {
+    public void extractionProcessOutlivesTheExtractionTimeout() throws IOException {
         givenArchiveWithASingleFile();
         givenAnExtractionProcessExitingWith(0);
 
         whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenNoExceptionIsThrown();
-        thenTheProcessIsGivenATimeout();
+        thenTheProcessTimeoutExceedsTheExtractionTimeout();
     }
 
     @Test
@@ -118,17 +117,6 @@ public class ExtractInADedicatedProcessTest {
     public void extractionStoppedByTheWatchdogIsReportedAsATimeout() throws IOException {
         givenArchiveWithASingleFile();
         givenAnExtractionProcessStoppedByTheWatchdog();
-
-        whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
-
-        thenExceptionIsThrown(IOException.class);
-        thenExceptionMessageContains("did not complete within");
-    }
-
-    @Test
-    public void extractionStoppedByTheTimeoutCommandIsReportedAsATimeout() throws IOException {
-        givenArchiveWithASingleFile();
-        givenAnExtractionProcessExitingWith(TIMEOUT_EXIT_CODE);
 
         whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
@@ -165,7 +153,7 @@ public class ExtractInADedicatedProcessTest {
             this.executedCommand = invocation.getArgument(0);
             this.executedCommand.getErrorStream().write(errorOutput.getBytes(StandardCharsets.UTF_8));
 
-            CommandStatus status = new CommandStatus(this.executedCommand, new ExtractionExitStatus(exitCode));
+            CommandStatus status = new CommandStatus(this.executedCommand, new TestExitStatus(exitCode));
             status.setTimedout(timedOut);
 
             return status;
@@ -184,8 +172,7 @@ public class ExtractInADedicatedProcessTest {
         String[] commandLine = this.executedCommand.getCommandLine();
 
         assertTrue(unquote(commandLine[0]).endsWith(File.separator + "java"));
-        assertEquals("-cp", commandLine[1]);
-        assertEquals(UnZip.class.getName(), commandLine[3]);
+        assertEquals(ZipExtractor.class.getName(), commandLine[classPathOption() + 2]);
     }
 
     private void thenTheProcessExtractsIn(String outputFolder) {
@@ -228,9 +215,9 @@ public class ExtractInADedicatedProcessTest {
         }
     }
 
-    private void thenTheProcessIsGivenATimeout() {
-        assertTrue("the extraction process must not be allowed to run forever",
-                this.executedCommand.getTimeout() > 0);
+    private void thenTheProcessTimeoutExceedsTheExtractionTimeout() {
+        assertTrue("the extraction must be able to time out, and roll back, before its process is killed",
+                this.executedCommand.getTimeout() > ZipExtractor.EXTRACTION_TIMEOUT);
     }
 
     private void thenExceptionIsThrown(Class<? extends Exception> classz) {
@@ -254,29 +241,15 @@ public class ExtractInADedicatedProcessTest {
     }
 
     private String[] processClassPath() {
-        return unquote(this.executedCommand.getCommandLine()[2]).split(File.pathSeparator);
+        return unquote(this.executedCommand.getCommandLine()[classPathOption() + 1]).split(File.pathSeparator);
+    }
+
+    private int classPathOption() {
+        return Arrays.asList(this.executedCommand.getCommandLine()).indexOf("-cp");
     }
 
     private static String unquote(String argument) {
         return argument.substring(1, argument.length() - 1).replace("'\\''", "'");
     }
 
-    private static class ExtractionExitStatus implements ExitStatus {
-
-        private final int exitCode;
-
-        ExtractionExitStatus(int exitCode) {
-            this.exitCode = exitCode;
-        }
-
-        @Override
-        public int getExitCode() {
-            return this.exitCode;
-        }
-
-        @Override
-        public boolean isSuccessful() {
-            return this.exitCode == 0;
-        }
-    }
 }

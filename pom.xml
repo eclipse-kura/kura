@@ -412,11 +412,14 @@
                                 <exclude>**/generated-sources/**/*.java</exclude>
                             </excludes>
                         </java>
-                        <!-- Kura sources are LF only -->
-                        <lineEndings>UNIX</lineEndings>
-                        <upToDateChecking>
-                            <enabled>true</enabled>
-                        </upToDateChecking>
+                        <pom>
+                            <sortPom>
+                                <expandEmptyElements>false</expandEmptyElements>
+                                <nrOfIndentSpace>4</nrOfIndentSpace>
+                                <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+                                <quiet>true</quiet>
+                            </sortPom>
+                        </pom>
                     </configuration>
                     <executions>
                         <execution>

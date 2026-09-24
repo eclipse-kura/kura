@@ -17,6 +17,7 @@ package org.eclipse.kura.util.zip;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -34,7 +35,7 @@ final class TestZipArchives {
     static final String FILE_NAME = "file.txt";
     static final String FILE_CONTENT = "This is an awesome text file!\n";
     static final String OVERSIZED_ENTRY_NAME = "tooBigFile";
-    static final String ESCAPING_ENTRY_NAME = "../".repeat(20) + "tmp/evil.txt";
+    static final String ESCAPING_ENTRY_NAME = String.join("", Collections.nCopies(20, "../")) + "tmp/evil.txt";
 
     private static final int BUFFER_SIZE = 8192;
 

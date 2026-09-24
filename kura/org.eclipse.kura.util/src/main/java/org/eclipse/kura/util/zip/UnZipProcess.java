@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.CodeSource;
 
 import org.eclipse.kura.executor.Command;
@@ -107,16 +110,26 @@ final class UnZipProcess {
             return source.toString(); // A folder of classes, as in development and in unit tests
         }
 
-        Path libraryFolder = Files.createTempDirectory(EXTRACTION_LIBRARY_PREFIX);
+        Path libraryFolder = Files.createTempDirectory(EXTRACTION_LIBRARY_PREFIX, ownerOnly());
         libraryFolder.toFile().deleteOnExit();
-        shareWithExtractionUser(libraryFolder, true);
 
         Path target = libraryFolder.resolve(source.getFileName());
         Files.copy(source, target);
         target.toFile().deleteOnExit();
+
         shareWithExtractionUser(target, false);
+        shareWithExtractionUser(libraryFolder, true);
 
         return target.toString();
+    }
+
+    private static FileAttribute<?>[] ownerOnly() {
+        if (!FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+            return new FileAttribute<?>[0]; // As on Windows, where the temporary folder is private to the user already
+        }
+
+        return new FileAttribute<?>[] {
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")) };
     }
 
     private static void shareWithExtractionUser(Path path, boolean traversable) throws IOException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.crl;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonValue;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,14 +42,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-
 import org.eclipse.kura.core.keystore.util.MappingCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonValue;
 
 public class CRLStore implements Closeable {
 
@@ -110,7 +108,8 @@ public class CRLStore implements Closeable {
     }
 
     public CertStore getCertStore() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        return CertStore.getInstance("Collection",
+        return CertStore.getInstance(
+                "Collection",
                 new CollectionCertStoreParameters(new MappingCollection<>(crls.values(), StoredCRL::getCrl)));
     }
 
@@ -160,7 +159,10 @@ public class CRLStore implements Closeable {
                 array.writeTo(out);
             }
 
-            Files.move(tmpFile.toPath(), this.storeFile.toPath(), StandardCopyOption.REPLACE_EXISTING,
+            Files.move(
+                    tmpFile.toPath(),
+                    this.storeFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
 
             logger.info("storing CRLs...done");
@@ -173,5 +175,4 @@ public class CRLStore implements Closeable {
     public void close() throws IOException {
         executor.shutdown();
     }
-
 }

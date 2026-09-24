@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.configuration.metatype;
 
 /**
@@ -39,16 +38,15 @@ package org.eclipse.kura.configuration.metatype;
  * </pre>
  */
 public enum Scalar {
-
-    STRING("String"),  //
-    LONG("Long"),  //
-    DOUBLE("Double"),  //
-    FLOAT("Float"),  //
-    INTEGER("Integer"),  //
-    BYTE("Byte"),  //
-    CHAR("Char"),  //
-    BOOLEAN("Boolean"),  //
-    SHORT("Short"),  //
+    STRING("String"), //
+    LONG("Long"), //
+    DOUBLE("Double"), //
+    FLOAT("Float"), //
+    INTEGER("Integer"), //
+    BYTE("Byte"), //
+    CHAR("Char"), //
+    BOOLEAN("Boolean"), //
+    SHORT("Short"), //
     PASSWORD("Password"); //
 
     private final String value;
@@ -72,5 +70,4 @@ public enum Scalar {
         }
         throw new IllegalArgumentException(v);
     }
-
 }

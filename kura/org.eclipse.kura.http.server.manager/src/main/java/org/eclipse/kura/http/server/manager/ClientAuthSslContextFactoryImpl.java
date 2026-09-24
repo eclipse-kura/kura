@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.http.server.manager;
 
 import java.security.KeyStore;
@@ -23,7 +22,6 @@ import java.security.cert.PKIXRevocationChecker.Option;
 import java.security.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Set;
-
 import org.eclipse.kura.security.keystore.KeystoreService;
 
 public final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory {
@@ -31,7 +29,9 @@ public final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory
     private boolean isRevocationEnabled;
     private Set<Option> revocationOptions;
 
-    public ClientAuthSslContextFactoryImpl(final KeystoreService keystoreService, final boolean isRevocationEnabled,
+    public ClientAuthSslContextFactoryImpl(
+            final KeystoreService keystoreService,
+            final boolean isRevocationEnabled,
             final Set<PKIXRevocationChecker.Option> revocationOptions) {
         super(keystoreService);
 
@@ -41,15 +41,15 @@ public final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory
     }
 
     @Override
-    protected PKIXBuilderParameters newPKIXBuilderParameters(KeyStore trustStore,
-            Collection<? extends java.security.cert.CRL> crls) throws Exception {
+    protected PKIXBuilderParameters newPKIXBuilderParameters(
+            KeyStore trustStore, Collection<? extends java.security.cert.CRL> crls) throws Exception {
         PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
 
         pbParams.setMaxPathLength(getMaxCertPathLength());
         pbParams.setRevocationEnabled(this.isRevocationEnabled);
 
-        final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator.getInstance("PKIX")
-                .getRevocationChecker();
+        final PKIXRevocationChecker revocationChecker =
+                (PKIXRevocationChecker) CertPathValidator.getInstance("PKIX").getRevocationChecker();
 
         revocationChecker.setOptions(this.revocationOptions);
 
@@ -69,5 +69,4 @@ public final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory
 
         return pbParams;
     }
-
 }

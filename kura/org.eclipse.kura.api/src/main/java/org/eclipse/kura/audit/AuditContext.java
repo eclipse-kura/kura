@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -17,7 +17,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -25,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * are the Web UI, a cloud connection or the Rest service.
  * An AuditContext contains a set of properties. Some property are well known and described by the
  * {@link AuditConstants} enumeration, other custom properties can be added by the entry point implementation.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 2.2
  */
@@ -38,7 +37,7 @@ public class AuditContext {
 
     /**
      * Creates a new {@link AuditContext}.
-     * 
+     *
      * @param properties
      *            The properties to be associated with this context. It must be a non null mutable map.
      */
@@ -48,7 +47,7 @@ public class AuditContext {
 
     /**
      * Returns the properties associated with this context
-     * 
+     *
      * @return the properties.
      */
     public Map<String, String> getProperties() {
@@ -65,7 +64,7 @@ public class AuditContext {
 
     /**
      * Creates a copy of this AuditContext with a new and independent set of properties.
-     * 
+     *
      * @return a copy of this AuditContext.
      */
     public AuditContext copy() {
@@ -75,7 +74,7 @@ public class AuditContext {
     /**
      * Returns the {@link AuditContext} associated with the current thread, if set, or a context with
      * {@link AuditConstants#KEY_ENTRY_POINT} set to {@link AuditConstants#ENTRY_POINT_INTERNAL} otherwise.
-     * 
+     *
      * @return the {@link AuditContext}
      */
     public static AuditContext currentOrInternal() {
@@ -93,7 +92,7 @@ public class AuditContext {
 
     /**
      * Returns the {@link AuditContext} associated with the current thread, if any.
-     * 
+     *
      * @return the {@link AuditContext} associated with this thread or empty if none is set
      */
     public static Optional<AuditContext> current() {
@@ -106,7 +105,7 @@ public class AuditContext {
      * Subsequent calls to {@link AuditContext#currentOrInternal()} performed on the same thread will return the
      * provided
      * {@link AuditContext} instance until the returned {@link Scope} is closed.
-     * 
+     *
      * @param context
      *            the context
      * @return a {@link Scope} that removes the thread local context when closed.
@@ -118,7 +117,7 @@ public class AuditContext {
     /**
      * Resents an {@link AutoCloseable} scope that removes the associated {@link AuditContext} when closed.
      * See {@link AuditContext#openScope(AuditContext)} for more details.
-     * 
+     *
      * @noextend This class is not intended to be subclassed by clients.
      * @since 2.2
      */
@@ -134,7 +133,7 @@ public class AuditContext {
 
         /**
          * Removes the associated {@link AuditContext} from thread local storage.
-         * 
+         *
          * {@inheritDoc}
          */
         @Override
@@ -143,7 +142,5 @@ public class AuditContext {
                 localContext.remove();
             }
         }
-
     }
-
 }

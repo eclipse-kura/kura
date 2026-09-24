@@ -1,26 +1,26 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.cloud.subscriber;
 
 import java.util.Map;
-
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.core.message.MessageType;
 
 public class CloudSubscriberOptions {
 
     private static final Property<String> PROPERTY_CLOUD_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), "org.eclipse.kura.cloud.CloudService");
+            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
+            "org.eclipse.kura.cloud.CloudService");
     private static final Property<String> PROPERTY_APP_ID = new Property<>("appId", "appId");
     private static final Property<String> PROPERTY_APP_TOPIC = new Property<>("app.topic", "#");
     private static final Property<Integer> PROPERTY_QOS = new Property<>("qos", 0);
@@ -80,5 +80,4 @@ public class CloudSubscriberOptions {
             return this.defaultValue;
         }
     }
-
 }

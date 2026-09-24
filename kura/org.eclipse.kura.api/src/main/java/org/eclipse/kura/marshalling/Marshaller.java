@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.marshalling;
 
 import java.io.OutputStream;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -39,7 +38,7 @@ public interface Marshaller {
 
     /**
      * Serialises the provided {@link Object} and writes the result to the supplied {@link OutputStream}
-     * 
+     *
      * @param out
      *            the {@link OutputStream} on which the data will be written
      * @param object

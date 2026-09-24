@@ -16,7 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
-
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
@@ -31,8 +30,8 @@ public class KeystoreEntryInfoMapperTest {
     @Test
     public void unmarshalTest() {
 
-        String jsonString = "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n"
-                + "    \"alias\" : \"mycerttestec\"\n" + "}";
+        String jsonString =
+                "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n" + "    \"alias\" : \"mycerttestec\"\n" + "}";
         EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(new StringReader(jsonString), EntryInfo.class);
 
         assertTrue(entry instanceof EntryInfo);

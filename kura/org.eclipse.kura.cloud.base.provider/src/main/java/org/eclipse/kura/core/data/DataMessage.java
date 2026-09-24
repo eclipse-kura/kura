@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -36,8 +36,7 @@ public class DataMessage {
     private String sessionId;
     private Date droppedOn;
 
-    public DataMessage() {
-    }
+    public DataMessage() {}
 
     public DataMessage(Builder b) {
         this.id = b.id;
@@ -109,13 +108,31 @@ public class DataMessage {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("DataMessage [id=").append(this.id).append(", topic=")
-                .append(this.topic).append(", qos=").append(this.qos).append(", retain=").append(this.retain)
-                .append(", createdOn=").append(this.createdOn).append(", publishedOn=").append(this.publishedOn)
-                .append(", publishedMessageId=").append(this.publishedMessageId).append(", confirmedOn=")
-                .append(this.confirmedOn).append(", payload=").append(Arrays.toString(this.payload))
-                .append(", priority=").append(this.priority).append(", sessionId=").append(this.sessionId)
-                .append(", droppedOn=").append(this.droppedOn).append("]");
+        StringBuilder builder = new StringBuilder("DataMessage [id=")
+                .append(this.id)
+                .append(", topic=")
+                .append(this.topic)
+                .append(", qos=")
+                .append(this.qos)
+                .append(", retain=")
+                .append(this.retain)
+                .append(", createdOn=")
+                .append(this.createdOn)
+                .append(", publishedOn=")
+                .append(this.publishedOn)
+                .append(", publishedMessageId=")
+                .append(this.publishedMessageId)
+                .append(", confirmedOn=")
+                .append(this.confirmedOn)
+                .append(", payload=")
+                .append(Arrays.toString(this.payload))
+                .append(", priority=")
+                .append(this.priority)
+                .append(", sessionId=")
+                .append(this.sessionId)
+                .append(", droppedOn=")
+                .append(this.droppedOn)
+                .append("]");
 
         return builder.toString();
     }

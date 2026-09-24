@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,14 +10,12 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -33,14 +31,13 @@ public class ContainerNetworkConfiguration {
 
     private Optional<String> networkMode;
 
-    private ContainerNetworkConfiguration() {
-    }
+    private ContainerNetworkConfiguration() {}
 
     /**
-     * 
+     *
      * Returns the network mode a container will be created with (e.g. 'bridge',
      * 'none', 'container:', 'host').
-     * 
+     *
      * @return
      */
     public Optional<String> getNetworkMode() {
@@ -86,11 +83,10 @@ public class ContainerNetworkConfiguration {
         public ContainerNetworkConfiguration build() {
             ContainerNetworkConfiguration result = new ContainerNetworkConfiguration();
 
-            result.networkMode = requireNonNull(this.networkMode,
-                    "Requested Container Network Mode Name cannot be null");
+            result.networkMode =
+                    requireNonNull(this.networkMode, "Requested Container Network Mode Name cannot be null");
 
             return result;
         }
-
     }
 }

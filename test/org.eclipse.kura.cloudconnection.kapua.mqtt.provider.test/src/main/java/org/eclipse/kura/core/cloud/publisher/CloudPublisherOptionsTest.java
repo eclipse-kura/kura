@@ -17,7 +17,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.core.message.MessageType;
 import org.junit.Test;
@@ -32,7 +31,8 @@ public class CloudPublisherOptionsTest {
     @Test
     public void testNotAllProps() {
         Map<String, Object> props = new HashMap<>();
-        props.put(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
+        props.put(
+                CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
                 "org.eclipse.kura.cloud.CloudService");
         CloudPublisherOptions options = new CloudPublisherOptions(props);
         assertNotNull(options);
@@ -56,12 +56,12 @@ public class CloudPublisherOptionsTest {
 
         Map<String, Object> props = new HashMap<>();
         props.put("appId", appId);
-        
+
         CloudPublisherOptions options = new CloudPublisherOptions(props);
         assertNotNull(options);
         assertEquals(appId, options.getAppId());
     }
-    
+
     @Test
     public void testGetAppTopic() {
         String appTopic = "A2/$assetName";
@@ -72,7 +72,7 @@ public class CloudPublisherOptionsTest {
         assertNotNull(options);
         assertEquals(appTopic, options.getAppTopic());
     }
-    
+
     @Test
     public void testGetQos() {
         int qos = 1;
@@ -83,7 +83,7 @@ public class CloudPublisherOptionsTest {
         assertNotNull(options);
         assertEquals(qos, options.getQos());
     }
-    
+
     @Test
     public void testIsRetain() {
         boolean retain = true;
@@ -94,7 +94,7 @@ public class CloudPublisherOptionsTest {
         assertNotNull(options);
         assertEquals(retain, options.isRetain());
     }
-    
+
     @Test
     public void testMessageType() {
         MessageType messageType = MessageType.CONTROL;
@@ -105,10 +105,10 @@ public class CloudPublisherOptionsTest {
         assertNotNull(options);
         assertEquals(messageType.name(), options.getMessageType().name());
     }
-    
+
     @Test
     public void testGetPriority() {
-        int priority= 1;
+        int priority = 1;
 
         Map<String, Object> props = new HashMap<>();
         props.put("priority", priority);
@@ -116,5 +116,4 @@ public class CloudPublisherOptionsTest {
         assertNotNull(options);
         assertEquals(priority, options.getPriority());
     }
-
 }

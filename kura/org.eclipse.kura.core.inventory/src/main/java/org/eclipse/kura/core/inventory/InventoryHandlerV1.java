@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
@@ -59,12 +58,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.deploymentadmin.BundleInfo;
-import org.osgi.service.deploymentadmin.DeploymentAdmin;
-import org.osgi.service.deploymentadmin.DeploymentPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -72,11 +65,17 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.deploymentadmin.BundleInfo;
+import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.deploymentadmin.DeploymentPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.core.inventory.InventoryHandlerV1",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.core.inventory.InventoryHandlerV1.class })
+        name = "org.eclipse.kura.core.inventory.InventoryHandlerV1",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        service = {org.eclipse.kura.core.inventory.InventoryHandlerV1.class})
 public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryHandlerV1.class);
@@ -119,7 +118,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
-    @Reference(name = "ContainerOrchestrationService",
+    @Reference(
+            name = "ContainerOrchestrationService",
             service = org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
@@ -134,7 +134,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
     }
 
-    @Reference(name = "DeploymentAdmin", service = org.osgi.service.deploymentadmin.DeploymentAdmin.class, unbind = "unsetDeploymentAdmin")
+    @Reference(
+            name = "DeploymentAdmin",
+            service = org.osgi.service.deploymentadmin.DeploymentAdmin.class,
+            unbind = "unsetDeploymentAdmin")
     protected void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
         this.deploymentAdmin = deploymentAdmin;
     }
@@ -145,7 +148,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
     }
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -156,7 +162,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
     }
 
-    @Reference(name = "RequestHandlerRegistry",
+    @Reference(
+            name = "RequestHandlerRegistry",
             service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
@@ -165,7 +172,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -173,7 +183,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             requestHandlerRegistry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.info("Unable to register cloudlet {} in {}", APP_ID, requestHandlerRegistry.getClass().getName());
+            logger.info(
+                    "Unable to register cloudlet {} in {}",
+                    APP_ID,
+                    requestHandlerRegistry.getClass().getName());
         }
     }
 
@@ -264,8 +277,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.containerOrchestrationService
-                        .startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
+                this.containerOrchestrationService.startContainer(
+                        findFirstMatchingContainer(extractContainerRef(reqMessage))
+                                .getContainerId());
 
                 return success();
             } else if (STOP_CONTAINER.equals(resources)) {
@@ -274,8 +288,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.containerOrchestrationService
-                        .stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
+                this.containerOrchestrationService.stopContainer(
+                        findFirstMatchingContainer(extractContainerRef(reqMessage))
+                                .getContainerId());
                 return success();
             } else if (DELETE_IMAGE.equals(resources)) {
 
@@ -283,8 +298,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.containerOrchestrationService
-                        .deleteImage(findFirstMatchingImage(extractContainerImageRef(reqMessage)).getImageId());
+                this.containerOrchestrationService.deleteImage(
+                        findFirstMatchingImage(extractContainerImageRef(reqMessage))
+                                .getImageId());
                 return success();
             }
         } catch (final KuraException e) {
@@ -326,11 +342,13 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             for (int j = 0; j < bis.length; j++) {
 
                 BundleInfo bi = bis[j];
-                SystemBundle xb = new SystemBundle(bi.getSymbolicName(), bi.getVersion().toString());
+                SystemBundle xb =
+                        new SystemBundle(bi.getSymbolicName(), bi.getVersion().toString());
 
                 Bundle[] bundles = this.bundleContext.getBundles();
                 Optional<Bundle> bundle = Arrays.asList(bundles).stream()
-                        .filter(b -> b.getSymbolicName().equals(bi.getSymbolicName())).findFirst();
+                        .filter(b -> b.getSymbolicName().equals(bi.getSymbolicName()))
+                        .findFirst();
                 if (bundle.isPresent()) {
                     boolean bundleSigned = true;
                     if (bundle.get().getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty()) {
@@ -345,7 +363,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 axbi[j] = xb;
             }
 
-            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName(), dp.getVersion().toString());
+            SystemDeploymentPackage xdp =
+                    new SystemDeploymentPackage(dp.getName(), dp.getVersion().toString());
 
             xdp.setBundleInfos(axbi);
             xdp.setSigned(dpSigned);
@@ -374,7 +393,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         for (int i = 0; i < bundles.length; i++) {
 
             Bundle bundle = bundles[i];
-            SystemBundle systemBundle = new SystemBundle(bundle.getSymbolicName(), bundle.getVersion().toString());
+            SystemBundle systemBundle = new SystemBundle(
+                    bundle.getSymbolicName(), bundle.getVersion().toString());
 
             systemBundle.setId(bundle.getBundleId());
 
@@ -410,42 +430,45 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         // get Bundles
         Bundle[] bundles = this.bundleContext.getBundles();
-        Arrays.asList(bundles).stream().forEach(b -> inventory.add(
-                new SystemResourceInfo(b.getSymbolicName(), b.getVersion().toString(), SystemResourceType.BUNDLE)));
+        Arrays.asList(bundles).stream()
+                .forEach(b -> inventory.add(new SystemResourceInfo(
+                        b.getSymbolicName(), b.getVersion().toString(), SystemResourceType.BUNDLE)));
 
         // get Deployment Packages
         DeploymentPackage[] dps = this.deploymentAdmin.listDeploymentPackages();
-        Arrays.asList(dps).stream().forEach(dp -> inventory
-                .add(new SystemResourceInfo(dp.getName(), dp.getVersion().toString(), SystemResourceType.DP)));
+        Arrays.asList(dps).stream()
+                .forEach(dp -> inventory.add(
+                        new SystemResourceInfo(dp.getName(), dp.getVersion().toString(), SystemResourceType.DP)));
 
         // get Docker Containers
         if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating docker inventory");
-                List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService
-                        .listContainerDescriptors();
-                containers.stream().forEach(
-                        container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
-                                container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
+                List<ContainerInstanceDescriptor> containers =
+                        this.containerOrchestrationService.listContainerDescriptors();
+                containers.stream()
+                        .forEach(container -> inventory.add(new SystemResourceInfo(
+                                container.getContainerName().replace("/", ""),
+                                container.getContainerImage() + ":"
+                                        + container.getContainerImageTag().split(":")[0],
                                 SystemResourceType.DOCKER)));
             } catch (Exception e) {
                 logger.error("Could not connect to docker");
             }
-
         }
 
         // get Container Images
         if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating container images inventory");
-                List<ImageInstanceDescriptor> images = this.containerOrchestrationService
-                        .listImageInstanceDescriptors();
-                images.stream().forEach(image -> inventory.add(new SystemResourceInfo(image.getImageName(),
-                        image.getImageTag(), SystemResourceType.CONTAINER_IMAGE)));
+                List<ImageInstanceDescriptor> images =
+                        this.containerOrchestrationService.listImageInstanceDescriptors();
+                images.stream()
+                        .forEach(image -> inventory.add(new SystemResourceInfo(
+                                image.getImageName(), image.getImageTag(), SystemResourceType.CONTAINER_IMAGE)));
             } catch (Exception e) {
                 logger.error("Could not connect to container-engine");
             }
-
         }
 
         inventory.sort(Comparator.comparing(SystemResourceInfo::getName));
@@ -494,8 +517,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService
-                    .listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containers =
+                    this.containerOrchestrationService.listContainerDescriptors();
 
             List<DockerContainer> containersList = new ArrayList<>();
             containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
@@ -520,8 +543,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService
-                    .listImageInstanceDescriptors();
+            List<ImageInstanceDescriptor> containers =
+                    this.containerOrchestrationService.listImageInstanceDescriptors();
 
             List<ContainerImage> imageList = new ArrayList<>();
             containers.stream().forEach(p -> imageList.add(new ContainerImage(p)));
@@ -539,8 +562,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     }
 
     private <T> ServiceReference<T>[] getJsonMarshallers(final Class<T> classz) {
-        String filterString = String.format("(kura.service.pid=%s)",
-                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
+        String filterString =
+                String.format("(kura.service.pid=%s)", "org.eclipse.kura.json.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(this.bundleContext, classz, filterString);
     }
 
@@ -591,32 +614,32 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         String stateString;
 
         switch (state) {
-        case Bundle.UNINSTALLED:
-            stateString = "UNINSTALLED";
-            break;
+            case Bundle.UNINSTALLED:
+                stateString = "UNINSTALLED";
+                break;
 
-        case Bundle.INSTALLED:
-            stateString = "INSTALLED";
-            break;
+            case Bundle.INSTALLED:
+                stateString = "INSTALLED";
+                break;
 
-        case Bundle.RESOLVED:
-            stateString = "RESOLVED";
-            break;
+            case Bundle.RESOLVED:
+                stateString = "RESOLVED";
+                break;
 
-        case Bundle.STARTING:
-            stateString = "STARTING";
-            break;
+            case Bundle.STARTING:
+                stateString = "STARTING";
+                break;
 
-        case Bundle.STOPPING:
-            stateString = "STOPPING";
-            break;
+            case Bundle.STOPPING:
+                stateString = "STOPPING";
+                break;
 
-        case Bundle.ACTIVE:
-            stateString = "ACTIVE";
-            break;
+            case Bundle.ACTIVE:
+                stateString = "ACTIVE";
+                break;
 
-        default:
-            stateString = String.valueOf(state);
+            default:
+                stateString = String.valueOf(state);
         }
 
         return stateString;
@@ -649,12 +672,12 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        DockerContainer dc = unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8),
-                DockerContainer.class);
+        DockerContainer dc =
+                unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), DockerContainer.class);
 
         try {
-            List<ContainerInstanceDescriptor> containerList = this.containerOrchestrationService
-                    .listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containerList =
+                    this.containerOrchestrationService.listContainerDescriptors();
 
             for (ContainerInstanceDescriptor container : containerList) {
                 if (container.getContainerName().equals(dc.getContainerName())) {
@@ -667,7 +690,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             logger.warn("failed to access docker service");
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
-
     }
 
     private ImageInstanceDescriptor extractContainerImageRef(final KuraMessage message) throws KuraException {
@@ -680,14 +702,15 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        ContainerImage dc = unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8),
-                ContainerImage.class);
+        ContainerImage dc =
+                unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), ContainerImage.class);
 
         try {
             List<ImageInstanceDescriptor> imageList = this.containerOrchestrationService.listImageInstanceDescriptors();
 
             for (ImageInstanceDescriptor image : imageList) {
-                if (image.getImageName().equals(dc.getImageName()) && image.getImageTag().equals(dc.getImageTag())) {
+                if (image.getImageName().equals(dc.getImageName())
+                        && image.getImageTag().equals(dc.getImageTag())) {
                     return image;
                 }
             }
@@ -697,7 +720,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             logger.warn("failed to access docker service");
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
-
     }
 
     private Bundle findFirstMatchingBundle(final SystemBundleRef ref) throws KuraException {
@@ -718,8 +740,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private ContainerInstanceDescriptor findFirstMatchingContainer(final ContainerInstanceDescriptor ref)
             throws KuraException {
-        for (final ContainerInstanceDescriptor container : this.containerOrchestrationService
-                .listContainerDescriptors()) {
+        for (final ContainerInstanceDescriptor container :
+                this.containerOrchestrationService.listContainerDescriptors()) {
             if (container.getContainerName().equals(ref.getContainerName())) {
                 return container;
             }
@@ -730,7 +752,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private ImageInstanceDescriptor findFirstMatchingImage(final ImageInstanceDescriptor ref) throws KuraException {
         for (final ImageInstanceDescriptor image : this.containerOrchestrationService.listImageInstanceDescriptors()) {
-            if (image.getImageName().equals(ref.getImageName()) && image.getImageTag().equals(ref.getImageTag())) {
+            if (image.getImageName().equals(ref.getImageName())
+                    && image.getImageTag().equals(ref.getImageTag())) {
                 return image;
             }
         }

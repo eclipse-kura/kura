@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.internal.driver;
 
 import static java.util.Objects.requireNonNull;
@@ -20,7 +19,6 @@ import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
@@ -28,15 +26,15 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 @Component(
-    name = "org.eclipse.kura.driver.descriptor.DriverDescriptorService",
-    immediate = true,
-    service = { org.eclipse.kura.driver.descriptor.DriverDescriptorService.class })
+        name = "org.eclipse.kura.driver.descriptor.DriverDescriptorService",
+        immediate = true,
+        service = {org.eclipse.kura.driver.descriptor.DriverDescriptorService.class})
 public class DriverDescriptorServiceImpl implements DriverDescriptorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DriverDescriptorServiceImpl.class);
@@ -58,7 +56,8 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
         final ServiceReference<Driver>[] refs = getDriverServiceReferences(filterString);
         try {
             for (final ServiceReference<Driver> driverServiceReference : refs) {
-                String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
+                String factoryPid =
+                        driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
                 Driver driver = this.bundleContext.getService(driverServiceReference);
                 driverDescriptor = newDriverDescriptor(driverPid, factoryPid, driver);
             }
@@ -76,8 +75,10 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
         final ServiceReference<Driver>[] refs = getDriverServiceReferences(null);
         try {
             for (final ServiceReference<Driver> driverServiceReference : refs) {
-                String driverPid = driverServiceReference.getProperty(KURA_SERVICE_PID).toString();
-                String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
+                String driverPid =
+                        driverServiceReference.getProperty(KURA_SERVICE_PID).toString();
+                String factoryPid =
+                        driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
                 Driver driver = this.bundleContext.getService(driverServiceReference);
                 driverDescriptors.add(newDriverDescriptor(driverPid, factoryPid, driver));
             }

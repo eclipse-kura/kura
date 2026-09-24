@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,8 +53,9 @@ public interface ContainerSignatureValidationService {
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
      * @return {@link:ValidationResult}
      */
-    public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
-            boolean verifyInTransparencyLog) throws KuraException;
+    public ValidationResult verify(
+            String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog)
+            throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor and the provided registry
@@ -89,8 +90,13 @@ public interface ContainerSignatureValidationService {
      *            this needs to be provided to verify the signature. See {@link RegistryCredentials}.
      * @return {@link:ValidationResult}
      */
-    public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
-            boolean verifyInTransparencyLog, RegistryCredentials credentials) throws KuraException;
+    public ValidationResult verify(
+            String imageName,
+            String imageReference,
+            String trustAnchor,
+            boolean verifyInTransparencyLog,
+            RegistryCredentials credentials)
+            throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor. The trust anchor format depends on
@@ -115,8 +121,9 @@ public interface ContainerSignatureValidationService {
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
      * @return {@link:ValidationResult}
      */
-    public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
-            boolean verifyInTransparencyLog) throws KuraException;
+    public ValidationResult verify(
+            ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog)
+            throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor and the provided registry
@@ -147,6 +154,10 @@ public interface ContainerSignatureValidationService {
      *            this needs to be provided to verify the signature. See {@link RegistryCredentials}.
      * @return {@link:ValidationResult}
      */
-    public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
-            boolean verifyInTransparencyLog, RegistryCredentials credentials) throws KuraException;
+    public ValidationResult verify(
+            ImageInstanceDescriptor imageDescriptor,
+            String trustAnchor,
+            boolean verifyInTransparencyLog,
+            RegistryCredentials credentials)
+            throws KuraException;
 }

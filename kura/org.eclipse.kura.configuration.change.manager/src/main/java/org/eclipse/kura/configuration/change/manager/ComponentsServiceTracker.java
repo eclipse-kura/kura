@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.configuration.change.manager;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -28,7 +27,8 @@ import org.osgi.util.tracker.ServiceTracker;
 public class ComponentsServiceTracker extends ServiceTracker {
 
     private final Set<ServiceTrackerListener> listeners;
-    private static final String FILTER_EXCLUDE_CONF_CHANGE_MANAGER_FACTORY = "(!(service.factoryPid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager))";
+    private static final String FILTER_EXCLUDE_CONF_CHANGE_MANAGER_FACTORY =
+            "(!(service.factoryPid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager))";
 
     @SuppressWarnings("unchecked")
     public ComponentsServiceTracker(BundleContext context) throws InvalidSyntaxException {
@@ -36,7 +36,7 @@ public class ComponentsServiceTracker extends ServiceTracker {
         this.listeners = new HashSet<>();
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public Object addingService(ServiceReference ref) {
         Object service = super.addingService(ref);
@@ -51,7 +51,7 @@ public class ComponentsServiceTracker extends ServiceTracker {
         notifyListeners(reference);
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public void removedService(ServiceReference reference, Object service) {
         super.removedService(reference, service);

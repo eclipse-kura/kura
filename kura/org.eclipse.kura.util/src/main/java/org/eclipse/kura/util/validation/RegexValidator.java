@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,5 +17,4 @@ public class RegexValidator extends PredicateValidator {
     public RegexValidator(final String pattern, final String message) {
         super(v -> v.matches(pattern), message);
     }
-
 }

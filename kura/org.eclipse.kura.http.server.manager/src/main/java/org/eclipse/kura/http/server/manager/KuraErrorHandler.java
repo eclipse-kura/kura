@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,28 +16,33 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 
 public class KuraErrorHandler extends ErrorHandler {
 
     @Override
-    protected void writeErrorHtml(Request request, Writer writer, Charset charset, int code, String message,
-            Throwable cause, boolean showStacks) throws IOException {
+    protected void writeErrorHtml(
+            Request request,
+            Writer writer,
+            Charset charset,
+            int code,
+            String message,
+            Throwable cause,
+            boolean showStacks)
+            throws IOException {
         // do nothing
     }
 
     @Override
-    protected void writeErrorPlain(Request request, PrintWriter writer, int code, String message, Throwable cause,
-            boolean showStacks) {
+    protected void writeErrorPlain(
+            Request request, PrintWriter writer, int code, String message, Throwable cause, boolean showStacks) {
         // do nothing
     }
 
     @Override
-    protected void writeErrorJson(Request request, PrintWriter writer, int code, String message, Throwable cause,
-            boolean showStacks) {
+    protected void writeErrorJson(
+            Request request, PrintWriter writer, int code, String message, Throwable cause, boolean showStacks) {
         // do nothing
     }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,9 @@ public class PrivateKeyWriteRequest extends PrivateKeyInfo implements Validable 
 
     @Override
     public boolean isValid() {
-        return getKeystoreServicePid() != null && getAlias() != null && getCertificateChain() != null
+        return getKeystoreServicePid() != null
+                && getAlias() != null
+                && getCertificateChain() != null
                 && getCertificateChain().length > 0;
     }
 }

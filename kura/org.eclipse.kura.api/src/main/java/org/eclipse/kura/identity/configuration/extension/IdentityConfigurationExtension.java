@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.identity.configuration.extension;
 
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.osgi.annotation.versioning.ProviderType;
@@ -27,7 +26,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <br>
  * Implementing service must be registered with the kura.service.pid property
  * set to an unique identifier.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.7
  */
@@ -47,8 +46,8 @@ public interface IdentityConfigurationExtension {
      * The {@link ComponentConfiguration#getPid()} method of the returned
      * configuration must be set to the value of the kura.service.pid property of
      * the extension service.
-     * 
-     * 
+     *
+     *
      * @param identityName the name of the identity.
      * @return the default additional configuration, or an empty optional.
      * @throws KuraException if a failure occurs while retrieving the configuration.
@@ -60,7 +59,7 @@ public interface IdentityConfigurationExtension {
      * change to the system. This method can be called also for identities that do
      * not exist on the system yet,
      * typically this will be done just before creating a new identity.
-     * 
+     *
      * @param identityName  the name of the identity.
      * @param configuration the configuration to be validated.
      * @throws KuraException if the provided configuration is not valid.
@@ -75,8 +74,8 @@ public interface IdentityConfigurationExtension {
      * The {@link ComponentConfiguration#getPid()} method of the returned
      * configuration must be set to the value of the kura.service.pid property of
      * the extension service.
-     * 
-     * 
+     *
+     *
      * @param identityName the name of the identity.
      * @return the additional configuration, or an empty optional.
      * @throws KuraException if a failure occurs while retrieving the configuration.
@@ -86,7 +85,7 @@ public interface IdentityConfigurationExtension {
     /**
      * Updates the additional configuration managed by this extension for the
      * given identity.
-     * 
+     *
      * @param identityName  the name of the identity.
      * @param configuration the configuration to be applied.
      * @throws KuraException if a failure occurs while updating the configuration.

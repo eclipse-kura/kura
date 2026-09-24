@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,17 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.Reader;
-
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.CsrInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.core.keystore.util.PrivateKeyInfo;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class KeystoreEntryInfoMapper {
 
@@ -45,7 +43,5 @@ public class KeystoreEntryInfoMapper {
         } else {
             return gson.fromJson(json, EntryInfo.class);
         }
-
     }
-
 }

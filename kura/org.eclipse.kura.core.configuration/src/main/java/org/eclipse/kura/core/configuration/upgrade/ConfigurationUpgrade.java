@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.configuration.upgrade;
 
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.BundleContext;
@@ -28,11 +27,13 @@ public class ConfigurationUpgrade {
 
     private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
-    private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DATA_SERVICE_PID = "org.eclipse.kura.data.DataService";
-    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    private static final String DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";

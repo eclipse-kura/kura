@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.bluetooth.le;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -47,7 +46,7 @@ public interface BluetoothLeGattService {
      *            The timeout for retrieving the service
      * @return The BluetoothLeGattCharacteristic
      * @throws KuraBluetoothResourceNotFoundException
-     * 
+     *
      * @deprecated since 2.2 use instead {@link findCharacteristic(UUID)}
      */
     @Deprecated
@@ -82,5 +81,4 @@ public interface BluetoothLeGattService {
      * @return true if this service is a primary service, false if secondary.
      */
     public boolean isPrimary();
-
 }

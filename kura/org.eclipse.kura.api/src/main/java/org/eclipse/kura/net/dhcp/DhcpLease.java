@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Sterwen Technology and others
+ * Copyright (c) 2022, 2026 Sterwen Technology and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Sterwen-Technology
+ *  Eurotech S.p.A.
  *******************************************************************************/
 package org.eclipse.kura.net.dhcp;
 
@@ -58,7 +59,12 @@ public class DhcpLease {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        sb.append("MacAddress:").append(macAddress).append(", IpAddress:").append(ipAddress).append(", Hostname:").append(hostname);
+        sb.append("MacAddress:")
+                .append(macAddress)
+                .append(", IpAddress:")
+                .append(ipAddress)
+                .append(", Hostname:")
+                .append(hostname);
         sb.append("]");
         return sb.toString();
     }

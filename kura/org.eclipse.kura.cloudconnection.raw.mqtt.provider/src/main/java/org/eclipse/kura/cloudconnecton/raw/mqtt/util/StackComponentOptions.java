@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.cloudconnecton.raw.mqtt.util;
 
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.slf4j.Logger;
@@ -24,8 +23,8 @@ public class StackComponentOptions<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(StackComponentOptions.class);
 
-    private static final Property<String> CLOUD_ENDPOINT_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), String.class);
+    private static final Property<String> CLOUD_ENDPOINT_SERVICE_PID =
+            new Property<>(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), String.class);
 
     private final Optional<String> cloudEndpointPid;
     private final Optional<T> componentOptions;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -45,7 +44,6 @@ class SqliteDbServiceOptions {
     }
 
     public enum EncryptionKeyFormat {
-
         ASCII,
         HEX_SSE,
         HEX_SQLCIPHER;
@@ -97,32 +95,31 @@ class SqliteDbServiceOptions {
             EncryptionKeySpec other = (EncryptionKeySpec) obj;
             return this.format == other.format && Objects.equals(this.key, other.key);
         }
-
     }
 
     private static final Property<String> MODE_PROPERTY = new Property<>("db.mode", Mode.IN_MEMORY.name());
     private static final Property<String> PATH_PROPERTY = new Property<>("db.path", "/opt/mydb.sqlite");
-    private static final Property<Integer> CONNECTION_POOL_MAX_SIZE_PROPERTY = new Property<>(
-            "db.connection.pool.max.size", 10);
-    private static final Property<String> JOURNAL_MODE_PROPERTY = new Property<>("db.journal.mode",
-            JournalMode.WAL.name());
+    private static final Property<Integer> CONNECTION_POOL_MAX_SIZE_PROPERTY =
+            new Property<>("db.connection.pool.max.size", 10);
+    private static final Property<String> JOURNAL_MODE_PROPERTY =
+            new Property<>("db.journal.mode", JournalMode.WAL.name());
     private static final Property<Boolean> DEFRAG_ENABLED_PROPERTY = new Property<>("db.defrag.enabled", true);
-    private static final Property<Long> DEFRAG_INTERVAL_SECONDS_PROPERTY = new Property<>("db.defrag.interval.seconds",
-            900L);
-    private static final Property<Boolean> WAL_CHECHPOINT_ENABLED_PROPERTY = new Property<>("db.wal.checkpoint.enabled",
-            true);
+    private static final Property<Long> DEFRAG_INTERVAL_SECONDS_PROPERTY =
+            new Property<>("db.defrag.interval.seconds", 900L);
+    private static final Property<Boolean> WAL_CHECHPOINT_ENABLED_PROPERTY =
+            new Property<>("db.wal.checkpoint.enabled", true);
 
-    private static final Property<Long> WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY = new Property<>(
-            "db.wal.checkpoint.interval.seconds", 600L);
-    private static final Property<Boolean> DEBUG_SHELL_ACCESS_ENABLED_PROPERTY = new Property<>(
-            "debug.shell.access.enabled", false);
+    private static final Property<Long> WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY =
+            new Property<>("db.wal.checkpoint.interval.seconds", 600L);
+    private static final Property<Boolean> DEBUG_SHELL_ACCESS_ENABLED_PROPERTY =
+            new Property<>("debug.shell.access.enabled", false);
     private static final Property<String> ENCRYPTION_KEY_PROPERTY = new Property<>("db.key", String.class);
-    private static final Property<String> ENCRYPTION_KEY_FORMAT_PROPERTY = new Property<>("db.key.format",
-            EncryptionKeyFormat.ASCII.name());
-    private static final Property<Boolean> DELETE_DB_FILES_ON_FAILURE = new Property<>("delete.db.files.on.failure",
-            true);
-    private static final Property<String> KURA_SERVICE_PID_PROPERTY = new Property<>(
-            ConfigurationService.KURA_SERVICE_PID, "sqlitedb");
+    private static final Property<String> ENCRYPTION_KEY_FORMAT_PROPERTY =
+            new Property<>("db.key.format", EncryptionKeyFormat.ASCII.name());
+    private static final Property<Boolean> DELETE_DB_FILES_ON_FAILURE =
+            new Property<>("delete.db.files.on.failure", true);
+    private static final Property<String> KURA_SERVICE_PID_PROPERTY =
+            new Property<>(ConfigurationService.KURA_SERVICE_PID, "sqlitedb");
 
     private final Mode mode;
     private final String path;
@@ -149,7 +146,9 @@ class SqliteDbServiceOptions {
         this.walCheckpointIntervalSeconds = WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY.get(properties);
         this.journalMode = extractJournalMode(properties);
         this.isDebugShellAccessEnabled = DEBUG_SHELL_ACCESS_ENABLED_PROPERTY.get(properties);
-        this.encryptionKey = ENCRYPTION_KEY_PROPERTY.getOptional(properties).filter(s -> !s.trim().isEmpty());
+        this.encryptionKey = ENCRYPTION_KEY_PROPERTY
+                .getOptional(properties)
+                .filter(s -> !s.trim().isEmpty());
         this.encryptionKeyFormat = extractEncryptionKeyFormat(properties);
         this.deleteDbFilesOnFailure = DELETE_DB_FILES_ON_FAILURE.get(properties);
     }
@@ -196,7 +195,8 @@ class SqliteDbServiceOptions {
 
     public Optional<EncryptionKeySpec> getEncryptionKey(final CryptoService cryptoService) throws KuraException {
         if (this.encryptionKey.isPresent()) {
-            String decrypted = new String(cryptoService.decryptAes(this.encryptionKey.get().toCharArray()));
+            String decrypted =
+                    new String(cryptoService.decryptAes(this.encryptionKey.get().toCharArray()));
 
             final EncryptionKeyFormat format = getEncryptionKeyFormat();
 
@@ -220,19 +220,28 @@ class SqliteDbServiceOptions {
         if (StandardCharsets.US_ASCII.newEncoder().canEncode(value)) {
             return value;
         } else {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ENCRYPTION_KEY, "",
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                    ENCRYPTION_KEY,
+                    "",
                     "Encryption key contains non ASCII characters");
         }
     }
 
     private String expectHexString(final String string) throws KuraException {
         if (string.length() % 2 != 0) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ENCRYPTION_KEY, "",
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                    ENCRYPTION_KEY,
+                    "",
                     "Hex encryption key length must be a multiple of 2");
         }
 
         if (!HEX_PATTERN.matcher(string).matches()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ENCRYPTION_KEY, "",
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                    ENCRYPTION_KEY,
+                    "",
                     "Hex encryption must contain only digits and or letters from \"a\" to \"f\"");
         }
 
@@ -293,9 +302,19 @@ class SqliteDbServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.defragEnabled, this.defragIntervalSeconds, this.deleteDbFilesOnFailure,
-                this.encryptionKey, this.encryptionKeyFormat, this.isDebugShellAccessEnabled, this.journalMode,
-                this.kuraServicePid, this.maxConnectionPoolSize, this.mode, this.path, this.walCheckpointEnabled,
+        return Objects.hash(
+                this.defragEnabled,
+                this.defragIntervalSeconds,
+                this.deleteDbFilesOnFailure,
+                this.encryptionKey,
+                this.encryptionKeyFormat,
+                this.isDebugShellAccessEnabled,
+                this.journalMode,
+                this.kuraServicePid,
+                this.maxConnectionPoolSize,
+                this.mode,
+                this.path,
+                this.walCheckpointEnabled,
                 this.walCheckpointIntervalSeconds);
     }
 
@@ -308,15 +327,18 @@ class SqliteDbServiceOptions {
             return false;
         }
         SqliteDbServiceOptions other = (SqliteDbServiceOptions) obj;
-        return this.defragEnabled == other.defragEnabled && this.defragIntervalSeconds == other.defragIntervalSeconds
+        return this.defragEnabled == other.defragEnabled
+                && this.defragIntervalSeconds == other.defragIntervalSeconds
                 && this.deleteDbFilesOnFailure == other.deleteDbFilesOnFailure
                 && Objects.equals(this.encryptionKey, other.encryptionKey)
                 && this.encryptionKeyFormat == other.encryptionKeyFormat
                 && this.isDebugShellAccessEnabled == other.isDebugShellAccessEnabled
-                && this.journalMode == other.journalMode && Objects.equals(this.kuraServicePid, other.kuraServicePid)
-                && this.maxConnectionPoolSize == other.maxConnectionPoolSize && this.mode == other.mode
-                && Objects.equals(this.path, other.path) && this.walCheckpointEnabled == other.walCheckpointEnabled
+                && this.journalMode == other.journalMode
+                && Objects.equals(this.kuraServicePid, other.kuraServicePid)
+                && this.maxConnectionPoolSize == other.maxConnectionPoolSize
+                && this.mode == other.mode
+                && Objects.equals(this.path, other.path)
+                && this.walCheckpointEnabled == other.walCheckpointEnabled
                 && this.walCheckpointIntervalSeconds == other.walCheckpointIntervalSeconds;
     }
-
 }

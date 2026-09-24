@@ -24,6 +24,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.ListContainersCmd;
+import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ContainerPort;
+import com.github.dockerjava.api.model.Image;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -48,22 +55,13 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.ListContainersCmd;
-import com.github.dockerjava.api.command.ListImagesCmd;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ContainerPort;
-import com.github.dockerjava.api.model.Image;
-
 public class ContainerOrchestrationServiceImplTest {
 
     private static final String CONTAINER_INSTANCE_DIGEST = "sha256:test";
-    private static final String[] REPO_DIGESTS_ARRAY = new String[] {
-            "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
-    private static final String[] EXPECTED_DIGESTS_ARRAY = new String[] {
-            "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
+    private static final String[] REPO_DIGESTS_ARRAY =
+            new String[] {"ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107"};
+    private static final String[] EXPECTED_DIGESTS_ARRAY =
+            new String[] {"sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107"};
     private static final String IMAGE_TAG_LATEST = "latest";
     private static final String IMAGE_NAME_NGINX = "nginx";
     private static final String CONTAINER_NAME_FRANK = "frank";
@@ -94,17 +92,27 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String DEFAULT_REPOSITORY_USERNAME = "";
     private static final String DEFAULT_REPOSITORY_PASSWORD = "";
 
-    private static final ContainerPort TCP_CONTAINER_PORT = new ContainerPort().withIp("0.0.0.0").withPrivatePort(100)
-            .withPublicPort(101).withType("tcp");
-    private static final ContainerPort UDP_CONTAINER_PORT = new ContainerPort().withIp("0.0.0.0").withPrivatePort(200)
-            .withPublicPort(201).withType("udp");
-    private static final ContainerPort SCTP_CONTAINER_PORT = new ContainerPort().withIp("0.0.0.0").withPrivatePort(300)
-            .withPublicPort(301).withType("sctp");
+    private static final ContainerPort TCP_CONTAINER_PORT = new ContainerPort()
+            .withIp("0.0.0.0")
+            .withPrivatePort(100)
+            .withPublicPort(101)
+            .withType("tcp");
+    private static final ContainerPort UDP_CONTAINER_PORT = new ContainerPort()
+            .withIp("0.0.0.0")
+            .withPrivatePort(200)
+            .withPublicPort(201)
+            .withType("udp");
+    private static final ContainerPort SCTP_CONTAINER_PORT = new ContainerPort()
+            .withIp("0.0.0.0")
+            .withPrivatePort(300)
+            .withPublicPort(301)
+            .withType("sctp");
 
     private ContainerOrchestrationServiceImpl dockerService;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DockerClient localDockerClient;
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ListContainersCmd mockedListContainersCmd;
 
@@ -387,7 +395,6 @@ public class ContainerOrchestrationServiceImplTest {
     /**
      * givens
      */
-
     private void givenDockerServiceImpl() {
         this.dockerService = new ContainerOrchestrationServiceImpl();
     }
@@ -452,7 +459,6 @@ public class ContainerOrchestrationServiceImplTest {
     /**
      * when
      */
-
     private void whenActivateInstance() {
         this.dockerService.activate(this.properties);
     }
@@ -481,7 +487,7 @@ public class ContainerOrchestrationServiceImplTest {
         Container mcont1 = mock(Container.class);
         when(mcont1.getId()).thenReturn(CONTAINER_ID_1);
         when(mcont1.toString()).thenReturn(CONTAINER_ID_1);
-        when(mcont1.getNames()).thenReturn(new String[] { "jim", "/jim" });
+        when(mcont1.getNames()).thenReturn(new String[] {"jim", "/jim"});
         when(mcont1.getImage()).thenReturn(IMAGE_NAME_NGINX);
         when(mcont1.getPorts()).thenReturn(new ContainerPort[0]);
         when(mcont1.getState()).thenReturn("running");
@@ -490,22 +496,28 @@ public class ContainerOrchestrationServiceImplTest {
         Container mcont2 = mock(Container.class);
         when(mcont2.getId()).thenReturn(CONTAINER_ID_2);
         when(mcont2.toString()).thenReturn(CONTAINER_ID_2);
-        when(mcont2.getNames()).thenReturn(new String[] { CONTAINER_NAME_FRANK, "/frank" });
+        when(mcont2.getNames()).thenReturn(new String[] {CONTAINER_NAME_FRANK, "/frank"});
         when(mcont2.getImage()).thenReturn("nginx2");
         when(mcont2.getPorts()).thenReturn(new ContainerPort[0]);
         when(mcont2.getState()).thenReturn("running");
         containerListmock.add(mcont2);
 
-        this.runningContainers = new String[] { mcont1.toString(), mcont2.toString() };
+        this.runningContainers = new String[] {mcont1.toString(), mcont2.toString()};
 
         // Build Respective CD's
-        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID(mcont1.getId())
-                .setContainerName(mcont1.getNames()[0]).setContainerImage(mcont1.getImage()).build();
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder()
+                .setContainerID(mcont1.getId())
+                .setContainerName(mcont1.getNames()[0])
+                .setContainerImage(mcont1.getImage())
+                .build();
 
-        ContainerInstanceDescriptor mcontCD2 = ContainerInstanceDescriptor.builder().setContainerID(mcont2.getId())
-                .setContainerName(mcont2.getNames()[0]).setContainerImage(mcont2.getImage()).build();
+        ContainerInstanceDescriptor mcontCD2 = ContainerInstanceDescriptor.builder()
+                .setContainerID(mcont2.getId())
+                .setContainerName(mcont2.getNames()[0])
+                .setContainerImage(mcont2.getImage())
+                .build();
 
-        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1, mcontCD2 };
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] {mcontCD1, mcontCD2};
 
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
@@ -532,20 +544,23 @@ public class ContainerOrchestrationServiceImplTest {
         Container mcont1 = mock(Container.class);
         when(mcont1.getId()).thenReturn("1f12d3s23");
         when(mcont1.toString()).thenReturn("1f12d3s23");
-        when(mcont1.getNames()).thenReturn(new String[] { "jim", "/jim" });
+        when(mcont1.getNames()).thenReturn(new String[] {"jim", "/jim"});
         when(mcont1.getImage()).thenReturn("nginx");
         when(mcont1.getPorts())
-                .thenReturn(new ContainerPort[] { TCP_CONTAINER_PORT, UDP_CONTAINER_PORT, SCTP_CONTAINER_PORT });
+                .thenReturn(new ContainerPort[] {TCP_CONTAINER_PORT, UDP_CONTAINER_PORT, SCTP_CONTAINER_PORT});
         when(mcont1.getState()).thenReturn("running");
         containerListmock.add(mcont1);
 
-        this.runningContainers = new String[] { mcont1.toString() };
+        this.runningContainers = new String[] {mcont1.toString()};
 
         // Build Respective CD's
-        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID(mcont1.getId())
-                .setContainerName(mcont1.getNames()[0]).setContainerImage(mcont1.getImage()).build();
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder()
+                .setContainerID(mcont1.getId())
+                .setContainerName(mcont1.getNames()[0])
+                .setContainerImage(mcont1.getImage())
+                .build();
 
-        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] {mcontCD1};
 
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
@@ -556,103 +571,126 @@ public class ContainerOrchestrationServiceImplTest {
     private void whenMockforContainerCreation() {
 
         // Build Respective CD's
-        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
-                .setContainerName(CONTAINER_NAME_FRANK).setContainerImage(IMAGE_NAME_NGINX).build();
-
-        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
-                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder()
+                .setContainerID("1d3dewf34r5")
+                .setContainerName(CONTAINER_NAME_FRANK)
+                .setContainerImage(IMAGE_NAME_NGINX)
                 .build();
 
-        this.containerConfig1 = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME_FRANK)
-                .setImageConfiguration(imageConfig).setVolumes(Collections.singletonMap("test", "~/test/test"))
-                .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
-                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(IMAGE_NAME_NGINX)
+                .setImageTag(IMAGE_TAG_LATEST)
+                .setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
 
-        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
+        this.containerConfig1 = ContainerConfiguration.builder()
+                .setContainerName(CONTAINER_NAME_FRANK)
+                .setImageConfiguration(imageConfig)
+                .setVolumes(Collections.singletonMap("test", "~/test/test"))
+                .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
+                .setEnvVars(Arrays.asList("test=test", "test2=test2"))
+                .build();
+
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] {mcontCD1};
 
         CreateContainerCmd ccc = mock(CreateContainerCmd.class, Mockito.RETURNS_DEEP_STUBS);
-        when(this.localDockerClient.createContainerCmd(mcontCD1.getContainerImage())).thenReturn(ccc);
+        when(this.localDockerClient.createContainerCmd(mcontCD1.getContainerImage()))
+                .thenReturn(ccc);
         when(ccc.exec().getId()).thenReturn(mcontCD1.getContainerId());
 
         List<Image> images = new LinkedList<>();
         Image mockImage = mock(Image.class);
 
-        when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
+        when(mockImage.getRepoTags()).thenReturn(new String[] {IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest"});
 
         images.add(mockImage);
 
         when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
         when(this.localDockerClient.listImagesCmd().exec()).thenReturn(images);
-
     }
 
     private void whenMockForImageListing() {
-        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
-                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(IMAGE_NAME_NGINX)
+                .setImageTag(IMAGE_TAG_LATEST)
+                .setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
 
         List<Image> images = new LinkedList<>();
         Image mockImage = mock(Image.class);
 
         when(mockImage.getId()).thenReturn("ngnix");
-        when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
+        when(mockImage.getRepoTags()).thenReturn(new String[] {IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest"});
         when(mockImage.getRepoDigests()).thenReturn(REPO_DIGESTS_ARRAY);
         images.add(mockImage);
 
         when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
         when(this.localDockerClient.listImagesCmd().withShowAll(true)).thenReturn(mock(ListImagesCmd.class));
         when(this.localDockerClient.listImagesCmd().withShowAll(true).exec()).thenReturn(images);
-
     }
 
     private void whenMockForImageDigestsListing() {
-        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
-                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(IMAGE_NAME_NGINX)
+                .setImageTag(IMAGE_TAG_LATEST)
+                .setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
 
         List<Image> images = new LinkedList<>();
         Image mockImage = mock(Image.class);
 
         when(mockImage.getId()).thenReturn("ngnix");
-        when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
+        when(mockImage.getRepoTags()).thenReturn(new String[] {IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest"});
         when(mockImage.getRepoDigests()).thenReturn(REPO_DIGESTS_ARRAY);
         images.add(mockImage);
 
         when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
         when(this.localDockerClient.listImagesCmd().withImageNameFilter(anyString()))
                 .thenReturn(mock(ListImagesCmd.class));
-        when(this.localDockerClient.listImagesCmd().withImageNameFilter(anyString()).exec()).thenReturn(images);
-
+        when(this.localDockerClient
+                        .listImagesCmd()
+                        .withImageNameFilter(anyString())
+                        .exec())
+                .thenReturn(images);
     }
 
     private void whenMockForContainerInstancesDigestAdding() {
 
         // Build Respective CD's
-        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
-                .setContainerName(CONTAINER_NAME_FRANK).setContainerImage(IMAGE_NAME_NGINX).build();
-
-        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
-                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder()
+                .setContainerID("1d3dewf34r5")
+                .setContainerName(CONTAINER_NAME_FRANK)
+                .setContainerImage(IMAGE_NAME_NGINX)
                 .build();
 
-        org.eclipse.kura.container.orchestration.ContainerPort containerPort = new org.eclipse.kura.container.orchestration.ContainerPort(
-                TCP_CONTAINER_PORT.getPrivatePort(), TCP_CONTAINER_PORT.getPublicPort());
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
+                .setImageName(IMAGE_NAME_NGINX)
+                .setImageTag(IMAGE_TAG_LATEST)
+                .setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(
+                        Optional.of(REGISTRY_URL), REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
 
-        this.containerConfig1 = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME_FRANK)
-                .setImageConfiguration(imageConfig).setVolumes(Collections.singletonMap("test", "~/test/test"))
-                .setEnforcementDigest(Optional.of(CONTAINER_INSTANCE_DIGEST)).setLoggingType("NONE")
-                .setContainerPorts(Arrays.asList(containerPort)).build();
+        org.eclipse.kura.container.orchestration.ContainerPort containerPort =
+                new org.eclipse.kura.container.orchestration.ContainerPort(
+                        TCP_CONTAINER_PORT.getPrivatePort(), TCP_CONTAINER_PORT.getPublicPort());
 
-        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
+        this.containerConfig1 = ContainerConfiguration.builder()
+                .setContainerName(CONTAINER_NAME_FRANK)
+                .setImageConfiguration(imageConfig)
+                .setVolumes(Collections.singletonMap("test", "~/test/test"))
+                .setEnforcementDigest(Optional.of(CONTAINER_INSTANCE_DIGEST))
+                .setLoggingType("NONE")
+                .setContainerPorts(Arrays.asList(containerPort))
+                .build();
 
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] {mcontCD1};
     }
 
     private void whenRunContainer() throws KuraException, InterruptedException {
@@ -682,7 +720,6 @@ public class ContainerOrchestrationServiceImplTest {
     /**
      * then
      */
-
     private void thenNotStoppedMicroservice() {
         verify(this.localDockerClient, times(0)).removeContainerCmd(any(String.class));
     }
@@ -710,24 +747,31 @@ public class ContainerOrchestrationServiceImplTest {
     private void thenContainerPortsInfosArePresent() {
 
         assertFalse(this.dockerService.listContainerDescriptors().isEmpty());
-        List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts = this.dockerService
-                .listContainerDescriptors().get(0).getContainerPorts();
+        List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts =
+                this.dockerService.listContainerDescriptors().get(0).getContainerPorts();
 
-        List<ContainerPort> expectedContainerPorts = Arrays.asList(TCP_CONTAINER_PORT, UDP_CONTAINER_PORT,
-                SCTP_CONTAINER_PORT);
-        List<PortInternetProtocol> expectedInternetPortProtocols = Arrays.asList(PortInternetProtocol.TCP,
-                PortInternetProtocol.UDP, PortInternetProtocol.SCTP);
+        List<ContainerPort> expectedContainerPorts =
+                Arrays.asList(TCP_CONTAINER_PORT, UDP_CONTAINER_PORT, SCTP_CONTAINER_PORT);
+        List<PortInternetProtocol> expectedInternetPortProtocols =
+                Arrays.asList(PortInternetProtocol.TCP, PortInternetProtocol.UDP, PortInternetProtocol.SCTP);
         for (int i = 0; i < containerPorts.size(); i++) {
-            assertEquals((int) expectedContainerPorts.get(i).getPublicPort(), containerPorts.get(i).getExternalPort());
-            assertEquals((int) expectedContainerPorts.get(i).getPrivatePort(), containerPorts.get(i).getInternalPort());
-            assertEquals(expectedInternetPortProtocols.get(i), containerPorts.get(i).getInternetProtocol());
+            assertEquals(
+                    (int) expectedContainerPorts.get(i).getPublicPort(),
+                    containerPorts.get(i).getExternalPort());
+            assertEquals(
+                    (int) expectedContainerPorts.get(i).getPrivatePort(),
+                    containerPorts.get(i).getInternalPort());
+            assertEquals(
+                    expectedInternetPortProtocols.get(i), containerPorts.get(i).getInternetProtocol());
         }
-
     }
 
     private void thenGetFirstContainerIDbyName() {
-        assertEquals(this.dockerService.getContainerIdByName(this.runningContainerDescriptor[0].getContainerName())
-                .orElse(""), this.runningContainerDescriptor[0].getContainerId());
+        assertEquals(
+                this.dockerService
+                        .getContainerIdByName(this.runningContainerDescriptor[0].getContainerName())
+                        .orElse(""),
+                this.runningContainerDescriptor[0].getContainerId());
     }
 
     private void thenTestIfNewContainerExists() {

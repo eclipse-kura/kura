@@ -15,7 +15,7 @@ package org.eclipse.kura.core.test;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
+import junit.framework.TestCase;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
@@ -23,11 +23,9 @@ import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
 public class NetworkServiceTest extends TestCase {
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1); // initialize with number of dependencies
     private static final String MAC_DELIM = ":";
 
     private static NetworkService networkService;
@@ -54,13 +52,13 @@ public class NetworkServiceTest extends TestCase {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testServiceExists() {
         assertNotNull(NetworkServiceTest.networkService);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testInterfaceNamesList() throws Exception {
         List<String> interfaces = networkService.getAllNetworkInterfaceNames();
@@ -72,7 +70,7 @@ public class NetworkServiceTest extends TestCase {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testAllInterfaces() throws Exception {
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = networkService.getNetworkInterfaces();
@@ -94,13 +92,14 @@ public class NetworkServiceTest extends TestCase {
 
             for (NetInterfaceAddress ia : ni.getNetInterfaceAddresses()) {
                 if (ia.getAddress() != null) {
-                    System.out.println("   network interface address: " + ia.getAddress().getHostAddress());
+                    System.out.println(
+                            "   network interface address: " + ia.getAddress().getHostAddress());
                 }
             }
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testActiveInterfaces() throws Exception {
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = networkService.getActiveNetworkInterfaces();
@@ -122,7 +121,8 @@ public class NetworkServiceTest extends TestCase {
 
             for (NetInterfaceAddress ia : ni.getNetInterfaceAddresses()) {
                 if (ia.getAddress() != null) {
-                    System.out.println("   network interface address: " + ia.getAddress().getHostAddress());
+                    System.out.println(
+                            "   network interface address: " + ia.getAddress().getHostAddress());
                 }
             }
         }

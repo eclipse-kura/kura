@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,8 @@ public class CloudComponentInstances {
     private List<CloudEndpointInstance> cloudEndpointInstances = new ArrayList<>();
     private List<PubSubInstance> pubsubInstances = new ArrayList<>();
 
-    public CloudComponentInstances(List<CloudEndpointInstance> cloudEndpointInstances,
-            List<PubSubInstance> pubsubInstances) {
+    public CloudComponentInstances(
+            List<CloudEndpointInstance> cloudEndpointInstances, List<PubSubInstance> pubsubInstances) {
         super();
         this.cloudEndpointInstances = cloudEndpointInstances;
         this.pubsubInstances = pubsubInstances;
@@ -34,5 +34,4 @@ public class CloudComponentInstances {
     public List<PubSubInstance> getPubsubInstances() {
         return this.pubsubInstances;
     }
-
 }

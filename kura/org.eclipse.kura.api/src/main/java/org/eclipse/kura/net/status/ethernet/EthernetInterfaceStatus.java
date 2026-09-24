@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.net.status.ethernet;
 
 import java.util.Objects;
-
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.osgi.annotation.versioning.ProviderType;
@@ -82,5 +81,4 @@ public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
         EthernetInterfaceStatus other = (EthernetInterfaceStatus) obj;
         return this.linkUp == other.linkUp;
     }
-
 }

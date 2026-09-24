@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
@@ -101,8 +100,8 @@ public class BuildDeviceProfileModemConnectionInfoTest {
 
     private void givenNetworkStatusServiceWithConnectedModem(String interfaceName, String ip) throws Exception {
         final NetworkStatusService networkStatusService = mock(NetworkStatusService.class);
-        final ModemInterfaceStatus modemStatus = buildModemStatus(interfaceName, ModemConnectionStatus.CONNECTED,
-                Optional.of(ip));
+        final ModemInterfaceStatus modemStatus =
+                buildModemStatus(interfaceName, ModemConnectionStatus.CONNECTED, Optional.of(ip));
         when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList("1-8"));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatus));
         this.cloudServiceImpl.setNetworkStatusService(networkStatusService);
@@ -110,8 +109,8 @@ public class BuildDeviceProfileModemConnectionInfoTest {
 
     private void givenNetworkStatusServiceWithModemWithoutIp(String interfaceName) throws Exception {
         final NetworkStatusService networkStatusService = mock(NetworkStatusService.class);
-        final ModemInterfaceStatus modemStatus = buildModemStatus(interfaceName, ModemConnectionStatus.CONNECTED,
-                Optional.empty());
+        final ModemInterfaceStatus modemStatus =
+                buildModemStatus(interfaceName, ModemConnectionStatus.CONNECTED, Optional.empty());
         when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList("1-8"));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatus));
         this.cloudServiceImpl.setNetworkStatusService(networkStatusService);
@@ -126,13 +125,15 @@ public class BuildDeviceProfileModemConnectionInfoTest {
     }
 
     private void thenConnectionInterfaceContains(String interfaceName) {
-        assertTrue("expected connectionInterface to contain " + interfaceName + " but was "
-                + this.deviceProfile.getConnectionInterface(),
+        assertTrue(
+                "expected connectionInterface to contain " + interfaceName + " but was "
+                        + this.deviceProfile.getConnectionInterface(),
                 this.deviceProfile.getConnectionInterface().contains(interfaceName));
     }
 
     private void thenConnectionIpContains(String ip) {
-        assertTrue("expected connectionIp to contain " + ip + " but was " + this.deviceProfile.getConnectionIp(),
+        assertTrue(
+                "expected connectionIp to contain " + ip + " but was " + this.deviceProfile.getConnectionIp(),
                 this.deviceProfile.getConnectionIp().contains(ip));
     }
 
@@ -148,31 +149,33 @@ public class BuildDeviceProfileModemConnectionInfoTest {
         return interfaceName + " (00:00:00:00:00:00)";
     }
 
-    private static List<NetInterface<? extends NetInterfaceAddress>> buildLegacyInterface(String interfaceName,
-            String ip) throws Exception {
+    private static List<NetInterface<? extends NetInterfaceAddress>> buildLegacyInterface(
+            String interfaceName, String ip) throws Exception {
         final NetInterfaceAddress address = mock(NetInterfaceAddress.class);
         when(address.getAddress()).thenReturn(IPAddress.parseHostAddress(ip));
 
         @SuppressWarnings("unchecked")
         final NetInterface<NetInterfaceAddress> netInterface = mock(NetInterface.class);
         when(netInterface.getName()).thenReturn(interfaceName);
-        when(netInterface.getHardwareAddress()).thenReturn(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+        when(netInterface.getHardwareAddress()).thenReturn(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
         when(netInterface.getNetInterfaceAddresses()).thenReturn(Collections.singletonList(address));
 
         return Collections.singletonList(netInterface);
     }
 
-    private static ModemInterfaceStatus buildModemStatus(String interfaceName, ModemConnectionStatus connectionStatus,
-            Optional<String> ip) throws Exception {
+    private static ModemInterfaceStatus buildModemStatus(
+            String interfaceName, ModemConnectionStatus connectionStatus, Optional<String> ip) throws Exception {
         final ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
         builder.withInterfaceName(interfaceName).withConnectionStatus(connectionStatus);
 
         if (ip.isPresent()) {
             final IP4Address address = (IP4Address) IPAddress.parseHostAddress(ip.get());
-            final NetworkInterfaceIpAddress<IP4Address> netAddress = new NetworkInterfaceIpAddress<>(address,
-                    (short) 24);
-            final NetworkInterfaceIpAddressStatus<IP4Address> ipStatus = NetworkInterfaceIpAddressStatus
-                    .<IP4Address>builder().withAddresses(Collections.singletonList(netAddress)).build();
+            final NetworkInterfaceIpAddress<IP4Address> netAddress =
+                    new NetworkInterfaceIpAddress<>(address, (short) 24);
+            final NetworkInterfaceIpAddressStatus<IP4Address> ipStatus =
+                    NetworkInterfaceIpAddressStatus.<IP4Address>builder()
+                            .withAddresses(Collections.singletonList(netAddress))
+                            .build();
             builder.withInterfaceIp4Addresses(Optional.of(ipStatus));
         }
 

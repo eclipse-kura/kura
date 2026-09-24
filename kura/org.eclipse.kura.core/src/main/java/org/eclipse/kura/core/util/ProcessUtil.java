@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,7 +17,6 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +31,7 @@ public class ProcessUtil {
 
     private static ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
-    private ProcessUtil() {
-
-    }
+    private ProcessUtil() {}
 
     public static SafeProcess exec(String command) throws IOException {
         // Use StringTokenizer since this is the method documented by Runtime
@@ -70,8 +67,7 @@ public class ProcessUtil {
      * @deprecated The method does nothing
      */
     @Deprecated
-    public static void close(SafeProcess proc) {
-    }
+    public static void close(SafeProcess proc) {}
 
     public static void destroy(SafeProcess proc) {
         proc.destroy();

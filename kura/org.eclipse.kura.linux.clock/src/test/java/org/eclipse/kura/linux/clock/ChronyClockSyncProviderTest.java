@@ -28,7 +28,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
@@ -55,14 +54,14 @@ public class ChronyClockSyncProviderTest {
 
         CommandExecutorService commandExecutorMock = mock(CommandExecutorService.class);
         when(commandExecutorMock.execute(any())).thenReturn(successFullStatus);
-        when(commandExecutorMock.execute(new Command(new String[] { "systemctl", "status", "chrony" })))
+        when(commandExecutorMock.execute(new Command(new String[] {"systemctl", "status", "chrony"})))
                 .thenReturn(notRunningProgramStatus);
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         when(cryptoServiceMock.sha256Hash(any())).thenReturn("");
 
-        ChronyClockSyncProvider ntsClockSyncProvider = new ChronyClockSyncProvider(commandExecutorMock,
-                cryptoServiceMock);
+        ChronyClockSyncProvider ntsClockSyncProvider =
+                new ChronyClockSyncProvider(commandExecutorMock, cryptoServiceMock);
         AtomicBoolean invoked = new AtomicBoolean(false);
         ClockSyncListener listener = (offset, update) -> {
             assertEquals(0, offset);

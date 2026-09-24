@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.sql.Connection;
 import java.sql.Statement;
-
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.JournalMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,7 @@ public class SqliteUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SqliteUtil.class);
 
-    private SqliteUtil() {
-    }
+    private SqliteUtil() {}
 
     public static void walCeckpoint(final Connection connection, final SqliteDbServiceOptions options) {
         logger.info("performing WAL checkpoint on database with url: {}...", options.getDbUrl());

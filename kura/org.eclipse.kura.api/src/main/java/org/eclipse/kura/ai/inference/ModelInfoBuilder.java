@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -204,7 +203,7 @@ public class ModelInfoBuilder {
         if (this.outputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The output descriptors list cannot be empty");
         }
-        return new ModelInfo(this.name, this.platform, this.version, this.parameters, this.inputDescriptors,
-                this.outputDescriptors);
+        return new ModelInfo(
+                this.name, this.platform, this.version, this.parameters, this.inputDescriptors, this.outputDescriptors);
     }
 }

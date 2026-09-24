@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,13 +15,13 @@ package org.eclipse.kura.rest.tamper.detection.api;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
 
 public class TamperStatusInfo {
 
     @SuppressWarnings("unused")
     private final boolean isDeviceTampered;
+
     @SuppressWarnings("unused")
     private final Map<String, Object> properties;
 

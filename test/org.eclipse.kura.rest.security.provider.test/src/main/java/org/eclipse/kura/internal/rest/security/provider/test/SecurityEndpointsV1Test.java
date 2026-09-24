@@ -12,6 +12,21 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider.test;
 
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+
+import jakarta.ws.rs.core.Response.Status;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
@@ -36,22 +51,6 @@ import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
-
-import jakarta.ws.rs.core.Response.Status;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 public class SecurityEndpointsV1Test extends AbstractRequestHandlerTest {
@@ -192,12 +191,16 @@ public class SecurityEndpointsV1Test extends AbstractRequestHandlerTest {
      * Utilities
      */
 
-    private void givenIdentity(final String username, final Optional<String> password, final List<String> roles,
+    private void givenIdentity(
+            final String username,
+            final Optional<String> password,
+            final List<String> roles,
             final boolean needsPasswordChange) {
         final UserAdmin userAdmin;
 
         try {
-            userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            userAdmin =
+                    ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail("failed to track UserAdmin");
             return;
@@ -272,7 +275,8 @@ public class SecurityEndpointsV1Test extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockSecurityService");
-        securityServiceRegistration = FrameworkUtil.getBundle(SecurityEndpointsV1Test.class).getBundleContext()
+        securityServiceRegistration = FrameworkUtil.getBundle(SecurityEndpointsV1Test.class)
+                .getBundleContext()
                 .registerService(SecurityService.class, securityServiceMock, configurationServiceProperties);
     }
 
@@ -280,8 +284,9 @@ public class SecurityEndpointsV1Test extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("SecurityService.target", "(kura.service.pid=mockSecurityService)");
 
-        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(ConfigurationAdmin.class,
-                Optional.empty()).get(30, TimeUnit.SECONDS);
+        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(
+                        ConfigurationAdmin.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(SecurityRestServiceV1.class.getName(), "?");
         config.update(properties);
     }
@@ -312,5 +317,4 @@ public class SecurityEndpointsV1Test extends AbstractRequestHandlerTest {
 
         return (T) userAdmin.createRole(name, type);
     }
-
 }

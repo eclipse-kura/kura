@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.osgi.annotation.versioning.ProviderType;
@@ -205,7 +204,7 @@ public interface BluetoothLeAdapter {
     /**
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
-     * 
+     *
      * @deprecated since 2.2 use instead {@link setDiscoverableTimeout}
      */
     @Deprecated
@@ -214,7 +213,7 @@ public interface BluetoothLeAdapter {
     /**
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
-     * 
+     *
      * @since 2.2
      */
     public void setDiscoverableTimeout(long value);
@@ -335,8 +334,8 @@ public interface BluetoothLeAdapter {
      *
      * @since 2.2
      */
-    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType,
-            boolean duplicateData);
+    public void setDiscoveryFilter(
+            List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType, boolean duplicateData);
 
     /**
      * Set a device discovery filter based on RSSI value. Only devices with rssi greater than the provided value will be
@@ -348,5 +347,4 @@ public interface BluetoothLeAdapter {
      * @since 2.0
      */
     public void setRssiDiscoveryFilter(int rssi);
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,7 +50,7 @@ public interface KeyValueDbService {
 
     /**
      * Set a key with the specified value in the database
-     * 
+     *
      * @param key
      *            the key name
      * @param value
@@ -62,7 +62,7 @@ public interface KeyValueDbService {
 
     /**
      * Set a key with the specified value in the database
-     * 
+     *
      * @param key
      *            the key name
      * @param value
@@ -74,10 +74,10 @@ public interface KeyValueDbService {
 
     /**
      * Get a key with the specified value in the database
-     * 
+     *
      * @param key
      *            the key name
-     * 
+     *
      * @return the key value as byte array
      * @throws KuraException
      *             if the operation is unsuccessful
@@ -86,10 +86,10 @@ public interface KeyValueDbService {
 
     /**
      * Get a key with the specified value in the database
-     * 
+     *
      * @param key
      *            the key name
-     * 
+     *
      * @return the key value as String. The string encondig is platform dependent
      * @throws KuraException
      *             if the operation is unsuccessful
@@ -98,10 +98,10 @@ public interface KeyValueDbService {
 
     /**
      * Delete a key with the specified value in the database
-     * 
+     *
      * @param key
      *            the key name
-     * 
+     *
      * @throws KuraException
      *             if the operation is unsuccessful
      */

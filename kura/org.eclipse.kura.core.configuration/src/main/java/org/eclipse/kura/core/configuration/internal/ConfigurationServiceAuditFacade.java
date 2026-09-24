@@ -17,20 +17,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.osgi.framework.Filter;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.service.component.annotations.Component;
 @Component(
-    name = "org.eclipse.kura.configuration.ConfigurationService",
-    immediate = true,
-    service = { org.eclipse.kura.configuration.ConfigurationService.class, org.eclipse.kura.configuration.metatype.OCDService.class })
+        name = "org.eclipse.kura.configuration.ConfigurationService",
+        immediate = true,
+        service = {
+            org.eclipse.kura.configuration.ConfigurationService.class,
+            org.eclipse.kura.configuration.metatype.OCDService.class
+        })
 public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
 
     private static final String CONFIGURATION_SERVICE_FAILURE = "{} ConfigurationService - Failure - {}";
@@ -38,9 +40,10 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
-    public synchronized void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
-            boolean takeSnapshot) throws KuraException {
-        audit(() -> super.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot),
+    public synchronized void createFactoryConfiguration(
+            String factoryPid, String pid, Map<String, Object> properties, boolean takeSnapshot) throws KuraException {
+        audit(
+                () -> super.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot),
                 "Create factory configuration " + factoryPid + " " + pid);
         postConfigurationChangedEvent(pid);
     }
@@ -88,7 +91,8 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     @Override
     public synchronized void updateConfigurations(List<ComponentConfiguration> configs, boolean takeSnapshot)
             throws KuraException {
-        audit(() -> super.updateConfigurations(configs, takeSnapshot),
+        audit(
+                () -> super.updateConfigurations(configs, takeSnapshot),
                 "Update configurations: " + formatConfigurationPids(configs));
         postConfigurationChangedEvent(formatConfigurationPids(configs));
     }

@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.event.publisher.test;
 
 import static org.junit.Assert.assertEquals;
@@ -18,14 +17,13 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.event.publisher.EventPublisherOptions;
 import org.junit.Before;
 import org.junit.Test;
 
 public class EventPublisherOptionsTest {
-    
+
     private EventPublisherOptions options;
     private Map<String, Object> properties = new HashMap<>();
     private Object returnedValue;
@@ -48,9 +46,9 @@ public class EventPublisherOptionsTest {
     public void shouldReturnTopicWithoutSeparators() {
         givenProperty(EventPublisherOptions.TOPIC_PROP_NAME, "/example.topic/");
         givenEventPublisherOptions();
-        
+
         whenGetTopic();
-        
+
         thenReturnedValueIs("example.topic");
     }
 
@@ -239,5 +237,4 @@ public class EventPublisherOptionsTest {
     public void cleanup() {
         this.properties.clear();
     }
-
 }

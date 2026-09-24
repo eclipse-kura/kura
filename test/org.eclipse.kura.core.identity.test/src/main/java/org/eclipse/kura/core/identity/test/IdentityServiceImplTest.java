@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -126,9 +125,12 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         givenNoUserAdminRoleWithName("kura.user.foo");
         givenUserAdminGroups("kura.permission.foo");
 
-        whenIdentityIsCreated(new IdentityConfiguration("foo", Arrays.asList(
-                new AssignedPermissions(set(new Permission("foo"))),
-                new PasswordConfiguration(false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
+        whenIdentityIsCreated(new IdentityConfiguration(
+                "foo",
+                Arrays.asList(
+                        new AssignedPermissions(set(new Permission("foo"))),
+                        new PasswordConfiguration(
+                                false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenIdentityServiceReportsUserCreated(true);
@@ -271,11 +273,11 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldSetPermissions() {
         givenUserAdminUsers("kura.user.foo");
-        givenUserAdminGroups("kura.permission.foo", "kura.permission.bar", "kura.permission.baz",
-                "kura.permission.other", "other");
+        givenUserAdminGroups(
+                "kura.permission.foo", "kura.permission.bar", "kura.permission.baz", "kura.permission.other", "other");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("bar"))))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo", singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("bar"))))));
 
         thenNoExceptionIsThrown();
         thenUserAdminGroupContainsMember("kura.permission.foo", "kura.user.foo");
@@ -287,10 +289,11 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldFailToSetPermissionsIfPermissionDoesNotExist() {
         givenUserAdminUsers("kura.user.foo");
-        givenUserAdminGroups("kura.permission.foo", "kura.permission.bar", "kura.permission.baz",
-                "kura.permission.other", "other");
+        givenUserAdminGroups(
+                "kura.permission.foo", "kura.permission.bar", "kura.permission.baz", "kura.permission.other", "other");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
                 singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("notexisting"))))));
 
         thenExceptionIsThrown(KuraException.class);
@@ -299,10 +302,11 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldConsiderConfigurationInvalidIfPermissionDoesNotExist() {
         givenUserAdminUsers("kura.user.foo");
-        givenUserAdminGroups("kura.permission.foo", "kura.permission.bar", "kura.permission.baz",
-                "kura.permission.other", "other");
+        givenUserAdminGroups(
+                "kura.permission.foo", "kura.permission.bar", "kura.permission.baz", "kura.permission.other", "other");
 
-        whenIdentityConfigurationIsValidated(new IdentityConfiguration("foo",
+        whenIdentityConfigurationIsValidated(new IdentityConfiguration(
+                "foo",
                 singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("notexisting"))))));
 
         thenExceptionIsThrown(KuraException.class);
@@ -311,12 +315,12 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldRemovePermissions() {
         givenUserAdminUsers("kura.user.foo");
-        givenUserAdminGroups("kura.permission.foo", "kura.permission.bar", "kura.permission.baz",
-                "kura.permission.other", "other");
+        givenUserAdminGroups(
+                "kura.permission.foo", "kura.permission.bar", "kura.permission.baz", "kura.permission.other", "other");
         givenUserAdminBasicMember("kura.permission.baz", "kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("bar"))))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo", singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("bar"))))));
 
         thenNoExceptionIsThrown();
         thenUserAdminGroupContainsMember("kura.permission.foo", "kura.user.foo");
@@ -328,24 +332,26 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldReturnAssignedPermissions() {
         givenUserAdminUsers("kura.user.foo");
-        givenUserAdminGroups("kura.permission.foo", "kura.permission.bar", "kura.permission.baz",
-                "kura.permission.other", "other");
+        givenUserAdminGroups(
+                "kura.permission.foo", "kura.permission.bar", "kura.permission.baz", "kura.permission.other", "other");
         givenUserAdminBasicMember("kura.permission.foo", "kura.user.foo");
         givenUserAdminBasicMember("kura.permission.bar", "kura.user.foo");
 
         whenIdentityConfigurationIsRetrieved("foo", set(AssignedPermissions.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo",
-                singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("bar"))))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration(
+                "foo", singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("bar"))))));
     }
 
     @Test
     public void shouldSetUserPassword() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("adminadmin"));
@@ -356,8 +362,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         givenUserAdminUsers("kura.user.foo");
         givenUserAdminCredential("kura.user.foo", "kura.password", sha256("foobar"));
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, true, Optional.empty(), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo", singletonList(new PasswordConfiguration(false, true, Optional.empty(), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("foobar"));
@@ -368,8 +374,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         givenUserAdminUsers("kura.user.foo");
         givenUserAdminCredential("kura.user.foo", "kura.password", sha256("foobar"));
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, false, Optional.empty(), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo", singletonList(new PasswordConfiguration(false, false, Optional.empty(), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIsNotSet("kura.user.foo", "kura.password");
@@ -378,11 +384,20 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldSetNeedPasswordChange() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                8,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(true, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        true, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("adminadmin"));
@@ -393,11 +408,20 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldUnsetNeedPasswordChange() {
         givenUserAdminUsers("kura.user.foo");
         givenUserAdminProperty("kura.user.foo", "kura.need.password.change", "true");
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                8,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("adminadmin"));
@@ -412,8 +436,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         whenIdentityConfigurationIsRetrieved("foo", set(PasswordConfiguration.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(true, false, Optional.empty(), Optional.empty()))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration(
+                "foo", singletonList(new PasswordConfiguration(true, false, Optional.empty(), Optional.empty()))));
     }
 
     @Test
@@ -423,8 +447,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         whenIdentityConfigurationIsRetrieved("foo", set(PasswordConfiguration.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, false, Optional.empty(), Optional.empty()))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration(
+                "foo", singletonList(new PasswordConfiguration(false, false, Optional.empty(), Optional.empty()))));
     }
 
     @Test
@@ -436,21 +460,25 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         whenIdentityConfigurationIsRetrieved("foo", set(PasswordConfiguration.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.empty(), Optional.of(lastPasswordHash())))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration(
+                "foo",
+                singletonList(
+                        new PasswordConfiguration(false, true, Optional.empty(), Optional.of(lastPasswordHash())))));
     }
 
     @Test
     public void shouldReturnDefaultConfiguationFromExtension() {
         givenMockIdentityConfigurationExtension("test.extension");
-        givenExtensionDefaultConfiguration("test.extension", "foo",
-                TestComponentConfiguration.forPid("test.extension"));
+        givenExtensionDefaultConfiguration(
+                "test.extension", "foo", TestComponentConfiguration.forPid("test.extension"));
 
         whenIdentityDefaultConfigurationIsRetrieved("foo", set(AdditionalConfigurations.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityDefaultConfigurationEquals(new IdentityConfiguration("foo", singletonList(
-                new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("test.extension"))))));
+        thenIdentityDefaultConfigurationEquals(new IdentityConfiguration(
+                "foo",
+                singletonList(new AdditionalConfigurations(
+                        singletonList(TestComponentConfiguration.forPid("test.extension"))))));
     }
 
     @Test
@@ -462,16 +490,20 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         whenIdentityConfigurationIsRetrieved("foo", set(AdditionalConfigurations.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo", singletonList(
-                new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("test.extension"))))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration(
+                "foo",
+                singletonList(new AdditionalConfigurations(
+                        singletonList(TestComponentConfiguration.forPid("test.extension"))))));
     }
 
     @Test
     public void shouldConsiderConfigurationInvalidIfExtensionIsNotRegistered() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsValidated(new IdentityConfiguration("foo", singletonList(
-                new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("nonexisting"))))));
+        whenIdentityConfigurationIsValidated(new IdentityConfiguration(
+                "foo",
+                singletonList(new AdditionalConfigurations(
+                        singletonList(TestComponentConfiguration.forPid("nonexisting"))))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -480,8 +512,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowEmptyPassword() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(
+                        new PasswordConfiguration(false, true, Optional.of("".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -490,9 +524,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowPasswordWithOnlySpaces() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(
-                new IdentityConfiguration("foo", singletonList(new PasswordConfiguration(false, true,
-                        Optional.of("                  ".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of("                  ".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -501,8 +536,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowPasswordBeginningWithSpaces() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of(" adminadmin".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of(" adminadmin".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -511,8 +548,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowPasswordEndingWithSpaces() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("adminadmin ".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of("adminadmin ".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -521,8 +560,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowPasswordContainingSpaces() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("admin admin ".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of("admin admin ".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -531,8 +572,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowPasswordContainingTab() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("admin\tadmin ".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new PasswordConfiguration(
+                        false, true, Optional.of("admin\tadmin ".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -541,8 +584,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldNotAllowPasswordEqualsToIdentityName() {
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("foo".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(
+                        new PasswordConfiguration(false, true, Optional.of("foo".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -550,11 +595,20 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldAllow255CharsPassword() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                8,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of(repeat('a', 255)), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(
+                        new PasswordConfiguration(false, true, Optional.of(repeat('a', 255)), Optional.empty()))));
 
         thenNoExceptionIsThrown();
     }
@@ -562,23 +616,41 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldNotAllowTooLongPassword() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                8,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of(repeat('a', 256)), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(
+                        new PasswordConfiguration(false, true, Optional.of(repeat('a', 256)), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
 
     @Test
     public void shouldNotAllowPasswordNotSatisfyingPasswordStrengthRequirements() {
-        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
-                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenPasswordStrengthVerificationOptions(
+                "new.password.min.length",
+                3,
+                "new.password.require.digits",
+                false,
+                "new.password.require.special.characters",
+                false,
+                "new.password.require.both.cases",
+                false);
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new PasswordConfiguration(false, true, Optional.of("a".toCharArray()), Optional.empty()))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(
+                        new PasswordConfiguration(false, true, Optional.of("a".toCharArray()), Optional.empty()))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -738,8 +810,10 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         givenMockIdentityConfigurationExtension("test.extension");
         givenExtensionReturningValidationFailure("test.extension", "foobar");
 
-        whenIdentityConfigurationIsValidated(new IdentityConfiguration("foobar", singletonList(
-                new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("test.extension"))))));
+        whenIdentityConfigurationIsValidated(new IdentityConfiguration(
+                "foobar",
+                singletonList(new AdditionalConfigurations(
+                        singletonList(TestComponentConfiguration.forPid("test.extension"))))));
 
         thenExceptionIsThrown(KuraException.class);
     }
@@ -869,13 +943,17 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         givenMockIdentityConfigurationExtension("test.extension");
         givenUserAdminUsers("kura.user.foo");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
-                new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("test.extension"))))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration(
+                "foo",
+                singletonList(new AdditionalConfigurations(
+                        singletonList(TestComponentConfiguration.forPid("test.extension"))))));
         whenIdentityConfigurationIsRetrieved("foo", set(AdditionalConfigurations.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo", singletonList(
-                new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("test.extension"))))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration(
+                "foo",
+                singletonList(new AdditionalConfigurations(
+                        singletonList(TestComponentConfiguration.forPid("test.extension"))))));
     }
 
     private final UserAdmin userAdmin;
@@ -890,11 +968,12 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public IdentityServiceImplTest() {
         super();
         try {
-            this.userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-            this.cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
-            this.identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
+            this.userAdmin =
+                    ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            this.cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
+            this.identityService = ServiceUtil.trackService(IdentityService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             givenNoUserAdminRoles();
         } catch (Exception e) {
@@ -914,13 +993,13 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         this.extensions.put(pid, new MockExtensionHolder(pid));
     }
 
-    private void givenExtensionConfiguration(final String extensionPid, final String identity,
-            final ComponentConfiguration config) {
+    private void givenExtensionConfiguration(
+            final String extensionPid, final String identity, final ComponentConfiguration config) {
         this.extensions.get(extensionPid).configurations.put(identity, config);
     }
 
-    private void givenExtensionDefaultConfiguration(final String extensionPid, final String identity,
-            final ComponentConfiguration config) {
+    private void givenExtensionDefaultConfiguration(
+            final String extensionPid, final String identity, final ComponentConfiguration config) {
         this.extensions.get(extensionPid).defaultConfigurations.put(identity, config);
     }
 
@@ -1031,13 +1110,13 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         });
     }
 
-    private void whenIdentityConfigurationIsRetrieved(final String identity,
-            final Set<Class<? extends IdentityConfigurationComponent>> components) {
+    private void whenIdentityConfigurationIsRetrieved(
+            final String identity, final Set<Class<? extends IdentityConfigurationComponent>> components) {
         call(() -> this.identityService.getIdentityConfiguration(identity, components));
     }
 
-    private void whenIdentityDefaultConfigurationIsRetrieved(final String identity,
-            final Set<Class<? extends IdentityConfigurationComponent>> components) {
+    private void whenIdentityDefaultConfigurationIsRetrieved(
+            final String identity, final Set<Class<? extends IdentityConfigurationComponent>> components) {
         call(() -> this.identityService.getIdentityDefaultConfiguration(identity, components));
     }
 
@@ -1050,7 +1129,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     }
 
     private void thenUserAdminCredentialIs(final String user, final String key, final String value) {
-        assertEquals(value, ((User) this.userAdmin.getRole(user)).getCredentials().get(key));
+        assertEquals(
+                value, ((User) this.userAdmin.getRole(user)).getCredentials().get(key));
     }
 
     private void thenUserAdminCredentialIsNotSet(final String user, final String key) {
@@ -1060,13 +1140,19 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     private void thenUserAdminGroupContainsMember(final String group, final String member) {
         final List<Role> members = getBasicMembers(group);
 
-        assertTrue(members.stream().filter(m -> Objects.equals(member, m.getName())).findAny().isPresent());
+        assertTrue(members.stream()
+                .filter(m -> Objects.equals(member, m.getName()))
+                .findAny()
+                .isPresent());
     }
 
     private void thenUserAdminGroupDoesNotContainMember(final String group, final String member) {
         final List<Role> members = getBasicMembers(group);
 
-        assertFalse(members.stream().filter(m -> Objects.equals(member, m.getName())).findAny().isPresent());
+        assertFalse(members.stream()
+                .filter(m -> Objects.equals(member, m.getName()))
+                .findAny()
+                .isPresent());
     }
 
     private void thenIdentityServiceReportsUserDeleted(final boolean deleted) {
@@ -1095,15 +1181,18 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
 
     @SuppressWarnings("unchecked")
     private void thenReturnedIdentityNamesAre(final String... names) {
-        assertEquals(Arrays.stream(names).collect(Collectors.toSet()),
-                ((List<IdentityConfiguration>) expectResult(List.class)).stream().map(IdentityConfiguration::getName)
-                        .collect(Collectors.toSet()));
+        assertEquals(
+                Arrays.stream(names).collect(Collectors.toSet()),
+                ((List<IdentityConfiguration>) expectResult(List.class))
+                        .stream().map(IdentityConfiguration::getName).collect(Collectors.toSet()));
     }
 
     @SuppressWarnings("unchecked")
     private void thenReturnedPermissionNamesAre(final String... names) {
-        assertEquals(Arrays.stream(names).collect(Collectors.toSet()), ((Set<Permission>) expectResult(Set.class))
-                .stream().map(Permission::getName).collect(Collectors.toSet()));
+        assertEquals(
+                Arrays.stream(names).collect(Collectors.toSet()),
+                ((Set<Permission>) expectResult(Set.class))
+                        .stream().map(Permission::getName).collect(Collectors.toSet()));
     }
 
     private void thenUserAdminRoleExists(final String name, final int type) {
@@ -1124,12 +1213,15 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     }
 
     public <T> T expectResult(final Class<T> ty) {
-        return this.result.filter(ty::isInstance).map(ty::cast)
+        return this.result
+                .filter(ty::isInstance)
+                .map(ty::cast)
                 .orElseThrow(() -> new IllegalStateException("unexpected return type"));
     }
 
     private List<Role> getBasicMembers(final String group) {
-        return Optional.ofNullable(((Group) this.userAdmin.getRole(group)).getMembers()).map(Arrays::asList)
+        return Optional.ofNullable(((Group) this.userAdmin.getRole(group)).getMembers())
+                .map(Arrays::asList)
                 .orElseGet(Collections::emptyList);
     }
 
@@ -1189,26 +1281,30 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
             this.extension = Mockito.mock(IdentityConfigurationExtension.class);
 
             try {
-                Mockito.when(this.extension.getConfiguration(ArgumentMatchers.anyString())).thenAnswer(a -> {
-                    final String name = a.getArgument(0, String.class);
+                Mockito.when(this.extension.getConfiguration(ArgumentMatchers.anyString()))
+                        .thenAnswer(a -> {
+                            final String name = a.getArgument(0, String.class);
 
-                    return Optional.ofNullable(this.configurations.get(name));
-                });
+                            return Optional.ofNullable(this.configurations.get(name));
+                        });
 
-                Mockito.when(this.extension.getDefaultConfiguration(ArgumentMatchers.anyString())).thenAnswer(a -> {
-                    final String name = a.getArgument(0, String.class);
+                Mockito.when(this.extension.getDefaultConfiguration(ArgumentMatchers.anyString()))
+                        .thenAnswer(a -> {
+                            final String name = a.getArgument(0, String.class);
 
-                    return Optional.ofNullable(this.defaultConfigurations.get(name));
-                });
+                            return Optional.ofNullable(this.defaultConfigurations.get(name));
+                        });
 
                 Mockito.doAnswer(i -> {
-                    final String identityName = i.getArgument(0, String.class);
-                    final ComponentConfiguration connfig = i.getArgument(1, ComponentConfiguration.class);
+                            final String identityName = i.getArgument(0, String.class);
+                            final ComponentConfiguration connfig = i.getArgument(1, ComponentConfiguration.class);
 
-                    this.configurations.put(identityName, connfig);
+                            this.configurations.put(identityName, connfig);
 
-                    return (Void) null;
-                }).when(this.extension).updateConfiguration(ArgumentMatchers.anyString(), ArgumentMatchers.any());
+                            return (Void) null;
+                        })
+                        .when(this.extension)
+                        .updateConfiguration(ArgumentMatchers.anyString(), ArgumentMatchers.any());
 
             } catch (KuraException e) {
                 // no need
@@ -1217,13 +1313,15 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
             final Dictionary<String, Object> properties = new Hashtable<>();
             properties.put("kura.service.pid", pid);
 
-            this.registration = FrameworkUtil.getBundle(IdentityServiceImplTest.class).getBundleContext()
+            this.registration = FrameworkUtil.getBundle(IdentityServiceImplTest.class)
+                    .getBundleContext()
                     .registerService(IdentityConfigurationExtension.class, this.extension, properties);
         }
 
         void throwOnIdentityValidation(final String identityName) {
             try {
-                Mockito.doThrow(new KuraException(KuraErrorCode.INVALID_PARAMETER)).when(this.extension)
+                Mockito.doThrow(new KuraException(KuraErrorCode.INVALID_PARAMETER))
+                        .when(this.extension)
                         .validateConfiguration(ArgumentMatchers.eq(identityName), ArgumentMatchers.any());
             } catch (KuraException e) {
                 // no need
@@ -1276,7 +1374,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
                 return false;
             }
             TestComponentConfiguration other = (TestComponentConfiguration) obj;
-            return Objects.equals(this.ocd, other.ocd) && Objects.equals(this.pid, other.pid)
+            return Objects.equals(this.ocd, other.ocd)
+                    && Objects.equals(this.pid, other.pid)
                     && Objects.equals(this.properties, other.properties);
         }
 
@@ -1285,6 +1384,5 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
             return "TestComponentConfiguration [pid=" + this.pid + ", ocd=" + this.ocd + ", properties="
                     + this.properties + "]";
         }
-
     }
 }

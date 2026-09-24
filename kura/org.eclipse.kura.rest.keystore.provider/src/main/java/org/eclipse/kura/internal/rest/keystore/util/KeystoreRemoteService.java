@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.keystore.util;
 
+import jakarta.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -38,10 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.security.auth.x500.X500Principal;
-import jakarta.ws.rs.WebApplicationException;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
@@ -98,7 +96,8 @@ public class KeystoreRemoteService {
         this.keystoreServices.entrySet().stream().forEach(entry -> {
             try {
                 if (entry.getValue().getKeyStore() != null) {
-                    keystores.add(buildKeystoreInfo(entry.getKey(), entry.getValue().getKeyStore()));
+                    keystores.add(
+                            buildKeystoreInfo(entry.getKey(), entry.getValue().getKeyStore()));
                 }
             } catch (KuraException | KeyStoreException e) {
                 throw new WebApplicationException(e);
@@ -114,11 +113,17 @@ public class KeystoreRemoteService {
                 try {
                     keystoreService.getValue().getEntries().entrySet().stream().forEach(entry -> {
                         if (entry.getValue() instanceof PrivateKeyEntry) {
-                            keys.add(buildPrivateKeyInfo(keystoreService.getKey(), entry.getKey(),
-                                    (PrivateKeyEntry) entry.getValue(), false));
+                            keys.add(buildPrivateKeyInfo(
+                                    keystoreService.getKey(),
+                                    entry.getKey(),
+                                    (PrivateKeyEntry) entry.getValue(),
+                                    false));
                         } else if (entry.getValue() instanceof TrustedCertificateEntry) {
-                            keys.add(buildCertificateInfo(keystoreService.getKey(), entry.getKey(),
-                                    (TrustedCertificateEntry) entry.getValue(), false));
+                            keys.add(buildCertificateInfo(
+                                    keystoreService.getKey(),
+                                    entry.getKey(),
+                                    (TrustedCertificateEntry) entry.getValue(),
+                                    false));
                         }
                     });
                 } catch (KuraException e) {
@@ -136,11 +141,11 @@ public class KeystoreRemoteService {
             try {
                 keystoreService.getEntries().entrySet().stream().forEach(entry -> {
                     if (entry.getValue() instanceof PrivateKeyEntry) {
-                        keys.add(buildPrivateKeyInfo(keystoreServicePid, entry.getKey(),
-                                (PrivateKeyEntry) entry.getValue(), true));
+                        keys.add(buildPrivateKeyInfo(
+                                keystoreServicePid, entry.getKey(), (PrivateKeyEntry) entry.getValue(), true));
                     } else if (entry.getValue() instanceof TrustedCertificateEntry) {
-                        keys.add(buildCertificateInfo(keystoreServicePid, entry.getKey(),
-                                (TrustedCertificateEntry) entry.getValue(), true));
+                        keys.add(buildCertificateInfo(
+                                keystoreServicePid, entry.getKey(), (TrustedCertificateEntry) entry.getValue(), true));
                     }
                 });
             } catch (KuraException e) {
@@ -154,28 +159,30 @@ public class KeystoreRemoteService {
 
     protected List<EntryInfo> getKeysByAliasInternal(final String alias) {
         List<EntryInfo> keys = new ArrayList<>();
-        this.keystoreServices.entrySet().stream().filter(entry -> {
-            try {
-                return entry.getValue().getAliases().contains(alias);
-            } catch (KuraException e) {
-                throw new WebApplicationException(e);
-            }
-        }).forEach(entry -> {
-            try {
-                Entry keystoreEntry = entry.getValue().getEntry(alias);
-                if (keystoreEntry instanceof PrivateKeyEntry) {
-                    keys.add(buildPrivateKeyInfo(entry.getKey(), alias, (PrivateKeyEntry) keystoreEntry, true));
-                } else if (keystoreEntry instanceof TrustedCertificateEntry) {
-                    keys.add(
-                            buildCertificateInfo(entry.getKey(), alias, (TrustedCertificateEntry) keystoreEntry, true));
-                } else {
-                    throw new WebApplicationException(404);
-                }
+        this.keystoreServices.entrySet().stream()
+                .filter(entry -> {
+                    try {
+                        return entry.getValue().getAliases().contains(alias);
+                    } catch (KuraException e) {
+                        throw new WebApplicationException(e);
+                    }
+                })
+                .forEach(entry -> {
+                    try {
+                        Entry keystoreEntry = entry.getValue().getEntry(alias);
+                        if (keystoreEntry instanceof PrivateKeyEntry) {
+                            keys.add(buildPrivateKeyInfo(entry.getKey(), alias, (PrivateKeyEntry) keystoreEntry, true));
+                        } else if (keystoreEntry instanceof TrustedCertificateEntry) {
+                            keys.add(buildCertificateInfo(
+                                    entry.getKey(), alias, (TrustedCertificateEntry) keystoreEntry, true));
+                        } else {
+                            throw new WebApplicationException(404);
+                        }
 
-            } catch (KuraException e) {
-                throw new WebApplicationException(e);
-            }
-        });
+                    } catch (KuraException e) {
+                        throw new WebApplicationException(e);
+                    }
+                });
 
         return keys;
     }
@@ -205,8 +212,9 @@ public class KeystoreRemoteService {
     protected String getCSRInternal(final CsrInfo info) {
         try {
             X500Principal principal = new X500Principal(info.getAttributes());
-            return this.keystoreServices.get(info.getKeystoreServicePid()).getCSR(info.getAlias(), principal,
-                    info.getSignatureAlgorithm());
+            return this.keystoreServices
+                    .get(info.getKeystoreServicePid())
+                    .getCSR(info.getAlias(), principal, info.getSignatureAlgorithm());
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
@@ -215,8 +223,9 @@ public class KeystoreRemoteService {
     protected String getCSRInternal(final CsrReadRequest request) {
         try {
             X500Principal principal = new X500Principal(request.getAttributes());
-            return this.keystoreServices.get(request.getKeystoreServicePid()).getCSR(request.getAlias(), principal,
-                    request.getSignatureAlgorithm());
+            return this.keystoreServices
+                    .get(request.getKeystoreServicePid())
+                    .getCSR(request.getAlias(), principal, request.getSignatureAlgorithm());
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
@@ -224,8 +233,11 @@ public class KeystoreRemoteService {
 
     protected void storeTrustedCertificateEntryInternal(final CertificateInfo writeRequest) {
         try {
-            this.keystoreServices.get(writeRequest.getKeystoreServicePid()).setEntry(writeRequest.getAlias(),
-                    KeystoreUtils.createCertificateEntry(writeRequest.getCertificate()));
+            this.keystoreServices
+                    .get(writeRequest.getKeystoreServicePid())
+                    .setEntry(
+                            writeRequest.getAlias(),
+                            KeystoreUtils.createCertificateEntry(writeRequest.getCertificate()));
         } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
@@ -233,9 +245,14 @@ public class KeystoreRemoteService {
 
     protected void storeKeyPairEntryInternal(final KeyPairInfo writeRequest) {
         try {
-            this.keystoreServices.get(writeRequest.getKeystoreServicePid()).createKeyPair(writeRequest.getAlias(),
-                    writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
-                    writeRequest.getAttributes());
+            this.keystoreServices
+                    .get(writeRequest.getKeystoreServicePid())
+                    .createKeyPair(
+                            writeRequest.getAlias(),
+                            writeRequest.getAlgorithm(),
+                            writeRequest.getSize(),
+                            writeRequest.getSignatureAlgorithm(),
+                            writeRequest.getAttributes());
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
@@ -244,8 +261,8 @@ public class KeystoreRemoteService {
     protected void storePrivateKeyEntryInternal(final PrivateKeyInfo writeRequest)
             throws KuraException, IOException, GeneralSecurityException {
 
-        final KeystoreService targetKeystore = Optional
-                .ofNullable(this.keystoreServices.get(writeRequest.getKeystoreServicePid()))
+        final KeystoreService targetKeystore = Optional.ofNullable(
+                        this.keystoreServices.get(writeRequest.getKeystoreServicePid()))
                 .orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND, "KeystoreService not found"));
 
         if (writeRequest.getPrivateKey() == null) {
@@ -255,8 +272,9 @@ public class KeystoreRemoteService {
         }
     }
 
-    private void updatePrivateKeyEntryCertificateChain(final KeystoreService targetKeystore,
-            final PrivateKeyInfo writeRequest) throws KuraException, CertificateException {
+    private void updatePrivateKeyEntryCertificateChain(
+            final KeystoreService targetKeystore, final PrivateKeyInfo writeRequest)
+            throws KuraException, CertificateException {
         final Entry targetEntry = Optional.ofNullable(targetKeystore.getEntry(writeRequest.getAlias()))
                 .orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND, "Entry not found"));
 
@@ -276,7 +294,8 @@ public class KeystoreRemoteService {
 
     private void createPrivateKeyEntry(final KeystoreService targetKeystore, final PrivateKeyInfo writeRequest)
             throws IOException, GeneralSecurityException, KuraException {
-        final PrivateKeyEntry privateKeyEntry = KeystoreUtils.createPrivateKey(writeRequest.getPrivateKey(),
+        final PrivateKeyEntry privateKeyEntry = KeystoreUtils.createPrivateKey(
+                writeRequest.getPrivateKey(),
                 Arrays.stream(writeRequest.getCertificateChain()).collect(Collectors.joining("\n")));
 
         targetKeystore.setEntry(writeRequest.getAlias(), privateKeyEntry);
@@ -297,8 +316,8 @@ public class KeystoreRemoteService {
         return keystoreInfo;
     }
 
-    private CertificateInfo buildCertificateInfo(String keystoreServicePid, String alias,
-            TrustedCertificateEntry certificate, boolean withCertificate) {
+    private CertificateInfo buildCertificateInfo(
+            String keystoreServicePid, String alias, TrustedCertificateEntry certificate, boolean withCertificate) {
         CertificateInfo certificateInfo = new CertificateInfo(keystoreServicePid, alias);
         if (certificate != null && certificate.getTrustedCertificate() instanceof X509Certificate) {
             X509Certificate x509Certificate = (X509Certificate) certificate.getTrustedCertificate();
@@ -314,8 +333,8 @@ public class KeystoreRemoteService {
                 logger.error("Cannot parse certificate subject alternative names", e);
             }
             if (withCertificate) {
-                final Base64.Encoder encoder = Base64.getMimeEncoder(64,
-                        LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
+                final Base64.Encoder encoder =
+                        Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
                 StringBuilder pemCertificate = new StringBuilder();
                 pemCertificate.append(BEGIN_CERT);
                 pemCertificate.append(LINE_SEPARATOR);
@@ -332,15 +351,15 @@ public class KeystoreRemoteService {
         return certificateInfo;
     }
 
-    private PrivateKeyInfo buildPrivateKeyInfo(String keystoreServicePid, String alias, PrivateKeyEntry privateKey,
-            boolean withCertificate) {
+    private PrivateKeyInfo buildPrivateKeyInfo(
+            String keystoreServicePid, String alias, PrivateKeyEntry privateKey, boolean withCertificate) {
         PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(keystoreServicePid, alias);
         if (privateKey != null) {
             privateKeyInfo.setAlgorithm(privateKey.getPrivateKey().getAlgorithm());
             privateKeyInfo.setSize(getSize(privateKey.getCertificate().getPublicKey()));
             if (withCertificate) {
-                final Base64.Encoder encoder = Base64.getMimeEncoder(64,
-                        LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
+                final Base64.Encoder encoder =
+                        Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
                 String[] certificateChain = new String[privateKey.getCertificateChain().length];
                 for (int i = 0; i < certificateChain.length; i++) {
                     StringBuilder pemCertificate = new StringBuilder();
@@ -357,7 +376,6 @@ public class KeystoreRemoteService {
                 }
                 privateKeyInfo.setCertificateChain(certificateChain);
             }
-
         }
         return privateKeyInfo;
     }
@@ -390,8 +408,8 @@ public class KeystoreRemoteService {
         } catch (InvalidSyntaxException e) {
             logger.error("Filter setup exception ", e);
         }
-        this.keystoreServiceTracker = new ServiceTracker<>(this.bundleContext, filter,
-                this.keystoreServiceTrackerCustomizer);
+        this.keystoreServiceTracker =
+                new ServiceTracker<>(this.bundleContext, filter, this.keystoreServiceTrackerCustomizer);
         this.keystoreServiceTracker.open();
     }
 
@@ -403,16 +421,16 @@ public class KeystoreRemoteService {
         @Override
         public KeystoreService addingService(final ServiceReference<KeystoreService> reference) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            KeystoreRemoteService.this.keystoreServices.put(kuraServicePid,
-                    KeystoreRemoteService.this.bundleContext.getService(reference));
+            KeystoreRemoteService.this.keystoreServices.put(
+                    kuraServicePid, KeystoreRemoteService.this.bundleContext.getService(reference));
             return KeystoreRemoteService.this.keystoreServices.get(kuraServicePid);
         }
 
         @Override
         public void modifiedService(final ServiceReference<KeystoreService> reference, final KeystoreService service) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            KeystoreRemoteService.this.keystoreServices.put(kuraServicePid,
-                    KeystoreRemoteService.this.bundleContext.getService(reference));
+            KeystoreRemoteService.this.keystoreServices.put(
+                    kuraServicePid, KeystoreRemoteService.this.bundleContext.getService(reference));
         }
 
         @Override

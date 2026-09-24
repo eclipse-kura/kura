@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
 import org.eclipse.kura.KuraException;
@@ -166,8 +165,17 @@ public class SparkplugDeviceTest extends SparkplugIntegrationTest {
 
         whenPublish();
 
-        thenDeliveredMessageContainsKuraPositionMetrics("spBv1.0/g1/DBIRTH/n1/d1", 699.3, 200.0, 250.5, 349.0, 89.98,
-                12, 30.2, 1, this.kuraPositionDate.getTime());
+        thenDeliveredMessageContainsKuraPositionMetrics(
+                "spBv1.0/g1/DBIRTH/n1/d1",
+                699.3,
+                200.0,
+                250.5,
+                349.0,
+                89.98,
+                12,
+                30.2,
+                1,
+                this.kuraPositionDate.getTime());
     }
 
     /*
@@ -200,8 +208,16 @@ public class SparkplugDeviceTest extends SparkplugIntegrationTest {
         this.kuraBodyToPublish = body;
     }
 
-    private void givenKuraPositionToPublish(double altitude, double heading, double latitude, double longitude,
-            double precision, int satellites, double speed, int status, Date timestamp) {
+    private void givenKuraPositionToPublish(
+            double altitude,
+            double heading,
+            double latitude,
+            double longitude,
+            double precision,
+            int satellites,
+            double speed,
+            int status,
+            Date timestamp) {
         this.kuraPositionToPublish = new KuraPosition();
         this.kuraPositionToPublish.setAltitude(altitude);
         this.kuraPositionToPublish.setHeading(heading);
@@ -244,8 +260,8 @@ public class SparkplugDeviceTest extends SparkplugIntegrationTest {
      * Then
      */
 
-    private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained,
-            long expectedSeq) throws Exception {
+    private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained, long expectedSeq)
+            throws Exception {
         verifyMessageDeliveredWithMatcher(expectedTopic, (MqttMessage message) -> {
             try {
                 Payload receivedPayload = Payload.parseFrom(message.getPayload());
@@ -284,39 +300,63 @@ public class SparkplugDeviceTest extends SparkplugIntegrationTest {
         });
     }
 
-    private void thenDeliveredMessageContainsKuraPositionMetrics(String expectedTopic, double expectedAltitude, double expectedHeading, double expectedLatitude, double expectedLongitude,
-            double expectedPrecision, int expectedSatellites, double expectedSpeed, int expectedStatus,
-            long expectedTimestamp) throws Exception {
+    private void thenDeliveredMessageContainsKuraPositionMetrics(
+            String expectedTopic,
+            double expectedAltitude,
+            double expectedHeading,
+            double expectedLatitude,
+            double expectedLongitude,
+            double expectedPrecision,
+            int expectedSatellites,
+            double expectedSpeed,
+            int expectedStatus,
+            long expectedTimestamp)
+            throws Exception {
         verifyMessageDeliveredWithMatcher(expectedTopic, (MqttMessage message) -> {
             try {
                 Payload receivedPayload = Payload.parseFrom(message.getPayload());
                 List<Metric> metrics = receivedPayload.getMetricsList();
 
                 Optional<Metric> altitude = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.altitude")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.altitude"))
+                        .findFirst();
                 Optional<Metric> heading = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.heading")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.heading"))
+                        .findFirst();
                 Optional<Metric> latitude = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.latitude")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.latitude"))
+                        .findFirst();
                 Optional<Metric> longitude = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.longitude")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.longitude"))
+                        .findFirst();
                 Optional<Metric> precision = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.precision")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.precision"))
+                        .findFirst();
                 Optional<Metric> satellites = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.satellites")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.satellites"))
+                        .findFirst();
                 Optional<Metric> speed = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.speed")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.speed"))
+                        .findFirst();
                 Optional<Metric> status = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.status")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.status"))
+                        .findFirst();
                 Optional<Metric> timestamp = metrics.stream()
-                        .filter(metric -> metric.getName().equals("kura.position.timestamp")).findFirst();
+                        .filter(metric -> metric.getName().equals("kura.position.timestamp"))
+                        .findFirst();
 
-                if (!altitude.isPresent() || !heading.isPresent() || !latitude.isPresent() || !longitude.isPresent()
-                        || !precision.isPresent() || !satellites.isPresent() || !speed.isPresent()
-                        || !status.isPresent() || !timestamp.isPresent()) {
+                if (!altitude.isPresent()
+                        || !heading.isPresent()
+                        || !latitude.isPresent()
+                        || !longitude.isPresent()
+                        || !precision.isPresent()
+                        || !satellites.isPresent()
+                        || !speed.isPresent()
+                        || !status.isPresent()
+                        || !timestamp.isPresent()) {
                     return false;
                 }
-                
+
                 boolean matches = altitude.get().getDoubleValue() == expectedAltitude;
                 matches &= heading.get().getDoubleValue() == expectedHeading;
                 matches &= latitude.get().getDoubleValue() == expectedLatitude;
@@ -354,8 +394,7 @@ public class SparkplugDeviceTest extends SparkplugIntegrationTest {
 
     private void verifyMessageDeliveredWithMatcher(String expectedTopic, ArgumentMatcher<MqttMessage> matcher)
             throws Exception {
-        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).atLeastOnce()).messageArrived(eq(expectedTopic),
-                argThat(matcher));
+        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).atLeastOnce())
+                .messageArrived(eq(expectedTopic), argThat(matcher));
     }
-
 }

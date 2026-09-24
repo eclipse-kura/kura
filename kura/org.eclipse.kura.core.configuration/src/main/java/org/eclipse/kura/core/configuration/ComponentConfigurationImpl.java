@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 
@@ -29,8 +28,7 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
      * Default constructor. Does not initialize any of the fields.
      */
     // Required by JAXB
-    public ComponentConfigurationImpl() {
-    }
+    public ComponentConfigurationImpl() {}
 
     public ComponentConfigurationImpl(String pid, Tocd definition, Map<String, Object> properties) {
         super();
@@ -71,5 +69,4 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
         return "ComponentConfigurationImpl [pid=" + this.pid + ", definition=" + this.definition + ", properties="
                 + this.properties + "]";
     }
-
 }

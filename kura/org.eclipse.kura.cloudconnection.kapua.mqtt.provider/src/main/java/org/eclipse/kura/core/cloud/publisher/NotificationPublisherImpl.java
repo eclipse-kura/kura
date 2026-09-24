@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,16 +14,15 @@ package org.eclipse.kura.core.cloud.publisher;
 
 import static java.util.Objects.isNull;
 import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
+import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
 import static org.eclipse.kura.core.message.MessageConstants.PRIORITY;
 import static org.eclipse.kura.core.message.MessageConstants.QOS;
 import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
-import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
@@ -32,7 +31,6 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.core.cloud.CloudServiceImpl;
 import org.eclipse.kura.core.cloud.CloudServiceOptions;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,10 +126,17 @@ public class NotificationPublisherImpl implements CloudNotificationPublisher {
 
         sb.append(options.getTopicControlPrefix()).append(topicSeparator);
 
-        sb.append(options.getTopicAccountToken()).append(topicSeparator).append(requestorClientId)
-                .append(topicSeparator).append(appId);
+        sb.append(options.getTopicAccountToken())
+                .append(topicSeparator)
+                .append(requestorClientId)
+                .append(topicSeparator)
+                .append(appId);
 
-        sb.append(topicSeparator).append("NOTIFY").append(topicSeparator).append(deviceId).append(topicSeparator)
+        sb.append(topicSeparator)
+                .append("NOTIFY")
+                .append(topicSeparator)
+                .append(deviceId)
+                .append(topicSeparator)
                 .append(messageType);
 
         return sb.toString();
@@ -156,5 +161,4 @@ public class NotificationPublisherImpl implements CloudNotificationPublisher {
         matcher.appendTail(buffer);
         return buffer.toString();
     }
-
 }

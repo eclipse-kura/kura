@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,17 +18,18 @@ public class ServiceListeningTestConstants {
      * POST BODIES
      */
 
-    public static final String COMPLETE_POST_BODY = "{\"interfaceNames\": [ \"org.eclipse.kura.configuration.ConfigurableComponent\", \"org.eclipse.kura.security.keystore.KeystoreService\"]}";
+    public static final String COMPLETE_POST_BODY =
+            "{\"interfaceNames\": [ \"org.eclipse.kura.configuration.ConfigurableComponent\", \"org.eclipse.kura.security.keystore.KeystoreService\"]}";
     public static final String NULL_POST_BODY = "{}";
     public static final String EMPTY_POST_BODY = "{\"interfaceNames\": []}";
-    public static final String NULL_FIELD_POST_BODY = "{\"interfaceNames\": [\"org.eclipse.kura.configuration.ConfigurableComponent\",]}";
-    public static final String EMPTY_FIELD_POST_BODY = "{\"interfaceNames\": [\"org.eclipse.kura.configuration.ConfigurableComponent\",\"\"]}";
+    public static final String NULL_FIELD_POST_BODY =
+            "{\"interfaceNames\": [\"org.eclipse.kura.configuration.ConfigurableComponent\",]}";
+    public static final String EMPTY_FIELD_POST_BODY =
+            "{\"interfaceNames\": [\"org.eclipse.kura.configuration.ConfigurableComponent\",\"\"]}";
 
     /*
      * END POINTS
      */
-
-    
 
     /*
      * CORRECT RESPONSES
@@ -42,9 +43,10 @@ public class ServiceListeningTestConstants {
 
     public static final String NULL_BODY_RESPONSE = "{\"message\":\"Bad request. interfaceNames cannot be null\"}";
     public static final String EMPTY_BODY_RESPONSE = "{\"message\":\"Bad request. interfaceNames cannot be empty\"}";
-    public static final String NULL_FIELD_BODY_RESPONSE = "{\"message\":\"Bad request. interfaceNames elements cannot be null\"}";
-    public static final String EMPTY_FIELD_BODY_RESPONSE = "{\"message\":\"Bad request. interfaceNames elements cannot be empty\"}";
+    public static final String NULL_FIELD_BODY_RESPONSE =
+            "{\"message\":\"Bad request. interfaceNames elements cannot be null\"}";
+    public static final String EMPTY_FIELD_BODY_RESPONSE =
+            "{\"message\":\"Bad request. interfaceNames elements cannot be empty\"}";
 
-    private ServiceListeningTestConstants() {
-    }
+    private ServiceListeningTestConstants() {}
 }

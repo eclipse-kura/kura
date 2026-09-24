@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -14,7 +14,6 @@
 package org.eclipse.kura.net;
 
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
@@ -43,7 +42,7 @@ public interface NetworkAdminService {
      *
      * @return list of NetInterfaceConfigs on the system
      * @throws KuraException
-     * 
+     *
      * @deprecated since 2.4. Use {@link getNetworkInterfaceConfigs(boolean
      *             recompute)} instead.
      */
@@ -64,7 +63,7 @@ public interface NetworkAdminService {
      *
      * @param interfaceName
      * @return list of NetConfig for this interface.
-     * 
+     *
      * @deprecated since 2.4. Use {@link getNetworkInterfaceConfigs(String
      *             interfaceName, boolean recompute)} instead.
      */
@@ -82,14 +81,14 @@ public interface NetworkAdminService {
      *                      - required MTU for the interface, -1 to keep the
      *                      automatic default
      * @throws KuraException
-     * 
+     *
      * @deprecated Since 2.4. Use the
      *             {@link org.eclipse.kura.configuration.ConfigurationService} to
      *             update the configuration of an Ethernet interface.
      */
     @Deprecated
-    public void updateEthernetInterfaceConfig(String interfaceName, boolean autoConnect, int mtu,
-            List<NetConfig> netConfigs) throws KuraException;
+    public void updateEthernetInterfaceConfig(
+            String interfaceName, boolean autoConnect, int mtu, List<NetConfig> netConfigs) throws KuraException;
 
     /**
      * Updates the configuration of the specified WifiInterface.
@@ -99,14 +98,15 @@ public interface NetworkAdminService {
      * @param autoConnect
      *                      - specifies the auto-connect value for the interface
      * @throws KuraException
-     * 
+     *
      * @deprecated Since 2.4. Use the
      *             {@link org.eclipse.kura.configuration.ConfigurationService} to
      *             update the configuration of a Wifi interface.
      */
     @Deprecated
-    public void updateWifiInterfaceConfig(String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint,
-            List<NetConfig> netConfigs) throws KuraException;
+    public void updateWifiInterfaceConfig(
+            String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint, List<NetConfig> netConfigs)
+            throws KuraException;
 
     /**
      * Updates the configuration of the specified ModemInterface.
@@ -127,14 +127,21 @@ public interface NetworkAdminService {
      * @param netConfigs
      *                      - list of NetConfigs for this interface
      * @throws KuraException
-     * 
+     *
      * @deprecated Since 2.4. Use the
      *             {@link org.eclipse.kura.configuration.ConfigurationService} to
      *             update the configuration of a Modem interface.
      */
     @Deprecated
-    public void updateModemInterfaceConfig(String interfaceName, String serialNum, String modemId, int pppNumber,
-            boolean autoConnect, int mtu, List<NetConfig> netConfigs) throws KuraException;
+    public void updateModemInterfaceConfig(
+            String interfaceName,
+            String serialNum,
+            String modemId,
+            int pppNumber,
+            boolean autoConnect,
+            int mtu,
+            List<NetConfig> netConfigs)
+            throws KuraException;
 
     /**
      * Enables the specified interface.
@@ -199,7 +206,7 @@ public interface NetworkAdminService {
      *                              A list of FirewallOpenPortConfigIP Objects
      *                              representing the configuration to set
      * @throws KuraException
-     * 
+     *
      * @deprecated Since 2.4
      */
     @Deprecated
@@ -213,7 +220,7 @@ public interface NetworkAdminService {
      *                              A list of FirewallPortForwardConfigIP Objects
      *                              representing the configuration to set
      * @throws KuraException
-     * 
+     *
      * @deprecated Since 2.4
      */
     @Deprecated
@@ -227,7 +234,7 @@ public interface NetworkAdminService {
      *                   A list of FirewallNatConfig Objects representing the
      *                   configuration to set
      * @throws KuraException
-     * 
+     *
      * @deprecated Since 2.4
      */
     @Deprecated
@@ -298,7 +305,7 @@ public interface NetworkAdminService {
 
     /**
      * Information on Dynamic Frequencies Selection
-     * 
+     *
      * @param ifaceName
      *                  - name of WiFi interface
      * @return True if Dynamic Frequencies Selection is supported, false otherwise
@@ -308,7 +315,7 @@ public interface NetworkAdminService {
 
     /**
      * Information on WiFi 802.11ac
-     * 
+     *
      * @param ifaceName
      *                  - name of WiFi interface
      * @return True if WiFi 802.11ac is supported, false otherwise.
@@ -318,7 +325,7 @@ public interface NetworkAdminService {
 
     /**
      * Obtains the DHCP Lease values
-     * 
+     *
      * @return list of ipAddresses, macAddresses, hostnames;
      * @throws KuraException
      * @since 2.3
@@ -330,7 +337,7 @@ public interface NetworkAdminService {
     /**
      * Obtains the DHCP Lease values assigned by a DHCP server running on a given
      * network interface
-     * 
+     *
      * @param ifaceName the name of the network interface
      * @return list of ipAddresses, macAddresses, hostnames;
      * @throws KuraException
@@ -348,7 +355,7 @@ public interface NetworkAdminService {
      *                   recomputed. Otherwise, a cached value is returned
      * @return list of NetInterfaceConfigs on the system
      * @throws KuraException
-     * 
+     *
      * @since 2.4
      */
     public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs(
@@ -371,7 +378,7 @@ public interface NetworkAdminService {
      *                       if true the configuration are recomputed. Otherwise, a
      *                       cached value is returned
      * @return list of NetConfig for this interface.
-     * 
+     *
      * @since 2.4
      */
     public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName, boolean recompute) throws KuraException;

@@ -15,7 +15,6 @@ package org.eclipse.kura.core.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;

@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * KuraAuthenticationFailedException is raised when an authentication failure occurs.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @since 3.0
  */
@@ -32,5 +32,4 @@ public class KuraAuthenticationFailedException extends KuraException {
     public KuraAuthenticationFailedException(String message) {
         super(KuraErrorCode.AUTHENTICATION_FAILED, null, message);
     }
-
 }

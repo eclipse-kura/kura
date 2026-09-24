@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -43,12 +42,10 @@ public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
         this.provider = requireNonNull(provider, "Connection provider cannot be null");
     }
 
-    protected abstract Optional<Object> extractColumnValue(ResultSet resultSet, ResultSetMetaData metadata,
-            int columnIndex)
-            throws SQLException;
+    protected abstract Optional<Object> extractColumnValue(
+            ResultSet resultSet, ResultSetMetaData metadata, int columnIndex) throws SQLException;
 
-    public List<WireRecord> performQuery(final String query)
-            throws KuraStoreException {
+    public List<WireRecord> performQuery(final String query) throws KuraStoreException {
 
         try {
             return provider.withConnection(c -> {
@@ -67,11 +64,9 @@ public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
         } catch (final Exception e) {
             throw new KuraStoreException(e, null);
         }
-
     }
 
-    protected Map<String, TypedValue<?>> convertSQLRowToWireRecord(final ResultSet rset)
-            throws SQLException {
+    protected Map<String, TypedValue<?>> convertSQLRowToWireRecord(final ResultSet rset) throws SQLException {
         final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
         final ResultSetMetaData rmet = rset.getMetaData();
         for (int columnIndex = 1; columnIndex <= rmet.getColumnCount(); columnIndex++) {
@@ -93,7 +88,6 @@ public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
             } catch (final Exception e) {
                 handleConversionException(rmet, columnIndex, fieldName, dbExtractedData.get(), e);
             }
-
         }
         return wireRecordProperties;
     }
@@ -103,14 +97,21 @@ public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
         return resultSetMetaData.getColumnName(columnIndex);
     }
 
-    protected void handleConversionException(final ResultSetMetaData rmet, int columnIndex, String fieldName,
-            final Object dbExtractedData, final Exception e) throws SQLException {
+    protected void handleConversionException(
+            final ResultSetMetaData rmet,
+            int columnIndex,
+            String fieldName,
+            final Object dbExtractedData,
+            final Exception e)
+            throws SQLException {
         logger.error(
                 "Failed to convert result for column {} (SQL type {}, Java type {}) "
                         + "to any of the supported Wires data type, "
                         + "please consider using a conversion function like CAST in your query. "
                         + "The result for this column will not be included in emitted envelope",
-                fieldName, rmet.getColumnTypeName(columnIndex), dbExtractedData.getClass().getName(), e);
+                fieldName,
+                rmet.getColumnTypeName(columnIndex),
+                dbExtractedData.getClass().getName(),
+                e);
     }
-
 }

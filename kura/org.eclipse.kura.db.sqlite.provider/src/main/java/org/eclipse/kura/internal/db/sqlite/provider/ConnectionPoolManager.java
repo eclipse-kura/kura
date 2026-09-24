@@ -1,31 +1,29 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.internal.db.sqlite.provider;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteDataSource;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.HikariPoolMXBean;
 
 public class ConnectionPoolManager {
 
@@ -98,7 +96,8 @@ public class ConnectionPoolManager {
 
     private boolean waitCondition(final BooleanSupplier condition, final Optional<Long> timeoutMs) {
 
-        final long end = timeoutMs.map(t -> System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(t))
+        final long end = timeoutMs
+                .map(t -> System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(t))
                 .orElse(Long.MAX_VALUE);
 
         while (System.nanoTime() < end) {

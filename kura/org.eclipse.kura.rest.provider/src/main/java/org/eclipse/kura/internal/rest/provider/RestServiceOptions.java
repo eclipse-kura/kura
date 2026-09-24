@@ -1,16 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.internal.rest.provider;
 
 import java.util.Collections;
@@ -18,7 +17,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import org.eclipse.kura.util.configuration.Property;
 
 public class RestServiceOptions {
@@ -26,14 +24,13 @@ public class RestServiceOptions {
     private static final Property<Integer[]> ALLOWED_PORTS = new Property<>("allowed.ports", new Integer[] {});
     private static final Property<Boolean> PASSWORD_AUTH_ENABLED = new Property<>("auth.password.enabled", true);
     private static final Property<Boolean> CERTIFICATE_AUTH_ENABLED = new Property<>("auth.certificate.enabled", true);
-    private static final Property<Boolean> SESSION_MANAGEMENT_ENABLED = new Property<>("session.management.enabled",
-            true);
-    private static final Property<Integer> SESSION_INACTIVITY_INTERVAL = new Property<>("session.inactivity.interval",
-            900);
+    private static final Property<Boolean> SESSION_MANAGEMENT_ENABLED =
+            new Property<>("session.management.enabled", true);
+    private static final Property<Integer> SESSION_INACTIVITY_INTERVAL =
+            new Property<>("session.inactivity.interval", 900);
     private static final Property<Boolean> BASIC_AUTHENTICATION_ENABLED = new Property<>("auth.basic.enabled", true);
-    private static final Property<Boolean> STATELESS_CERTIFICATE_AUTHENTICATION_ENABLED = new Property<>(
-            "auth.certificate.stateless.enabled",
-            true);
+    private static final Property<Boolean> STATELESS_CERTIFICATE_AUTHENTICATION_ENABLED =
+            new Property<>("auth.certificate.stateless.enabled", true);
 
     private final Set<Integer> allowedPorts;
     private final boolean passwordAuthEnabled;
@@ -101,8 +98,14 @@ public class RestServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowedPorts, basicAuthEnabled, certificateAuthEnabled, passwordAuthEnabled,
-                sessionInactivityInterval, sessionManagementEnabled, statelessCertificateAuthEnabled);
+        return Objects.hash(
+                allowedPorts,
+                basicAuthEnabled,
+                certificateAuthEnabled,
+                passwordAuthEnabled,
+                sessionInactivityInterval,
+                sessionManagementEnabled,
+                statelessCertificateAuthEnabled);
     }
 
     @Override
@@ -114,12 +117,12 @@ public class RestServiceOptions {
             return false;
         }
         RestServiceOptions other = (RestServiceOptions) obj;
-        return Objects.equals(allowedPorts, other.allowedPorts) && basicAuthEnabled == other.basicAuthEnabled
+        return Objects.equals(allowedPorts, other.allowedPorts)
+                && basicAuthEnabled == other.basicAuthEnabled
                 && certificateAuthEnabled == other.certificateAuthEnabled
                 && passwordAuthEnabled == other.passwordAuthEnabled
                 && sessionInactivityInterval == other.sessionInactivityInterval
                 && sessionManagementEnabled == other.sessionManagementEnabled
                 && statelessCertificateAuthEnabled == other.statelessCertificateAuthEnabled;
     }
-
 }

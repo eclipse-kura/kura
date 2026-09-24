@@ -94,5 +94,4 @@ public class KeystoreChangeFilteringTest extends AbstractJwtScenario {
 
         thenATokenIsIssued();
     }
-
 }

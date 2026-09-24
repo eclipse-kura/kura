@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.crl;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import java.io.IOException;
 import java.net.URI;
 import java.security.cert.CRLException;
@@ -23,15 +26,10 @@ import java.util.Base64.Encoder;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 public class StoredCRL {
 

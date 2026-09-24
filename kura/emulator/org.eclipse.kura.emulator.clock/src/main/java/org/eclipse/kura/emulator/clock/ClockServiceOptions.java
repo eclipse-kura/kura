@@ -13,15 +13,16 @@
 package org.eclipse.kura.emulator.clock;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Icon;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.clock.ClockService", name = "ClockService", description = "Emulated implementation of the ClockService", icon = @Icon(resource = "ClockService", size = 32))
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.clock.ClockService",
+        name = "ClockService",
+        description = "Emulated implementation of the ClockService",
+        icon = @Icon(resource = "ClockService", size = 32))
 public @interface ClockServiceOptions {
 
     @AttributeDefinition(name = "enabled", description = "The emulated ClockService is always disabled.")
     boolean enabled() default false;
-
 }
-
-

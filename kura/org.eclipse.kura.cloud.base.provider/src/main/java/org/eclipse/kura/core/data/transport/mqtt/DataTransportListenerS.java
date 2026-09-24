@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.core.data.transport.mqtt;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.osgi.service.component.ComponentContext;
@@ -214,8 +213,8 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onMessageArrived(topic, payload, qos,
-                            retained);
+                    ((org.eclipse.kura.data.DataTransportListener) service)
+                            .onMessageArrived(topic, payload, qos, retained);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }

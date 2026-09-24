@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.kura.core.token.jwt.common.VerificationConfig;
 import org.junit.Test;
 
@@ -138,8 +137,8 @@ public class VerificationOptionsTest {
         this.config = VerificationConfig.defaults().withVerificationKeyAliases(verificationKeyAliases);
     }
 
-    private void givenAClockSkewOfSecondsAndRequiredValidCertificates(final int clockSkewSeconds,
-            final boolean requireValidCertificate) {
+    private void givenAClockSkewOfSecondsAndRequiredValidCertificates(
+            final int clockSkewSeconds, final boolean requireValidCertificate) {
 
         this.config = VerificationConfig.defaults() //
                 .withClockSkewSeconds(clockSkewSeconds) //
@@ -151,7 +150,8 @@ public class VerificationOptionsTest {
     }
 
     private void thenThereAreNoTrustedIssuers() {
-        assertTrue("expected no trusted issuers but got " + this.options.getTrustedIssuers(),
+        assertTrue(
+                "expected no trusted issuers but got " + this.options.getTrustedIssuers(),
                 this.options.getTrustedIssuers().isEmpty());
     }
 
@@ -176,5 +176,4 @@ public class VerificationOptionsTest {
     private void thenValidCertificatesAreNotRequired() {
         assertFalse("expected valid certificates not to be required", this.options.isRequireValidCertificate());
     }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
@@ -221,9 +220,10 @@ public class ExecutorUtil {
             }
         }
         // Sort pids in reverse order (useful when stop processes...)
-        return pids.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1,
-                        LinkedHashMap::new));
+        return pids.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, e -> new LinuxPid(e.getValue()), (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     private boolean checkLine(String line, String[] tokens) {
@@ -267,7 +267,8 @@ public class ExecutorUtil {
     private Executor configureExecutor(Command command) {
         Executor executor = getExecutor();
         int timeout = command.getTimeout();
-        ExecuteWatchdog watchdog = timeout <= 0 ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
+        ExecuteWatchdog watchdog = timeout <= 0
+                ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
                 : new ExecuteWatchdog(timeout * 1000L);
         executor.setWatchdog(watchdog);
 
@@ -332,7 +333,7 @@ public class ExecutorUtil {
         if (logger.isInfoEnabled()) {
             logger.info("Attempting to send {} to process with pid {}", ((LinuxSignal) signal).name(), pidNumber);
         }
-        return new String[] { "kill", "-" + signal.getSignalNumber(), String.valueOf(pidNumber) };
+        return new String[] {"kill", "-" + signal.getSignalNumber(), String.valueOf(pidNumber)};
     }
 
     private CommandLine buildUnprivilegedCommand(Command command) {

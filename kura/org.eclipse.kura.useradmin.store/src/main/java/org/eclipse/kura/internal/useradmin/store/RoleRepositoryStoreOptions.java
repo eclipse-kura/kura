@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.useradmin.store;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import org.eclipse.kura.util.configuration.Property;
 
 public class RoleRepositoryStoreOptions {
@@ -93,7 +92,9 @@ public class RoleRepositoryStoreOptions {
             return false;
         }
         RoleRepositoryStoreOptions other = (RoleRepositoryStoreOptions) obj;
-        return Objects.equals(groupsConfig, other.groupsConfig) && Objects.equals(rolesConfig, other.rolesConfig)
-                && Objects.equals(usersConfig, other.usersConfig) && writeDelayMs == other.writeDelayMs;
+        return Objects.equals(groupsConfig, other.groupsConfig)
+                && Objects.equals(rolesConfig, other.rolesConfig)
+                && Objects.equals(usersConfig, other.usersConfig)
+                && writeDelayMs == other.writeDelayMs;
     }
 }

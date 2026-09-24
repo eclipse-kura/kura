@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -70,7 +69,8 @@ public class DeploymentPackagesMarshallingFailureTest {
         properties.put(ARGS_KEY.value(), Collections.singletonList(RESOURCE_DEPLOYMENT_PACKAGES));
         KuraMessage request = new KuraMessage(new KuraRequestPayload(), properties);
 
-        this.response = (KuraResponsePayload) this.inventory.doGet(null, request).getPayload();
+        this.response =
+                (KuraResponsePayload) this.inventory.doGet(null, request).getPayload();
     }
 
     private void thenResponseCodeIs(int expectedCode) {

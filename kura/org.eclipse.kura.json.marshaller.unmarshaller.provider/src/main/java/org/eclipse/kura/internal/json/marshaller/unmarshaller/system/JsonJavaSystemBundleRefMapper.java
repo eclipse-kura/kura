@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,19 +12,16 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
-
 import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
 
 public class JsonJavaSystemBundleRefMapper {
 
-    private JsonJavaSystemBundleRefMapper() {
-    }
+    private JsonJavaSystemBundleRefMapper() {}
 
     private static final String NAME_KEY = "name";
     private static final String VERSION_KEY = "version";
@@ -52,5 +49,4 @@ public class JsonJavaSystemBundleRefMapper {
         return getOptionalStringValue(object, name)
                 .orElseThrow(() -> new IllegalArgumentException(name + " is required"));
     }
-
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -22,10 +22,10 @@ class H2DbServiceOptions {
     private static final Property<String> CONNECTOR_URL_PROP = new Property<>("db.connector.url", "jdbc:h2:mem:kuradb");
     private static final Property<String> USER_PROP = new Property<>("db.user", "SA");
     private static final Property<String> PASSWORD_PROP = new Property<>("db.password", "");
-    private static final Property<Integer> CHECKPOINT_INTERVAL_SECONDS_PROP = new Property<>(
-            "db.checkpoint.interval.seconds", 900);
-    private static final Property<Integer> DEFRAG_INTERVAL_MINUTES_PROP = new Property<>("db.defrag.interval.minutes",
-            20);
+    private static final Property<Integer> CHECKPOINT_INTERVAL_SECONDS_PROP =
+            new Property<>("db.checkpoint.interval.seconds", 900);
+    private static final Property<Integer> DEFRAG_INTERVAL_MINUTES_PROP =
+            new Property<>("db.defrag.interval.minutes", 20);
     private static final Property<Integer> CONNECTION_POOL_MAX_SIZE = new Property<>("db.connection.pool.max.size", 10);
 
     private static final Pattern FILE_LOG_LEVEL_PATTERN = generatePatternForProperty("trace_level_file");
@@ -72,7 +72,10 @@ class H2DbServiceOptions {
         patternStringBuilder.append(';');
         for (int i = 0; i < property.length(); i++) {
             final char c = property.charAt(i);
-            patternStringBuilder.append('[').append(Character.toLowerCase(c)).append(Character.toUpperCase(c))
+            patternStringBuilder
+                    .append('[')
+                    .append(Character.toLowerCase(c))
+                    .append(Character.toUpperCase(c))
                     .append(']');
         }
         patternStringBuilder.append("=[^;]*");
@@ -119,7 +122,8 @@ class H2DbServiceOptions {
             this.dbName = file.getName();
         }
 
-        this.isFileBasedLogLevelSpecified = FILE_LOG_LEVEL_PATTERN.matcher(this.dbUrl).find();
+        this.isFileBasedLogLevelSpecified =
+                FILE_LOG_LEVEL_PATTERN.matcher(this.dbUrl).find();
     }
 
     private void parseProtocol(String protocol) {

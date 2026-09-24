@@ -1,5 +1,5 @@
-/***************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+/*******************************************************************************
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,14 +10,12 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -36,12 +34,11 @@ public class ImageConfiguration {
     private Optional<RegistryCredentials> registryCredentials;
     private int imageDownloadTimeoutSeconds = 500;
 
-    private ImageConfiguration() {
-    }
+    private ImageConfiguration() {}
 
     /**
      * Returns an Image's name as a String.
-     * 
+     *
      * @return
      */
     public String getImageName() {
@@ -50,7 +47,7 @@ public class ImageConfiguration {
 
     /**
      * Returns an Image's tag as a String.
-     * 
+     *
      * @return
      */
     public String getImageTag() {
@@ -59,7 +56,7 @@ public class ImageConfiguration {
 
     /**
      * Returns an Image's download timeout time as a int.
-     * 
+     *
      * @return
      */
     public int getimageDownloadTimeoutSeconds() {
@@ -98,7 +95,8 @@ public class ImageConfiguration {
             return false;
         }
         ImageConfiguration other = (ImageConfiguration) obj;
-        return Objects.equals(this.imageName, other.imageName) && Objects.equals(this.imageTag, other.imageTag)
+        return Objects.equals(this.imageName, other.imageName)
+                && Objects.equals(this.imageTag, other.imageTag)
                 && Objects.equals(this.registryCredentials, other.registryCredentials);
     }
 
@@ -134,12 +132,11 @@ public class ImageConfiguration {
 
             result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
             result.imageTag = this.imageTag;
-            result.registryCredentials = requireNonNull(this.registryCredentials,
-                    "Request Registry Credentials object cannot be null.");
+            result.registryCredentials =
+                    requireNonNull(this.registryCredentials, "Request Registry Credentials object cannot be null.");
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 
             return result;
         }
-
     }
 }

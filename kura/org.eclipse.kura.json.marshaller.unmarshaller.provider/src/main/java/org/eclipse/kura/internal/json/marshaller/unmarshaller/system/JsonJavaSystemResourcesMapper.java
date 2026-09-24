@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,16 +12,14 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
-import org.eclipse.kura.system.SystemResourceInfo;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Writer;
+import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
+import org.eclipse.kura.system.SystemResourceInfo;
 
 public class JsonJavaSystemResourcesMapper {
 
@@ -61,5 +59,4 @@ public class JsonJavaSystemResourcesMapper {
         jsonObject.add(RESOURCE_TYPE, sri.getTypeString());
         return jsonObject;
     }
-
 }

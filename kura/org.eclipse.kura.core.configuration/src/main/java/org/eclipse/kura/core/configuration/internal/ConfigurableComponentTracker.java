@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * ServiceTracker to track all the ConfigurabaleComponents.
  * When the ConfigurableComponet is found it is then registered to the ConfigurationService.
  */
-
 @SuppressWarnings("rawtypes")
 public class ConfigurableComponentTracker extends ServiceTracker {
 
@@ -64,7 +63,7 @@ public class ConfigurableComponentTracker extends ServiceTracker {
     //
     // ----------------------------------------------------------------
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public void open(boolean trackAllServices) {
         s_logger.info("Opening ServiceTracker");
@@ -87,10 +86,13 @@ public class ConfigurableComponentTracker extends ServiceTracker {
                                 s_logger.info(
                                         "Adding ConfigurableComponent with pid {}, service pid {} and factory pid "
                                                 + factoryPid,
-                                        pid, servicePid);
+                                        pid,
+                                        servicePid);
                                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
                             } else if (obj instanceof SelfConfiguringComponent) {
-                                s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid,
+                                s_logger.info(
+                                        "Adding SelfConfiguringComponent with pid {} and service pid {}",
+                                        pid,
                                         servicePid);
                                 this.m_confService.registerSelfConfiguringComponent(pid, servicePid);
                             }
@@ -105,7 +107,7 @@ public class ConfigurableComponentTracker extends ServiceTracker {
         }
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public Object addingService(ServiceReference ref) {
         Object service = super.addingService(ref);
@@ -116,8 +118,10 @@ public class ConfigurableComponentTracker extends ServiceTracker {
 
         if (servicePid != null) {
             if (service instanceof ConfigurableComponent) {
-                s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid " + factoryPid,
-                        pid, servicePid);
+                s_logger.info(
+                        "Adding ConfigurableComponent with pid {}, service pid {} and factory pid " + factoryPid,
+                        pid,
+                        servicePid);
                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
             } else if (service instanceof SelfConfiguringComponent) {
                 s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
@@ -128,7 +132,7 @@ public class ConfigurableComponentTracker extends ServiceTracker {
         return service;
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public void removedService(ServiceReference reference, Object service) {
         super.removedService(reference, service);

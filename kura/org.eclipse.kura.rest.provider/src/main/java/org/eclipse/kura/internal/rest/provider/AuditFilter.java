@@ -1,29 +1,26 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.internal.rest.provider;
-
-import java.io.IOException;
-
-import org.eclipse.kura.audit.AuditContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.Context;
+import java.io.IOException;
+import org.eclipse.kura.audit.AuditContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AuditFilter implements ContainerResponseFilter {
 
@@ -50,11 +47,10 @@ public class AuditFilter implements ContainerResponseFilter {
                         || requestContext.getSecurityContext().getUserPrincipal() == null) {
                     responseContext.setStatus(401);
                 } else {
-                    auditLogger.warn("{} Rest - Failure - User not authorized to perform the requested operation",
-                            auditContext);
+                    auditLogger.warn(
+                            "{} Rest - Failure - User not authorized to perform the requested operation", auditContext);
                     return;
                 }
-
             }
 
             if (responseContext.getStatus() == 401) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.security.tamper.detection;
 
 import java.util.Collections;
 import java.util.Map;
-
 import org.eclipse.kura.type.TypedValue;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -62,5 +61,4 @@ public class TamperStatus {
     public Map<String, TypedValue<?>> getProperties() {
         return this.properties;
     }
-
 }

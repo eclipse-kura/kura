@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -15,7 +15,6 @@ package org.eclipse.kura.certificate;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
@@ -133,59 +132,58 @@ public interface CertificatesService {
 
     /**
      * Return the list of the installed {@KuraCertificate}
-     * 
+     *
      * @return a list of {@KuraCertificate}
      * @throws KuraException
-     * 
+     *
      * @since 2.2
      */
     public List<KuraCertificateEntry> getCertificates() throws KuraException;
 
     /**
      * Return the {@KuraCertificate} identified by its id
-     * 
+     *
      * @param id
      *            the id of the certificate
      * @return the {@KuraCertificate}
      * @throws KuraException
-     * 
+     *
      * @since 2.2
      */
     public KuraCertificateEntry getCertificateEntry(String id) throws KuraException;
 
     /**
      * Update the {@KuraCertificate} in a keystore
-     * 
+     *
      * @param id
      *            the id of the certificate
      * @param certificate
      *            the new certificate
      * @throws KuraException
-     * 
+     *
      * @since 2.2
      */
     public void updateCertificate(KuraCertificateEntry certificate) throws KuraException;
 
     /**
      * Add a {@KuraCertificate} in a keystore
-     * 
+     *
      * @param certificate
      *            the new certificate
      * @throws KuraException
-     * 
+     *
      * @since 2.2
      */
     public void addCertificate(KuraCertificateEntry certificate) throws KuraException;
 
     /**
      * Delete the certificate identified by its id
-     * 
+     *
      * @param id
      *            the id of the certificate
      * @throws KuraException
-     * 
+     *
      * @since 2.2
      */
     public void deleteCertificate(String id) throws KuraException;
-
 }

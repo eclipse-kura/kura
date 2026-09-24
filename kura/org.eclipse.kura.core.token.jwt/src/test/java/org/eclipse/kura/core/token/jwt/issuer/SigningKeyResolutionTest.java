@@ -92,5 +92,4 @@ public class SigningKeyResolutionTest extends AbstractJwtScenario {
         givenTheIssuerIsBoundToTheKeystore();
         givenTheIssuerIsActivatedWith(IssuingConfig.defaults().withSigningKeyAlias(alias));
     }
-
 }

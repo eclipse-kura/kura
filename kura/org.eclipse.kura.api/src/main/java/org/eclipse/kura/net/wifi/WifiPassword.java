@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -88,10 +88,11 @@ public class WifiPassword extends Password {
                 }
             } else if (!(passKey.length() == 5 || passKey.length() == 13 || passKey.length() == 16)) {
                 // not 5, 13, or 16 ASCII characters
-                throw KuraException
-                        .internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+                throw KuraException.internalError(
+                        "the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
             }
-        } else if (wifiSecurity == WifiSecurity.SECURITY_WPA || wifiSecurity == WifiSecurity.SECURITY_WPA2
+        } else if (wifiSecurity == WifiSecurity.SECURITY_WPA
+                || wifiSecurity == WifiSecurity.SECURITY_WPA2
                 || wifiSecurity == WifiSecurity.SECURITY_WPA_WPA2) {
             if (passKey.length() < 8 || passKey.length() > 63) {
                 throw KuraException.internalError(

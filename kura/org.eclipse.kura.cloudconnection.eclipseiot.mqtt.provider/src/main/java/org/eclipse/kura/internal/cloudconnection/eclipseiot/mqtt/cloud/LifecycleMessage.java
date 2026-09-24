@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,7 +16,7 @@ import org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.Message
 import org.eclipse.kura.message.KuraPayload;
 
 public class LifecycleMessage {
-    
+
     private StringBuilder topicBuilder;
     private CloudConnectionManagerOptions options;
     private LifeCyclePayloadBuilder payloadBuilder;
@@ -26,9 +26,11 @@ public class LifecycleMessage {
         this.options = options;
 
         this.topicBuilder = new StringBuilder(MessageType.EVENT.getTopicPrefix());
-        this.topicBuilder.append(this.options.getTopicSeparator()).append(this.options.getTopicSeparator())
+        this.topicBuilder
+                .append(this.options.getTopicSeparator())
+                .append(this.options.getTopicSeparator())
                 .append(this.options.getTopicSeparator());
-        
+
         this.payloadBuilder = new LifeCyclePayloadBuilder(cloudServiceImpl);
     }
 
@@ -51,5 +53,4 @@ public class LifecycleMessage {
     public KuraPayload getPayload() {
         return this.payload;
     }
-
 }

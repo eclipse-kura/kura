@@ -26,10 +26,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
@@ -38,25 +36,28 @@ import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.util.measurement.Measurement;
-import org.osgi.util.measurement.Unit;
-import org.osgi.util.position.Position;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.util.measurement.Measurement;
+import org.osgi.util.measurement.Unit;
+import org.osgi.util.position.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.position.PositionService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.position.PositionService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.position.PositionService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+            org.eclipse.kura.position.PositionService.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class
+        })
 @Designate(ocd = PositionServiceOptions.class)
 public class PositionServiceImpl implements PositionService, ConfigurableComponent {
 
@@ -228,10 +229,10 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
             this.index = 0;
         }
 
-        Measurement latitude = new Measurement(java.lang.Math.toRadians(this.gpsPoints[this.index].getLatitude()),
-                Unit.rad);
-        Measurement longitude = new Measurement(java.lang.Math.toRadians(this.gpsPoints[this.index].getLongitude()),
-                Unit.rad);
+        Measurement latitude =
+                new Measurement(java.lang.Math.toRadians(this.gpsPoints[this.index].getLatitude()), Unit.rad);
+        Measurement longitude =
+                new Measurement(java.lang.Math.toRadians(this.gpsPoints[this.index].getLongitude()), Unit.rad);
         Measurement altitude = new Measurement(this.gpsPoints[this.index].getAltitude(), Unit.m);
 
         logger.debug("Updating latitude: {}", latitude);
@@ -241,8 +242,12 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
         // Measurement lat, Measurement lon, Measurement alt, Measurement speed, Measurement track
         this.currentTime = new Date();
         this.currentPosition = new Position(latitude, longitude, altitude, null, null);
-        this.currentNmeaPosition = new NmeaPosition(this.gpsPoints[this.index].getLatitude(),
-                this.gpsPoints[this.index].getLongitude(), this.gpsPoints[this.index].getAltitude(), 0, 0);
+        this.currentNmeaPosition = new NmeaPosition(
+                this.gpsPoints[this.index].getLatitude(),
+                this.gpsPoints[this.index].getLongitude(),
+                this.gpsPoints[this.index].getAltitude(),
+                0,
+                0);
 
         this.index++;
     }

@@ -40,7 +40,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -135,11 +134,11 @@ public class CertificateUtilTest {
         assertTrue(this.certificateChain.length > 0);
     }
 
-    private void whenCertificateChainIsGeneratedWith(String signatureAlgorithm, String attributes, Date startDate,
-            Date endDate) {
+    private void whenCertificateChainIsGeneratedWith(
+            String signatureAlgorithm, String attributes, Date startDate, Date endDate) {
         try {
-            this.certificateChain = CertificateUtil.generateCertificateChain(this.keyPair, signatureAlgorithm,
-                    attributes, startDate, endDate);
+            this.certificateChain = CertificateUtil.generateCertificateChain(
+                    this.keyPair, signatureAlgorithm, attributes, startDate, endDate);
         } catch (OperatorCreationException | CertificateException e) {
             e.printStackTrace();
             fail();
@@ -169,7 +168,6 @@ public class CertificateUtilTest {
             e.printStackTrace();
             fail();
         }
-
     }
 
     private void thenPemStringIsNotEmpty() {
@@ -188,14 +186,13 @@ public class CertificateUtilTest {
     private void givenCertificateInX509Format(String certFilePath) {
         try (InputStream is = new FileInputStream(certFilePath);
                 Reader r = new StringReader(IOUtils.toString(is, StandardCharsets.UTF_8));
-                PEMParser pemParser = new PEMParser(r);) {
+                PEMParser pemParser = new PEMParser(r); ) {
             this.pemObject = pemParser.readObject();
             this.x509Certificate = CertificateUtil.toJavaX509Certificate(this.pemObject);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
-
     }
 
     private void thenStoreContainsCert() {
@@ -209,7 +206,6 @@ public class CertificateUtilTest {
             e.printStackTrace();
             fail();
         }
-
     }
 
     private void thenTrusAnchorSetSizeIs(int size) {
@@ -265,7 +261,7 @@ public class CertificateUtilTest {
 
         try (InputStream is = new FileInputStream(filepath);
                 Reader r = new StringReader(IOUtils.toString(is, StandardCharsets.UTF_8));
-                PEMParser pemParser = new PEMParser(r);) {
+                PEMParser pemParser = new PEMParser(r); ) {
             this.pemObject = pemParser.readObject();
         } catch (IOException e) {
             e.printStackTrace();

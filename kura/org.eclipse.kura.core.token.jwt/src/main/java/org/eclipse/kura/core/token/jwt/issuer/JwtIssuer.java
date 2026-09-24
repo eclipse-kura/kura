@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.core.token.jwt.issuer;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator.Builder;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import java.security.interfaces.RSAPrivateKey;
 import java.time.Duration;
 import java.time.Instant;
@@ -22,15 +26,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.security.token.TokenIssueRequest;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTCreator.Builder;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 
 final class JwtIssuer {
 
@@ -96,7 +94,8 @@ final class JwtIssuer {
             final String name = claim.getKey();
 
             if (RESERVED_CLAIMS.contains(name)) {
-                throw new KuraException(KuraErrorCode.BAD_REQUEST,
+                throw new KuraException(
+                        KuraErrorCode.BAD_REQUEST,
                         "Claim '" + name + "' is reserved and cannot be set through the request");
             }
 
@@ -111,17 +110,19 @@ final class JwtIssuer {
 
     private static void applyClaim(final Builder builder, final String name, final Object value) throws KuraException {
         switch (value) {
-        case null -> builder.withNullClaim(name);
-        case String s -> builder.withClaim(name, s);
-        case Boolean b -> builder.withClaim(name, b);
-        case Integer i -> builder.withClaim(name, i);
-        case Long l -> builder.withClaim(name, l);
-        case Double d -> builder.withClaim(name, d);
-        case Instant i -> builder.withClaim(name, i);
-        case List<?> list -> builder.withClaim(name, list);
-        case Map<?, ?> map -> builder.withClaim(name, asStringKeyedMap(map));
-        default -> throw new KuraException(KuraErrorCode.BAD_REQUEST,
-                "Unsupported value type " + value.getClass().getName() + " for claim '" + name + "'");
+            case null -> builder.withNullClaim(name);
+            case String s -> builder.withClaim(name, s);
+            case Boolean b -> builder.withClaim(name, b);
+            case Integer i -> builder.withClaim(name, i);
+            case Long l -> builder.withClaim(name, l);
+            case Double d -> builder.withClaim(name, d);
+            case Instant i -> builder.withClaim(name, i);
+            case List<?> list -> builder.withClaim(name, list);
+            case Map<?, ?> map -> builder.withClaim(name, asStringKeyedMap(map));
+            default ->
+                throw new KuraException(
+                        KuraErrorCode.BAD_REQUEST,
+                        "Unsupported value type " + value.getClass().getName() + " for claim '" + name + "'");
         }
     }
 
@@ -138,5 +139,4 @@ final class JwtIssuer {
 
         return result;
     }
-
 }

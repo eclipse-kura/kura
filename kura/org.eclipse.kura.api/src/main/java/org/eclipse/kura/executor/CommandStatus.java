@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.executor;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.apache.commons.io.output.NullOutputStream;
 
 /**
@@ -32,7 +31,7 @@ import org.apache.commons.io.output.NullOutputStream;
  * <li>errorStream : the error stream of the command</li>
  * <li>inputStream : the input stream used to send data to the process</li>
  * </ul>
- * 
+ *
  * @since 2.2
  *
  */
@@ -100,5 +99,4 @@ public class CommandStatus {
     public void setTimedout(boolean isTimedout) {
         this.isTimedout = isTimedout;
     }
-
 }

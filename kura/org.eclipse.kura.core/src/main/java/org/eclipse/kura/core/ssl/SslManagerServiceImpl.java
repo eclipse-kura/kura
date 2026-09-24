@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -57,7 +56,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -85,13 +83,15 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "org.eclipse.kura.ssl.SslManagerService", //
+@Component(
+        name = "org.eclipse.kura.ssl.SslManagerService", //
         configurationPolicy = ConfigurationPolicy.REQUIRE, //
         immediate = true, //
         property = { //
-                "kura.ui.factory.hide=true", //
-                "kura.ui.service.hide=true", //
-                EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC })
+            "kura.ui.factory.hide=true", //
+            "kura.ui.service.hide=true", //
+            EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC
+        })
 @Designate(ocd = SslManagerServiceOCD.class, factory = true)
 public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler {
 
@@ -184,8 +184,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.options = new SslManagerServiceOptions(properties);
         this.sslContexts = new ConcurrentHashMap<>();
 
-        ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<>(
-                componentContext.getBundleContext(), SslServiceListener.class, null);
+        ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker =
+                new ServiceTracker<>(componentContext.getBundleContext(), SslServiceListener.class, null);
 
         // Deferred open of tracker to prevent
         // java.lang.Exception: Recursive invocation of
@@ -231,14 +231,32 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return getSSLContext(protocol, ciphers, null, null, null, keyAlias, hostnameVerifcation);
     }
 
-    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
-            char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException {
-        return getSSLContext(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias,
+    private SSLContext getSSLContext(
+            String protocol,
+            String ciphers,
+            String trustStore,
+            String keyStore,
+            char[] keyStorePassword,
+            String keyAlias)
+            throws GeneralSecurityException, IOException {
+        return getSSLContext(
+                protocol,
+                ciphers,
+                trustStore,
+                keyStore,
+                keyStorePassword,
+                keyAlias,
                 this.options.isSslHostnameVerification());
     }
 
-    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
-            char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
+    private SSLContext getSSLContext(
+            String protocol,
+            String ciphers,
+            String trustStore,
+            String keyStore,
+            char[] keyStorePassword,
+            String keyAlias,
+            boolean hostnameVerification)
             throws GeneralSecurityException, IOException {
         ConnectionSslOptions connSslOpts = new ConnectionSslOptions(this.options);
         connSslOpts.setProtocol(protocol);
@@ -263,14 +281,27 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     @Override
-    public SSLSocketFactory getSSLSocketFactory(String protocol, String ciphers, String trustStore, String keyStore,
-            char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException {
-        return getSSLContext(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias).getSocketFactory();
+    public SSLSocketFactory getSSLSocketFactory(
+            String protocol,
+            String ciphers,
+            String trustStore,
+            String keyStore,
+            char[] keyStorePassword,
+            String keyAlias)
+            throws GeneralSecurityException, IOException {
+        return getSSLContext(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias)
+                .getSocketFactory();
     }
 
     @Override
-    public SSLSocketFactory getSSLSocketFactory(String protocol, String ciphers, String trustStore, String keyStore,
-            char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
+    public SSLSocketFactory getSSLSocketFactory(
+            String protocol,
+            String ciphers,
+            String trustStore,
+            String keyStore,
+            char[] keyStorePassword,
+            String keyAlias,
+            boolean hostnameVerification)
             throws GeneralSecurityException, IOException {
         return getSSLContext(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias, hostnameVerification)
                 .getSocketFactory();
@@ -335,7 +366,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 
-        try (InputStream tsReadStream = new FileInputStream(keyStore);) {
+        try (InputStream tsReadStream = new FileInputStream(keyStore); ) {
             ks.load(tsReadStream, keyStorePassword);
         }
 
@@ -369,16 +400,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                 kms = getKeyManagers(options.getKeyStore(), options.getKeyStorePassword(), options.getAlias());
             }
 
-            context = createSSLContext(options.getProtocol(), options.getCiphers(), kms, tms,
-                    options.getHostnameVerification());
+            context = createSSLContext(
+                    options.getProtocol(), options.getCiphers(), kms, tms, options.getHostnameVerification());
             this.sslContexts.put(options, context);
         }
 
         return context;
     }
 
-    private static SSLContext createSSLContext(String protocol, String ciphers, KeyManager[] kms, TrustManager[] tms,
-            boolean hostnameVerification) throws NoSuchAlgorithmException, KeyManagementException {
+    private static SSLContext createSSLContext(
+            String protocol, String ciphers, KeyManager[] kms, TrustManager[] tms, boolean hostnameVerification)
+            throws NoSuchAlgorithmException, KeyManagementException {
         // inits the SSL context
         SSLContext sslCtx;
         if (protocol == null || protocol.isEmpty()) {
@@ -390,13 +422,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         // get the SSLSocketFactory
         final SSLSocketFactory sslSocketFactory = sslCtx.getSocketFactory();
-        final SSLSocketFactoryWrapper socketFactoryWrapper = new SSLSocketFactoryWrapper(sslSocketFactory, ciphers,
-                hostnameVerification);
+        final SSLSocketFactoryWrapper socketFactoryWrapper =
+                new SSLSocketFactoryWrapper(sslSocketFactory, ciphers, hostnameVerification);
 
         // wrap it
-        return new SSLContext(new SSLContextSPIWrapper(sslCtx, socketFactoryWrapper), sslCtx.getProvider(),
-                sslCtx.getProtocol()) {
-        };
+        return new SSLContext(
+                new SSLContextSPIWrapper(sslCtx, socketFactoryWrapper), sslCtx.getProvider(), sslCtx.getProtocol()) {};
     }
 
     private TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
@@ -469,8 +500,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         final RevocationCheckMode revocationCheckMode = options.getRevocationCheckMode();
 
         if (revocationCheckMode == RevocationCheckMode.CRL_ONLY) {
-            checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS,
-                    PKIXRevocationChecker.Option.NO_FALLBACK);
+            checkerOptions =
+                    EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS, PKIXRevocationChecker.Option.NO_FALLBACK);
         } else if (revocationCheckMode == RevocationCheckMode.PREFER_CRL) {
             checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS);
         } else {
@@ -498,7 +529,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR); // TO DO:review
         }
         try {
-            return this.keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm())
+            return this.keystoreService
+                    .getKeyManagers(KeyManagerFactory.getDefaultAlgorithm())
                     .toArray(new KeyManager[0]);
             // TO DO: it was possible to load a keystore based on Alias. Now it is not possible.
         } catch (KuraException e) {
@@ -508,7 +540,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private KeyManager[] getKeyManagers(String keyStore, char[] keyStorePassword, String keyAlias)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
-            UnrecoverableEntryException {
+                    UnrecoverableEntryException {
         KeyStore ks = getKeyStore(keyStore, keyStorePassword, keyAlias);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -516,7 +548,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         final List<KeyManager> matching = Arrays.stream(kmf.getKeyManagers())
                 .filter(m -> m instanceof X509KeyManager && ((X509KeyManager) m).getCertificateChain(keyAlias) != null)
-                .map(k -> new SingleAliasX509KeyManager(keyAlias, (X509KeyManager) k)).collect(Collectors.toList());
+                .map(k -> new SingleAliasX509KeyManager(keyAlias, (X509KeyManager) k))
+                .collect(Collectors.toList());
 
         return matching.toArray(new KeyManager[matching.size()]);
     }
@@ -531,7 +564,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             throw new KeyStoreException("The referenced keystore does not exist or is not accessible");
         }
 
-        try (InputStream ksReadStream = new FileInputStream(keyStore);) {
+        try (InputStream ksReadStream = new FileInputStream(keyStore); ) {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(ksReadStream, keyStorePassword);
 
@@ -565,7 +598,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         @Override
         public String[] getClientAliases(String keyType, Principal[] issuers) {
-            return new String[] { this.alias };
+            return new String[] {this.alias};
         }
 
         @Override
@@ -575,7 +608,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         @Override
         public String[] getServerAliases(String keyType, Principal[] issuers) {
-            return new String[] { this.alias };
+            return new String[] {this.alias};
         }
 
         @Override
@@ -621,5 +654,4 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             this.sslContexts.clear();
         }
     }
-
 }

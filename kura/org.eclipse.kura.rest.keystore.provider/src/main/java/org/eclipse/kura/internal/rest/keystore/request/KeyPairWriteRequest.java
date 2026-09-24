@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,8 +35,9 @@ public class KeyPairWriteRequest extends KeyPairInfo implements Validable {
         if (getKeystoreServicePid() == null || getAlias() == null) {
             return false;
         }
-        return !(getAlgorithm() == null || getSize() == 0 || getSignatureAlgorithm() == null
+        return !(getAlgorithm() == null
+                || getSize() == 0
+                || getSignatureAlgorithm() == null
                 || getAttributes() == null);
     }
-
 }

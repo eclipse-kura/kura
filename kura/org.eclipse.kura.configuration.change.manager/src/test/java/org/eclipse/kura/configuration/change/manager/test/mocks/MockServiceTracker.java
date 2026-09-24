@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.configuration.change.manager.test.mocks;
 
 import org.eclipse.kura.configuration.change.manager.ServiceTrackerListener;
@@ -26,5 +25,4 @@ public class MockServiceTracker {
     public void simulateConfigChange(String changedPid) {
         listener.onConfigurationChanged(changedPid);
     }
-
 }

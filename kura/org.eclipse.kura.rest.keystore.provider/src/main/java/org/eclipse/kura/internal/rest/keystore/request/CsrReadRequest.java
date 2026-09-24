@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,8 +35,9 @@ public class CsrReadRequest extends CsrInfo implements Validable {
 
     @Override
     public boolean isValid() {
-        return this.getKeystoreServicePid() != null && this.getAlias() != null && this.getSignatureAlgorithm() != null
+        return this.getKeystoreServicePid() != null
+                && this.getAlias() != null
+                && this.getSignatureAlgorithm() != null
                 && this.getAttributes() != null;
     }
-
 }

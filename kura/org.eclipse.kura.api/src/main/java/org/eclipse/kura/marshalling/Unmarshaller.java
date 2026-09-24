@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.marshalling;
 
 import java.io.InputStream;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -41,7 +40,7 @@ public interface Unmarshaller {
 
     /**
      * Deserialises an object of the specified type from the provided {@link InputStream}
-     * 
+     *
      * @param in
      *            the input stream
      * @param clazz

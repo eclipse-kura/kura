@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -49,12 +48,14 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, //
+@Component(
+        immediate = true, //
         name = "org.eclipse.kura.core.token.jwt.verifier.JwtVerificationService", //
         configurationPolicy = ConfigurationPolicy.REQUIRE, //
         property = { //
-                "kura.service.pid=org.eclipse.kura.core.token.jwt.verifier.JwtVerificationService", //
-                EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC })
+            "kura.service.pid=org.eclipse.kura.core.token.jwt.verifier.JwtVerificationService", //
+            EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC
+        })
 @Designate(ocd = JwtVerificationServiceOCD.class)
 public class JwtVerificationService implements TokenVerificationService, ConfigurableComponent, EventHandler {
 
@@ -66,8 +67,8 @@ public class JwtVerificationService implements TokenVerificationService, Configu
     private final AtomicReference<JwtVerifier> verifier = new AtomicReference<>();
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
-    public synchronized void setKeystoreService(final KeystoreService keystoreService,
-            final Map<String, Object> properties) {
+    public synchronized void setKeystoreService(
+            final KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreTracker.bind(keystoreService, properties);
         rebuildVerifier();
     }
@@ -111,8 +112,8 @@ public class JwtVerificationService implements TokenVerificationService, Configu
         final JwtVerifier currentVerifier = this.verifier.get();
 
         if (currentVerifier == null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "JwtVerificationService misconfigured or not yet ready");
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ERROR, "JwtVerificationService misconfigured or not yet ready");
         }
 
         return currentVerifier.verify(request.getToken(), request.getIntendedConsumer());
@@ -129,8 +130,8 @@ public class JwtVerificationService implements TokenVerificationService, Configu
             return;
         }
 
-        final Map<String, X509Certificate> certificates = loadVerificationCertificates(keystore.get(),
-                options.get().getVerificationKeyAliases());
+        final Map<String, X509Certificate> certificates =
+                loadVerificationCertificates(keystore.get(), options.get().getVerificationKeyAliases());
 
         if (certificates.isEmpty()) {
             logger.warn("No usable certificate found in the configured key store, token verification is not available");
@@ -143,13 +144,14 @@ public class JwtVerificationService implements TokenVerificationService, Configu
         logger.info("JWT verification service state rebuilt, {} trusted certificate(s) loaded", certificates.size());
     }
 
-    private static Map<String, X509Certificate> loadVerificationCertificates(final KeystoreService keystoreService,
-            final Set<String> aliases) {
+    private static Map<String, X509Certificate> loadVerificationCertificates(
+            final KeystoreService keystoreService, final Set<String> aliases) {
 
         final Map<String, X509Certificate> result = new LinkedHashMap<>();
 
         try {
-            for (final Map.Entry<String, Entry> storeEntry : keystoreService.getEntries().entrySet()) {
+            for (final Map.Entry<String, Entry> storeEntry :
+                    keystoreService.getEntries().entrySet()) {
                 final String alias = storeEntry.getKey();
 
                 if (!aliases.isEmpty() && !aliases.contains(alias)) {
@@ -186,5 +188,4 @@ public class JwtVerificationService implements TokenVerificationService, Configu
     private static Optional<X509Certificate> asX509Certificate(final Certificate certificate) {
         return certificate instanceof X509Certificate x509Certificate ? Optional.of(x509Certificate) : Optional.empty();
     }
-
 }

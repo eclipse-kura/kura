@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-
 import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DEROctetString;
@@ -44,8 +43,7 @@ public class CRLUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(CRLUtil.class);
 
-    private CRLUtil() {
-    }
+    private CRLUtil() {}
 
     public static Set<URI> getCrlURIs(final X509Certificate cert) throws IOException {
         final byte[] crlDistributionPoints = cert.getExtensionValue(Extension.cRLDistributionPoints.getId());
@@ -57,8 +55,8 @@ public class CRLUtil {
         try (final ASN1InputStream in0 = new ASN1InputStream(crlDistributionPoints);
                 final ASN1InputStream in = new ASN1InputStream(((DEROctetString) in0.readObject()).getOctets())) {
 
-            final DistributionPoint[] distributionPoints = CRLDistPoint.getInstance(in.readObject())
-                    .getDistributionPoints();
+            final DistributionPoint[] distributionPoints =
+                    CRLDistPoint.getInstance(in.readObject()).getDistributionPoints();
 
             if (distributionPoints == null) {
                 return Collections.emptySet();
@@ -76,11 +74,13 @@ public class CRLUtil {
                     continue;
                 }
 
-                final GeneralName[] generalNames = GeneralNames.getInstance(distributionPointName.getName()).getNames();
+                final GeneralName[] generalNames = GeneralNames.getInstance(distributionPointName.getName())
+                        .getNames();
 
                 for (final GeneralName name : generalNames) {
                     if (name.getTagNo() == GeneralName.uniformResourceIdentifier) {
-                        final String uriString = ASN1IA5String.getInstance(name.getName()).getString();
+                        final String uriString =
+                                ASN1IA5String.getInstance(name.getName()).getString();
                         parseURI(uriString).ifPresent(result::add);
                     }
                 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.internal.rest.service.listing.provider.dto;
 
 import java.util.List;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.internal.rest.service.listing.provider.util.FilterBuilder;
@@ -67,7 +66,8 @@ public class FilterDTO {
         }
 
         if (count != 1) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST,
+            throw new KuraException(
+                    KuraErrorCode.BAD_REQUEST,
                     "Exactly one among the \"name\", \"and\", \"or\" and \"not\" properties must be specified");
         }
     }
@@ -85,5 +85,4 @@ public class FilterDTO {
 
         return filterBuilder;
     }
-
 }

@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.rest.keystore.request.handler;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
@@ -23,15 +22,17 @@ import org.eclipse.kura.core.keystore.util.PrivateKeyInfo;
 import org.eclipse.kura.internal.rest.keystore.request.PrivateKeyWriteRequest;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.osgi.service.component.annotations.Component;
 @Component(
-    name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV2",
-    immediate = true,
-    service = {},
-    property = { "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV2" })
+        name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV2",
+        immediate = true,
+        service = {},
+        property = {
+            "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV2"
+        })
 public class KeystoreServiceRequestHandlerV2 extends KeystoreServiceRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRequestHandlerV2.class);
@@ -64,7 +65,5 @@ public class KeystoreServiceRequestHandlerV2 extends KeystoreServiceRequestHandl
             return new KuraMessage(new KuraResponsePayload(500));
         }
         return new KuraMessage(new KuraResponsePayload(200));
-
     }
-
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -24,10 +24,17 @@ public class UsbTtyDevice extends AbstractUsbDevice {
 
     /** The device node of the TTY device **/
     private final String deviceNode;
+
     private final Integer interfaceNumber;
 
-    public UsbTtyDevice(String vendorId, String productId, String manufacturerName, String productName,
-            String usbBusNumber, String usbDevicePath, String deviceNode) {
+    public UsbTtyDevice(
+            String vendorId,
+            String productId,
+            String manufacturerName,
+            String productName,
+            String usbBusNumber,
+            String usbDevicePath,
+            String deviceNode) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
         this.deviceNode = deviceNode;
         this.interfaceNumber = null;
@@ -37,8 +44,15 @@ public class UsbTtyDevice extends AbstractUsbDevice {
      * @since 1.4
      */
     @SuppressWarnings("checkstyle:parameterNumber")
-    public UsbTtyDevice(String vendorId, String productId, String manufacturerName, String productName,
-            String usbBusNumber, String usbDevicePath, String deviceNode, Integer interfaceNumber) {
+    public UsbTtyDevice(
+            String vendorId,
+            String productId,
+            String manufacturerName,
+            String productName,
+            String usbBusNumber,
+            String usbDevicePath,
+            String deviceNode,
+            Integer interfaceNumber) {
         super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
         this.deviceNode = deviceNode;
         this.interfaceNumber = interfaceNumber;

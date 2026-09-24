@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -40,8 +38,7 @@ public class ContainerInstanceDescriptor {
     private ContainerState containerState = ContainerState.STOPPING;
     private boolean isFrameworkManaged;
 
-    private ContainerInstanceDescriptor() {
-    }
+    private ContainerInstanceDescriptor() {}
 
     /**
      * Returns the container status as {@link ContainerState}
@@ -140,8 +137,14 @@ public class ContainerInstanceDescriptor {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerID, this.containerImage, this.containerImageTag, this.containerName,
-                this.containerPorts, this.containerState, this.isFrameworkManaged);
+        return Objects.hash(
+                this.containerID,
+                this.containerImage,
+                this.containerImageTag,
+                this.containerName,
+                this.containerPorts,
+                this.containerState,
+                this.isFrameworkManaged);
     }
 
     @Override
@@ -158,7 +161,8 @@ public class ContainerInstanceDescriptor {
                 && Objects.equals(this.containerImageTag, other.containerImageTag)
                 && Objects.equals(this.containerName, other.containerName)
                 && Objects.equals(this.containerPorts, other.containerPorts)
-                && this.containerState == other.containerState && this.isFrameworkManaged == other.isFrameworkManaged;
+                && this.containerState == other.containerState
+                && this.isFrameworkManaged == other.isFrameworkManaged;
     }
 
     /**
@@ -283,7 +287,5 @@ public class ContainerInstanceDescriptor {
 
             return containerDescriptor;
         }
-
     }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.net.status.wifi;
 
 /**
  * Flags describing the capabilities of an Access Point.
- * 
+ *
  * @since 2.8
  */
 public enum WifiFlag {
@@ -28,5 +28,4 @@ public enum WifiFlag {
     WPS_PBC,
     /** Supports PIN based WPS */
     WPS_PIN;
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,11 +18,9 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -48,7 +46,7 @@ public interface CryptoService {
     /**
      * Returns an OutputStream that encrypts provided data using AES in the same way as the encryptAes(char[]) method,
      * and then writes it to the supplied OutputStream lazily. *
-     * 
+     *
      * @param streamToEncrypt
      *            The OutputStream on which the encrypted data will be written.
      * @return The OutputStream able to encrypt data.
@@ -93,8 +91,9 @@ public interface CryptoService {
      * @deprecated Use {@link #encryptAes(char[]) instead
      */
     @Deprecated
-    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            IllegalBlockSizeException, BadPaddingException;
+    public String encryptAes(String value)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
+                    BadPaddingException;
 
     /**
      * Returns a plain text string based on the provided encrypted value.
@@ -111,8 +110,9 @@ public interface CryptoService {
      * @deprecated Use {@link #decryptAes(char[])} instead
      */
     @Deprecated
-    public String decryptAes(String encryptedValue) throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException;
+    public String decryptAes(String encryptedValue)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException,
+                    IllegalBlockSizeException, BadPaddingException;
 
     /**
      * Returns a SHA1 hashed value of the provided string s.

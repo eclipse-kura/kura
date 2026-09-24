@@ -1,28 +1,27 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.util.Objects.requireNonNull;
 
 public class DataServiceOptions {
 
@@ -46,9 +45,12 @@ public class DataServiceOptions {
     private static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
     private static final String CONNECTION_SCHEDULE_ENABLED = "connection.schedule.enabled";
     private static final String CONNECTION_SCHECULE_EXPRESSION = "connection.schedule.expression";
-    private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS = "connection.schedule.inactivity.interval.seconds";
-    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE = "connection.schedule.priority.override.enable";
-    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD = "connection.schedule.priority.override.threshold";
+    private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS =
+            "connection.schedule.inactivity.interval.seconds";
+    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE =
+            "connection.schedule.priority.override.enable";
+    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD =
+            "connection.schedule.priority.override.threshold";
     private static final String MAXIMUM_PAYLOAD_SIZE = "maximum.payload.size";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
@@ -83,8 +85,8 @@ public class DataServiceOptions {
     }
 
     public int getStoreHousekeeperInterval() {
-        return (int) this.properties.getOrDefault(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME,
-                STORE_HOUSEKEEPER_INTERVAL_DEFAULT);
+        return (int)
+                this.properties.getOrDefault(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME, STORE_HOUSEKEEPER_INTERVAL_DEFAULT);
     }
 
     public int getStorePurgeAge() {
@@ -96,8 +98,8 @@ public class DataServiceOptions {
     }
 
     public boolean isPublishInFlightMessages() {
-        return (boolean) this.properties.getOrDefault(REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME,
-                REPUBLISH_IN_FLIGHT_MSGS_DEFAULT);
+        return (boolean)
+                this.properties.getOrDefault(REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME, REPUBLISH_IN_FLIGHT_MSGS_DEFAULT);
     }
 
     public int getMaxInFlightMessages() {
@@ -105,8 +107,8 @@ public class DataServiceOptions {
     }
 
     public int getInFlightMessagesCongestionTimeout() {
-        return (int) this.properties.getOrDefault(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME,
-                IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT);
+        return (int) this.properties.getOrDefault(
+                IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME, IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT);
     }
 
     public boolean isAutoConnect() {
@@ -134,8 +136,8 @@ public class DataServiceOptions {
     }
 
     public long getRateLimitTimeUnit() {
-        String timeUnitString = (String) this.properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
-                RATE_LIMIT_TIME_UNIT_DEFAULT);
+        String timeUnitString =
+                (String) this.properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME, RATE_LIMIT_TIME_UNIT_DEFAULT);
         TimeUnit timeUnit;
 
         if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {
@@ -194,21 +196,24 @@ public class DataServiceOptions {
     }
 
     public long getConnectionScheduleDisconnectDelay() {
-        return (long) this.properties.getOrDefault(CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
+        return (long) this.properties.getOrDefault(
+                CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
                 CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT);
     }
 
     public boolean isConnectionSchedulePriorityOverrideEnabled() {
-        return (Boolean) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE,
-                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT) && isConnectionScheduleEnabled()
+        return (Boolean) this.properties.getOrDefault(
+                        CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE,
+                        CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT)
+                && isConnectionScheduleEnabled()
                 && getConnectionScheduleExpression().isPresent();
     }
 
     public int getConnectionSchedulePriorityOverridePriority() {
 
-        return (Integer) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
+        return (Integer) this.properties.getOrDefault(
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
                 CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT);
-
     }
 
     public long getMaximumPayloadSizeBytes() {

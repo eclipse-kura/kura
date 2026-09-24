@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.InternetConnectionStatus;
@@ -34,7 +33,7 @@ public class SystemServiceMockDecorator {
     private static final String EXT_PROPERTIES_VERSION = "1.0.0";
 
     /**
-     * 
+     *
      * @param service
      *            the mock SystemService to modify. It adds mock methods that return all the properties specified
      *            in resource {@link FRAMEWORK_PROPERTIES_RESPONSE}.
@@ -44,7 +43,7 @@ public class SystemServiceMockDecorator {
     }
 
     /**
-     * 
+     *
      * @param service
      *            the mock SystemService to modify. It adds mock methods to include all the extended properties
      *            specified in resource {@link EXTENDED_PROPERTIES_RESPONSE}.
@@ -54,7 +53,7 @@ public class SystemServiceMockDecorator {
     }
 
     /**
-     * 
+     *
      * @param service
      *            the mock SystemService to modify. It adds mock methods to include all the kura properties
      *            specified in resource {@link KURA_PROPERTIES_RESPONSE}.
@@ -64,7 +63,7 @@ public class SystemServiceMockDecorator {
     }
 
     /**
-     * 
+     *
      * @param service
      *            the mock SystemService to modify. Its mock methods are all modified to throw a
      *            {@link RuntimeException}.
@@ -225,5 +224,4 @@ public class SystemServiceMockDecorator {
 
         when(service.getProperties()).thenThrow(RuntimeException.class);
     }
-
 }

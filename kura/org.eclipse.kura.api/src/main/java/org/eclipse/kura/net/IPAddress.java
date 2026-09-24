@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,13 +12,11 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
+import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-
 import org.osgi.annotation.versioning.ProviderType;
-
-import com.google.common.net.InetAddresses;
 
 /**
  * This class represents an Internet Protocol (IP) address.

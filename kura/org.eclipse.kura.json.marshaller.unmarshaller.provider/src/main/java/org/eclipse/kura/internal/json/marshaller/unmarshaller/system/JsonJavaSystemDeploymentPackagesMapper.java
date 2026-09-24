@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,17 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-
-import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
-import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 
 public class JsonJavaSystemDeploymentPackagesMapper {
 
@@ -83,5 +81,4 @@ public class JsonJavaSystemDeploymentPackagesMapper {
         jsonObject.add(DP_SIGNED, dp.isSigned());
         return jsonObject;
     }
-
 }

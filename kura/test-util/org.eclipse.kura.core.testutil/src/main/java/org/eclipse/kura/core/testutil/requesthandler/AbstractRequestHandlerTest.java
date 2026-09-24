@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 import java.net.CookieManager;
 import java.net.CookieStore;
 import java.net.HttpCookie;
@@ -27,12 +29,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.Response;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
 
 public abstract class AbstractRequestHandlerTest {
 
@@ -98,7 +96,8 @@ public abstract class AbstractRequestHandlerTest {
     protected void thenCurrentCookieDiffersFromPreviousSnapshot(final String name) {
         final Optional<HttpCookie> cookieInSnapshot = Optional.ofNullable(this.cookieSnapshot.get(name));
         final Optional<HttpCookie> currentCookie = expectCookieManager().getCookieStore().getCookies().stream()
-                .filter(c -> name.equals(c.getName())).findAny();
+                .filter(c -> name.equals(c.getName()))
+                .findAny();
 
         assertNotEquals(cookieInSnapshot.map(HttpCookie::getValue), currentCookie.map(HttpCookie::getValue));
     }
@@ -122,8 +121,11 @@ public abstract class AbstractRequestHandlerTest {
     }
 
     protected void thenResponseBodyEqualsJson(final String value) {
-        assertEquals(Json.parse(value), Json.parse(
-                expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected response body"))));
+        assertEquals(
+                Json.parse(value),
+                Json.parse(expectResponse()
+                        .getBody()
+                        .orElseThrow(() -> new IllegalStateException("expected response body"))));
     }
 
     protected void thenResponseBodyIsEmpty() {
@@ -137,13 +139,15 @@ public abstract class AbstractRequestHandlerTest {
     protected void thenResponseHasCookie(final String name) {
         final CookieManager cookieManager = expectCookieManager();
 
-        assertTrue(cookieManager.getCookieStore().getCookies().stream().anyMatch(c -> c.getName().equals(name)));
+        assertTrue(cookieManager.getCookieStore().getCookies().stream()
+                .anyMatch(c -> c.getName().equals(name)));
     }
 
     protected void thenResponseDoesNotHaveCookie(final String name) {
         final CookieManager cookieManager = expectCookieManager();
 
-        assertTrue(cookieManager.getCookieStore().getCookies().stream().noneMatch(c -> c.getName().equals(name)));
+        assertTrue(cookieManager.getCookieStore().getCookies().stream()
+                .noneMatch(c -> c.getName().equals(name)));
     }
 
     protected CookieManager expectCookieManager() {
@@ -159,13 +163,13 @@ public abstract class AbstractRequestHandlerTest {
     }
 
     protected JsonObject expectJsonResponse() {
-        return Json.parse(
-                expectResponse().getBody().orElseThrow(() -> new IllegalStateException("response body is empty")))
+        return Json.parse(expectResponse()
+                        .getBody()
+                        .orElseThrow(() -> new IllegalStateException("response body is empty")))
                 .asObject();
     }
 
     public TransportType getTransportType() {
         return this.transportType;
     }
-
 }

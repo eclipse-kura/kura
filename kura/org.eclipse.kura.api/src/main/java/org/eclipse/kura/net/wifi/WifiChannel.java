@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Sterwen-Technology and others
+ * Copyright (c) 2021, 2026 Sterwen Technology and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,16 +11,14 @@
  *  Sterwen-Technology
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.net.wifi;
 
 import java.util.Objects;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wifi channel and Frequency in MHz
- * 
+ *
  * @since 2.2
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -144,5 +142,4 @@ public class WifiChannel {
                 + ", noInitiatingRadiation=" + noInitiatingRadiation + ", radarDetection=" + radarDetection
                 + ", disabled=" + disabled + "]";
     }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.core.identity;
 
 import java.util.Objects;
-
 import org.eclipse.kura.identity.PasswordHash;
 
 public class PasswordHashImpl implements PasswordHash {
@@ -46,5 +45,4 @@ public class PasswordHashImpl implements PasswordHash {
     public String toString() {
         return this.hash;
     }
-
 }

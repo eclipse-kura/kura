@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -17,7 +17,6 @@ import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 
 import java.util.Arrays;
-
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
@@ -112,5 +111,4 @@ public class ByteArrayValue implements TypedValue<byte[]> {
     public String toString() {
         return "ByteArrayValue [value=" + Arrays.toString(this.value) + "]";
     }
-
 }

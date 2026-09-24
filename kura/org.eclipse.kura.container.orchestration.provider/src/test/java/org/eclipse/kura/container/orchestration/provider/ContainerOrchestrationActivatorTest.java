@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationActivator;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
@@ -32,7 +31,8 @@ import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 public class ContainerOrchestrationActivatorTest {
 
-    private static final String SERVICE_COMPONENT_ID = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService";
+    private static final String SERVICE_COMPONENT_ID =
+            "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService";
 
     private ServiceComponentRuntime scr;
     private ComponentDescriptionDTO matchingComponent;

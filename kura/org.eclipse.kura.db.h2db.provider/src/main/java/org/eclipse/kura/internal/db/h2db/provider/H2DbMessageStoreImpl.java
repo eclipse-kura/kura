@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.StoredMessage.Builder;
@@ -76,12 +75,13 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
     @Override
     protected JdbcMessageStoreQueries buildSqlMessageStoreQueries() {
 
-        return JdbcMessageStoreQueries.builder().withSqlCreateTable("CREATE TABLE IF NOT EXISTS "
-                + super.escapedTableName
-                + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
-                + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
-                + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER,"
-                + " sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);")
+        return JdbcMessageStoreQueries.builder()
+                .withSqlCreateTable("CREATE TABLE IF NOT EXISTS "
+                        + super.escapedTableName
+                        + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
+                        + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
+                        + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER,"
+                        + " sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);")
                 .withSqlMessageCount("SELECT COUNT(*) FROM " + super.escapedTableName + ";")
                 .withSqlStore("INSERT INTO " + super.escapedTableName
                         + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, smallPayload, largePayload, priority, "
@@ -110,12 +110,15 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
                         + " SET publishedOn = NULL WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;")
                 .withSqlDropAllInFlightMessages(UPDATE + super.escapedTableName
                         + " SET droppedOn = ? WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;")
-                .withSqlDeleteDroppedMessages(DELETE_FROM + super.escapedTableName
-                        + " WHERE droppedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND droppedOn IS NOT NULL;")
-                .withSqlDeleteConfirmedMessages(DELETE_FROM + super.escapedTableName
-                        + " WHERE confirmedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND confirmedOn IS NOT NULL;")
-                .withSqlDeletePublishedMessages(DELETE_FROM + super.escapedTableName
-                        + " WHERE qos = 0 AND publishedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND publishedOn IS NOT NULL;")
+                .withSqlDeleteDroppedMessages(
+                        DELETE_FROM + super.escapedTableName
+                                + " WHERE droppedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND droppedOn IS NOT NULL;")
+                .withSqlDeleteConfirmedMessages(
+                        DELETE_FROM + super.escapedTableName
+                                + " WHERE confirmedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND confirmedOn IS NOT NULL;")
+                .withSqlDeletePublishedMessages(
+                        DELETE_FROM + super.escapedTableName
+                                + " WHERE qos = 0 AND publishedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND publishedOn IS NOT NULL;")
                 .withSqlCreateNextMessageIndex(
                         CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_nextMsg") + " ON "
                                 + super.escapedTableName + " (publishedOn ASC, priority ASC, createdOn ASC, qos);")
@@ -143,7 +146,6 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
             handleKuraStoreException(e);
             return (int) storeInternal(topic, payload, qos, retain, priority);
         }
-
     }
 
     private void handleKuraStoreException(final KuraStoreException e) throws KuraStoreException {
@@ -156,14 +158,17 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
 
         final int errorCode = ((SQLException) cause).getErrorCode();
 
-        if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2
-                || errorCode == ErrorCode.SEQUENCE_EXHAUSTED || errorCode == ErrorCode.DUPLICATE_KEY_1) {
+        if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1
+                || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2
+                || errorCode == ErrorCode.SEQUENCE_EXHAUSTED
+                || errorCode == ErrorCode.DUPLICATE_KEY_1) {
 
             if (super.getMessageCountInternal() >= Integer.MAX_VALUE) {
                 throw new KuraStoreException("Table size is greater or equal than integer max value");
             }
 
-            final int freeId = super.connectionProvider.withPreparedStatement(this.sqlGetFreeId,
+            final int freeId = super.connectionProvider.withPreparedStatement(
+                    this.sqlGetFreeId,
                     (c, stmt) -> JdbcUtil.getFirstColumnValue(stmt::executeQuery, ResultSet::getInt),
                     "failed to get free ID");
 
@@ -180,42 +185,42 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
 
         final Timestamp now = new Timestamp(new Date().getTime());
 
-        return super.connectionProvider.withConnection(c -> {
+        return super.connectionProvider.withConnection(
+                c -> {
+                    final long result;
 
-            final long result;
+                    try (PreparedStatement pstmt =
+                            c.prepareStatement(super.queries.getSqlStore(), new String[] {"id"})) {
+                        pstmt.setString(1, topic);
+                        pstmt.setInt(2, qos);
+                        pstmt.setBoolean(3, retain);
+                        pstmt.setTimestamp(4, now, this.utcCalendar);
+                        pstmt.setTimestamp(5, null);
+                        pstmt.setInt(6, -1);
+                        pstmt.setTimestamp(7, null);
 
-            try (PreparedStatement pstmt = c.prepareStatement(super.queries.getSqlStore(), new String[] { "id" })) {
-                pstmt.setString(1, topic);
-                pstmt.setInt(2, qos);
-                pstmt.setBoolean(3, retain);
-                pstmt.setTimestamp(4, now, this.utcCalendar);
-                pstmt.setTimestamp(5, null);
-                pstmt.setInt(6, -1);
-                pstmt.setTimestamp(7, null);
+                        if (payload == null || payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
+                            pstmt.setBytes(8, payload);
+                            pstmt.setNull(9, Types.BLOB);
+                        } else {
+                            pstmt.setNull(8, Types.VARBINARY);
+                            pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);
+                        }
 
-                if (payload == null || payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
-                    pstmt.setBytes(8, payload);
-                    pstmt.setNull(9, Types.BLOB);
-                } else {
-                    pstmt.setNull(8, Types.VARBINARY);
-                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);
-                }
+                        pstmt.setInt(10, priority);
+                        pstmt.setString(11, null);
+                        pstmt.setTimestamp(12, null);
 
-                pstmt.setInt(10, priority);
-                pstmt.setString(11, null);
-                pstmt.setTimestamp(12, null);
+                        pstmt.execute();
 
-                pstmt.execute();
+                        result = (long) JdbcUtil.getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getInt);
+                    }
 
-                result = (long) JdbcUtil.getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getInt);
+                    c.commit();
 
-            }
-
-            c.commit();
-
-            return result;
-        }, "Cannot store message");
-
+                    return result;
+                },
+                "Cannot store message");
     }
 
     @Override
@@ -232,7 +237,5 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
         }
 
         return result;
-
     }
-
 }

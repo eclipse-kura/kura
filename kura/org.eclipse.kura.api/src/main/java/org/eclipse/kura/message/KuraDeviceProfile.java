@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -36,6 +36,7 @@ public class KuraDeviceProfile {
      * @since 2.2
      */
     public static final String CPU_VERSION_KEY = "cpu_version";
+
     public static final String BIOS_VERSION_KEY = "bios_version";
     public static final String OS_KEY = "os";
     public static final String OS_VERSION_KEY = "os_version";
@@ -172,7 +173,7 @@ public class KuraDeviceProfile {
 
     /**
      * Returns the CPU version information.
-     * 
+     *
      * @since 2.2
      * @return A string representing the CPU version information.
      */
@@ -300,7 +301,7 @@ public class KuraDeviceProfile {
     }
 
     /**
-     * 
+     *
      * @since 2.6
      * @return a String representing the JVM vendor name.
      */
@@ -309,7 +310,7 @@ public class KuraDeviceProfile {
     }
 
     /**
-     * 
+     *
      * @since 2.6
      * @return a String representing the JDK vendor version.
      */
@@ -399,7 +400,7 @@ public class KuraDeviceProfile {
 
     /**
      * Sets the CPU version information
-     * 
+     *
      * @since 2.2
      * @param cpuVersion
      *            the CPU version information
@@ -509,7 +510,7 @@ public class KuraDeviceProfile {
     }
 
     /**
-     * 
+     *
      * @since 2.6
      * @param jvmVendor a String representing the JVM vendor name.
      */
@@ -518,7 +519,7 @@ public class KuraDeviceProfile {
     }
 
     /**
-     * 
+     *
      * @since 2.6
      * @param jdkVendorVersion a String representing the JDK vendor version.
      */

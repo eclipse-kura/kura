@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -102,8 +101,7 @@ public class ChannelRecord {
 
     private String unit;
 
-    private ChannelRecord() {
-    }
+    private ChannelRecord() {}
 
     /**
      * Creates a channel record that represents a read request.
@@ -131,8 +129,8 @@ public class ChannelRecord {
     /**
      * @since 2.3
      */
-    public static ChannelRecord createReadRecord(final String channelName, final DataType valueType,
-            final String unit) {
+    public static ChannelRecord createReadRecord(
+            final String channelName, final DataType valueType, final String unit) {
         requireNonNull(channelName, NULL_CHANNEL_NAME_ERROR_MESSAGE);
         requireNonNull(valueType, "Value Type cannot be null");
 

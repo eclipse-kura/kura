@@ -22,8 +22,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -36,8 +36,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
-
-import org.eclipse.kura.cloudconnection.CloudEndpoint;
 
 public class InventoryHandlerTest {
 
@@ -108,7 +106,7 @@ public class InventoryHandlerTest {
         dependencyLatch.countDown();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetPackages() throws Exception {
         StringBuilder sb = init();
@@ -118,11 +116,12 @@ public class InventoryHandlerTest {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String body = new String(resp.getBody());
-        assertTrue(body.contains(
-                "{\"deploymentPackages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
+        assertTrue(
+                body.contains(
+                        "{\"deploymentPackages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetBundles() throws Exception {
         StringBuilder sb = init();
@@ -135,7 +134,7 @@ public class InventoryHandlerTest {
         assertTrue(body.contains("{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetInventory() throws Exception {
         StringBuilder sb = init();
@@ -146,11 +145,12 @@ public class InventoryHandlerTest {
 
         String body = new String(resp.getBody());
         assertTrue(body.startsWith("{\"inventory\":"));
-        assertTrue(body.contains(
-                "{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\",\"type\":\"BUNDLE\"},{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"type\":\"DP\"}"));
+        assertTrue(
+                body.contains(
+                        "{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\",\"type\":\"BUNDLE\"},{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"type\":\"DP\"}"));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @TestTarget(targetPlatforms = {TestTarget.PLATFORM_ALL})
     @Test
     public void testGetSystemPackages() throws Exception {
         // system packages are listed through the Linux package managers, not available on Windows

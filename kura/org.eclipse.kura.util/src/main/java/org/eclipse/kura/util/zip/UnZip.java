@@ -29,7 +29,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
@@ -40,10 +39,10 @@ public class UnZip {
     private static final Logger logger = LoggerFactory.getLogger(UnZip.class);
 
     private static final int BUFFER = 1024;
-    private static final int ZIP_MAGIC_FIRST_BYTE = 0x50;  // 'P'
+    private static final int ZIP_MAGIC_FIRST_BYTE = 0x50; // 'P'
     private static final int ZIP_MAGIC_SECOND_BYTE = 0x4B; // 'K'
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
-    private static int tooMany = 1024;     // Max number of files
+    private static int tooMany = 1024; // Max number of files
 
     private UnZip() {
         // Do nothing...
@@ -111,9 +110,12 @@ public class UnZip {
         }
 
         long total = writtenSoFar;
-        try (OutputStream fos = Files.newOutputStream(newFile.toPath(),
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS)) {
+        try (OutputStream fos = Files.newOutputStream(
+                newFile.toPath(),
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE,
+                LinkOption.NOFOLLOW_LINKS)) {
             byte[] buffer = new byte[BUFFER];
 
             int len = zis.read(buffer);
@@ -139,7 +141,10 @@ public class UnZip {
     }
 
     private static String entryPath(File folder, ZipEntry ze) {
-        return new StringBuilder(folder.getPath()).append(File.separator).append(ze.getName()).toString();
+        return new StringBuilder(folder.getPath())
+                .append(File.separator)
+                .append(ze.getName())
+                .toString();
     }
 
     private static void createDirectories(File directory, Deque<File> createdEntries) {
@@ -177,7 +182,8 @@ public class UnZip {
 
     private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
         final Path filePath = new File(zipFileName).getCanonicalFile().toPath();
-        final Path intendedCanonicalPath = new File(intendedDir).getCanonicalFile().toPath();
+        final Path intendedCanonicalPath =
+                new File(intendedDir).getCanonicalFile().toPath();
 
         if (filePath.startsWith(intendedCanonicalPath)) {
             return filePath.toString();
@@ -199,5 +205,4 @@ public class UnZip {
             return false;
         }
     }
-
 }

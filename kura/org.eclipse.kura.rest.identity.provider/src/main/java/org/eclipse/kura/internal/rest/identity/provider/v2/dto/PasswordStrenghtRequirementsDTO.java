@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,8 +21,11 @@ public class PasswordStrenghtRequirementsDTO {
     private final Boolean specialCharactersRequired;
     private final Boolean bothCasesRequired;
 
-    public PasswordStrenghtRequirementsDTO(int passwordMinimumLength, Boolean digitsRequired,
-            Boolean specialCharactersRequired, Boolean bothCasesRequired) {
+    public PasswordStrenghtRequirementsDTO(
+            int passwordMinimumLength,
+            Boolean digitsRequired,
+            Boolean specialCharactersRequired,
+            Boolean bothCasesRequired) {
 
         this.passwordMinimumLength = passwordMinimumLength;
         this.digitsRequired = digitsRequired;
@@ -48,7 +51,10 @@ public class PasswordStrenghtRequirementsDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.bothCasesRequired, this.digitsRequired, this.passwordMinimumLength,
+        return Objects.hash(
+                this.bothCasesRequired,
+                this.digitsRequired,
+                this.passwordMinimumLength,
                 this.specialCharactersRequired);
     }
 
@@ -61,7 +67,8 @@ public class PasswordStrenghtRequirementsDTO {
             return false;
         }
         PasswordStrenghtRequirementsDTO other = (PasswordStrenghtRequirementsDTO) obj;
-        return this.bothCasesRequired == other.bothCasesRequired && this.digitsRequired == other.digitsRequired
+        return this.bothCasesRequired == other.bothCasesRequired
+                && this.digitsRequired == other.digitsRequired
                 && this.passwordMinimumLength == other.passwordMinimumLength
                 && this.specialCharactersRequired == other.specialCharactersRequired;
     }
@@ -72,5 +79,4 @@ public class PasswordStrenghtRequirementsDTO {
                 + ", digitsRequired=" + this.digitsRequired + ", specialCharactersRequired="
                 + this.specialCharactersRequired + ", bothCasesRequired=" + this.bothCasesRequired + "]";
     }
-
 }

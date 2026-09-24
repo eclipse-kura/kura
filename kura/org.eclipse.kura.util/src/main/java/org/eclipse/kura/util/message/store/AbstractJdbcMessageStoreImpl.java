@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.message.store.StoredMessage;
@@ -82,9 +81,10 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
 
     protected long getMessageCountInternal() throws KuraStoreException {
 
-        return this.connectionProvider.withPreparedStatement(this.queries.getSqlMessageCount(),
-                (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getLong), "Cannot get message count");
-
+        return this.connectionProvider.withPreparedStatement(
+                this.queries.getSqlMessageCount(),
+                (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getLong),
+                "Cannot get message count");
     }
 
     protected void validate(String topic) throws KuraStoreException {
@@ -99,36 +99,36 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
 
         final Timestamp now = new Timestamp(new Date().getTime());
 
-        return this.connectionProvider.withConnection(c -> {
+        return this.connectionProvider.withConnection(
+                c -> {
+                    final long result;
 
-            final long result;
+                    try (PreparedStatement pstmt =
+                            c.prepareStatement(this.queries.getSqlStore(), new String[] {"id"})) {
 
-            try (PreparedStatement pstmt = c.prepareStatement(this.queries.getSqlStore(),
-                    new String[] { "id" })) {
+                        pstmt.setString(1, topic);
+                        pstmt.setInt(2, qos);
+                        pstmt.setBoolean(3, retain);
+                        pstmt.setTimestamp(4, now, this.utcCalendar);
+                        pstmt.setTimestamp(5, null);
+                        pstmt.setInt(6, -1);
+                        pstmt.setTimestamp(7, null);
+                        pstmt.setBytes(8, payload);
+                        pstmt.setInt(9, priority);
+                        pstmt.setString(10, null);
+                        pstmt.setTimestamp(11, null);
+                        pstmt.execute();
 
-                pstmt.setString(1, topic);
-                pstmt.setInt(2, qos);
-                pstmt.setBoolean(3, retain);
-                pstmt.setTimestamp(4, now, this.utcCalendar);
-                pstmt.setTimestamp(5, null);
-                pstmt.setInt(6, -1);
-                pstmt.setTimestamp(7, null);
-                pstmt.setBytes(8, payload);
-                pstmt.setInt(9, priority);
-                pstmt.setString(10, null);
-                pstmt.setTimestamp(11, null);
-                pstmt.execute();
+                        result = getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getLong);
+                    }
 
-                result = getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getLong);
-            }
+                    if (isExplicitCommitEnabled()) {
+                        c.commit();
+                    }
 
-            if (isExplicitCommitEnabled()) {
-                c.commit();
-            }
-
-            return result;
-        }, "Cannot store message");
-
+                    return result;
+                },
+                "Cannot store message");
     }
 
     @Override
@@ -140,25 +140,27 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     protected Optional<StoredMessage> get(int msgId, final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
-        return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetMessage(), (c, stmt) -> {
-            stmt.setInt(1, msgId);
+        return this.connectionProvider.withPreparedStatement(
+                this.queries.getSqlGetMessage(),
+                (c, stmt) -> {
+                    stmt.setInt(1, msgId);
 
-            return getFirstColumnValueOrEmpty(stmt::executeQuery, (rs, i) -> messageBuilder.call(rs));
-
-        }, "Cannot get message by ID: " + msgId);
+                    return getFirstColumnValueOrEmpty(stmt::executeQuery, (rs, i) -> messageBuilder.call(rs));
+                },
+                "Cannot get message by ID: " + msgId);
     }
 
     @Override
     public Optional<StoredMessage> getNextMessage() throws KuraStoreException {
 
         return getNextMessage(rs -> buildStoredMessageBuilder(rs, true).build());
-
     }
 
     protected Optional<StoredMessage> getNextMessage(final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
-        return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetNextMessage(),
+        return this.connectionProvider.withPreparedStatement(
+                this.queries.getSqlGetNextMessage(),
                 (c, stmt) -> getFirstColumnValueOrEmpty(stmt::executeQuery, (rs, i) -> messageBuilder.call(rs)),
                 "Cannot get message next message");
     }
@@ -167,22 +169,22 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     public void markAsPublished(int msgId, DataTransportToken token) throws KuraStoreException {
         final Timestamp now = new Timestamp(new Date().getTime());
 
-        this.connectionProvider.withPreparedStatement(this.queries.getSqlSetPublishedQoS1(), (c, stmt) -> {
+        this.connectionProvider.withPreparedStatement(
+                this.queries.getSqlSetPublishedQoS1(),
+                (c, stmt) -> {
+                    stmt.setTimestamp(1, now, this.utcCalendar);
+                    stmt.setInt(2, token.getMessageId());
+                    stmt.setString(3, token.getSessionId());
+                    stmt.setInt(4, msgId);
 
-            stmt.setTimestamp(1, now, this.utcCalendar);
-            stmt.setInt(2, token.getMessageId());
-            stmt.setString(3, token.getSessionId());
-            stmt.setInt(4, msgId);
+                    stmt.execute();
 
-            stmt.execute();
-
-            if (isExplicitCommitEnabled()) {
-                c.commit();
-            }
-            return null;
-
-        }, "Cannot update timestamp");
-
+                    if (isExplicitCommitEnabled()) {
+                        c.commit();
+                    }
+                    return null;
+                },
+                "Cannot update timestamp");
     }
 
     @Override
@@ -247,51 +249,57 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     protected void updateTimestamp(String sql, Integer... msgIds) throws KuraStoreException {
         final Timestamp now = new Timestamp(new Date().getTime());
 
-        this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
-            stmt.setTimestamp(1, now, this.utcCalendar);
+        this.connectionProvider.withPreparedStatement(
+                sql,
+                (c, stmt) -> {
+                    stmt.setTimestamp(1, now, this.utcCalendar);
 
-            for (int i = 0; i < msgIds.length; i++) {
-                stmt.setInt(2 + i, msgIds[i]);
-            }
-            stmt.execute();
+                    for (int i = 0; i < msgIds.length; i++) {
+                        stmt.setInt(2 + i, msgIds[i]);
+                    }
+                    stmt.execute();
 
-            if (isExplicitCommitEnabled()) {
-                c.commit();
-            }
-            return null;
-
-        }, "Cannot update timestamp");
+                    if (isExplicitCommitEnabled()) {
+                        c.commit();
+                    }
+                    return null;
+                },
+                "Cannot update timestamp");
     }
 
     protected List<StoredMessage> listMessages(String sql, Integer... params) throws KuraStoreException {
-        return this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    stmt.setInt(2 + i, params[i]);
-                }
-            }
+        return this.connectionProvider.withPreparedStatement(
+                sql,
+                (c, stmt) -> {
+                    if (params != null) {
+                        for (int i = 0; i < params.length; i++) {
+                            stmt.setInt(2 + i, params[i]);
+                        }
+                    }
 
-            try (final ResultSet rs = stmt.executeQuery()) {
-                return buildStoredMessagesNoPayload(rs);
-            }
-        }, "Cannot list messages");
+                    try (final ResultSet rs = stmt.executeQuery()) {
+                        return buildStoredMessagesNoPayload(rs);
+                    }
+                },
+                "Cannot list messages");
     }
 
     protected void execute(String sql, Object... params) throws KuraStoreException {
-        this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
+        this.connectionProvider.withPreparedStatement(
+                sql,
+                (c, stmt) -> {
+                    for (int i = 0; i < params.length; i++) {
+                        stmt.setObject(1 + i, params[i]);
+                    }
 
-            for (int i = 0; i < params.length; i++) {
-                stmt.setObject(1 + i, params[i]);
-            }
+                    stmt.execute();
 
-            stmt.execute();
-
-            if (isExplicitCommitEnabled()) {
-                c.commit();
-            }
-            return null;
-
-        }, "Cannot execute query");
+                    if (isExplicitCommitEnabled()) {
+                        c.commit();
+                    }
+                    return null;
+                },
+                "Cannot execute query");
     }
 
     protected List<StoredMessage> buildStoredMessagesNoPayload(ResultSet rs) throws SQLException {
@@ -305,10 +313,13 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     protected StoredMessage.Builder buildStoredMessageBuilder(ResultSet rs, final boolean includePayload)
             throws SQLException {
         StoredMessage.Builder builder = new StoredMessage.Builder(rs.getInt("id"))
-                .withTopic(rs.getString(TOPIC_ELEMENT)).withQos(rs.getInt("qos")).withRetain(rs.getBoolean("retain"))
+                .withTopic(rs.getString(TOPIC_ELEMENT))
+                .withQos(rs.getInt("qos"))
+                .withRetain(rs.getBoolean("retain"))
                 .withCreatedOn(rs.getTimestamp("createdOn", this.utcCalendar))
                 .withPublishedOn(rs.getTimestamp("publishedOn", this.utcCalendar))
-                .withConfirmedOn(rs.getTimestamp("confirmedOn", this.utcCalendar)).withPriority(rs.getInt("priority"))
+                .withConfirmedOn(rs.getTimestamp("confirmedOn", this.utcCalendar))
+                .withPriority(rs.getInt("priority"))
                 .withDroppedOn(rs.getTimestamp("droppedOn"));
 
         if (includePayload) {
@@ -318,8 +329,8 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
         final String sessionId = rs.getString("sessionId");
 
         if (sessionId != null) {
-            builder = builder
-                    .withDataTransportToken(new DataTransportToken(rs.getInt("publishedMessageId"), sessionId));
+            builder =
+                    builder.withDataTransportToken(new DataTransportToken(rs.getInt("publishedMessageId"), sessionId));
         }
 
         return builder;

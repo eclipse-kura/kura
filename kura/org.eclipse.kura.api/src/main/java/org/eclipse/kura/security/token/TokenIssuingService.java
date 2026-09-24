@@ -14,13 +14,12 @@ package org.eclipse.kura.security.token;
 
 import java.time.Duration;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service that issues authentication tokens.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 3.0
  */
@@ -29,7 +28,7 @@ public interface TokenIssuingService {
 
     /**
      * The configured upper bound on the lifetime of issued tokens.
-     * 
+     *
      * @return the maximum lifetime, empty if any lifetime is accepted
      */
     public Optional<Duration> getMaximumLifetime();
@@ -55,5 +54,4 @@ public interface TokenIssuingService {
      *             if {@code request} is {@code null}
      */
     public String issue(final TokenIssueRequest request) throws KuraException;
-
 }

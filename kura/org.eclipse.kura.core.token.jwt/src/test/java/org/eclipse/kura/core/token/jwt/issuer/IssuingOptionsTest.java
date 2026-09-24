@@ -18,7 +18,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
-
 import org.eclipse.kura.core.token.jwt.common.IssuingConfig;
 import org.junit.Test;
 
@@ -78,7 +77,8 @@ public class IssuingOptionsTest {
     }
 
     private void givenAConfigurationWith(final String signingKeyAlias, final String issuer) {
-        this.config = IssuingConfig.defaults().withSigningKeyAlias(signingKeyAlias).withIssuer(issuer);
+        this.config =
+                IssuingConfig.defaults().withSigningKeyAlias(signingKeyAlias).withIssuer(issuer);
     }
 
     private void whenTheOptionsAreParsed() {
@@ -86,12 +86,16 @@ public class IssuingOptionsTest {
     }
 
     private void thenTheMaximumLifetimeIs(final Duration expected) {
-        assertTrue("expected a maximum lifetime to be configured", this.options.getMaximumLifetime().isPresent());
+        assertTrue(
+                "expected a maximum lifetime to be configured",
+                this.options.getMaximumLifetime().isPresent());
         assertEquals(expected, this.options.getMaximumLifetime().get());
     }
 
     private void thenThereIsNoMaximumLifetime() {
-        assertFalse("expected no maximum lifetime to be configured", this.options.getMaximumLifetime().isPresent());
+        assertFalse(
+                "expected no maximum lifetime to be configured",
+                this.options.getMaximumLifetime().isPresent());
     }
 
     private void thenTheSigningKeyAliasIs(final String expected) {
@@ -101,5 +105,4 @@ public class IssuingOptionsTest {
     private void thenTheIssuerIs(final String expected) {
         assertEquals(expected, this.options.getIssuer());
     }
-
 }

@@ -15,7 +15,6 @@ package org.eclipse.kura.system;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Bundle;
@@ -58,6 +57,7 @@ public interface SystemService {
      * @since 1.3
      */
     public static final String KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION = "kura.marketplace.compatibility.version";
+
     public static final String KEY_DEVICE_NAME = "kura.device.name";
     public static final String KEY_PLATFORM = "kura.platform";
     public static final String KEY_MODEL_ID = "kura.model.id";
@@ -73,6 +73,7 @@ public interface SystemService {
      * @since 1.2
      */
     public static final String KEY_KURA_PACKAGES_DIR = "kura.packages";
+
     public static final String KEY_KURA_DATA_DIR = "kura.data";
     public static final String KEY_KURA_TMP_DIR = "kura.tmp";
     public static final String KEY_KURA_SNAPSHOTS_DIR = "kura.snapshots";
@@ -684,5 +685,4 @@ public interface SystemService {
      * @return the hostname address used to check the internet connection. Default value is eclipse.org
      */
     public String getInternetConnectionStatusCheckHost();
-
 }

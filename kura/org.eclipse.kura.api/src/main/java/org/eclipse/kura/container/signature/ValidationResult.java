@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,12 +14,11 @@ package org.eclipse.kura.container.signature;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Class representing the result of the signature validation performed by {@link:ContainerSignatureValidationService}
- * 
+ *
  * The validation result is composed of two main parts: whether or not the container image signature was
  * validated and the container image digest (in the "algorithm:encoded" format, @see
  * <a href="https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests">Opencontainers specs</a>)

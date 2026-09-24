@@ -17,7 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service that verifies authentication tokens.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 3.0
  */
@@ -37,5 +37,4 @@ public interface TokenVerificationService {
      *             {@link org.eclipse.kura.KuraAuthenticationFailedException}
      */
     public VerificationProof verify(final TokenVerifyRequest request) throws KuraException;
-
 }

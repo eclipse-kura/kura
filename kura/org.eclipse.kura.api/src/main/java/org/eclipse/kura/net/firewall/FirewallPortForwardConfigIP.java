@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
 import java.net.UnknownHostException;
-
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
@@ -63,7 +62,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 
     /**
      * Creates and empty port forward configuration
-     * 
+     *
      * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
      */
     @Deprecated
@@ -98,9 +97,17 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
      */
     @SuppressWarnings("checkstyle:parameterNumber")
     @Deprecated
-    public FirewallPortForwardConfigIP(String inboundIface, String outboundIface, IP4Address address,
-            NetProtocol protocol, int inPort, int outPort, boolean masquerade, NetworkPair<T> permittedNetwork,
-            String permittedMac, String sourcePortRange) {
+    public FirewallPortForwardConfigIP(
+            String inboundIface,
+            String outboundIface,
+            IP4Address address,
+            NetProtocol protocol,
+            int inPort,
+            int outPort,
+            boolean masquerade,
+            NetworkPair<T> permittedNetwork,
+            String permittedMac,
+            String sourcePortRange) {
         super();
         this.inboundIface = inboundIface;
         this.outboundIface = outboundIface;
@@ -271,11 +278,12 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 
     /**
      * The base builder class for firewall port forward configurations
-     * 
+     *
      * @since 2.6
      */
     @ProviderType
-    public abstract static class FirewallPortForwardConfigIPBuilder<U extends IPAddress, T extends FirewallPortForwardConfigIPBuilder<U, T>> {
+    public abstract static class FirewallPortForwardConfigIPBuilder<
+            U extends IPAddress, T extends FirewallPortForwardConfigIPBuilder<U, T>> {
 
         protected String inboundIface;
         protected String outboundIface;

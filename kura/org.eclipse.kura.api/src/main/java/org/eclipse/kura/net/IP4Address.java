@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net;
 
 import java.net.UnknownHostException;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -30,7 +29,7 @@ public class IP4Address extends IPAddress {
 
     /**
      * Returns the default IPv4 address (0.0.0.0/0).
-     * 
+     *
      * @return the 0.0.0.0/0 IPv4 address
      * @throws UnknownHostException
      * @since 2.6

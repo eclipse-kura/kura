@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
@@ -63,12 +62,29 @@ public class CloudEndpointPublisher implements DataServiceListener {
 
         String requestId = generator.next();
 
-        String sbReqTopic = new StringBuilder("EDC").append("/").append(ACCOUNT_NAME_VAR_NAME).append("/")
-                .append(deviceId).append("/").append(appId).append("/").append(appTopic).toString();
+        String sbReqTopic = new StringBuilder("EDC")
+                .append("/")
+                .append(ACCOUNT_NAME_VAR_NAME)
+                .append("/")
+                .append(deviceId)
+                .append("/")
+                .append(appId)
+                .append("/")
+                .append(appTopic)
+                .toString();
 
-        String sbRespTopic = new StringBuilder("EDC").append("/").append(ACCOUNT_NAME_VAR_NAME).append("/")
-                .append(CLIENT_ID_VAR_NAME).append("/").append(appId).append("/").append("REPLY").append("/")
-                .append(requestId).toString();
+        String sbRespTopic = new StringBuilder("EDC")
+                .append("/")
+                .append(ACCOUNT_NAME_VAR_NAME)
+                .append("/")
+                .append(CLIENT_ID_VAR_NAME)
+                .append("/")
+                .append(appId)
+                .append("/")
+                .append("REPLY")
+                .append("/")
+                .append(requestId)
+                .toString();
 
         KuraRequestPayload req = null;
         if (appPayload != null) {
@@ -123,7 +139,6 @@ public class CloudEndpointPublisher implements DataServiceListener {
             } catch (Exception e) {
                 future.completeExceptionally(e);
             }
-
         }
     }
 
@@ -180,5 +195,4 @@ public class CloudEndpointPublisher implements DataServiceListener {
             return input.substring(lastSlashIndex + 1);
         }
     }
-
 }

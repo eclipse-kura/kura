@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.dhcp;
 
 import java.util.List;
-
 import org.eclipse.kura.net.IPAddress;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -55,8 +54,8 @@ public abstract class DhcpServerCfgIP<T extends IPAddress> {
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
-    public DhcpServerCfgIP(T subnet, T subnetMask, short prefix, T routerAddress, T rangeStart, T rangeEnd,
-            List<T> dnsServers) {
+    public DhcpServerCfgIP(
+            T subnet, T subnetMask, short prefix, T routerAddress, T rangeStart, T rangeEnd, List<T> dnsServers) {
         super();
         this.subnet = subnet;
         this.subnetMask = subnetMask;

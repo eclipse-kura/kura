@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Map;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -108,7 +107,7 @@ public class SelfConfiguringComponentRegistrationTest {
     @Test
     public void duplicatedServicePidArrayIsReducedToASingleValue() throws Throwable {
         givenConfigurationService();
-        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new String[] { SERVICE_PID, SERVICE_PID });
+        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new String[] {SERVICE_PID, SERVICE_PID});
 
         whenConfigurableComponentIsAdded();
 
@@ -119,7 +118,7 @@ public class SelfConfiguringComponentRegistrationTest {
     @Test
     public void primitiveArrayServicePidIsReducedToASingleValue() throws Throwable {
         givenConfigurationService();
-        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new int[] { 7, 7 });
+        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new int[] {7, 7});
 
         whenConfigurableComponentIsAdded();
 
@@ -130,7 +129,7 @@ public class SelfConfiguringComponentRegistrationTest {
     @Test
     public void ambiguousPrimitiveArrayServicePidIsRejected() throws Throwable {
         givenConfigurationService();
-        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new int[] { 7, 8 });
+        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new int[] {7, 8});
 
         whenConfigurableComponentIsAdded();
 
@@ -155,14 +154,16 @@ public class SelfConfiguringComponentRegistrationTest {
     @SuppressWarnings("unchecked")
     private void givenSelfConfiguringComponentReference(String kuraPid, Object servicePid) {
         this.selfConfiguringReference = mock(ServiceReference.class);
-        when(this.selfConfiguringReference.getProperty(ConfigurationService.KURA_SERVICE_PID)).thenReturn(kuraPid);
+        when(this.selfConfiguringReference.getProperty(ConfigurationService.KURA_SERVICE_PID))
+                .thenReturn(kuraPid);
         when(this.selfConfiguringReference.getProperty(Constants.SERVICE_PID)).thenReturn(servicePid);
     }
 
     @SuppressWarnings("unchecked")
     private void givenConfigurableComponentReference(String kuraPid, Object servicePid) {
         this.configurableReference = mock(ServiceReference.class);
-        when(this.configurableReference.getProperty(ConfigurationService.KURA_SERVICE_PID)).thenReturn(kuraPid);
+        when(this.configurableReference.getProperty(ConfigurationService.KURA_SERVICE_PID))
+                .thenReturn(kuraPid);
         when(this.configurableReference.getProperty(Constants.SERVICE_PID)).thenReturn(servicePid);
     }
 
@@ -194,8 +195,8 @@ public class SelfConfiguringComponentRegistrationTest {
 
     @SuppressWarnings("unchecked")
     private void thenServicePidOf(String pid, String expectedServicePid) throws Throwable {
-        Map<String, String> servicePidByPid = (Map<String, String>) TestUtil.getFieldValue(this.configurationService,
-                "servicePidByPid");
+        Map<String, String> servicePidByPid =
+                (Map<String, String>) TestUtil.getFieldValue(this.configurationService, "servicePidByPid");
 
         assertFalse(servicePidByPid.isEmpty());
         assertEquals(expectedServicePid, servicePidByPid.get(pid));

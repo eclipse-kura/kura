@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,7 +17,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
@@ -58,7 +57,7 @@ public class StepsCollection {
     void givenUnregisterCloudDeliveryListener(CloudDeliveryListener listener) {
         this.endpoint.unregisterCloudDeliveryListener(listener);
     }
-    
+
     void givenActivated(Map<String, Object> properties) {
         this.endpoint.activate(properties);
     }
@@ -113,7 +112,6 @@ public class StepsCollection {
         } catch (Exception e) {
             this.occurredException = e;
         }
-
     }
 
     /*
@@ -122,7 +120,8 @@ public class StepsCollection {
 
     <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
         assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+        assertEquals(
+                expectedException.getName(), this.occurredException.getClass().getName());
     }
 
     /*
@@ -141,8 +140,5 @@ public class StepsCollection {
         public Map<String, Object> build() {
             return this.properties;
         }
-
     }
-
-
 }

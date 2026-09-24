@@ -1,16 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block;
 
 import static java.util.Objects.requireNonNull;
@@ -113,9 +112,10 @@ public class BlockAggregator<T extends Block> {
     @SuppressWarnings("unchecked")
     public Stream<T> stream() {
         this.blocks.sort((Block o1, Block o2) -> o1.getStart() - o2.getStart());
-        return (Stream<T>) StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(new AggregatingIterator(this.blocks.listIterator()),
-                        Spliterator.ORDERED), false)
+        return (Stream<T>) StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(
+                                new AggregatingIterator(this.blocks.listIterator()), Spliterator.ORDERED),
+                        false)
                 .filter(block -> !(block instanceof ProhibitedBlock));
     }
 
@@ -214,6 +214,5 @@ public class BlockAggregator<T extends Block> {
             this.last = null;
             return result;
         }
-
     }
 }

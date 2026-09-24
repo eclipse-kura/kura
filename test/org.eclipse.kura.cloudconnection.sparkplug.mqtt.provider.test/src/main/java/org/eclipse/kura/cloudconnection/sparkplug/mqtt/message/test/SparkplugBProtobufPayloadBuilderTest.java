@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugBProtobufPayloadBuilder;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
@@ -72,8 +71,7 @@ public class SparkplugBProtobufPayloadBuilderTest {
                     new TypeMapperCase("metric.dataset", randomData, timestamp, DataType.DataSet, ex),
                     new TypeMapperCase("metric.template", randomData, timestamp, DataType.Template, ex),
                     new TypeMapperCase("metric.propertyset", randomData, timestamp, DataType.PropertySet, ex),
-                    new TypeMapperCase("metric.propertysetlist", randomData, timestamp, DataType.PropertySetList,
-                            ex),
+                    new TypeMapperCase("metric.propertysetlist", randomData, timestamp, DataType.PropertySetList, ex),
                     new TypeMapperCase("metric.file", randomData, timestamp, DataType.File, ex),
                     new TypeMapperCase("metric.booleanarray", randomData, timestamp, DataType.BooleanArray, ex),
                     new TypeMapperCase("metric.datetimearray", randomData, timestamp, DataType.DateTimeArray, ex),
@@ -90,7 +88,8 @@ public class SparkplugBProtobufPayloadBuilderTest {
                     new TypeMapperCase("metric.doubleArray", randomData, timestamp, DataType.DoubleArray, ex),
                     new TypeMapperCase("metric.unknown", randomData, timestamp, DataType.Unknown, ex));
 
-            return Stream.concat(supportedTypes.stream(), unsupportedTypes.stream()).collect(Collectors.toList());
+            return Stream.concat(supportedTypes.stream(), unsupportedTypes.stream())
+                    .collect(Collectors.toList());
         }
 
         private TypeMapperCase testCase;
@@ -102,11 +101,15 @@ public class SparkplugBProtobufPayloadBuilderTest {
         @Test
         public void shouldBuildMetric() {
             givenMetric(this.testCase.getName(), this.testCase.getValue(), this.testCase.getTimestamp());
-            
+
             whenBuildPayload();
-            
-            thenPayloadContainsMetric(this.testCase.getName(), this.testCase.getValue(), this.testCase.getTimestamp(),
-                    this.testCase.getExpectedDataType(), this.testCase.getExpectedException());
+
+            thenPayloadContainsMetric(
+                    this.testCase.getName(),
+                    this.testCase.getValue(),
+                    this.testCase.getTimestamp(),
+                    this.testCase.getExpectedDataType(),
+                    this.testCase.getExpectedException());
         }
     }
 
@@ -115,9 +118,9 @@ public class SparkplugBProtobufPayloadBuilderTest {
         @Test
         public void shouldReturnCorrectBdSeq() {
             givenBdSeq(12L, 120L);
-            
+
             whenBuildPayload();
-            
+
             thenPayloadContainsMetric("bdSeq", 12L, 120L, DataType.Int64, Optional.empty());
         }
 
@@ -147,7 +150,6 @@ public class SparkplugBProtobufPayloadBuilderTest {
 
             thenBodyEquals("example.body".getBytes());
         }
-
     }
 
     /*
@@ -202,68 +204,74 @@ public class SparkplugBProtobufPayloadBuilderTest {
          * Then
          */
 
-        void thenPayloadContainsMetric(String expectedName, Object expectedValue, long expectedTimestamp,
-                DataType expectedDataType, Optional<Exception> expectedException) {
+        void thenPayloadContainsMetric(
+                String expectedName,
+                Object expectedValue,
+                long expectedTimestamp,
+                DataType expectedDataType,
+                Optional<Exception> expectedException) {
             if (expectedException.isPresent()) {
                 thenExceptionOccurred(expectedException.get().getClass());
             } else {
-                Metric metric = this.payload.getMetricsList().stream().filter(m -> m.getName().equals(expectedName))
-                        .collect(Collectors.toList()).get(0);
+                Metric metric = this.payload.getMetricsList().stream()
+                        .filter(m -> m.getName().equals(expectedName))
+                        .collect(Collectors.toList())
+                        .get(0);
 
                 Object actualValue = null;
 
                 switch (expectedDataType) {
-                case Boolean:
-                    actualValue = metric.getBooleanValue();
-                    break;
-                case Bytes:
-                    actualValue = metric.getBytesValue().toByteArray();
-                    break;
-                case DateTime:
-                case Int64:
-                case UInt32:
-                case UInt64:
-                    actualValue = metric.getLongValue();
-                    break;
-                case Double:
-                    actualValue = metric.getDoubleValue();
-                    break;
-                case Int8:
-                case Int16:
-                case Int32:
-                case UInt8:
-                case UInt16:
-                    actualValue = metric.getIntValue();
-                    break;
-                case Float:
-                    actualValue = metric.getFloatValue();
-                    break;
-                case String:
-                case Text:
-                case UUID:
-                    actualValue = metric.getStringValue();
-                    break;
-                case File:
-                case DataSet:
-                case DateTimeArray:
-                case Int16Array:
-                case Int32Array:
-                case Int64Array:
-                case Int8Array:
-                case PropertySet:
-                case PropertySetList:
-                case StringArray:
-                case Template:
-                case UInt16Array:
-                case FloatArray:
-                case UInt32Array:
-                case UInt64Array:
-                case DoubleArray:
-                case UInt8Array:
-                case BooleanArray:
-                case Unknown:
-                default:
-                    break;
+                    case Boolean:
+                        actualValue = metric.getBooleanValue();
+                        break;
+                    case Bytes:
+                        actualValue = metric.getBytesValue().toByteArray();
+                        break;
+                    case DateTime:
+                    case Int64:
+                    case UInt32:
+                    case UInt64:
+                        actualValue = metric.getLongValue();
+                        break;
+                    case Double:
+                        actualValue = metric.getDoubleValue();
+                        break;
+                    case Int8:
+                    case Int16:
+                    case Int32:
+                    case UInt8:
+                    case UInt16:
+                        actualValue = metric.getIntValue();
+                        break;
+                    case Float:
+                        actualValue = metric.getFloatValue();
+                        break;
+                    case String:
+                    case Text:
+                    case UUID:
+                        actualValue = metric.getStringValue();
+                        break;
+                    case File:
+                    case DataSet:
+                    case DateTimeArray:
+                    case Int16Array:
+                    case Int32Array:
+                    case Int64Array:
+                    case Int8Array:
+                    case PropertySet:
+                    case PropertySetList:
+                    case StringArray:
+                    case Template:
+                    case UInt16Array:
+                    case FloatArray:
+                    case UInt32Array:
+                    case UInt64Array:
+                    case DoubleArray:
+                    case UInt8Array:
+                    case BooleanArray:
+                    case Unknown:
+                    default:
+                        break;
                 }
 
                 assertEquals(expectedName, metric.getName());
@@ -279,7 +287,9 @@ public class SparkplugBProtobufPayloadBuilderTest {
 
         <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
             assertNotNull("No exception thrown", this.occurredException);
-            assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+            assertEquals(
+                    expectedException.getName(),
+                    this.occurredException.getClass().getName());
         }
 
         void thenSeqEquals(long expectedSeq) {
@@ -294,6 +304,4 @@ public class SparkplugBProtobufPayloadBuilderTest {
             assertTrue(Arrays.equals(expectedBody, this.payload.getBody().toByteArray()));
         }
     }
-
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,8 @@ public class CloudConnectionFactoryInfo {
     private final String defaultCloudEndpointPid;
     private final String cloudEndpointPidRegex;
 
-    public CloudConnectionFactoryInfo(String cloudConnectionFactoryPid, String defaultCloudEndpointPid,
-            String cloudEndpointPidRegex) {
+    public CloudConnectionFactoryInfo(
+            String cloudConnectionFactoryPid, String defaultCloudEndpointPid, String cloudEndpointPidRegex) {
 
         this.cloudConnectionFactoryPid = cloudConnectionFactoryPid;
         this.defaultCloudEndpointPid = defaultCloudEndpointPid;
@@ -37,5 +37,4 @@ public class CloudConnectionFactoryInfo {
     public String getCloudEndpointPidRegex() {
         return this.cloudEndpointPidRegex;
     }
-
 }

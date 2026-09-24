@@ -16,15 +16,25 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 
-@ObjectClassDefinition(id = "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber", name = "RawMqttSubscriber", description = "The RawMqttSubscriber allows to define the subscribtion topic and notify the associated applications when a subscription event happens.")
+@ObjectClassDefinition(
+        id = "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
+        name = "RawMqttSubscriber",
+        description =
+                "The RawMqttSubscriber allows to define the subscribtion topic and notify the associated applications when a subscription event happens.")
 public @interface RawMqttSubscriberOptions {
 
-    @AttributeDefinition(name = "Topic Filter", description = "The MQTT subscription topic filter. For example foo/bar/baz, foo/+/bar, #, foo/#")
+    @AttributeDefinition(
+            name = "Topic Filter",
+            description = "The MQTT subscription topic filter. For example foo/bar/baz, foo/+/bar, #, foo/#")
     String topic_filter() default "";
 
-    @AttributeDefinition(name = "Qos", options = { @Option(label = "0", value = "0"), @Option(label = "1", value = "1"), @Option(label = "2", value = "2") }, description = "The desired quality of service for the subscription messages.")
+    @AttributeDefinition(
+            name = "Qos",
+            options = {
+                @Option(label = "0", value = "0"),
+                @Option(label = "1", value = "1"),
+                @Option(label = "2", value = "2")
+            },
+            description = "The desired quality of service for the subscription messages.")
     int qos() default 0;
-
 }
-
-

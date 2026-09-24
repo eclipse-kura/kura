@@ -39,7 +39,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Properties;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -48,23 +47,22 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.crypto.CryptoService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.crypto.CryptoService.class })
+        name = "org.eclipse.kura.crypto.CryptoService",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        service = {org.eclipse.kura.crypto.CryptoService.class})
 public class CryptoServiceImpl implements CryptoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
@@ -88,7 +86,10 @@ public class CryptoServiceImpl implements CryptoService {
     private SystemService systemService;
     private Optional<byte[]> secretKey;
 
-    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
+    @Reference(
+            name = "SystemService",
+            service = org.eclipse.kura.system.SystemService.class,
+            unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -123,7 +124,8 @@ public class CryptoServiceImpl implements CryptoService {
             logger.warn("Unexpected exception loading encryption provided by systemd", e);
         }
 
-        return Optional.ofNullable(System.getProperty(SECRET_KEY_SYSTEM_PROPERTY_NAME)).filter(k -> !k.isEmpty())
+        return Optional.ofNullable(System.getProperty(SECRET_KEY_SYSTEM_PROPERTY_NAME))
+                .filter(k -> !k.isEmpty())
                 .map(k -> {
                     logger.debug("using key from system properties");
                     return k.getBytes(StandardCharsets.UTF_8);
@@ -156,7 +158,6 @@ public class CryptoServiceImpl implements CryptoService {
         } catch (InvalidAlgorithmParameterException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, PARAMETER_EXCEPTION_CAUSE);
         }
-
     }
 
     @Override
@@ -324,8 +325,9 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     @Deprecated
-    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            IllegalBlockSizeException, BadPaddingException {
+    public String encryptAes(String value)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
+                    BadPaddingException {
         char[] encryptedValue = null;
         try {
             encryptedValue = encryptAes(value.toCharArray());
@@ -349,8 +351,9 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     @Deprecated
-    public String decryptAes(String encryptedValue) throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
+    public String decryptAes(String encryptedValue)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException,
+                    IllegalBlockSizeException, BadPaddingException {
         try {
             return new String(decryptAes(encryptedValue.toCharArray()));
         } catch (KuraException e) {
@@ -386,7 +389,7 @@ public class CryptoServiceImpl implements CryptoService {
             return "changeit".toCharArray();
         }
 
-        try (FileInputStream fis = new FileInputStream(this.keystorePasswordPath);) {
+        try (FileInputStream fis = new FileInputStream(this.keystorePasswordPath); ) {
             props.load(fis);
             Object value = props.get(keyStorePath);
             if (value != null) {
@@ -415,7 +418,7 @@ public class CryptoServiceImpl implements CryptoService {
         char[] encryptedPassword = encryptAes(password);
         props.put(keyStorePath, new String(encryptedPassword));
 
-        try (FileOutputStream fos = new FileOutputStream(this.keystorePasswordPath);) {
+        try (FileOutputStream fos = new FileOutputStream(this.keystorePasswordPath); ) {
             props.store(fos, "Do not edit this file. It's automatically generated by Kura");
             fos.flush();
         } catch (IOException e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.util.store.listener;
 
 import java.util.Set;
@@ -19,7 +18,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
 import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +49,10 @@ public class ConnectionListenerManager {
 
     public void addAll(Set<ConnectionListener> listeners) {
         this.listeners.addAll(listeners);
-
     }
 
     public void add(ConnectionListener listener) {
         this.listeners.add(listener);
-
     }
 
     public void remove(ConnectionListener listener) {
@@ -72,5 +68,4 @@ public class ConnectionListenerManager {
             Thread.currentThread().interrupt();
         }
     }
-
 }

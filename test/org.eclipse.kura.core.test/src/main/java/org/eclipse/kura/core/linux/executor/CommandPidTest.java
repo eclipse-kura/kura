@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
@@ -36,7 +35,7 @@ import org.junit.runners.Parameterized;
 public class CommandPidTest {
 
     private static CommandExecutorService executor;
-    private static String[] commandLine = { "find", "/", "-name", "foo" };
+    private static String[] commandLine = {"find", "/", "-name", "foo"};
     private Map<String, Pid> pids = new HashMap<>();
 
     public CommandPidTest(CommandExecutorService executor) {
@@ -45,8 +44,8 @@ public class CommandPidTest {
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getExecutors() {
-        return Arrays.asList(new UnprivilegedExecutorServiceImpl(mock(SystemService.class)),
-                new PrivilegedExecutorServiceImpl());
+        return Arrays.asList(
+                new UnprivilegedExecutorServiceImpl(mock(SystemService.class)), new PrivilegedExecutorServiceImpl());
     }
 
     @Test
@@ -77,5 +76,4 @@ public class CommandPidTest {
     private void thenPidsAreNotEmpty() {
         assertFalse(this.pids.isEmpty());
     }
-
 }

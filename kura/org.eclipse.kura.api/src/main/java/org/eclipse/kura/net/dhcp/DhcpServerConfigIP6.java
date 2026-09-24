@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.dhcp;
 
 import java.util.List;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP6Address;
@@ -57,13 +56,33 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address> implemen
      */
     @Deprecated
     @SuppressWarnings("checkstyle:parameterNumber")
-    public DhcpServerConfigIP6(String interfaceName, boolean enabled, IP6Address subnet, IP6Address routerAddress,
-            IP6Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP6Address rangeStart,
-            IP6Address rangeEnd, boolean passDns, List<IP6Address> dnsServers) {
+    public DhcpServerConfigIP6(
+            String interfaceName,
+            boolean enabled,
+            IP6Address subnet,
+            IP6Address routerAddress,
+            IP6Address subnetMask,
+            int defaultLeaseTime,
+            int maximumLeaseTime,
+            short prefix,
+            IP6Address rangeStart,
+            IP6Address rangeEnd,
+            boolean passDns,
+            List<IP6Address> dnsServers) {
 
-        super(interfaceName, enabled, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix,
-                rangeStart, rangeEnd, passDns, dnsServers);
-
+        super(
+                interfaceName,
+                enabled,
+                subnet,
+                routerAddress,
+                subnetMask,
+                defaultLeaseTime,
+                maximumLeaseTime,
+                prefix,
+                rangeStart,
+                rangeEnd,
+                passDns,
+                dnsServers);
     }
 
     /**

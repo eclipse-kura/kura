@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.type.TypedValue;
@@ -48,22 +47,22 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public final class WireTestUtil {
 
-    private WireTestUtil() {
-    }
+    private WireTestUtil() {}
 
     public static CompletableFuture<Void> updateWireComponentConfiguration(
             final ConfigurationService configurationService, final String pid, final Map<String, Object> properties) {
 
         try {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+            final BundleContext bundleContext =
+                    FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
             final CompletableFuture<Void> result = new CompletableFuture<>();
 
-            final Filter filter = FrameworkUtil
-                    .createFilter("(&(objectClass=org.eclipse.kura.wire.WireComponent)(kura.service.pid=" + pid + "))");
+            final Filter filter = FrameworkUtil.createFilter(
+                    "(&(objectClass=org.eclipse.kura.wire.WireComponent)(kura.service.pid=" + pid + "))");
 
-            final ServiceTracker<WireComponent, WireComponent> tracker = new ServiceTracker<>(bundleContext, filter,
-                    new ServiceTrackerCustomizer<WireComponent, WireComponent>() {
+            final ServiceTracker<WireComponent, WireComponent> tracker = new ServiceTracker<>(
+                    bundleContext, filter, new ServiceTrackerCustomizer<WireComponent, WireComponent>() {
 
                         @Override
                         public WireComponent addingService(final ServiceReference<WireComponent> ref) {
@@ -71,14 +70,14 @@ public final class WireTestUtil {
                         }
 
                         @Override
-                        public void modifiedService(final ServiceReference<WireComponent> ref,
-                                final WireComponent comp) {
+                        public void modifiedService(
+                                final ServiceReference<WireComponent> ref, final WireComponent comp) {
                             result.complete(null);
                         }
 
                         @Override
-                        public void removedService(final ServiceReference<WireComponent> ref,
-                                final WireComponent comp) {
+                        public void removedService(
+                                final ServiceReference<WireComponent> ref, final WireComponent comp) {
                             bundleContext.ungetService(ref);
                         }
                     });
@@ -93,8 +92,9 @@ public final class WireTestUtil {
         }
     }
 
-    public static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
-            final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
+    public static CompletableFuture<Void> updateComponentConfiguration(
+            final ConfigurationService configurationService, final String pid, final Map<String, Object> properties)
+            throws KuraException, InvalidSyntaxException {
 
         final CompletableFuture<Void> result = modified("(kura.service.pid=" + pid + ")");
 
@@ -106,10 +106,11 @@ public final class WireTestUtil {
     public static CompletableFuture<Void> modified(final String filter) throws KuraException, InvalidSyntaxException {
 
         final CompletableFuture<Void> result = new CompletableFuture<Void>();
-        final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+        final BundleContext context =
+                FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
-        final ServiceTracker<?, ?> tracker = new ServiceTracker<Object, Object>(context,
-                FrameworkUtil.createFilter(filter), new ServiceTrackerCustomizer<Object, Object>() {
+        final ServiceTracker<?, ?> tracker = new ServiceTracker<Object, Object>(
+                context, FrameworkUtil.createFilter(filter), new ServiceTrackerCustomizer<Object, Object>() {
 
                     @Override
                     public Object addingService(ServiceReference<Object> reference) {
@@ -144,10 +145,11 @@ public final class WireTestUtil {
         }
 
         final CompletableFuture<T> result = new CompletableFuture<>();
-        final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+        final BundleContext context =
+                FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
-        final ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, filter,
-                new ServiceTrackerCustomizer<T, T>() {
+        final ServiceTracker<T, T> tracker =
+                new ServiceTracker<T, T>(context, filter, new ServiceTrackerCustomizer<T, T>() {
 
                     @Override
                     public T addingService(ServiceReference<T> reference) {
@@ -174,18 +176,23 @@ public final class WireTestUtil {
         return result.whenComplete((ok, ex) -> tracker.close());
     }
 
-    public static <T> CompletableFuture<T> createFactoryConfiguration(final ConfigurationService configurationService,
-            final Class<T> classz, final String pid, final String factoryPid, final Map<String, Object> properties) {
+    public static <T> CompletableFuture<T> createFactoryConfiguration(
+            final ConfigurationService configurationService,
+            final Class<T> classz,
+            final String pid,
+            final String factoryPid,
+            final Map<String, Object> properties) {
         try {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+            final BundleContext bundleContext =
+                    FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
             final CompletableFuture<T> result = new CompletableFuture<>();
 
-            final Filter filter = FrameworkUtil
-                    .createFilter("(&(objectClass=" + classz.getName() + ")(kura.service.pid=" + pid + "))");
+            final Filter filter = FrameworkUtil.createFilter(
+                    "(&(objectClass=" + classz.getName() + ")(kura.service.pid=" + pid + "))");
 
-            final ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, filter,
-                    new ServiceTrackerCustomizer<T, T>() {
+            final ServiceTracker<T, T> tracker =
+                    new ServiceTracker<>(bundleContext, filter, new ServiceTrackerCustomizer<T, T>() {
 
                         @Override
                         public T addingService(final ServiceReference<T> ref) {
@@ -194,7 +201,6 @@ public final class WireTestUtil {
                             result.complete(obj);
 
                             return obj;
-
                         }
 
                         @Override
@@ -218,19 +224,20 @@ public final class WireTestUtil {
         }
     }
 
-    public static CompletableFuture<Void> deleteFactoryConfiguration(final ConfigurationService configurationService,
-            final String pid) {
+    public static CompletableFuture<Void> deleteFactoryConfiguration(
+            final ConfigurationService configurationService, final String pid) {
 
         try {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+            final BundleContext bundleContext =
+                    FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
             final CompletableFuture<Void> tracked = new CompletableFuture<>();
             final CompletableFuture<Void> removed = new CompletableFuture<>();
 
             final Filter filter = FrameworkUtil.createFilter("(kura.service.pid=" + pid + ")");
 
-            final ServiceTracker<Object, Object> tracker = new ServiceTracker<>(bundleContext, filter,
-                    new ServiceTrackerCustomizer<Object, Object>() {
+            final ServiceTracker<Object, Object> tracker =
+                    new ServiceTracker<>(bundleContext, filter, new ServiceTrackerCustomizer<Object, Object>() {
 
                         @Override
                         public Object addingService(final ServiceReference<Object> ref) {
@@ -282,8 +289,10 @@ public final class WireTestUtil {
         return unwrapRecord(envelope, 0).getProperties().get(key);
     }
 
-    public static CompletableFuture<Void> componentsActivated(final BundleContext context,
-            final Set<String> expectedPids, final BiConsumer<String, Object> trackedObjectConsumer) {
+    public static CompletableFuture<Void> componentsActivated(
+            final BundleContext context,
+            final Set<String> expectedPids,
+            final BiConsumer<String, Object> trackedObjectConsumer) {
 
         if (expectedPids.isEmpty()) {
             return CompletableFuture.completedFuture(null);
@@ -293,8 +302,8 @@ public final class WireTestUtil {
 
         final CompletableFuture<Void> result = new CompletableFuture<>();
 
-        final ServiceTracker<WireComponent, WireComponent> tracker = new ServiceTracker<>(context, WireComponent.class,
-                new ServiceTrackerCustomizer<WireComponent, WireComponent>() {
+        final ServiceTracker<WireComponent, WireComponent> tracker = new ServiceTracker<>(
+                context, WireComponent.class, new ServiceTrackerCustomizer<WireComponent, WireComponent>() {
 
                     @Override
                     public WireComponent addingService(final ServiceReference<WireComponent> ref) {
@@ -329,8 +338,8 @@ public final class WireTestUtil {
         return result.whenComplete((ok, ex) -> tracker.close());
     }
 
-    public static CompletableFuture<Void> wiresConnected(final BundleContext context,
-            final Set<MultiportWireConfiguration> expected) {
+    public static CompletableFuture<Void> wiresConnected(
+            final BundleContext context, final Set<MultiportWireConfiguration> expected) {
 
         if (expected.isEmpty()) {
             return CompletableFuture.completedFuture(null);
@@ -352,17 +361,15 @@ public final class WireTestUtil {
             if (tracked.containsAll(expected)) {
                 result.complete(null);
             }
-
         };
 
         final Dictionary<String, Object> listenerProperties = new Hashtable<>();
         listenerProperties.put(WireConstants.WIREADMIN_EVENTS, WireAdminEvent.WIRE_CONNECTED);
 
-        final ServiceRegistration<WireAdminListener> registration = context.registerService(WireAdminListener.class,
-                listener, listenerProperties);
+        final ServiceRegistration<WireAdminListener> registration =
+                context.registerService(WireAdminListener.class, listener, listenerProperties);
 
         return result.whenComplete((ok, ex) -> registration.unregister());
-
     }
 
     private static MultiportWireConfiguration fromWire(final Wire wire) {
@@ -376,5 +383,4 @@ public final class WireTestUtil {
 
         return new MultiportWireConfiguration(emitterPid, receiverPid, emitterPort, receiverPort);
     }
-
 }

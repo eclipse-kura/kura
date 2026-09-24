@@ -1,21 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
- * which is available at https:www.eclipse.org/legal/epl-2.0/
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.core.inventory.resources;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerPort;
 import org.eclipse.kura.container.orchestration.ContainerState;
@@ -40,7 +38,9 @@ public class DockerContainer extends SystemResourceInfo {
     }
 
     public DockerContainer(ContainerInstanceDescriptor container) {
-        super(container.getContainerName(), container.getContainerImage() + ":" + container.getContainerImageTag(),
+        super(
+                container.getContainerName(),
+                container.getContainerImage() + ":" + container.getContainerImageTag(),
                 SystemResourceType.DOCKER);
 
         this.containerName = container.getContainerName();
@@ -48,14 +48,15 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerImageTag = container.getContainerImageTag();
 
         this.containerID = container.getContainerId();
-        this.containerPortsExternal = container.getContainerPorts().stream().map(ContainerPort::getExternalPort)
+        this.containerPortsExternal = container.getContainerPorts().stream()
+                .map(ContainerPort::getExternalPort)
                 .collect(Collectors.toList());
 
-        this.containerPortsInternal = container.getContainerPorts().stream().map(ContainerPort::getInternalPort)
+        this.containerPortsInternal = container.getContainerPorts().stream()
+                .map(ContainerPort::getInternalPort)
                 .collect(Collectors.toList());
         this.containerState = container.getContainerState();
         this.isFrameworkManaged = container.isFrameworkManaged();
-
     }
 
     public String getContainerName() {
@@ -124,5 +125,4 @@ public class DockerContainer extends SystemResourceInfo {
     public Boolean isFrameworkManaged() {
         return this.isFrameworkManaged;
     }
-
 }

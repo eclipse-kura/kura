@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.rest.identity.provider.util;
 import static java.util.Objects.isNull;
 
 import jakarta.ws.rs.core.Response.Status;
-
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class StringUtils {
@@ -33,13 +32,13 @@ public class StringUtils {
     public static void validateField(String propertyName, String inputToValidate) {
 
         if (isNull(inputToValidate)) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                    "Missing '" + propertyName + "' property");
+            throw DefaultExceptionHandler.buildWebApplicationException(
+                    Status.BAD_REQUEST, "Missing '" + propertyName + "' property");
         }
 
         if (inputToValidate.trim().isEmpty()) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                    "`" + propertyName + "` value can't be empty");
+            throw DefaultExceptionHandler.buildWebApplicationException(
+                    Status.BAD_REQUEST, "`" + propertyName + "` value can't be empty");
         }
     }
 }

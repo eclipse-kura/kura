@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -51,7 +50,8 @@ public class UserAdminIdentityStore implements IdentityStore {
     private final Logger logger;
     private final PasswordHasher passwordHasher;
 
-    public UserAdminIdentityStore(final UserAdminHelper userAdminHelper,
+    public UserAdminIdentityStore(
+            final UserAdminHelper userAdminHelper,
             final Map<String, IdentityConfigurationExtension> extensions,
             final Logger logger,
             final PasswordHasher passwordHasher) {
@@ -67,9 +67,10 @@ public class UserAdminIdentityStore implements IdentityStore {
     }
 
     @Override
-    public Optional<IdentityConfiguration> getIdentityConfiguration(final String identityName,
-            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
-        return this.userAdminHelper.getUser(identityName)
+    public Optional<IdentityConfiguration> getIdentityConfiguration(
+            final String identityName, final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
+        return this.userAdminHelper
+                .getUser(identityName)
                 .map(user -> buildIdentity(identityName, user, componentsToReturn));
     }
 
@@ -83,7 +84,8 @@ public class UserAdminIdentityStore implements IdentityStore {
 
     @Override
     public void updateIdentityConfiguration(final IdentityConfiguration identityConfiguration) throws KuraException {
-        final User user = this.userAdminHelper.getUser(identityConfiguration.getName())
+        final User user = this.userAdminHelper
+                .getUser(identityConfiguration.getName())
                 .orElseThrow(() -> new KuraException(KuraErrorCode.INVALID_PARAMETER, "Identity does not exist"));
         updateIdentityConfigurationInternal(user, identityConfiguration);
     }
@@ -114,15 +116,17 @@ public class UserAdminIdentityStore implements IdentityStore {
             updateAssignedPermissions(identityName, permissions.get(), user);
         }
 
-        final Optional<AdditionalConfigurations> additionalConfigurations = identity
-                .getComponent(AdditionalConfigurations.class);
+        final Optional<AdditionalConfigurations> additionalConfigurations =
+                identity.getComponent(AdditionalConfigurations.class);
 
         if (additionalConfigurations.isPresent()) {
             updateAdditionalConfigurations(identity.getName(), additionalConfigurations.get());
         }
     }
 
-    private IdentityConfiguration buildIdentity(final String name, final User user,
+    private IdentityConfiguration buildIdentity(
+            final String name,
+            final User user,
             final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
 
         final List<IdentityConfigurationComponent> components = new ArrayList<>();
@@ -133,7 +137,8 @@ public class UserAdminIdentityStore implements IdentityStore {
 
         if (componentsToReturn.contains(AssignedPermissions.class)) {
             final Set<Permission> permissions = this.userAdminHelper.getIdentityPermissions(name).stream()
-                    .map(Permission::new).collect(Collectors.toSet());
+                    .map(Permission::new)
+                    .collect(Collectors.toSet());
             components.add(new AssignedPermissions(permissions));
         }
 
@@ -159,29 +164,35 @@ public class UserAdminIdentityStore implements IdentityStore {
     }
 
     private PasswordConfiguration getPasswordData(final User user) {
-        final Optional<String> passwordHash = Optional.ofNullable(user.getCredentials()
-                .get(IdentityServiceImpl.PASSWORD_PROPERTY))
-                .filter(String.class::isInstance).map(String.class::cast);
+        final Optional<String> passwordHash = Optional.ofNullable(
+                        user.getCredentials().get(IdentityServiceImpl.PASSWORD_PROPERTY))
+                .filter(String.class::isInstance)
+                .map(String.class::cast);
 
-        final boolean isPasswordChangeNeeded = Objects.equals("true",
-                user.getProperties().get(IdentityServiceImpl.KURA_NEED_PASSWORD_CHANGE));
+        final boolean isPasswordChangeNeeded =
+                Objects.equals("true", user.getProperties().get(IdentityServiceImpl.KURA_NEED_PASSWORD_CHANGE));
 
-        return new PasswordConfiguration(isPasswordChangeNeeded, passwordHash.isPresent(), Optional.empty(),
+        return new PasswordConfiguration(
+                isPasswordChangeNeeded,
+                passwordHash.isPresent(),
+                Optional.empty(),
                 passwordHash.map(PasswordHashImpl::new));
     }
 
-    private void updateAssignedPermissions(final String identityName, final AssignedPermissions assignedPermissions,
-            final User user) {
+    private void updateAssignedPermissions(
+            final String identityName, final AssignedPermissions assignedPermissions, final User user) {
         this.userAdminHelper.foreachPermission((name, group) -> {
             final Permission permission = new Permission(name);
-            final List<Role> members = Optional.ofNullable(group.getMembers()).map(Arrays::asList)
-                    .orElse(Collections.emptyList());
+            final List<Role> members =
+                    Optional.ofNullable(group.getMembers()).map(Arrays::asList).orElse(Collections.emptyList());
 
             if (assignedPermissions.getPermissions().contains(permission) && !members.contains(user)) {
-                IdentityServiceImpl.audit(() -> group.addMember(user),
+                IdentityServiceImpl.audit(
+                        () -> group.addMember(user),
                         "Add permission " + permission.getName() + " to identity " + identityName);
             } else if (!assignedPermissions.getPermissions().contains(permission) && members.contains(user)) {
-                IdentityServiceImpl.audit(() -> group.removeMember(user),
+                IdentityServiceImpl.audit(
+                        () -> group.removeMember(user),
                         "Remove permission " + permission.getName() + " from identity " + identityName);
             }
         });
@@ -196,12 +207,13 @@ public class UserAdminIdentityStore implements IdentityStore {
 
         if (passwordData.isPasswordChangeNeeded()) {
             if (!"true".equals(currentIsPasswordChangeNeeded)) {
-                IdentityServiceImpl.audit(() -> setProperty(properties,
-                        IdentityServiceImpl.KURA_NEED_PASSWORD_CHANGE, "true"),
+                IdentityServiceImpl.audit(
+                        () -> setProperty(properties, IdentityServiceImpl.KURA_NEED_PASSWORD_CHANGE, "true"),
                         "Enable password change at next login for identity " + identityName);
             }
         } else if (currentIsPasswordChangeNeeded != null) {
-            IdentityServiceImpl.audit(() -> removeProperty(properties, IdentityServiceImpl.KURA_NEED_PASSWORD_CHANGE),
+            IdentityServiceImpl.audit(
+                    () -> removeProperty(properties, IdentityServiceImpl.KURA_NEED_PASSWORD_CHANGE),
                     "Disable password change at next login for identity " + identityName);
         }
 
@@ -212,18 +224,22 @@ public class UserAdminIdentityStore implements IdentityStore {
 
         if (passwordData.isPasswordAuthEnabled() && newPassword.isPresent()) {
 
-            IdentityServiceImpl.audit(() -> setProperty(credentials, IdentityServiceImpl.PASSWORD_PROPERTY,
-                    this.passwordHasher.hash(newPassword.get()).toString()),
+            IdentityServiceImpl.audit(
+                    () -> setProperty(
+                            credentials,
+                            IdentityServiceImpl.PASSWORD_PROPERTY,
+                            this.passwordHasher.hash(newPassword.get()).toString()),
                     "Update Kura password for identity " + identityName);
 
         } else if (!passwordData.isPasswordAuthEnabled() && currentPasswordHash != null) {
-            IdentityServiceImpl.audit(() -> removeProperty(credentials, IdentityServiceImpl.PASSWORD_PROPERTY),
+            IdentityServiceImpl.audit(
+                    () -> removeProperty(credentials, IdentityServiceImpl.PASSWORD_PROPERTY),
                     "Disable Kura password for identity " + identityName);
         }
     }
 
-    private void updateAdditionalConfigurations(final String identityName,
-            final AdditionalConfigurations additionalConfigurations) throws KuraException {
+    private void updateAdditionalConfigurations(
+            final String identityName, final AdditionalConfigurations additionalConfigurations) throws KuraException {
 
         final FailureHandler failureHandler = new FailureHandler(this.logger);
 
@@ -238,7 +254,8 @@ public class UserAdminIdentityStore implements IdentityStore {
             }
 
             try {
-                IdentityServiceImpl.audit(() -> extension.get().updateConfiguration(identityName, config),
+                IdentityServiceImpl.audit(
+                        () -> extension.get().updateConfiguration(identityName, config),
                         "Update configuration for extension " + pid + " for identity " + identityName);
             } catch (final KuraException e) {
                 failureHandler.addError(e.getMessage());

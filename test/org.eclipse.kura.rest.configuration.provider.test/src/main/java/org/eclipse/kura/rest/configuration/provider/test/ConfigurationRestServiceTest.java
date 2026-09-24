@@ -28,6 +28,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonValue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +48,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -75,9 +76,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonValue;
 
 @RunWith(Parameterized.class)
 public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
@@ -332,7 +330,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetNullsInArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.STRING, new String[] { "foo", null, null });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.STRING, new String[] {"foo", null, null});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -354,7 +352,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetBooleanArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.BOOLEAN, new Boolean[] { true, false, true });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.BOOLEAN, new Boolean[] {true, false, true});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -365,7 +363,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetByteArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.BYTE, new Byte[] { 1, 2, 3 });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.BYTE, new Byte[] {1, 2, 3});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -376,7 +374,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetCharArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.CHAR, new Character[] { 'a', 'b', 'c' });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.CHAR, new Character[] {'a', 'b', 'c'});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -387,7 +385,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetDoubleArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.DOUBLE, new Double[] { 1.0d, 2.0d, 3.0d });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.DOUBLE, new Double[] {1.0d, 2.0d, 3.0d});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -398,7 +396,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetFloatArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.FLOAT, new Float[] { 1.0f, 2.0f, 3.0f });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.FLOAT, new Float[] {1.0f, 2.0f, 3.0f});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -409,7 +407,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetIntegerArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.INTEGER, new Integer[] { 1, 2, 3 });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.INTEGER, new Integer[] {1, 2, 3});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -420,7 +418,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetShortArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, new Short[] { 1, 2, 3 });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, new Short[] {1, 2, 3});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -431,7 +429,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetLongArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.LONG, new Long[] { 1L, 2L, 3L });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.LONG, new Long[] {1L, 2L, 3L});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -445,8 +443,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         givenEncryptedPassword("foobar");
 
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password[] { new Password(this.encryptedPassword) });
+        givenATestConfigurationPropertyWithAdTypeAndValue(
+                Scalar.PASSWORD, new Password[] {new Password(this.encryptedPassword)});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -457,7 +455,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetStringArrayProperty() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.STRING, new String[] { "foo", "bar", "baz" });
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.STRING, new String[] {"foo", "bar", "baz"});
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -468,7 +466,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateConfigurationBooleanPropertyTrue() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":true}}" + "}" + "]}");
 
@@ -478,7 +478,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateConfigurationBooleanPropertyFalse() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":false}}" + "}" + "]}");
 
@@ -488,8 +490,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateByteProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":15}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":15}}"
+                        + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", (byte) 15);
@@ -497,8 +502,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateCharProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"a\"}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"a\"}}" + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 'a');
@@ -506,8 +514,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateDoubleProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":2.0}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":2.0}}" + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 2.0d);
@@ -515,8 +526,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateFloatProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":2.0}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":2.0}}"
+                        + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 2.0f);
@@ -524,8 +538,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateIntegerPropert() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":123}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":123}}" + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 123);
@@ -533,8 +550,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateShortProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":123}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":123}}"
+                        + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", (short) 123);
@@ -542,8 +562,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateLongProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":123}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":123}}"
+                        + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 123L);
@@ -551,7 +574,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdatePasswordProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":\"foobar\"}}" + "}" + "]}");
 
@@ -561,7 +586,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateStringProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":\"test string\"}}" + "}" + "]}");
 
@@ -571,88 +598,106 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateBooleanArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":[false,true,false]}}" + "}"
                         + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Boolean[] { false, true, false });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Boolean[] {false, true, false});
     }
 
     @Test
     public void testUpdateByteArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":[15,12]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Byte[] { 15, 12 });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Byte[] {15, 12});
     }
 
     @Test
     public void testUpdateCharArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[\"a\",\"b\",\"c\"]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Character[] { 'a', 'b', 'c' });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Character[] {'a', 'b', 'c'});
     }
 
     @Test
     public void testUpdateDoubleArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":[2.0,3.0]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Double[] { 2.0d, 3.0d });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Double[] {2.0d, 3.0d});
     }
 
     @Test
     public void testUpdateFloatArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":[2.0,4.0]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Float[] { 2.0f, 4.0f });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Float[] {2.0f, 4.0f});
     }
 
     @Test
     public void testUpdateIntegerArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":[1,2,3]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Integer[] { 1, 2, 3 });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Integer[] {1, 2, 3});
     }
 
     @Test
     public void testUpdateShortArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":[1,2,3]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Short[] { 1, 2, 3 });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Short[] {1, 2, 3});
     }
 
     @Test
     public void testUpdateLongArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":[1,2,3]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Long[] { 1L, 2L, 3L });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Long[] {1L, 2L, 3L});
     }
 
     @Test
     public void testUpdatePasswordArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":[\"foobar\",\"a\"]}}" + "}"
                         + "]}");
@@ -663,21 +708,26 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateStringArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[\"test string\",\"foo\"]}}" + "}"
                         + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new String[] { "test string", "foo" });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new String[] {"test string", "foo"});
     }
 
     @Test
     public void testUpdateNullProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\","
-                + "properties: {\"testProp\":{\"type\":\"STRING\"},\"otherProp\":{\"type\":\"STRING\",\"value\":null}}"
-                + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":["
+                        + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"STRING\"},\"otherProp\":{\"type\":\"STRING\",\"value\":null}}"
+                        + "}" + "]}");
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", null);
@@ -686,17 +736,21 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateNullsInArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",value:[null,\"foo\",null]}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new String[] { null, "foo", null });
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new String[] {null, "foo", null});
     }
 
     @Test
     public void testUpdateTypeMismatchNumericProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":\"foo\"}}" + "}" + "]}");
 
@@ -706,8 +760,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchStringProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":12}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":12}}"
+                        + "}" + "]}");
 
         thenResponseCodeIs(400);
         thenResponseElementExists(self().field("message"));
@@ -715,8 +772,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchPasswordProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":12}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":12}}" + "}" + "]}");
 
         thenResponseCodeIs(400);
         thenResponseElementExists(self().field("message"));
@@ -724,8 +784,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchCharProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":12}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":12}}"
+                        + "}" + "]}");
 
         thenResponseCodeIs(400);
         thenResponseElementExists(self().field("message"));
@@ -733,7 +796,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateInvalidLengthCharProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"foo\"}}" + "}" + "]}");
 
@@ -743,7 +808,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchNumericArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":[\"foo\"]}}" + "}" + "]}");
 
@@ -753,8 +820,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchStringArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[12]}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[12]}}" + "}" + "]}");
 
         thenResponseCodeIs(400);
         thenResponseElementExists(self().field("message"));
@@ -762,7 +832,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchPasswordArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":[12]}}" + "}" + "]}");
 
@@ -772,8 +844,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchCharArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
-                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[12]}}" + "}" + "]}");
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[12]}}"
+                        + "}" + "]}");
 
         thenResponseCodeIs(400);
         thenResponseElementExists(self().field("message"));
@@ -781,7 +856,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateInvalidLengthCharArrayProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[\"foo\"]}}" + "}" + "]}");
 
@@ -791,7 +868,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateTypeMismatchBooleanProperty() {
-        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+        whenRequestIsPerformed(
+                new MethodSpec("PUT"),
+                "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":\"foo\"}}" + "}" + "]}");
 
@@ -803,8 +882,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public void testListComponentConfigurationsByPidException() throws KuraException {
         givenMockGetComponentConfigurationPidReturnException();
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenResponseCodeIs(400);
     }
@@ -813,8 +892,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public void testListComponentConfigurationsByPidEmpty() throws KuraException {
         givenMockGetComponentConfigurationPidReturnEmpty();
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"configs\":[]}");
@@ -824,7 +903,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public void testListComponentConfigurationsByPid() throws KuraException {
         givenMockGetComponentConfigurationPidReturnSome(5);
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                "/configurableComponents/configurations/byPid",
                 "{\"pids\":[\"pid1\",\"pid3\"]}");
 
         thenRequestSucceeds();
@@ -835,7 +916,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public void testListDefaultComponentConfigurationException() throws KuraException {
         givenMockGetDefaultComponentConfigurationReturnException();
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid/_default",
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                "/configurableComponents/configurations/byPid/_default",
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
@@ -846,7 +929,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public void testListDefaultComponentConfiguration() throws KuraException {
         givenMockGetDefaultComponentConfigurationReturnOne("test");
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid/_default",
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                "/configurableComponents/configurations/byPid/_default",
                 "{\"pids\":[\"test\"]}");
 
         thenRequestSucceeds();
@@ -952,14 +1037,26 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("fooAdName"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("id"));
-        thenResponseElementIs(Json.value("BOOLEAN"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("type"));
+        thenResponseElementIs(
+                Json.value("fooAdName"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("id"));
+        thenResponseElementIs(
+                Json.value("BOOLEAN"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("type"));
     }
 
     @Test
@@ -971,24 +1068,66 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(null,
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("name"));
-        thenResponseElementIs(null,
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("description"));
-        thenResponseElementIs(null,
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("min"));
-        thenResponseElementIs(null,
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("max"));
-        thenResponseElementIs(null, self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0)
-                .field("defaultValue"));
-        thenResponseElementIs(null, self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0)
-                .field("defaultValue"));
-        thenResponseElementIs(null,
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("option"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("name"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("description"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("min"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("max"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
+        thenResponseElementIs(
+                null,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("option"));
     }
 
     @Test
@@ -996,16 +1135,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN).withName("testName").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN)
+                                        .withName("testName")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("testName"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("name"));
+        thenResponseElementIs(
+                Json.value("testName"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("name"));
     }
 
     @Test
@@ -1013,17 +1160,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN).withDescription("test description")
+                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN)
+                                        .withDescription("test description")
                                         .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("test description"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("description"));
+        thenResponseElementIs(
+                Json.value("test description"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("description"));
     }
 
     @Test
@@ -1031,16 +1185,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN).withCardinality(1).build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN)
+                                        .withCardinality(1)
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value(1),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("cardinality"));
+        thenResponseElementIs(
+                Json.value(1),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("cardinality"));
     }
 
     @Test
@@ -1048,16 +1210,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN).withMin("10").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN)
+                                        .withMin("10")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("10"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("min"));
+        thenResponseElementIs(
+                Json.value("10"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("min"));
     }
 
     @Test
@@ -1065,16 +1235,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN).withMax("10").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN)
+                                        .withMax("10")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("10"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("max"));
+        thenResponseElementIs(
+                Json.value("10"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("max"));
     }
 
     @Test
@@ -1082,16 +1260,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN).withDefault("true").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.BOOLEAN)
+                                        .withDefault("true")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("true"), self().field("configs").arrayItem(0).field("definition").field("ad")
-                .arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("true"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1099,16 +1285,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withDefault("test\\ value").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withDefault("test\\ value")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("test value"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("test value"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1116,16 +1310,24 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withDefault("0\\ 0\\,5").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withDefault("0\\ 0\\,5")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("0 0,5"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("0 0,5"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1133,17 +1335,25 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(3)
-                                        .withDefault("a\\,b, c\\ d ,e").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withCardinality(3)
+                                        .withDefault("a\\,b, c\\ d ,e")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("a\\,b,c d,e"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("a\\,b,c d,e"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1151,17 +1361,25 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(1)
-                                        .withDefault("test\\ value").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withCardinality(1)
+                                        .withDefault("test\\ value")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("test value"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("test value"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1169,17 +1387,25 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(-1)
-                                        .withDefault("test\\ value").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withCardinality(-1)
+                                        .withDefault("test\\ value")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("test value"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("test value"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1187,17 +1413,25 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(-3)
-                                        .withDefault("a\\,b, c\\ d ,e").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withCardinality(-3)
+                                        .withDefault("a\\,b, c\\ d ,e")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("a\\,b,c d,e"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("a\\,b,c d,e"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1205,17 +1439,25 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(3)
-                                        .withDefault("a\\ b").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withCardinality(3)
+                                        .withDefault("a\\ b")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("a b"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("a b"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1223,17 +1465,25 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
-                                .withAd(adBuilder("fooAdName", Scalar.STRING).withCardinality(0)
-                                        .withDefault("a,b").build()) //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING)
+                                        .withCardinality(0)
+                                        .withDefault("a,b")
+                                        .build()) //
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.value("a"), self().field("configs").arrayItem(0).field("definition")
-                .field("ad").arrayItem(0).field("defaultValue"));
+        thenResponseElementIs(
+                Json.value("a"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("defaultValue"));
     }
 
     @Test
@@ -1248,12 +1498,18 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .build()) //
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse("[{\"value\":\"foo\"},{\"label\":\"bar\",\"value\":\"baz\"}]"),
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("option"));
+        thenResponseElementIs(
+                Json.parse("[{\"value\":\"foo\"},{\"label\":\"bar\",\"value\":\"baz\"}]"),
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("option"));
     }
 
     @Test
@@ -1268,17 +1524,19 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                         .build()) //
                                 .build()) //
                 .withConfigurationProperties(
-                        singletonMap("testProp", new Password[] { new Password(this.encryptedPassword) }))
+                        singletonMap("testProp", new Password[] {new Password(this.encryptedPassword)}))
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
-                "{\"pids\":[\"foo\"]}");
+        whenRequestIsPerformed(
+                new MethodSpec("POST"), "/configurableComponents/configurations/byPid", "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse("{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
-                + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
-                + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
-                + "\"properties\":{\"testProp\":{\"value\":[\"" + "placeholder" + "\"],\"type\":\"PASSWORD\"}}}"),
+        thenResponseElementIs(
+                Json.parse("{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+                        + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
+                        + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
+                        + "\"properties\":{\"testProp\":{\"value\":[\"" + "placeholder"
+                        + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
 
@@ -1291,13 +1549,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .withAd(adBuilder("fooAdName", Scalar.STRING) //
                                         .withOption(null, "foo") //
                                         .withOption("pass", "baz") //
-                                        .withDefault("default").build()) //
+                                        .withDefault("default")
+                                        .build()) //
                                 .build()) //
                 .withConfigurationProperties(
-                        singletonMap("testProp", new Password[] { new Password(this.encryptedPassword) }))
+                        singletonMap("testProp", new Password[] {new Password(this.encryptedPassword)}))
                 .build());
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid/_default",
+        whenRequestIsPerformed(
+                new MethodSpec("POST"),
+                "/configurableComponents/configurations/byPid/_default",
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
@@ -1324,11 +1585,12 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public static void setUp() throws Exception {
         WireTestUtil.trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
-        final ConfigurationAdmin configurationAdmin = WireTestUtil
-                .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(
+                        ConfigurationAdmin.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
 
-        final Configuration config = configurationAdmin
-                .getConfiguration("org.eclipse.kura.internal.rest.configuration.ConfigurationRestService", "?");
+        final Configuration config = configurationAdmin.getConfiguration(
+                "org.eclipse.kura.internal.rest.configuration.ConfigurationRestService", "?");
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("ConfigurationService.target", "(kura.service.pid=mockConfigurationService)");
 
@@ -1338,31 +1600,35 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockConfigurationService");
 
-        FrameworkUtil.getBundle(ConfigurationRestServiceTest.class).getBundleContext()
+        FrameworkUtil.getBundle(ConfigurationRestServiceTest.class)
+                .getBundleContext()
                 .registerService(ConfigurationService.class, configurationService, configurationServiceProperties);
-
     }
 
     @SuppressWarnings("unchecked")
-    public ConfigurationRestServiceTest(final Transport transport) throws InterruptedException, ExecutionException,
-            TimeoutException, KuraException, InvalidSyntaxException, IOException {
+    public ConfigurationRestServiceTest(final Transport transport)
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException,
+                    IOException {
         super(transport);
-        this.cryptoService = WireTestUtil.trackService(CryptoService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        this.cryptoService =
+                WireTestUtil.trackService(CryptoService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         Mockito.reset(configurationService);
 
         final Answer<?> configurationUpdateAnswer = i -> {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return null;
         };
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
+        Mockito.doAnswer(configurationUpdateAnswer)
+                .when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any());
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
+        Mockito.doAnswer(configurationUpdateAnswer)
+                .when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
     private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
-        final JsonValue root = Json
-                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
+        final JsonValue root =
+                Json.parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
         final JsonValue actual;
 
         try {
@@ -1376,8 +1642,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void thenResponseElementExists(final JsonProjection projection) {
-        final JsonValue root = Json
-                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
+        final JsonValue root =
+                Json.parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
 
         try {
             assertNotNull("response element " + projection + " is null", projection.apply(root));
@@ -1545,7 +1811,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             }
         };
 
-        when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any())).thenReturn(config);
+        when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any()))
+                .thenReturn(config);
     }
 
     private void givenMockGetSnapshotReturnException(int snapshotId) throws KuraException {
@@ -1590,7 +1857,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenMockRollbackReturnException(long snapshotId) throws KuraException {
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(configurationService).rollback(snapshotId);
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST))
+                .when(configurationService)
+                .rollback(snapshotId);
     }
 
     private void givenMockRollbackReturnOne(long snapshotId) throws KuraException {
@@ -1602,24 +1871,28 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenConfigurations(final ComponentConfiguration... configurations) throws KuraException {
-        final Map<String, ComponentConfiguration> byPid = Arrays.stream(configurations)
-                .collect(Collectors.toMap(c -> c.getPid(), c -> c));
+        final Map<String, ComponentConfiguration> byPid =
+                Arrays.stream(configurations).collect(Collectors.toMap(c -> c.getPid(), c -> c));
 
-        Mockito.when(configurationService.getComponentConfigurations()).thenReturn(byPid.values().stream().toList());
+        Mockito.when(configurationService.getComponentConfigurations())
+                .thenReturn(byPid.values().stream().toList());
 
-        Mockito.when(configurationService.getComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
-            final String pid = i.getArgument(0, String.class);
-            return byPid.get(pid);
-        });
+        Mockito.when(configurationService.getComponentConfiguration(ArgumentMatchers.any()))
+                .thenAnswer(i -> {
+                    final String pid = i.getArgument(0, String.class);
+                    return byPid.get(pid);
+                });
 
-        Mockito.when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
-            final String pid = i.getArgument(0, String.class);
-            return byPid.get(pid);
-        });
+        Mockito.when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any()))
+                .thenAnswer(i -> {
+                    final String pid = i.getArgument(0, String.class);
+                    return byPid.get(pid);
+                });
 
         givenMockGetSnapshotsReturnSome(5);
 
-        Mockito.when(configurationService.getSnapshot(anyLong())).thenReturn(byPid.values().stream().toList());
+        Mockito.when(configurationService.getSnapshot(anyLong()))
+                .thenReturn(byPid.values().stream().toList());
     }
 
     private void givenATestConfigurationPropertyWithAdTypeAndValue(final Scalar type, final Object value)
@@ -1630,48 +1903,68 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .withAd(adBuilder("testProp", type) //
                                         .build()) //
                                 .build()) //
-                .withConfigurationProperties(singletonMap("testProp", value)).build());
+                .withConfigurationProperties(singletonMap("testProp", value))
+                .build());
     }
 
     private void thenTestPropertyTypeIs(final JsonValue type) {
-        thenResponseElementIs(type,
-                self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("type"));
-        thenResponseElementIs(type,
-                self().field("configs").arrayItem(0).field("properties").field("testProp").field("type"));
+        thenResponseElementIs(
+                type,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("definition")
+                        .field("ad")
+                        .arrayItem(0)
+                        .field("type"));
+        thenResponseElementIs(
+                type,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("properties")
+                        .field("testProp")
+                        .field("type"));
     }
 
     private void thenTestPropertyIsMissing() {
-        thenResponseElementIs(null, self().field("configs").arrayItem(0).field("properties").field("testProp"));
+        thenResponseElementIs(
+                null, self().field("configs").arrayItem(0).field("properties").field("testProp"));
     }
 
     private void thenTestPropertyValueIs(final JsonValue value) {
-        thenResponseElementIs(value,
-                self().field("configs").arrayItem(0).field("properties").field("testProp").field("value"));
+        thenResponseElementIs(
+                value,
+                self().field("configs")
+                        .arrayItem(0)
+                        .field("properties")
+                        .field("testProp")
+                        .field("value"));
     }
 
-    private void thenReceivedPropertiesForPidContains(final String pid, final String expectedKey,
-            final Object expectedValue) {
+    private void thenReceivedPropertiesForPidContains(
+            final String pid, final String expectedKey, final Object expectedValue) {
         assertEquals(expectedValue, this.receivedConfigsByPid.get(pid).get(expectedKey));
     }
 
-    private void thenReceivedPropertiesForPidContainsArray(final String pid, final String expectedKey,
-            final Object[] expectedValue) {
-        assertArrayEquals(expectedValue, (Object[]) this.receivedConfigsByPid.get(pid).get(expectedKey));
+    private void thenReceivedPropertiesForPidContainsArray(
+            final String pid, final String expectedKey, final Object[] expectedValue) {
+        assertArrayEquals(
+                expectedValue, (Object[]) this.receivedConfigsByPid.get(pid).get(expectedKey));
     }
 
-    private void thenReceivedPropertiesForPidContainsPassword(final String pid, final String expectedKey,
-            final String expectedValue) {
-        assertEquals(expectedValue,
+    private void thenReceivedPropertiesForPidContainsPassword(
+            final String pid, final String expectedKey, final String expectedValue) {
+        assertEquals(
+                expectedValue,
                 new String(((Password) this.receivedConfigsByPid.get(pid).get(expectedKey)).getPassword()));
     }
 
-    private void thenReceivedPropertiesForPidContainsPasswords(final String pid, final String expectedKey,
-            final String... expectedValues) {
-        final Password[] passwords = (Password[]) this.receivedConfigsByPid.get(pid).get(expectedKey);
+    private void thenReceivedPropertiesForPidContainsPasswords(
+            final String pid, final String expectedKey, final String... expectedValues) {
+        final Password[] passwords =
+                (Password[]) this.receivedConfigsByPid.get(pid).get(expectedKey);
 
         for (int i = 0; i < expectedValues.length; i++) {
             assertEquals(expectedValues[i], new String(passwords[i].getPassword()));
         }
-
     }
 }

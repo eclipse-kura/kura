@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Scott Ware
  *  Eurotech
@@ -24,7 +24,6 @@ package org.eclipse.kura.bluetooth.le.beacon;
  * @since 2.2
  */
 public enum AdvertisingReportPhy {
-
     NONE((byte) 0x00),
     LE_1M((byte) 0x01),
     LE_2M((byte) 0x02),
@@ -56,5 +55,4 @@ public enum AdvertisingReportPhy {
         }
         return value;
     }
-
 }

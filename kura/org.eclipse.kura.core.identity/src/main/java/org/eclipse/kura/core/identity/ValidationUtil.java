@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
@@ -28,11 +27,11 @@ public class ValidationUtil {
     private static final String PERMISSION_NAME = "Permission name";
     private static final String IDENTITY_NAME = "Identity name";
 
-    private ValidationUtil() {
-    }
+    private ValidationUtil() {}
 
-    public static void validateNewPassword(final char[] password,
-            final PasswordStrengthVerificationService passwordStrengthVerificationService) throws KuraException {
+    public static void validateNewPassword(
+            final char[] password, final PasswordStrengthVerificationService passwordStrengthVerificationService)
+            throws KuraException {
         if (password == null || password.length == 0) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "New password cannot be empty");
         }
@@ -44,8 +43,11 @@ public class ValidationUtil {
         passwordStrengthVerificationService.checkPasswordStrength(password);
     }
 
-    public static void validateNewPassword(String identityName, final char[] password,
-            final PasswordStrengthVerificationService passwordStrengthVerificationService) throws KuraException {
+    public static void validateNewPassword(
+            String identityName,
+            final char[] password,
+            final PasswordStrengthVerificationService passwordStrengthVerificationService)
+            throws KuraException {
         if (password == null || password.length == 0) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "New password cannot be empty");
         }
@@ -77,7 +79,8 @@ public class ValidationUtil {
     private static void requireMinimumLength(final String parameterName, final String value, final int length)
             throws KuraException {
         if (value.length() < length) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER,
                     parameterName + " name must be at least " + length + " characters long");
         }
     }
@@ -85,16 +88,16 @@ public class ValidationUtil {
     private static void requireMaximumLength(final String parameterName, final String value, final int length)
             throws KuraException {
         if (value.length() > length) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                    parameterName + " must be at most " + length + " characters long");
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER, parameterName + " must be at most " + length + " characters long");
         }
     }
 
     private static void requireMaximumLength(final String parameterName, final char[] value, final int length)
             throws KuraException {
         if (value.length > length) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                    parameterName + " must be at most " + length + " characters long");
+            throw new KuraException(
+                    KuraErrorCode.INVALID_PARAMETER, parameterName + " must be at most " + length + " characters long");
         }
     }
 
@@ -102,8 +105,8 @@ public class ValidationUtil {
             throws KuraException {
         for (int i = 0; i < value.length; i++) {
             if (Character.isWhitespace(value[i])) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                        parameterName + " cannot contain whitespace characters");
+                throw new KuraException(
+                        KuraErrorCode.INVALID_PARAMETER, parameterName + " cannot contain whitespace characters");
             }
         }
     }
@@ -132,9 +135,11 @@ public class ValidationUtil {
 
         private void requireNonEmptyAlphanumericString(final String value) throws KuraException {
             if (!ALPHANUMERIC_PATTERN.matcher(value).matches()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, parameterName
-                        + " must be composed of one or more non empty alphanumeric characters sequences separated by the following characters: "
-                        + delimiters.stream().map(c -> "\'" + c + "\'").collect(Collectors.joining(" ")));
+                throw new KuraException(
+                        KuraErrorCode.INVALID_PARAMETER,
+                        parameterName
+                                + " must be composed of one or more non empty alphanumeric characters sequences separated by the following characters: "
+                                + delimiters.stream().map(c -> "\'" + c + "\'").collect(Collectors.joining(" ")));
             }
         }
 

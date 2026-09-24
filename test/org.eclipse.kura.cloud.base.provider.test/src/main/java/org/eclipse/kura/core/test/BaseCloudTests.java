@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import io.moquette.broker.Server;
+import io.moquette.broker.config.FluentConfig;
+import io.moquette.broker.config.IConfig;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -25,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
@@ -43,10 +45,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.moquette.broker.Server;
-import io.moquette.broker.config.FluentConfig;
-import io.moquette.broker.config.IConfig;
-
 public class BaseCloudTests {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseCloudTests.class);
@@ -57,7 +55,8 @@ public class BaseCloudTests {
 
     protected static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     protected static final String DEFAULT_DATA_SERVICE_PID = "org.eclipse.kura.data.DataService";
-    protected static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+    protected static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
     protected static ConfigurationService configurationService;
     protected static DataService dataService;
@@ -79,11 +78,12 @@ public class BaseCloudTests {
             configureKeystores();
             startMoquetteBroker(brokerKeyStore.getAbsolutePath());
 
-            configurationService = WireTestUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30,
-                    TimeUnit.SECONDS);
-            dataService = WireTestUtil.trackService(DataService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-            cloudService = WireTestUtil.trackService(CloudService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            configurationService = WireTestUtil.trackService(ConfigurationService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
+            dataService = WireTestUtil.trackService(DataService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
+            cloudService = WireTestUtil.trackService(CloudService.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             configureCloudService();
             configureDataService();
@@ -110,7 +110,11 @@ public class BaseCloudTests {
             return;
         }
 
-        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+        IConfig brokerConfig = new FluentConfig()
+                .port(1883)
+                .host("0.0.0.0")
+                .disablePersistence()
+                .build();
         brokerConfig.setProperty(IConfig.NETTY_MAX_BYTES_PROPERTY_NAME, "16777216");
         brokerConfig.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, jksPath);
         brokerConfig.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, "changeit");
@@ -136,26 +140,32 @@ public class BaseCloudTests {
 
     private static void configureKeystores() throws TestCAException, IOException {
         final KeyPair brokerKeyPair = TestCA.generateKeyPair();
-        final TestCA clientCA = new TestCA(
-                CertificateCreationOptions.builder(new X500Name("cn=client CA, dc=baz.com")).build());
+        final TestCA clientCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=client CA, dc=baz.com"))
+                .build());
         final KeyPair clientKeyPair = TestCA.generateKeyPair();
         final X509Certificate clientCertificate = clientCA.createAndSignCertificate(
-                CertificateCreationOptions.builder(new X500Name("cn=client, dc=baz.com")).build(), clientKeyPair);
+                CertificateCreationOptions.builder(new X500Name("cn=client, dc=baz.com"))
+                        .build(),
+                clientKeyPair);
 
-        brokerCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=broker CA, dc=bar.com")).build());
+        brokerCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=broker CA, dc=bar.com"))
+                .build());
         brokerCertificate = brokerCA.createAndSignCertificate(
-                CertificateCreationOptions.builder(new X500Name("cn=broker, dc=bar.com")).build(), brokerKeyPair);
+                CertificateCreationOptions.builder(new X500Name("cn=broker, dc=bar.com"))
+                        .build(),
+                brokerKeyPair);
 
         brokerKeyStore = TestCA.writeKeystore( //
-                new PrivateKeyEntry(brokerKeyPair.getPrivate(),
-                        new Certificate[] { brokerCertificate, brokerCA.getCertificate() }), //
+                new PrivateKeyEntry(
+                        brokerKeyPair.getPrivate(),
+                        new Certificate[] {brokerCertificate, brokerCA.getCertificate()}), //
                 new TrustedCertificateEntry(clientCA.getCertificate()));
         mqttKeyStore = TestCA.writeKeystore(
-                new PrivateKeyEntry(clientKeyPair.getPrivate(),
-                        new Certificate[] { clientCertificate, clientCA.getCertificate() }),
+                new PrivateKeyEntry(
+                        clientKeyPair.getPrivate(), new Certificate[] {clientCertificate, clientCA.getCertificate()}),
                 new TrustedCertificateEntry(brokerCertificate));
-        mqttKeyStoreKeyOnly = TestCA.writeKeystore(new PrivateKeyEntry(clientKeyPair.getPrivate(),
-                new Certificate[] { clientCertificate, clientCA.getCertificate() }));
+        mqttKeyStoreKeyOnly = TestCA.writeKeystore(new PrivateKeyEntry(
+                clientKeyPair.getPrivate(), new Certificate[] {clientCertificate, clientCA.getCertificate()}));
         mqttTrustStore = TestCA.writeKeystore(new TrustedCertificateEntry(brokerCA.getCertificate()));
     }
 
@@ -169,8 +179,8 @@ public class BaseCloudTests {
          */
         cloudServiceProperties.put("topic.control-prefix", "EDC");
 
-        ServiceUtil
-                .updateComponentConfiguration(configurationService, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties)
+        ServiceUtil.updateComponentConfiguration(
+                        configurationService, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties)
                 .get(30, TimeUnit.SECONDS);
     }
 
@@ -180,8 +190,7 @@ public class BaseCloudTests {
         dataProps.put("connect.auto-on-startup", false);
         dataProps.put("enable.rate.limit", false);
 
-        ServiceUtil
-                .updateComponentConfiguration(configurationService, DEFAULT_DATA_SERVICE_PID, dataProps)
+        ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_DATA_SERVICE_PID, dataProps)
                 .get(30, TimeUnit.SECONDS);
     }
 
@@ -193,8 +202,9 @@ public class BaseCloudTests {
         properties.put("client-id", "test");
         properties.put("topic.context.account-name", "mqtt");
 
-        ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
-                properties).get(30, TimeUnit.SECONDS);
+        ServiceUtil.updateComponentConfiguration(
+                        configurationService, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID, properties)
+                .get(30, TimeUnit.SECONDS);
     }
 
     protected static void connectDataService() throws KuraConnectException {
@@ -202,5 +212,4 @@ public class BaseCloudTests {
             dataService.connect();
         }
     }
-
 }

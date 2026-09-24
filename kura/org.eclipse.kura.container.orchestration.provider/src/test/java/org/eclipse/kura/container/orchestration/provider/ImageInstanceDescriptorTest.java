@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
@@ -53,16 +52,26 @@ public class ImageInstanceDescriptorTest {
     // given
     private void givenContainerOne() {
 
-        this.firstImageConfig = ImageInstanceDescriptor.builder().setImageName(IMAGE_NAME).setImageTag(IMAGE_TAG)
-                .setImageArch(IMAGE_ARCH).setImageAuthor(IMAGE_AUTHOR).setimageSize(IMAGE_SIZE).setImageId(IMAGE_ID)
+        this.firstImageConfig = ImageInstanceDescriptor.builder()
+                .setImageName(IMAGE_NAME)
+                .setImageTag(IMAGE_TAG)
+                .setImageArch(IMAGE_ARCH)
+                .setImageAuthor(IMAGE_AUTHOR)
+                .setimageSize(IMAGE_SIZE)
+                .setImageId(IMAGE_ID)
                 .build();
     }
 
     private void givenContainerTwoDiffrent() {
 
-        this.seccondImageConfig = ImageInstanceDescriptor.builder().setImageName("NOT_" + IMAGE_NAME)
-                .setImageTag("NOT_" + IMAGE_TAG).setImageArch("NOT_" + IMAGE_ARCH).setImageAuthor(IMAGE_AUTHOR)
-                .setimageSize(IMAGE_SIZE).setImageId("3rhf8943hf78934hf734t7r8fw38fy234897fh8").build();
+        this.seccondImageConfig = ImageInstanceDescriptor.builder()
+                .setImageName("NOT_" + IMAGE_NAME)
+                .setImageTag("NOT_" + IMAGE_TAG)
+                .setImageArch("NOT_" + IMAGE_ARCH)
+                .setImageAuthor(IMAGE_AUTHOR)
+                .setimageSize(IMAGE_SIZE)
+                .setImageId("3rhf8943hf78934hf734t7r8fw38fy234897fh8")
+                .build();
     }
 
     // then
@@ -73,11 +82,9 @@ public class ImageInstanceDescriptorTest {
         assertEquals(IMAGE_AUTHOR, this.firstImageConfig.getImageAuthor());
         assertEquals(IMAGE_ID, this.firstImageConfig.getImageId());
         assertEquals(IMAGE_SIZE, this.firstImageConfig.getImageSize());
-
     }
 
     private void thenFirstContainerDoesntEqualSeccond() {
         assertFalse(firstImageConfig.equals(this.seccondImageConfig));
     }
-
 }

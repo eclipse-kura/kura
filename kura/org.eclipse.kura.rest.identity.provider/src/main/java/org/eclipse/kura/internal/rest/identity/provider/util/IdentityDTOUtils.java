@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.identity.AdditionalConfigurations;
@@ -46,46 +45,51 @@ public class IdentityDTOUtils {
     public static Set<Class<? extends IdentityConfigurationComponent>> toIdentityConfigurationComponents(
             Set<String> componentNames) {
 
-        return componentNames.stream().map(name -> {
-
-            switch (name) {
-            case "AdditionalConfigurations":
-                return AdditionalConfigurations.class;
-            case "AssignedPermissions":
-                return AssignedPermissions.class;
-            case "PasswordConfiguration":
-                return PasswordConfiguration.class;
-            default:
-                throw new IllegalArgumentException("Unknown component name: " + name);
-            }
-
-        }).collect(Collectors.toSet());
-
+        return componentNames.stream()
+                .map(name -> {
+                    switch (name) {
+                        case "AdditionalConfigurations":
+                            return AdditionalConfigurations.class;
+                        case "AssignedPermissions":
+                            return AssignedPermissions.class;
+                        case "PasswordConfiguration":
+                            return PasswordConfiguration.class;
+                        default:
+                            throw new IllegalArgumentException("Unknown component name: " + name);
+                    }
+                })
+                .collect(Collectors.toSet());
     }
 
     public static IdentityConfigurationDTO fromIdentityConfiguration(IdentityConfiguration identityConfiguration) {
 
-        IdentityConfigurationDTO identityConfigurationDTO = new IdentityConfigurationDTO(
-                new IdentityDTO(identityConfiguration.getName()));
+        IdentityConfigurationDTO identityConfigurationDTO =
+                new IdentityConfigurationDTO(new IdentityDTO(identityConfiguration.getName()));
 
-        identityConfiguration.getComponent(AdditionalConfigurations.class)
-                .ifPresent(additionalConfigurations -> identityConfigurationDTO
-                        .setAdditionalConfigurations(fromAdditionalConfigurations(additionalConfigurations)));
+        identityConfiguration
+                .getComponent(AdditionalConfigurations.class)
+                .ifPresent(additionalConfigurations -> identityConfigurationDTO.setAdditionalConfigurations(
+                        fromAdditionalConfigurations(additionalConfigurations)));
 
-        identityConfiguration.getComponent(AssignedPermissions.class)
-                .ifPresent(assignedPermissions -> identityConfigurationDTO
-                        .setPermissionConfiguration(fromPermissionConfiguration(assignedPermissions)));
+        identityConfiguration
+                .getComponent(AssignedPermissions.class)
+                .ifPresent(assignedPermissions -> identityConfigurationDTO.setPermissionConfiguration(
+                        fromPermissionConfiguration(assignedPermissions)));
 
-        identityConfiguration.getComponent(PasswordConfiguration.class)
-                .ifPresent(passwordConfiguration -> identityConfigurationDTO
-                        .setPasswordConfiguration(fromPasswordConfiguration(passwordConfiguration)));
+        identityConfiguration
+                .getComponent(PasswordConfiguration.class)
+                .ifPresent(passwordConfiguration -> identityConfigurationDTO.setPasswordConfiguration(
+                        fromPasswordConfiguration(passwordConfiguration)));
 
         return identityConfigurationDTO;
     }
 
     public static ComponentConfigurationDTO fromComponentConfiguration(ComponentConfiguration componentConfiguration) {
-        return new ComponentConfigurationDTO(componentConfiguration.getPid(), null, DTOUtil
-                .configurationPropertiesToDtos(componentConfiguration.getConfigurationProperties(), null, false));
+        return new ComponentConfigurationDTO(
+                componentConfiguration.getPid(),
+                null,
+                DTOUtil.configurationPropertiesToDtos(
+                        componentConfiguration.getConfigurationProperties(), null, false));
     }
 
     public static Permission toPermission(PermissionDTO permissionDTO) {
@@ -100,24 +104,26 @@ public class IdentityDTOUtils {
 
         ComponentConfigurationImpl componentConfiguration = new ComponentConfigurationImpl();
         componentConfiguration.setPid(componentConfigurationDTO.getPid());
-        componentConfiguration
-                .setProperties(DTOUtil.dtosToConfigurationProperties(componentConfigurationDTO.getProperties()));
+        componentConfiguration.setProperties(
+                DTOUtil.dtosToConfigurationProperties(componentConfigurationDTO.getProperties()));
 
         return componentConfiguration;
     }
 
     public static IdentityConfigurationComponent toPermissionConfiguration(
             PermissionConfigurationDTO permissionConfigurationDTO) {
-        return new AssignedPermissions(permissionConfigurationDTO.getPermissions().stream() //
-                .map(IdentityDTOUtils::toPermission) //
-                .collect(Collectors.toSet()) //
-        );
+        return new AssignedPermissions(
+                permissionConfigurationDTO.getPermissions().stream() //
+                        .map(IdentityDTOUtils::toPermission) //
+                        .collect(Collectors.toSet()) //
+                );
     }
 
     public static PermissionConfigurationDTO fromPermissionConfiguration(AssignedPermissions assignedPermissions) {
         PermissionConfigurationDTO permissionsConfigurationDTO = new PermissionConfigurationDTO();
         permissionsConfigurationDTO.setPermissions(assignedPermissions.getPermissions().stream()
-                .map(IdentityDTOUtils::fromPermission).collect(Collectors.toSet()));
+                .map(IdentityDTOUtils::fromPermission)
+                .collect(Collectors.toSet()));
 
         return permissionsConfigurationDTO;
     }
@@ -140,16 +146,20 @@ public class IdentityDTOUtils {
             password = Optional.of(passwordConfigurationDTO.getPassword().toCharArray());
         }
 
-        return new PasswordConfiguration(passwordConfigurationDTO.isPasswordChangeNeeded(),
-                passwordConfigurationDTO.isPasswordAuthEnabled(), password, Optional.empty());
+        return new PasswordConfiguration(
+                passwordConfigurationDTO.isPasswordChangeNeeded(),
+                passwordConfigurationDTO.isPasswordAuthEnabled(),
+                password,
+                Optional.empty());
     }
 
     public static IdentityConfigurationComponent toAdditionalConfigurations(
             AdditionalConfigurationsDTO additionalConfigurationsDTO) {
 
-        List<ComponentConfiguration> configurations = additionalConfigurationsDTO.getConfigurations()//
-                .stream()//
-                .map(IdentityDTOUtils::toComponentConfiguration)//
+        List<ComponentConfiguration> configurations = additionalConfigurationsDTO
+                .getConfigurations() //
+                .stream() //
+                .map(IdentityDTOUtils::toComponentConfiguration) //
                 .collect(Collectors.toList());
 
         return new AdditionalConfigurations(configurations);
@@ -160,9 +170,10 @@ public class IdentityDTOUtils {
 
         AdditionalConfigurationsDTO additionalConfigurationsDTO = new AdditionalConfigurationsDTO();
 
-        Set<ComponentConfigurationDTO> configurations = additionalConfigurations.getConfigurations()//
-                .stream()//
-                .map(IdentityDTOUtils::fromComponentConfiguration)//
+        Set<ComponentConfigurationDTO> configurations = additionalConfigurations
+                .getConfigurations() //
+                .stream() //
+                .map(IdentityDTOUtils::fromComponentConfiguration) //
                 .collect(Collectors.toSet());
 
         additionalConfigurationsDTO.setConfigurations(configurations);
@@ -186,16 +197,15 @@ public class IdentityDTOUtils {
         }
 
         return new IdentityConfiguration(identityConfigurationDTO.getIdentity().getName(), components);
-
     }
 
     public static PasswordStrenghtRequirementsDTO fromPasswordStrengthRequirements(
             PasswordStrengthRequirements passwordStrengthRequirements) {
 
-        return new PasswordStrenghtRequirementsDTO(passwordStrengthRequirements.getPasswordMinimumLength(),
+        return new PasswordStrenghtRequirementsDTO(
+                passwordStrengthRequirements.getPasswordMinimumLength(),
                 passwordStrengthRequirements.digitsRequired(), //
                 passwordStrengthRequirements.specialCharactersRequired(),
                 passwordStrengthRequirements.bothCasesRequired());
     }
-
 }

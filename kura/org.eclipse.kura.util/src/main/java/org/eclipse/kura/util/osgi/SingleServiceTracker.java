@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Red Hat Inc and others
- * 
+ * Copyright (c) 2018, 2026 Rad Hat Inc and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *  Red Hat Inc 
+ *  Red Hat Inc
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.util.osgi;
@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.function.Consumer;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -132,7 +131,6 @@ public class SingleServiceTracker<T> {
             }
 
             i.add(entry);
-
         }
     }
 
@@ -188,7 +186,6 @@ public class SingleServiceTracker<T> {
             // we have a different entry now
             setBestEntry(bestEntry);
         }
-
     }
 
     protected void removed(final ServiceReference<T> reference, final T service) {
@@ -215,7 +212,6 @@ public class SingleServiceTracker<T> {
 
         this.currentEntry = entry;
         notifyService(entry != null ? entry.service : null);
-
     }
 
     protected void notifyService(final T service) {
@@ -225,14 +221,11 @@ public class SingleServiceTracker<T> {
         } catch (final Exception e) {
             logger.warn("Failed to notify changed service", e);
         }
-
     }
 
     public T getService() {
 
         final Entry<T> entry = this.currentEntry;
         return entry != null ? entry.service : null;
-
     }
-
 }

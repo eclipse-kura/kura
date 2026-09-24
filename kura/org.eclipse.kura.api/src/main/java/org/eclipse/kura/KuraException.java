@@ -144,5 +144,4 @@ public class KuraException extends Exception {
     public String getMessage() {
         return KuraExceptionMessages.message(this.code, this.arguments);
     }
-
 }

@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.token.jwt.common.AbstractJwtScenario;
 import org.eclipse.kura.core.token.jwt.common.IssuingConfig;
@@ -110,21 +109,23 @@ public class IssueAndVerifyTest extends AbstractJwtScenario {
     }
 
     private void thenTheProofHasClaimNamed(final String name) {
-        assertTrue("the proof has no claim '" + name + "' in " + proof().getClaims(),
+        assertTrue(
+                "the proof has no claim '" + name + "' in " + proof().getClaims(),
                 proof().getClaims().containsKey(name));
     }
 
     private void thenTheProofExposesTheIssuedTokenIdentifier() {
-        final String issuedTokenId = TokenInspector.of(issuedToken()).claim("jti").get().getAsString();
+        final String issuedTokenId =
+                TokenInspector.of(issuedToken()).claim("jti").get().getAsString();
 
         thenTheProofExposesTokenId(issuedTokenId);
     }
 
     private void thenTheProofExposesTheIssuedExpiration() {
-        final long issuedExpiration = TokenInspector.of(issuedToken()).claim("exp").get().getAsLong();
+        final long issuedExpiration =
+                TokenInspector.of(issuedToken()).claim("exp").get().getAsLong();
 
         assertTrue("the proof exposes no expiration", proof().getExpiresAt().isPresent());
         assertEquals(issuedExpiration, proof().getExpiresAt().get().getEpochSecond());
     }
-
 }

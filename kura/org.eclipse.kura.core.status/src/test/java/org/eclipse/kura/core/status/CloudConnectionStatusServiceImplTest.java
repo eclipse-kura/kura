@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
-
 import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
 import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
 import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
@@ -52,8 +51,8 @@ public class CloudConnectionStatusServiceImplTest {
 
         assertNotNull(TestUtil.getFieldValue(service, "properties"));
         assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(1, componentRegistry.size());
     }
 
@@ -66,8 +65,8 @@ public class CloudConnectionStatusServiceImplTest {
 
         assertNotNull(TestUtil.getFieldValue(service, "properties"));
         assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(1, componentRegistry.size());
     }
 
@@ -80,8 +79,8 @@ public class CloudConnectionStatusServiceImplTest {
 
         assertNotNull(TestUtil.getFieldValue(service, "properties"));
         assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(1, componentRegistry.size());
     }
 
@@ -94,8 +93,8 @@ public class CloudConnectionStatusServiceImplTest {
 
         assertNotNull(TestUtil.getFieldValue(service, "properties"));
         assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(1, componentRegistry.size());
     }
 
@@ -108,23 +107,23 @@ public class CloudConnectionStatusServiceImplTest {
 
         assertNotNull(TestUtil.getFieldValue(service, "properties"));
         assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(1, componentRegistry.size());
     }
 
     @Test
     public void testActivateLinuxGpioLed() throws NoSuchFieldException {
-        CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService(
-                "ccs:linux_led:/sys/class/led/led1_green" + ";" + "ccs:led:44");
+        CloudConnectionStatusServiceImpl service =
+                initCloudConnectionStatusService("ccs:linux_led:/sys/class/led/led1_green" + ";" + "ccs:led:44");
 
         ComponentContext componentContext = mock(ComponentContext.class);
         service.activate(componentContext);
 
         assertNotNull(TestUtil.getFieldValue(service, "properties"));
         assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(1, componentRegistry.size());
     }
 
@@ -140,16 +139,16 @@ public class CloudConnectionStatusServiceImplTest {
 
         assertTrue(executorservice.isShutdown());
 
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
-                "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet) TestUtil.getFieldValue(service, "componentRegistry");
         assertEquals(0, componentRegistry.size());
     }
 
     @Test
     public void testRegisterMinPriority() throws NoSuchFieldException {
         // Prepare mock component with min priority
-        CloudConnectionStatusComponent mockComponent = createMockComponent(CloudConnectionStatusService.PRIORITY_MIN,
-                CloudConnectionStatusEnum.ON);
+        CloudConnectionStatusComponent mockComponent =
+                createMockComponent(CloudConnectionStatusService.PRIORITY_MIN, CloudConnectionStatusEnum.ON);
 
         // Create service
         CloudConnectionStatusServiceImpl service = createCloudConnStatusServiceImplLog();
@@ -170,8 +169,8 @@ public class CloudConnectionStatusServiceImplTest {
     @Test
     public void testRegisterMaxPriority() throws NoSuchFieldException {
         // Prepare mock component with max priority
-        CloudConnectionStatusComponent mockComponent = createMockComponent(CloudConnectionStatusService.PRIORITY_MAX,
-                CloudConnectionStatusEnum.ON);
+        CloudConnectionStatusComponent mockComponent =
+                createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, CloudConnectionStatusEnum.ON);
 
         CloudConnectionStatusServiceImpl service = createCloudConnStatusServiceImplLog();
 
@@ -191,8 +190,8 @@ public class CloudConnectionStatusServiceImplTest {
     @Test
     public void testRegisterNullStatus() throws NoSuchFieldException {
         // Prepare mock component with max priority with status set to "null"
-        CloudConnectionStatusComponent mockComponent = createMockComponent(CloudConnectionStatusService.PRIORITY_MAX,
-                null);
+        CloudConnectionStatusComponent mockComponent =
+                createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, null);
 
         // Create service
         CloudConnectionStatusServiceImpl service = createCloudConnStatusServiceImplLog();
@@ -212,14 +211,18 @@ public class CloudConnectionStatusServiceImplTest {
 
     @Test
     public void testRegisterStatusesLog() throws NoSuchFieldException {
-        CloudConnectionStatusEnum[] statuses = { CloudConnectionStatusEnum.OFF, CloudConnectionStatusEnum.FAST_BLINKING,
-                CloudConnectionStatusEnum.SLOW_BLINKING, CloudConnectionStatusEnum.HEARTBEAT,
-                CloudConnectionStatusEnum.ON };
+        CloudConnectionStatusEnum[] statuses = {
+            CloudConnectionStatusEnum.OFF,
+            CloudConnectionStatusEnum.FAST_BLINKING,
+            CloudConnectionStatusEnum.SLOW_BLINKING,
+            CloudConnectionStatusEnum.HEARTBEAT,
+            CloudConnectionStatusEnum.ON
+        };
 
         for (CloudConnectionStatusEnum selectedStatus : statuses) {
             // Prepare mock component with max priority with selected status
-            CloudConnectionStatusComponent mockComponent = createMockComponent(
-                    CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
+            CloudConnectionStatusComponent mockComponent =
+                    createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
 
             // Create service
             CloudConnectionStatusServiceImpl service = createCloudConnStatusServiceImplLog();
@@ -243,14 +246,18 @@ public class CloudConnectionStatusServiceImplTest {
 
     @Test
     public void testRegisterStatusesGpio() throws NoSuchFieldException {
-        CloudConnectionStatusEnum[] statuses = { CloudConnectionStatusEnum.OFF, CloudConnectionStatusEnum.FAST_BLINKING,
-                CloudConnectionStatusEnum.SLOW_BLINKING, CloudConnectionStatusEnum.HEARTBEAT,
-                CloudConnectionStatusEnum.ON };
+        CloudConnectionStatusEnum[] statuses = {
+            CloudConnectionStatusEnum.OFF,
+            CloudConnectionStatusEnum.FAST_BLINKING,
+            CloudConnectionStatusEnum.SLOW_BLINKING,
+            CloudConnectionStatusEnum.HEARTBEAT,
+            CloudConnectionStatusEnum.ON
+        };
 
         for (CloudConnectionStatusEnum selectedStatus : statuses) {
             // Prepare mock component with max priority with selected status
-            CloudConnectionStatusComponent mockComponent = createMockComponent(
-                    CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
+            CloudConnectionStatusComponent mockComponent =
+                    createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
 
             // Create service
             CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("ccs:led:44");
@@ -279,14 +286,18 @@ public class CloudConnectionStatusServiceImplTest {
 
     @Test
     public void testRegisterStatusesGpioWithoutGPIOService() throws NoSuchFieldException {
-        CloudConnectionStatusEnum[] statuses = { CloudConnectionStatusEnum.OFF, CloudConnectionStatusEnum.FAST_BLINKING,
-                CloudConnectionStatusEnum.SLOW_BLINKING, CloudConnectionStatusEnum.HEARTBEAT,
-                CloudConnectionStatusEnum.ON };
+        CloudConnectionStatusEnum[] statuses = {
+            CloudConnectionStatusEnum.OFF,
+            CloudConnectionStatusEnum.FAST_BLINKING,
+            CloudConnectionStatusEnum.SLOW_BLINKING,
+            CloudConnectionStatusEnum.HEARTBEAT,
+            CloudConnectionStatusEnum.ON
+        };
 
         for (CloudConnectionStatusEnum selectedStatus : statuses) {
             // Prepare mock component with max priority with selected status
-            CloudConnectionStatusComponent mockComponent = createMockComponent(
-                    CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
+            CloudConnectionStatusComponent mockComponent =
+                    createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
 
             // Create service
             CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("ccs:led:44");
@@ -314,8 +325,8 @@ public class CloudConnectionStatusServiceImplTest {
     @Test
     public void testUnregister() throws NoSuchFieldException {
         // Prepare mock component with max priority with status set to "ON"
-        CloudConnectionStatusComponent mockComponent = createMockComponent(CloudConnectionStatusService.PRIORITY_MAX,
-                CloudConnectionStatusEnum.ON);
+        CloudConnectionStatusComponent mockComponent =
+                createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, CloudConnectionStatusEnum.ON);
 
         // Create service
         CloudConnectionStatusServiceImpl service = createCloudConnStatusServiceImplLog();
@@ -348,8 +359,8 @@ public class CloudConnectionStatusServiceImplTest {
     @Test
     public void testUpdateStatus() throws NoSuchFieldException {
         // Prepare mock component with max priority with status set to "ON"
-        CloudConnectionStatusComponent mockComponent = createMockComponent(CloudConnectionStatusService.PRIORITY_MAX,
-                CloudConnectionStatusEnum.ON);
+        CloudConnectionStatusComponent mockComponent =
+                createMockComponent(CloudConnectionStatusService.PRIORITY_MAX, CloudConnectionStatusEnum.ON);
 
         // Create service
         CloudConnectionStatusServiceImpl service = createCloudConnStatusServiceImplLog();
@@ -368,7 +379,9 @@ public class CloudConnectionStatusServiceImplTest {
 
         // Update the status to "fast blinking"
         Mockito.doNothing().when(mockComponent).setNotificationStatus(CloudConnectionStatusEnum.FAST_BLINKING);
-        Mockito.doReturn(CloudConnectionStatusEnum.FAST_BLINKING).when(mockComponent).getNotificationStatus();
+        Mockito.doReturn(CloudConnectionStatusEnum.FAST_BLINKING)
+                .when(mockComponent)
+                .getNotificationStatus();
 
         assertTrue(service.updateStatus(mockComponent, CloudConnectionStatusEnum.FAST_BLINKING));
 
@@ -414,8 +427,8 @@ public class CloudConnectionStatusServiceImplTest {
 
     boolean isInComponentRegistry(CloudConnectionStatusServiceImpl service, CloudConnectionStatusComponent component)
             throws NoSuchFieldException {
-        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet<CloudConnectionStatusComponent>) TestUtil
-                .getFieldValue(service, "componentRegistry");
+        HashSet<CloudConnectionStatusComponent> componentRegistry =
+                (HashSet<CloudConnectionStatusComponent>) TestUtil.getFieldValue(service, "componentRegistry");
 
         return componentRegistry.contains(component);
     }

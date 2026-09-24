@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.net.status.modem;
 
 import java.util.Objects;
 import java.util.Set;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -31,7 +30,12 @@ public class Bearer {
     private final long bytesTransmitted;
     private final long bytesReceived;
 
-    public Bearer(String name, boolean connected, String apn, Set<BearerIpType> ipTypes, long bytesTransmitted,
+    public Bearer(
+            String name,
+            boolean connected,
+            String apn,
+            Set<BearerIpType> ipTypes,
+            long bytesTransmitted,
             long bytesReceived) {
         super();
         this.name = name;
@@ -68,8 +72,8 @@ public class Bearer {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.apn, this.bytesReceived, this.bytesTransmitted, this.connected, this.ipTypes,
-                this.name);
+        return Objects.hash(
+                this.apn, this.bytesReceived, this.bytesTransmitted, this.connected, this.ipTypes, this.name);
     }
 
     @Override
@@ -81,9 +85,11 @@ public class Bearer {
             return false;
         }
         Bearer other = (Bearer) obj;
-        return Objects.equals(this.apn, other.apn) && this.bytesReceived == other.bytesReceived
-                && this.bytesTransmitted == other.bytesTransmitted && this.connected == other.connected
-                && Objects.equals(this.ipTypes, other.ipTypes) && Objects.equals(this.name, other.name);
+        return Objects.equals(this.apn, other.apn)
+                && this.bytesReceived == other.bytesReceived
+                && this.bytesTransmitted == other.bytesTransmitted
+                && this.connected == other.connected
+                && Objects.equals(this.ipTypes, other.ipTypes)
+                && Objects.equals(this.name, other.name);
     }
-
 }

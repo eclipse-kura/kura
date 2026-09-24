@@ -16,7 +16,6 @@ package org.eclipse.kura.rest.configuration.api;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.configuration.metatype.Scalar;
@@ -36,7 +35,8 @@ public class AdDTO implements AD {
     private final boolean isRequired;
 
     public AdDTO(final AD ad) {
-        this.option = ad.getOption() == null || ad.getOption().isEmpty() ? null
+        this.option = ad.getOption() == null || ad.getOption().isEmpty()
+                ? null
                 : ad.getOption().stream().map(OptionDTO::new).collect(Collectors.toList());
         this.name = ad.getName();
         this.description = ad.getDescription();
@@ -112,5 +112,4 @@ public class AdDTO implements AD {
 
         return Arrays.stream(values).map(value -> value.replace(",", "\\,")).collect(Collectors.joining(","));
     }
-
 }

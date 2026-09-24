@@ -16,6 +16,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import io.moquette.broker.Server;
+import io.moquette.broker.config.ClasspathResourceLoader;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.IResourceLoader;
+import io.moquette.broker.config.ResourceLoaderConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +28,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
@@ -46,19 +50,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.moquette.broker.Server;
-import io.moquette.broker.config.ClasspathResourceLoader;
-import io.moquette.broker.config.IConfig;
-import io.moquette.broker.config.IResourceLoader;
-import io.moquette.broker.config.ResourceLoaderConfig;
-
 public class SparkplugIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SparkplugIntegrationTest.class);
 
-    private static final String SPARKPLUG_FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
-    static final String CLOUD_ENDPOINT_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
-    static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
+    private static final String SPARKPLUG_FACTORY_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
+    static final String CLOUD_ENDPOINT_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
+    static final String DATA_TRANSPORT_SERVICE_PID =
+            "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
     static final String SPARKPLUG_DEVICE_PID = "test.device";
 
     private static CountDownLatch dependenciesLatch = new CountDownLatch(1);
@@ -119,8 +120,8 @@ public class SparkplugIntegrationTest {
         // ClasspathResourceLoader captures the thread context classloader, which in the bnd/equinox
         // test runtime is not this bundle's loader, so the resource is not found ("Can't locate
         // classpath resource null"). Pass this class' own classloader explicitly and the resource name.
-        IResourceLoader classpathLoader = new ClasspathResourceLoader("config/moquette.conf",
-                SparkplugIntegrationTest.class.getClassLoader());
+        IResourceLoader classpathLoader =
+                new ClasspathResourceLoader("config/moquette.conf", SparkplugIntegrationTest.class.getClassLoader());
         IConfig classPathConfig = new ResourceLoaderConfig(classpathLoader, "config/moquette.conf");
 
         mqttBroker = new Server();
@@ -137,21 +138,25 @@ public class SparkplugIntegrationTest {
 
     public static <T> T trackService(Class<T> clazz, String pid)
             throws InterruptedException, ExecutionException, TimeoutException {
-        return (T) ServiceUtil.trackService(clazz, Optional.of(String.format("(kura.service.pid=%s)", pid))).get(30,
-                TimeUnit.SECONDS);
+        return (T) ServiceUtil.trackService(clazz, Optional.of(String.format("(kura.service.pid=%s)", pid)))
+                .get(30, TimeUnit.SECONDS);
     }
 
     private static void createSparkplugCloudConnection()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException {
         if (!configurationService.getConfigurableComponentPids().contains(SPARKPLUG_FACTORY_PID)) {
-            CloudConnectionFactory factory = ServiceUtil.createFactoryConfiguration(configurationService,
-                    CloudConnectionFactory.class, SPARKPLUG_FACTORY_PID, SPARKPLUG_FACTORY_PID, null)
+            CloudConnectionFactory factory = ServiceUtil.createFactoryConfiguration(
+                            configurationService,
+                            CloudConnectionFactory.class,
+                            SPARKPLUG_FACTORY_PID,
+                            SPARKPLUG_FACTORY_PID,
+                            null)
                     .get(30, TimeUnit.SECONDS);
             factory.createConfiguration(CLOUD_ENDPOINT_PID);
 
             sparkplugCloudEndpoint = (SparkplugCloudEndpoint) trackService(CloudEndpoint.class, CLOUD_ENDPOINT_PID);
-            sparkplugDataTransport = (SparkplugDataTransport) trackService(DataTransportService.class,
-                    DATA_TRANSPORT_SERVICE_PID);
+            sparkplugDataTransport =
+                    (SparkplugDataTransport) trackService(DataTransportService.class, DATA_TRANSPORT_SERVICE_PID);
 
             deactivateSsl();
 
@@ -167,8 +172,10 @@ public class SparkplugIntegrationTest {
             properties.put(SparkplugDevice.KEY_DEVICE_ID, "d1");
 
             configurationService.createFactoryConfiguration(
-                    "org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice", SPARKPLUG_DEVICE_PID,
-                    properties, false);
+                    "org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice",
+                    SPARKPLUG_DEVICE_PID,
+                    properties,
+                    false);
             sparkplugDevice = (SparkplugDevice) trackService(CloudPublisher.class, SPARKPLUG_DEVICE_PID);
         }
     }
@@ -186,5 +193,4 @@ public class SparkplugIntegrationTest {
         sparkplugDataTransport.setSslManagerService(sslService);
         sparkplugDataTransport.unsetSslManagerService(sslService);
     }
-
 }

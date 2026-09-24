@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.token.jwt.common.AbstractJwtScenario;
@@ -31,7 +30,7 @@ public class UnsupportedClaimValuesTest extends AbstractJwtScenario {
     public void aByteArrayClaimIsRejected() throws TestCAException {
         givenAnIssuerWithASigningKey();
 
-        whenATokenIsRequestedWithClaim("payload", new byte[] { 1, 2, 3 });
+        whenATokenIsRequestedWithClaim("payload", new byte[] {1, 2, 3});
 
         thenIssuingFailedWith(KuraErrorCode.BAD_REQUEST);
         thenNoTokenIsIssued();
@@ -126,5 +125,4 @@ public class UnsupportedClaimValuesTest extends AbstractJwtScenario {
 
         return list;
     }
-
 }

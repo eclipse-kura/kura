@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.data.DataServiceOptions;
 import org.eclipse.kura.message.store.provider.MessageStore;
@@ -48,10 +47,14 @@ public class MessageStoreState {
 
         if (!this.houseKeeperExecutor.isPresent()) {
             this.houseKeeperExecutor = Optional.of(Executors.newSingleThreadScheduledExecutor());
-            this.houseKeeperExecutor.get().scheduleWithFixedDelay(
-                    new HouseKeeperTask(this, dataServiceOptions.getStorePurgeAge()), 1, // start in one second
-                    dataServiceOptions.getStoreHousekeeperInterval(), // repeat every retryInterval until we stopped.
-                    TimeUnit.SECONDS);
+            this.houseKeeperExecutor
+                    .get()
+                    .scheduleWithFixedDelay(
+                            new HouseKeeperTask(this, dataServiceOptions.getStorePurgeAge()),
+                            1, // start in one second
+                            dataServiceOptions
+                                    .getStoreHousekeeperInterval(), // repeat every retryInterval until we stopped.
+                            TimeUnit.SECONDS);
         }
     }
 

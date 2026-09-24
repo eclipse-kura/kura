@@ -1,17 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Red Hat Inc and others
- * 
+ * Copyright (c) 2018, 2026 Rad Hat Inc and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Red Hat Inc
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.util.osgi;
 
 import org.eclipse.kura.util.base.StringUtil;
@@ -19,8 +18,7 @@ import org.osgi.framework.Constants;
 
 public final class FilterUtil {
 
-    private FilterUtil() {
-    }
+    private FilterUtil() {}
 
     public static String equal(final String property, final String value) {
         if (property == null || property.isEmpty()) {
@@ -105,18 +103,17 @@ public final class FilterUtil {
             final char c = value.charAt(i);
 
             switch (c) {
-            case '*': //$FALL-THROUGH$
-            case '(': //$FALL-THROUGH$
-            case ')': //$FALL-THROUGH$
-                sb.append('\\');
-                break;
-            default:
-                break;
+                case '*': // $FALL-THROUGH$
+                case '(': // $FALL-THROUGH$
+                case ')': // $FALL-THROUGH$
+                    sb.append('\\');
+                    break;
+                default:
+                    break;
             }
 
             sb.append(c);
         }
         return sb.toString();
     }
-
 }

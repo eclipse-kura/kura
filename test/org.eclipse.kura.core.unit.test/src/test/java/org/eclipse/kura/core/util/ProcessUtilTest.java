@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNull;
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.junit.BeforeClass;
@@ -48,7 +47,7 @@ public class ProcessUtilTest {
 
     @Test
     public void testExecString() throws Exception {
-        int[] values = new int[] { 0, 1, 2 };
+        int[] values = new int[] {0, 1, 2};
         String command = "/bin/sh " + TEMP_SCRIPT_FILE_PATH;
         if (win) {
             command = TEMP_SCRIPT_FILE_PATH;
@@ -90,10 +89,10 @@ public class ProcessUtilTest {
 
     @Test
     public void testExecStringArray() throws Exception {
-        int[] values = new int[] { 0, 1, 2 };
-        String[] commandArray = { "/bin/sh", TEMP_SCRIPT_FILE_PATH };
+        int[] values = new int[] {0, 1, 2};
+        String[] commandArray = {"/bin/sh", TEMP_SCRIPT_FILE_PATH};
         if (win) {
-            commandArray = new String[] { TEMP_SCRIPT_FILE_PATH };
+            commandArray = new String[] {TEMP_SCRIPT_FILE_PATH};
         }
         File file = new File(TEMP_SCRIPT_FILE_PATH);
         file.deleteOnExit();
@@ -133,9 +132,9 @@ public class ProcessUtilTest {
     @Test
     public void testDestroy() throws Exception {
         // First execute the process
-        String[] commandArray = { "/bin/sh", TEMP_SCRIPT_FILE_PATH };
+        String[] commandArray = {"/bin/sh", TEMP_SCRIPT_FILE_PATH};
         if (win) {
-            commandArray = new String[] { TEMP_SCRIPT_FILE_PATH };
+            commandArray = new String[] {TEMP_SCRIPT_FILE_PATH};
         }
         File file = new File(TEMP_SCRIPT_FILE_PATH);
         file.deleteOnExit();

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
@@ -43,7 +42,9 @@ public class DatabaseLoader {
     private final Optional<SqliteDbServiceOptions> oldOptions;
     private final CryptoService cryptoService;
 
-    public DatabaseLoader(final SqliteDbServiceOptions newOptions, final Optional<SqliteDbServiceOptions> oldOptions,
+    public DatabaseLoader(
+            final SqliteDbServiceOptions newOptions,
+            final Optional<SqliteDbServiceOptions> oldOptions,
             final CryptoService cryptoService) {
         this.newOptions = newOptions;
         this.oldOptions = oldOptions;
@@ -58,7 +59,8 @@ public class DatabaseLoader {
             final boolean isConfigurationAttributeInvalidException = (e instanceof KuraException
                     && ((KuraException) e).getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
 
-            if (this.newOptions.isDeleteDbFilesOnFailure() && this.newOptions.getMode() != Mode.IN_MEMORY
+            if (this.newOptions.isDeleteDbFilesOnFailure()
+                    && this.newOptions.getMode() != Mode.IN_MEMORY
                     && !isConfigurationAttributeInvalidException) {
                 logger.warn("failed to open database, deleting database files and retrying", e);
                 deleteDbFiles(newOptions.getPath());
@@ -67,7 +69,6 @@ public class DatabaseLoader {
 
             throw e;
         }
-
     }
 
     protected SQLiteDataSource openDataSourceInternal() throws SQLException, KuraException {
@@ -86,15 +87,17 @@ public class DatabaseLoader {
 
         if (this.oldOptions.isPresent()) {
             try {
-                addEncryptionKey(applicableEncryptionKeys, this.oldOptions.get().getEncryptionKey(cryptoService),
+                addEncryptionKey(
+                        applicableEncryptionKeys,
+                        this.oldOptions.get().getEncryptionKey(cryptoService),
                         "key from old options");
             } catch (final Exception e) {
                 logger.warn("failed to get key from old options", e);
             }
         }
 
-        addEncryptionKey(applicableEncryptionKeys, getCryptoServiceEntry(newOptions.getPath()),
-                "key from CryptoService");
+        addEncryptionKey(
+                applicableEncryptionKeys, getCryptoServiceEntry(newOptions.getPath()), "key from CryptoService");
 
         applicableEncryptionKeys.add(Optional.empty());
 
@@ -123,8 +126,10 @@ public class DatabaseLoader {
         throw new SQLException("Failed to open database", lastException);
     }
 
-    private void addEncryptionKey(final List<Optional<EncryptionKeySpec>> applicableEncryptionKeys,
-            final Optional<EncryptionKeySpec> keyFromNewOptions, final String type) {
+    private void addEncryptionKey(
+            final List<Optional<EncryptionKeySpec>> applicableEncryptionKeys,
+            final Optional<EncryptionKeySpec> keyFromNewOptions,
+            final String type) {
         if (keyFromNewOptions.isPresent()) {
             logger.debug("adding {}", type);
             applicableEncryptionKeys.add(keyFromNewOptions);
@@ -134,7 +139,8 @@ public class DatabaseLoader {
     private void updateCryptoServiceEntry(final String dbPath, final Optional<EncryptionKeySpec> keyFromOptions)
             throws KuraException {
         final String entryKey = getCryptoServicePasswordEntryKey(dbPath);
-        final char[] entryValue = encodeCrtpyoServicePasswordEntry(keyFromOptions).toCharArray();
+        final char[] entryValue =
+                encodeCrtpyoServicePasswordEntry(keyFromOptions).toCharArray();
 
         final char[] currentValue = this.cryptoService.getKeyStorePassword(entryKey);
 
@@ -149,7 +155,8 @@ public class DatabaseLoader {
 
     private String encodeCrtpyoServicePasswordEntry(final Optional<EncryptionKeySpec> encryptionKey) {
         if (encryptionKey.isPresent()) {
-            return encryptionKey.get().getFormat().name() + ":" + encryptionKey.get().getKey();
+            return encryptionKey.get().getFormat().name() + ":"
+                    + encryptionKey.get().getKey();
         } else {
             return "";
         }
@@ -157,8 +164,8 @@ public class DatabaseLoader {
 
     private Optional<EncryptionKeySpec> getCryptoServiceEntry(final String dbPath) {
         try {
-            final String raw = new String(
-                    this.cryptoService.getKeyStorePassword(getCryptoServicePasswordEntryKey(dbPath)));
+            final String raw =
+                    new String(this.cryptoService.getKeyStorePassword(getCryptoServicePasswordEntryKey(dbPath)));
 
             final int index = raw.indexOf(':');
 
@@ -171,8 +178,9 @@ public class DatabaseLoader {
         }
     }
 
-    protected SQLiteDataSource openDataSource(final String url, final Optional<EncryptionKeySpec> encryptionKey,
-            final Optional<JournalMode> journalMode) throws SQLException {
+    protected SQLiteDataSource openDataSource(
+            final String url, final Optional<EncryptionKeySpec> encryptionKey, final Optional<JournalMode> journalMode)
+            throws SQLException {
         final SQLiteConfig config = new SQLiteConfig();
 
         if (encryptionKey.isPresent()) {
@@ -181,8 +189,10 @@ public class DatabaseLoader {
         }
 
         if (journalMode.isPresent()) {
-            config.setJournalMode(journalMode.get() == JournalMode.ROLLBACK_JOURNAL ? SQLiteConfig.JournalMode.DELETE
-                    : SQLiteConfig.JournalMode.WAL);
+            config.setJournalMode(
+                    journalMode.get() == JournalMode.ROLLBACK_JOURNAL
+                            ? SQLiteConfig.JournalMode.DELETE
+                            : SQLiteConfig.JournalMode.WAL);
         }
 
         final SQLiteDataSource dataSource = buildDataSource(config);
@@ -192,8 +202,11 @@ public class DatabaseLoader {
         return dataSource;
     }
 
-    protected void changeEncryptionKey(final SQLiteDataSource dataSource,
-            final Optional<EncryptionKeySpec> encryptionKey, final SqliteDbServiceOptions options) throws SQLException {
+    protected void changeEncryptionKey(
+            final SQLiteDataSource dataSource,
+            final Optional<EncryptionKeySpec> encryptionKey,
+            final SqliteDbServiceOptions options)
+            throws SQLException {
         logger.info("Updating encryption key for {}", dataSource.getUrl());
 
         try (final Connection connection = dataSource.getConnection()) {
@@ -216,7 +229,6 @@ public class DatabaseLoader {
 
             SqliteUtil.vacuum(connection, options);
         }
-
     }
 
     protected void deleteDbFiles(final String dbPath) {
@@ -247,5 +259,4 @@ public class DatabaseLoader {
             Files.delete(file.toPath());
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@ package org.eclipse.kura.configuration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Filter;
@@ -149,8 +148,8 @@ public interface ConfigurationService {
      *
      * @since 1.0.8
      */
-    public void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
-            boolean takeSnapshot) throws KuraException;
+    public void createFactoryConfiguration(
+            String factoryPid, String pid, Map<String, Object> properties, boolean takeSnapshot) throws KuraException;
 
     /**
      * Deletes the ConfigurableComponent instance having the specified PID.

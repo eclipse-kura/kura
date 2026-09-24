@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Objects;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -131,9 +130,12 @@ public class IdentityRestServiceV2DependenciesTest {
 
     private void givenFailingRequestHandlerRegistryMock() throws KuraException {
         this.requestHandlerRegistryMock = mock(RequestHandlerRegistry.class);
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistryMock)
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST))
+                .when(this.requestHandlerRegistryMock)
                 .registerRequestHandler(any(), any());
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistryMock).unregister(any());
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST))
+                .when(this.requestHandlerRegistryMock)
+                .unregister(any());
     }
 
     /*
@@ -175,8 +177,8 @@ public class IdentityRestServiceV2DependenciesTest {
     }
 
     private void thenRequestHandlerIsRegistered(String expectedMqttAppId) throws KuraException {
-        verify(this.requestHandlerRegistryMock, times(1)).registerRequestHandler(eq(expectedMqttAppId),
-                any(RequestHandler.class));
+        verify(this.requestHandlerRegistryMock, times(1))
+                .registerRequestHandler(eq(expectedMqttAppId), any(RequestHandler.class));
     }
 
     private void thenRequestHandlerIsUnregistered(String expectedMqttAppId) throws KuraException {
@@ -189,7 +191,8 @@ public class IdentityRestServiceV2DependenciesTest {
             StringWriter sw = new StringWriter();
             this.occurredException.printStackTrace(new PrintWriter(sw));
 
-            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+            errorMessage = String.format(
+                    "No exception expected, \"%s\" found. Caused by: %s",
                     this.occurredException.getClass().getName(), sw.toString());
         }
 
@@ -203,5 +206,4 @@ public class IdentityRestServiceV2DependenciesTest {
             this.occurredException = e;
         }
     }
-
 }

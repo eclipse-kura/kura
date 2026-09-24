@@ -54,7 +54,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
@@ -69,18 +68,18 @@ import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.system.SystemService",
-    immediate = true,
-    service = { org.eclipse.kura.system.SystemService.class })
+        name = "org.eclipse.kura.system.SystemService",
+        immediate = true,
+        service = {org.eclipse.kura.system.SystemService.class})
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
     private ScheduledExecutorService internetCheckerExecutor;
@@ -112,12 +111,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private String primaryInterfaceMacAddress;
 
-    private final AtomicReference<InternetConnectionStatus> currentInternetStatus = new AtomicReference<>(
-            InternetConnectionStatus.UNAVAILABLE);
+    private final AtomicReference<InternetConnectionStatus> currentInternetStatus =
+            new AtomicReference<>(InternetConnectionStatus.UNAVAILABLE);
 
     private ScheduledFuture<?> currentTask;
 
-    @Reference(name = "PrivilegedExecutorService",
+    @Reference(
+            name = "PrivilegedExecutorService",
             service = org.eclipse.kura.executor.PrivilegedExecutorService.class,
             unbind = "unsetExecutorService")
     public void setExecutorService(CommandExecutorService executorService) {
@@ -134,7 +134,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     //
     // ----------------------------------------------------------------
 
-    @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:methodLength" })
+    @SuppressWarnings({"rawtypes", "unchecked", "checkstyle:methodLength"})
     @Activate
     protected void activate(ComponentContext componentContext) {
         this.componentContext = componentContext;
@@ -269,7 +269,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
 
             if (updateTriggered) {
-                File directory;       // Desired current working directory
+                File directory; // Desired current working directory
 
                 directory = new File(KURA_PATH).getAbsoluteFile();
                 if (directory.exists() || directory.mkdirs()) {
@@ -337,8 +337,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(KEY_KURA_HOME_DIR, System.getProperty(KEY_KURA_HOME_DIR));
             }
             if (System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR) != null) {
-                this.kuraProperties.put(KEY_KURA_FRAMEWORK_CONFIG_DIR,
-                        System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR));
+                this.kuraProperties.put(
+                        KEY_KURA_FRAMEWORK_CONFIG_DIR, System.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR));
             }
             if (System.getProperty(KEY_KURA_USER_CONFIG_DIR) != null) {
                 this.kuraProperties.put(KEY_KURA_USER_CONFIG_DIR, System.getProperty(KEY_KURA_USER_CONFIG_DIR));
@@ -380,12 +380,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(KEY_KURA_TRUST_STORE_PWD, System.getProperty(KEY_KURA_TRUST_STORE_PWD));
             }
             if (System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE) != null) {
-                this.kuraProperties.put(KEY_FILE_COMMAND_ZIP_MAX_SIZE,
-                        System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE));
+                this.kuraProperties.put(
+                        KEY_FILE_COMMAND_ZIP_MAX_SIZE, System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE));
             }
             if (System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER) != null) {
-                this.kuraProperties.put(KEY_FILE_COMMAND_ZIP_MAX_NUMBER,
-                        System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER));
+                this.kuraProperties.put(
+                        KEY_FILE_COMMAND_ZIP_MAX_NUMBER, System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER));
             }
             if (System.getProperty(KEY_OS_ARCH) != null) {
                 this.kuraProperties.put(KEY_OS_ARCH, System.getProperty(KEY_OS_ARCH));
@@ -436,7 +436,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(KEY_FILE_SEP, System.getProperty(KEY_FILE_SEP));
             }
             if (System.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE) != null) {
-                this.kuraProperties.put(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE,
+                this.kuraProperties.put(
+                        CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE,
                         System.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE));
             }
             if (System.getProperty(DB_URL_PROPNAME) != null) {
@@ -461,8 +462,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(DB_NIO_PROPNAME, System.getProperty(DB_NIO_PROPNAME));
             }
             if (System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME) != null) {
-                this.kuraProperties.put(DB_WRITE_DELAY_MILLIES_PROPNAME,
-                        System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME));
+                this.kuraProperties.put(
+                        DB_WRITE_DELAY_MILLIES_PROPNAME, System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME));
             }
             if (System.getProperty(KEY_CPU_VERSION) != null) {
                 this.kuraProperties.put(KEY_CPU_VERSION, System.getProperty(KEY_CPU_VERSION));
@@ -471,11 +472,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(KEY_COMMAND_USER, System.getProperty(KEY_COMMAND_USER));
             }
             if (System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST) != null) {
-                this.kuraProperties.put(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST,
+                this.kuraProperties.put(
+                        KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST,
                         System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST));
             }
             if (System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP) != null) {
-                this.kuraProperties.put(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP,
+                this.kuraProperties.put(
+                        KEY_INTERNET_CONNECTION_STATUS_CHECK_IP,
                         System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP));
             }
 
@@ -521,8 +524,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return result;
         });
 
-        this.currentTask = this.internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
-                INTERNET_CHECK_TIME_INTERVAL, TimeUnit.MILLISECONDS);
+        this.currentTask = this.internetCheckerExecutor.scheduleAtFixedRate(
+                this::checkInternetTask, 5000, INTERNET_CHECK_TIME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     private void loadKuraCustom(Properties kuraCustomProps, String kuraCustomConfig) {
@@ -624,8 +627,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String macAddress = null;
         try {
             logger.info("executing: ifconfig and looking for {}", primaryNetworkInterfaceName);
-            List<String> out = Arrays
-                    .asList(runSystemCommand("ifconfig", false, this.executorService).split("\\r?\\n"));
+            List<String> out = Arrays.asList(
+                    runSystemCommand("ifconfig", false, this.executorService).split("\\r?\\n"));
             ListIterator<String> iterator = out.listIterator();
             String line;
             while (iterator.hasNext()) {
@@ -691,7 +694,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 for (final Path p : s) {
                     final File file = p.toFile();
 
-                    if (Objects.equals(primaryNetworkInterfaceName, file.getName().split("@")[0])) {
+                    if (Objects.equals(
+                            primaryNetworkInterfaceName, file.getName().split("@")[0])) {
                         interfaceSysfsDir = Optional.of(file);
                         break;
                     }
@@ -803,7 +807,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             linuxKernelVersion = new File("/proc/sys/kernel/version");
             if (linuxKernelVersion.exists()) {
                 StringBuilder kernelVersionData = new StringBuilder();
-                try (FileReader fr = new FileReader(linuxKernelVersion); BufferedReader in = new BufferedReader(fr)) {
+                try (FileReader fr = new FileReader(linuxKernelVersion);
+                        BufferedReader in = new BufferedReader(fr)) {
                     String tempLine = null;
                     while ((tempLine = in.readLine()) != null) {
                         kernelVersionData.append(" ");
@@ -814,7 +819,6 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     logger.error("Failed to get OS version", e);
                 }
             }
-
         }
 
         return sbOsVersion.toString();
@@ -1047,13 +1051,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 }
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
+            String[] cmds = {BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'"};
             String biosTmp = runSystemCommand(cmds, true, this.executorService);
             if (biosTmp.contains(": ")) {
                 biosVersion = biosTmp.split(SPACES_REGEX)[1];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
+            String[] cmds = {"wmic", "bios", "get", "smbiosbiosversion"};
             String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("SMBIOSBIOSVersion")) {
                 biosVersion = biosTmp.split("SMBIOSBIOSVersion\\s+")[1];
@@ -1077,7 +1081,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+        } else if (OS_LINUX.equals(getOsName())
+                || OS_CLOUDBEES.equals(getOsName())
                 || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             String displayTmp = runSystemCommand("hostname", false, this.executorService);
             if (displayTmp.length() > 0) {
@@ -1128,7 +1133,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 modelId = modelTmp.split("Version:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String[] cmds = { "wmic", "baseboard", "get", "Version" };
+            String[] cmds = {"wmic", "baseboard", "get", "Version"};
             String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("Version")) {
                 modelId = biosTmp.split("Version\\s+")[1];
@@ -1149,7 +1154,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String modelName = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
+            String[] cmds = {BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Model Name'"};
             String modelTmp = runSystemCommand(cmds, true, this.executorService);
             if (modelTmp.contains(": ")) {
                 modelName = modelTmp.split(SPACES_REGEX)[1];
@@ -1160,7 +1165,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 modelName = modelTmp.split("Product Name:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String[] cmds = { "wmic", "baseboard", "get", "Product" };
+            String[] cmds = {"wmic", "baseboard", "get", "Product"};
             String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("Product")) {
                 modelName = biosTmp.split("Product\\s+")[1];
@@ -1180,8 +1185,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         String partNumber = UNSUPPORTED;
 
-        if (OS_LINUX.equals(getOsName()) && (LINUX_2_6_34_9_WR4_2_0_0_STANDARD.equals(getOsVersion())
-                || LINUX_2_6_34_12_WR4_3_0_0_STANDARD.equals(getOsVersion()))) {
+        if (OS_LINUX.equals(getOsName())
+                && (LINUX_2_6_34_9_WR4_2_0_0_STANDARD.equals(getOsVersion())
+                        || LINUX_2_6_34_12_WR4_3_0_0_STANDARD.equals(getOsVersion()))) {
             partNumber = runSystemCommand("eth_partno_bsp", false, this.executorService) + " "
                     + runSystemCommand("eth_partno_epr", false, this.executorService);
         }
@@ -1199,7 +1205,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String serialNum = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
+            String[] cmds = {BIN_SH, "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'"};
             String serialTmp = runSystemCommand(cmds, true, this.executorService);
             if (serialTmp.contains(": ")) {
                 serialNum = serialTmp.split(SPACES_REGEX)[1];
@@ -1210,7 +1216,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 serialNum = serialTmp.split("Serial Number:\\s+")[1].split("\n")[0];
             }
         } else if (getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
-            String[] cmds = { "wmic", "bios", "get", "SerialNumber" };
+            String[] cmds = {"wmic", "bios", "get", "SerialNumber"};
             String biosTmp = runSystemCommand(cmds, false, this.executorService);
             if (biosTmp.contains("SerialNumber")) {
                 serialNum = biosTmp.split("SerialNumber\\s+")[1];
@@ -1251,39 +1257,41 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException {
 
         List<SystemResourceInfo> packagesInfo = new ArrayList<>();
-        CommandStatus debStatus = execute(new String[] { "dpkg-query", "-W" });
+        CommandStatus debStatus = execute(new String[] {"dpkg-query", "-W"});
         if (debStatus.getExitStatus().isSuccessful()
                 && ((ByteArrayOutputStream) debStatus.getOutputStream()).size() > 0) {
             parseSystemPackages(packagesInfo, debStatus, SystemResourceType.DEB);
         }
 
-        CommandStatus rpmStatus = execute(
-                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        CommandStatus rpmStatus =
+                execute(new String[] {"rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'"});
         if (rpmStatus.getExitStatus().isSuccessful()
                 && ((ByteArrayOutputStream) rpmStatus.getOutputStream()).size() > 0) {
             parseSystemPackages(packagesInfo, rpmStatus, SystemResourceType.RPM);
         }
 
-        CommandStatus apkStatus = execute(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
+        CommandStatus apkStatus = execute(new String[] {"apk", "list", "-I", "|", "awk", "'{ print $1 }'"});
         if (apkStatus.getExitStatus().isSuccessful()
                 && ((ByteArrayOutputStream) apkStatus.getOutputStream()).size() > 0) {
             parseSystemPackages(packagesInfo, apkStatus, SystemResourceType.APK);
         }
 
-        if (!debStatus.getExitStatus().isSuccessful() && !rpmStatus.getExitStatus().isSuccessful()
+        if (!debStatus.getExitStatus().isSuccessful()
+                && !rpmStatus.getExitStatus().isSuccessful()
                 && !apkStatus.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to retrieve system packages.");
         }
         return packagesInfo;
     }
 
-    private void parseSystemPackages(List<SystemResourceInfo> packagesInfo, CommandStatus status,
-            SystemResourceType type) {
-        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
-                StandardCharsets.UTF_8).split("\n");
+    private void parseSystemPackages(
+            List<SystemResourceInfo> packagesInfo, CommandStatus status, SystemResourceType type) {
+        String[] packages = new String(
+                        ((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), StandardCharsets.UTF_8)
+                .split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
             String[] fields = p.split("\\s+"); // this works for dpkg and rpm where separator for version and name is a
-                                               // sequence of spaces
+            // sequence of spaces
             if (fields.length >= 2) {
                 packagesInfo.add(new SystemResourceInfo(fields[0], fields[1], type));
             } else {
@@ -1331,7 +1339,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
         }
 
-        return new String[] { split[0] + name.toString(), version.toString() };
+        return new String[] {split[0] + name.toString(), version.toString()};
     }
 
     private CommandStatus execute(String[] commandLine) {
@@ -1343,7 +1351,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         command.setOutputStream(out);
         CommandStatus status = this.executorService.execute(command);
         if (logger.isDebugEnabled()) {
-            logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
+            logger.debug(
+                    "execute command {} :: exited with code - {}",
+                    command,
+                    status.getExitStatus().getExitCode());
             logger.debug("execute stderr {}", new String(err.toByteArray(), StandardCharsets.UTF_8));
             logger.debug("execute stdout {}", new String(out.toByteArray(), StandardCharsets.UTF_8));
         }
@@ -1389,7 +1400,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         if (OS_MAC_OSX.equals(getOsName())) {
             hostname = runSystemCommand("scutil --get ComputerName", false, this.executorService);
-        } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())
+        } else if (OS_LINUX.equals(getOsName())
+                || OS_CLOUDBEES.equals(getOsName())
                 || getOsName().toLowerCase().startsWith(OS_WINDOWS)) {
             hostname = runSystemCommand("hostname", false, this.executorService);
         }
@@ -1598,8 +1610,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             try {
                 return Integer.parseInt(propertyValue.get());
             } catch (NumberFormatException e) {
-                logger.error("Cannot parse integer value for property {}: {}. Set it to default {}.", propertyName,
-                        propertyValue.get(), defaultValue, e);
+                logger.error(
+                        "Cannot parse integer value for property {}: {}. Set it to default {}.",
+                        propertyName,
+                        propertyValue.get(),
+                        defaultValue,
+                        e);
             }
         }
         return defaultValue;
@@ -1648,27 +1664,26 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String version;
 
         switch (protocol) {
-        case INET:
-            version = "-4";
-            break;
+            case INET:
+                version = "-4";
+                break;
 
-        case INET6:
-            version = "-6";
-            break;
-        default:
-            throw new IllegalArgumentException("Unexpected protocol: " + protocol);
+            case INET6:
+                version = "-6";
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected protocol: " + protocol);
         }
 
         try {
             // -c 5: send 5 ping requests,
             // -W 5: wait for 1 seconds max for each reply
-            CommandStatus status = this.executorService
-                    .execute(new Command(new String[] { "ping", version, address, "-c", "5", "-W", "1" }));
+            CommandStatus status = this.executorService.execute(
+                    new Command(new String[] {"ping", version, address, "-c", "5", "-W", "1"}));
             return status.getExitStatus().isSuccessful();
         } catch (Exception e) {
             logger.trace("Error while executing ping command", e);
             return false;
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,7 @@ public class PasswordStrengthValidators {
     private static final String LOWERCASE = ".*[a-z].*";
     private static final String UPPERCASE = ".*[A-Z].*";
 
-    private PasswordStrengthValidators() {
-    }
+    private PasswordStrengthValidators() {}
 
     public static List<Validator<String>> fromConfig(final ValidatorOptions userOptions) {
         return fromConfig(userOptions, new DefaultMessages());
@@ -54,20 +53,20 @@ public class PasswordStrengthValidators {
     }
 
     private static Validator<String> passwordLengthValidator(final int minPasswordLength, final Messages messages) {
-        return new PredicateValidator(v -> {
-            final int passwordLength = v == null ? 0 : v.length();
-            return passwordLength >= minPasswordLength;
-        }, messages.pwdStrengthMinLength(minPasswordLength));
+        return new PredicateValidator(
+                v -> {
+                    final int passwordLength = v == null ? 0 : v.length();
+                    return passwordLength >= minPasswordLength;
+                },
+                messages.pwdStrengthMinLength(minPasswordLength));
     }
 
     private static Validator<String> containsDigitsValidator(final Messages messages) {
-        return new RegexValidator(CONTAINS_DIGITS, messages.pwdStrengthDigitsRequired()) {
-        };
+        return new RegexValidator(CONTAINS_DIGITS, messages.pwdStrengthDigitsRequired()) {};
     }
 
     private static Validator<String> containsSpecialChars(final Messages messages) {
-        return new RegexValidator(CONTAINS_NOT_ALPHANUMERIC, messages.pwdStrengthNonAlphanumericRequired()) {
-        };
+        return new RegexValidator(CONTAINS_NOT_ALPHANUMERIC, messages.pwdStrengthNonAlphanumericRequired()) {};
     }
 
     private static Validator<String> containsBothCases(final Messages messages) {
@@ -82,8 +81,8 @@ public class PasswordStrengthValidators {
 
     public static Validator<String> requireDifferentNameAndPassword(final String identityName) {
 
-        return new PredicateValidator(v -> !v.equalsIgnoreCase(identityName),
-                new DefaultMessages().pwdNotEqualsUsername());
+        return new PredicateValidator(
+                v -> !v.equalsIgnoreCase(identityName), new DefaultMessages().pwdNotEqualsUsername());
     }
 
     public interface Messages {
@@ -126,5 +125,4 @@ public class PasswordStrengthValidators {
             return "The identity name cannot be the same as the password";
         }
     }
-
 }

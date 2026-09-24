@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.net.wifi;
 
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.kura.net.NetInterface;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -81,5 +80,4 @@ public interface WifiInterface<T extends WifiInterfaceAddress> extends NetInterf
      */
     @Override
     public List<T> getNetInterfaceAddresses();
-
 }

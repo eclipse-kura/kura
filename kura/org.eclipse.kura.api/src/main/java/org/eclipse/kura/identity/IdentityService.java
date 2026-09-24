@@ -18,13 +18,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * A service interface that allows to manage Kura identities.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.7.0
  */
@@ -33,7 +32,7 @@ public interface IdentityService {
 
     /**
      * Creates a new identity with the given name.
-     * 
+     *
      * @param identityName
      *            the name of the identity to be created.
      * @return {@code true} if the identity with the given name has been created as
@@ -46,7 +45,7 @@ public interface IdentityService {
 
     /**
      * Creates a new identity using the provided configuration.
-     * 
+     *
      * @param identityConfiguration
      *            the identity configuration including identity
      *            name and optional configuration components.
@@ -61,7 +60,7 @@ public interface IdentityService {
 
     /**
      * Deletes the identity with the given name, including temporary identities.
-     * 
+     *
      * @param identityName
      *            the name of the identity to be deleted.
      * @return {@code true} if the identity with the given name has been deleted as
@@ -74,7 +73,7 @@ public interface IdentityService {
 
     /**
      * Returns the configuration of all existing identities.
-     * 
+     *
      * @param componentsToReturn
      *            the set of {@link IdentityConfigurationComponent}
      *            types to be returned. If the set is empty a
@@ -82,7 +81,7 @@ public interface IdentityService {
      *            each defined identity with an empty component list.
      *            This can be used to get the name for all defined
      *            identities.
-     * 
+     *
      * @return the list of {@link IdentityConfiguration}s. An empty list will be
      *         returned if no identities are defined.
      * @throws KuraException
@@ -94,7 +93,7 @@ public interface IdentityService {
 
     /**
      * Returns the configuration of the identity with the given name.
-     * 
+     *
      * @param identityName
      *            the identity name.
      * @param componentsToReturn
@@ -106,8 +105,9 @@ public interface IdentityService {
      *             if a failure occurs in retrieving identity
      *             configuration.
      */
-    public Optional<IdentityConfiguration> getIdentityConfiguration(final String identityName,
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
+    public Optional<IdentityConfiguration> getIdentityConfiguration(
+            final String identityName, Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
+            throws KuraException;
 
     /**
      * Returns the default configuration for the identity with the given name, this
@@ -116,7 +116,7 @@ public interface IdentityService {
      * {@link IdentityService#getIdentityConfiguration(String, Set)}
      * method for an identity that has just been created with the
      * {@link IdentityService#createIdentity(String)} method.
-     * 
+     *
      * This method can be useful for example to allow a user interface to show the
      * initial identity configuration to the user before creating it.
      *
@@ -130,13 +130,14 @@ public interface IdentityService {
      *             if a failure occurs in retrieving identity
      *             configuration.
      */
-    public IdentityConfiguration getIdentityDefaultConfiguration(final String identityName,
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
+    public IdentityConfiguration getIdentityDefaultConfiguration(
+            final String identityName, Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
+            throws KuraException;
 
     /**
      * Validates the provided identity configuration without performing any
      * change to the system.
-     * 
+     *
      * @param identityConfiguration
      *            the identity configuration that should be
      *            validated.
@@ -151,7 +152,7 @@ public interface IdentityService {
      * {@link IdentityConfigurationComponent} types.
      * The configuration of the identities or identity
      * components that have not been provided will not be modified.
-     * 
+     *
      * @param identityConfiguration
      *            the identity configuration that should be
      *            updated.
@@ -163,7 +164,7 @@ public interface IdentityService {
 
     /**
      * Defines a new permission.
-     * 
+     *
      * @param permission
      *            the permission to be created.
      * @return {@code true} if the permission has been created as
@@ -177,7 +178,7 @@ public interface IdentityService {
     /**
      * Removes an existing permission. The permission will also be removed from all
      * identities assigned to it.
-     * 
+     *
      * @param permission
      *            the permission to be deleted.
      * @return {@code true} if the permission has been deleted as
@@ -191,7 +192,7 @@ public interface IdentityService {
     /**
      * Returns the set of permissions that are currently defined within the
      * framework.
-     * 
+     *
      * @return the set of permissions that are currently defined within the
      *         framework.
      * @throws KuraException
@@ -202,7 +203,7 @@ public interface IdentityService {
     /**
      * Computes a {@link PasswordHash} for the given plaintext password. The
      * password array will be overwritten at the end of the operation.
-     * 
+     *
      * @param password
      *            the plaintext password.
      * @return the computed password hash.
@@ -214,7 +215,7 @@ public interface IdentityService {
     /**
      * Checks if the provided password matches the one currently assigned to the
      * given identity.
-     * 
+     *
      * @param identityName
      * @param password
      * @throws KuraException
@@ -257,7 +258,6 @@ public interface IdentityService {
      */
     public void createTemporaryIdentity(final String identityName, final Duration lifetime) throws KuraException;
 
-
     /**
      * Creates a temporary identity that is not persisted and has automatic
      * expiration. Temporary identities behave like regular identities but are
@@ -277,5 +277,6 @@ public interface IdentityService {
      *             is not valid.
      * @since 2.8.0
      */
-    public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime) throws KuraException;
+    public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime)
+            throws KuraException;
 }

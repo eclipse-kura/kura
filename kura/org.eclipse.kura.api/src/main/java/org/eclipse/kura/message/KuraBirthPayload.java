@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -53,7 +53,7 @@ public class KuraBirthPayload extends KuraPayload {
 
     /**
      * Provides information on the device tampering status.
-     * 
+     *
      * @since 2.2
      */
     public enum TamperStatus {
@@ -70,7 +70,6 @@ public class KuraBirthPayload extends KuraPayload {
          * The device has not been tampered
          */
         NOT_TAMPERED;
-
     }
 
     private static final String ACCEPT_ENCODING_KEY = "accept_encoding";
@@ -281,14 +280,22 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("getJvmVersion()=").append(getJvmVersion()).append(", ");
         sb.append("getJvmProfile()=").append(getJvmProfile()).append(", ");
         sb.append("getKuraVersion()=").append(getApplicationFrameworkVersion()).append(", ");
-        sb.append("getApplicationFramework()=").append(getApplicationFramework()).append(", ");
-        sb.append("getApplicationFrameworkVersion()=").append(getApplicationFrameworkVersion()).append(", ");
+        sb.append("getApplicationFramework()=")
+                .append(getApplicationFramework())
+                .append(", ");
+        sb.append("getApplicationFrameworkVersion()=")
+                .append(getApplicationFrameworkVersion())
+                .append(", ");
         sb.append("getOsgiFramework()=").append(getOsgiFramework()).append(", ");
-        sb.append("getOsgiFrameworkVersion()=").append(getOsgiFrameworkVersion()).append(", ");
+        sb.append("getOsgiFrameworkVersion()=")
+                .append(getOsgiFrameworkVersion())
+                .append(", ");
         sb.append("getConnectionInterface()=").append(getConnectionInterface()).append(", ");
         sb.append("getConnectionIp()=").append(getConnectionIp()).append(", ");
         sb.append("getAcceptEncoding()=").append(getAcceptEncoding()).append(", ");
-        sb.append("getApplicationIdentifiers()=").append(getApplicationIdentifiers()).append(", ");
+        sb.append("getApplicationIdentifiers()=")
+                .append(getApplicationIdentifiers())
+                .append(", ");
         sb.append("getPayloadEncoding()=").append(getPayloadEncoding()).append(", ");
         sb.append("getTamperStatus()=").append(getTamperStatus()).append(", ");
         sb.append("getJvmVendor()=").append(getJvmVendor()).append(", ");
@@ -527,7 +534,7 @@ public class KuraBirthPayload extends KuraPayload {
         }
 
         /**
-         * 
+         *
          * @since 2.6
          * @param jvmVendor
          * @return
@@ -538,7 +545,7 @@ public class KuraBirthPayload extends KuraPayload {
         }
 
         /**
-         * 
+         *
          * @since 2.6
          * @param jdkVendorVersion
          * @return

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -28,19 +27,19 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component(
-    name = "org.eclipse.kura.util.test.driver.ChannelDescriptorTestDriver",
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.driver.Driver.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+        name = "org.eclipse.kura.util.test.driver.ChannelDescriptorTestDriver",
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {org.eclipse.kura.driver.Driver.class, org.eclipse.kura.configuration.ConfigurableComponent.class})
 @Designate(ocd = ChannelDescriptorTestDriverOptions.class, factory = true)
 public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponent {
 
@@ -79,26 +78,22 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
     @Override
     public void read(List<ChannelRecord> records) throws ConnectionException {
         throw new ConnectionException("Read is not supported");
-
     }
 
     @Override
     public void registerChannelListener(Map<String, Object> channelConfig, ChannelListener listener)
             throws ConnectionException {
         throw new ConnectionException("Register channle listener is not supported");
-
     }
 
     @Override
     public void unregisterChannelListener(ChannelListener listener) throws ConnectionException {
         throw new ConnectionException("Unregister channle listener is not supported");
-
     }
 
     @Override
     public void write(List<ChannelRecord> records) throws ConnectionException {
         throw new ConnectionException("Write is not supported");
-
     }
 
     @Override
@@ -135,7 +130,10 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
             generateAds(Tscalar.DOUBLE, "13.5", "20.5", "16");
             generateAds(Tscalar.FLOAT, "13.5", "20.5", "16");
             generateAds(Tscalar.INTEGER, "-200000", "300000", "10");
-            generateAds(Tscalar.LONG, "" + ((long) Integer.MIN_VALUE - 10000), "" + ((long) Integer.MAX_VALUE + 10000),
+            generateAds(
+                    Tscalar.LONG,
+                    "" + ((long) Integer.MIN_VALUE - 10000),
+                    "" + ((long) Integer.MAX_VALUE + 10000),
                     "2");
             // generateAds(Tscalar.PASSWORD, "foo", "bar", "foo");
             generateAds(Tscalar.SHORT, "-20000", "20000", "1");
@@ -146,14 +144,19 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
             generateOptionAd(Tscalar.DOUBLE, "-10.21", "20.123123", "30.23123");
             generateOptionAd(Tscalar.FLOAT, "10.4", "-12.4", "0.5");
             generateOptionAd(Tscalar.INTEGER, "-200000", "300000", "10");
-            generateOptionAd(Tscalar.LONG, "" + ((long) Integer.MIN_VALUE - 10000),
-                    "" + ((long) Integer.MAX_VALUE + 10000), "-34");
+            generateOptionAd(
+                    Tscalar.LONG,
+                    "" + ((long) Integer.MIN_VALUE - 10000),
+                    "" + ((long) Integer.MAX_VALUE + 10000),
+                    "-34");
             generateOptionAd(Tscalar.SHORT, "-20000", "20000", "1");
         }
 
         private AdBuilder createBuilder(final Tscalar type, final String defaultValue) {
-            return new AdBuilder(type + ".prop", type).withName(type + " property")
-                    .withDescription("A " + type + " property").withDefaultValue(defaultValue);
+            return new AdBuilder(type + ".prop", type)
+                    .withName(type + " property")
+                    .withDescription("A " + type + " property")
+                    .withDefaultValue(defaultValue);
         }
 
         private void generateAds(final Tscalar type, final String defaultValue) {
@@ -161,11 +164,13 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
 
             ads.add(builder.build());
 
-            ads.add(builder.duplicate().withId(builder.id + "not.required")
+            ads.add(builder.duplicate()
+                    .withId(builder.id + "not.required")
                     .withName(builder.name.orElse("") + " not required")
-                    .withDescription(builder.description.orElse("") + " not required").withoutRequired()
-                    .withoutDefaultValue().build());
-
+                    .withDescription(builder.description.orElse("") + " not required")
+                    .withoutRequired()
+                    .withoutDefaultValue()
+                    .build());
         }
 
         private void generateAds(final Tscalar type, final String min, final String max, final String defaultValue) {
@@ -173,15 +178,20 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
 
             final AdBuilder builder = createBuilder(type, defaultValue);
 
-            ads.add(builder.duplicate().withId(builder.id + ".min.max")
+            ads.add(builder.duplicate()
+                    .withId(builder.id + ".min.max")
                     .withName(builder.name.orElse("") + " with min and max")
                     .withDescription(builder.description.orElse("") + " with min : " + min + " and max : " + max)
-                    .withMin(min).withMax(max).build());
+                    .withMin(min)
+                    .withMax(max)
+                    .build());
         }
 
         private void generateOptionAd(final Tscalar type, final String... values) {
-            final AdBuilder builder = new AdBuilder(type + ".options", type).withDefaultValue(values[0])
-                    .withName(type + " property with options").withDescription("A " + type + " property wit options")
+            final AdBuilder builder = new AdBuilder(type + ".options", type)
+                    .withDefaultValue(values[0])
+                    .withName(type + " property with options")
+                    .withDescription("A " + type + " property wit options")
                     .withDefaultValue(values[0]);
 
             for (int i = 0; i < values.length; i++) {
@@ -195,7 +205,6 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
         public Object getDescriptor() {
             return ads;
         }
-
     }
 
     private static class AdBuilder {
@@ -341,5 +350,4 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
             return ad;
         }
     }
-
 }

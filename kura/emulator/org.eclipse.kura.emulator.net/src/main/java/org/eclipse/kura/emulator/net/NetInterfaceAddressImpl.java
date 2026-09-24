@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.emulator.net;
 
 import java.util.List;
-
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterfaceAddress;
 
@@ -26,8 +25,7 @@ public class NetInterfaceAddressImpl implements NetInterfaceAddress {
     private IPAddress broadcast;
     private List<? extends IPAddress> dnsAddresses;
 
-    public NetInterfaceAddressImpl() {
-    }
+    public NetInterfaceAddressImpl() {}
 
     public NetInterfaceAddressImpl(NetInterfaceAddress other) {
         super();
@@ -101,9 +99,12 @@ public class NetInterfaceAddressImpl implements NetInterfaceAddress {
 
         NetInterfaceAddress other = (NetInterfaceAddress) obj;
 
-        return this.networkPrefixLength == other.getNetworkPrefixLength() && compare(this.address, other.getAddress())
-                && compare(this.netmask, other.getNetmask()) && compare(this.gateway, other.getGateway())
-                && compare(this.broadcast, other.getBroadcast()) && compare(this.dnsAddresses, other.getDnsServers());
+        return this.networkPrefixLength == other.getNetworkPrefixLength()
+                && compare(this.address, other.getAddress())
+                && compare(this.netmask, other.getNetmask())
+                && compare(this.gateway, other.getGateway())
+                && compare(this.broadcast, other.getBroadcast())
+                && compare(this.dnsAddresses, other.getDnsServers());
     }
 
     protected boolean compare(Object obj1, Object obj2) {
@@ -122,5 +123,4 @@ public class NetInterfaceAddressImpl implements NetInterfaceAddress {
         result = prime * result + this.networkPrefixLength;
         return result;
     }
-
 }

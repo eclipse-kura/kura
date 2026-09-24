@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,5 +32,4 @@ public class PredicateValidator implements Validator<String> {
             errorMessageConsumer.accept(this.message);
         }
     }
-
 }

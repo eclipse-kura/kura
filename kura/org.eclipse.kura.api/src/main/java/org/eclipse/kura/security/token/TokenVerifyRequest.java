@@ -17,7 +17,7 @@ import java.util.Optional;
 
 /**
  * Describes what the caller wants to verify on the token.
- * 
+ *
  * @since 3.0
  */
 public final class TokenVerifyRequest {
@@ -31,7 +31,7 @@ public final class TokenVerifyRequest {
     }
 
     /**
-     * 
+     *
      * @return the encoded token associated with this request, cannot be {@code null}, or empty, or whitespace-only
      */
     public String getToken() {
@@ -39,7 +39,7 @@ public final class TokenVerifyRequest {
     }
 
     /**
-     * 
+     *
      * @return the intended consumer for the presented token, so that token verifier can reject the presented token if
      *         it is not for him, cannot be {@code null}
      */
@@ -49,7 +49,7 @@ public final class TokenVerifyRequest {
 
     /**
      * Get a builder for constructing a {@link TokenVerifyRequest} with the token that needs to be verified.
-     * 
+     *
      * @param token
      *            the encoded token to be verified, must not be {@code null}, nor empty, nor whitespace-only
      * @return a {@link Builder} for constructing a {@link TokenVerifyRequest}
@@ -108,12 +108,11 @@ public final class TokenVerifyRequest {
 
         /**
          * Builds a {@link TokenVerifyRequest}.
-         * 
+         *
          * @return a {@link TokenVerifyRequest}
          */
         public TokenVerifyRequest build() {
             return new TokenVerifyRequest(this);
         }
-
     }
 }

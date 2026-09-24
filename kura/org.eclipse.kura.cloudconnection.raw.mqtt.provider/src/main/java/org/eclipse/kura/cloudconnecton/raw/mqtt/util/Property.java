@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -15,7 +15,6 @@ package org.eclipse.kura.cloudconnecton.raw.mqtt.util;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 
@@ -52,8 +51,12 @@ public class Property<T> {
         try {
             return (T) properties.get(this.key);
         } catch (final Exception e) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, null, null,
-                    "invalid property value for " + this.key, e);
+            throw new KuraException(
+                    KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                    null,
+                    null,
+                    "invalid property value for " + this.key,
+                    e);
         }
     }
 
@@ -71,8 +74,8 @@ public class Property<T> {
 
         final Property<T> orig = this;
 
-        return new Property<U>(this.key, this.defaultValue != null ? mapper.apply(this.defaultValue) : null,
-                valueType) {
+        return new Property<U>(
+                this.key, this.defaultValue != null ? mapper.apply(this.defaultValue) : null, valueType) {
 
             @Override
             public U get(final Map<String, Object> properties) throws KuraException {
@@ -101,7 +104,10 @@ public class Property<T> {
                 final T value = orig.get(properties);
 
                 if (!validator.test(value)) {
-                    throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, null, null,
+                    throw new KuraException(
+                            KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                            null,
+                            null,
                             "Validation failed for property " + this.key);
                 }
 
@@ -120,5 +126,4 @@ public class Property<T> {
             }
         };
     }
-
 }

@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -46,7 +45,6 @@ public class ComponentUtilTest {
         } catch (Throwable e) {
             fail("Parameters not checked.");
         }
-
     }
 
     @Test
@@ -148,8 +146,7 @@ public class ComponentUtilTest {
 
         assertEquals("property remains", 1, props.size());
         assertTrue("key still exists", props.containsKey("key1"));
-        assertArrayEquals("key is already encrypted", "pass".toCharArray(),
-                ((Password) props.get("key1")).getPassword());
+        assertArrayEquals(
+                "key is already encrypted", "pass".toCharArray(), ((Password) props.get("key1")).getPassword());
     }
-
 }

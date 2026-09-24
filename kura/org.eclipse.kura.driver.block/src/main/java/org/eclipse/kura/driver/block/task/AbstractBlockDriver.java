@@ -1,16 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.driver.block.task;
 
 import static java.util.Objects.requireNonNull;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -134,8 +132,7 @@ public abstract class AbstractBlockDriver<T> implements Driver {
      * @param aggregator
      *            the {@link BlockTaskAggregator} that will perform the aggregation
      */
-    protected void beforeAggregation(T domain, Mode mode, BlockTaskAggregator aggregator) {
-    }
+    protected void beforeAggregation(T domain, Mode mode, BlockTaskAggregator aggregator) {}
 
     /**
      * Perform the following operations:
@@ -176,15 +173,19 @@ public abstract class AbstractBlockDriver<T> implements Driver {
                 };
             }
 
-            final Map<T, ArrayList<Block>> groupedTasks = toTasks(records, mode).collect(Collectors.groupingBy(
-                    classifier, Collectors.mapping(pair -> pair.second, Collectors.toCollection(ArrayList::new))));
+            final Map<T, ArrayList<Block>> groupedTasks = toTasks(records, mode)
+                    .collect(Collectors.groupingBy(
+                            classifier,
+                            Collectors.mapping(pair -> pair.second, Collectors.toCollection(ArrayList::new))));
 
             groupedTasks.entrySet().forEach(entry -> {
                 final T domain = entry.getKey();
                 final BlockTaskAggregator aggregator;
                 if (domainsWithUpdateTasks.contains(domain)) {
-                    aggregator = new UpdateBlockTaskAggregator(entry.getValue(),
-                            getTaskFactoryForDomain(domain, Mode.READ), getTaskFactoryForDomain(domain, Mode.WRITE));
+                    aggregator = new UpdateBlockTaskAggregator(
+                            entry.getValue(),
+                            getTaskFactoryForDomain(domain, Mode.READ),
+                            getTaskFactoryForDomain(domain, Mode.WRITE));
                     aggregator.setMinimumGapSize(getReadMinimumGapSizeForDomain(domain));
                 } else {
                     aggregator = new BlockTaskAggregator(entry.getValue(), getTaskFactoryForDomain(domain, mode));
@@ -284,8 +285,7 @@ public abstract class AbstractBlockDriver<T> implements Driver {
         }
 
         @Override
-        public void close() throws Exception {
-        }
+        public void close() throws Exception {}
 
         @Override
         public List<ChannelRecord> execute() throws ConnectionException, KuraException {
@@ -302,7 +302,6 @@ public abstract class AbstractBlockDriver<T> implements Driver {
         public List<ChannelRecord> getChannelRecords() {
             return this.records;
         }
-
     }
 
     public static final class Pair<U, V> {

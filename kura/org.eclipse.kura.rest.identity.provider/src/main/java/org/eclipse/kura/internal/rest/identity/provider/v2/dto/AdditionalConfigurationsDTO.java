@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.internal.rest.identity.provider.v2.dto;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 
 public class AdditionalConfigurationsDTO {
@@ -33,5 +32,4 @@ public class AdditionalConfigurationsDTO {
     public String toString() {
         return "AdditionalConfigurationDTO [configurations=" + this.configurations + "]";
     }
-
 }

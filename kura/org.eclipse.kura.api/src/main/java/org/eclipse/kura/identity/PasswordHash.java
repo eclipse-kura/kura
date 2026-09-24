@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -22,10 +22,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * <br>
  * Instances of this class can be constructed using the
  * {@link IdentityService#computePasswordHash(char[])}.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.7.0
  */
 @ProviderType
-public interface PasswordHash {
-}
+public interface PasswordHash {}

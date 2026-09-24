@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
@@ -52,7 +51,9 @@ public class LegacyIdentityService {
     private final PasswordStrengthVerificationService passwordStrengthVerificationService;
     private final CryptoService cryptoService;
 
-    public LegacyIdentityService(CryptoService cryptoService, UserAdmin userAdmin,
+    public LegacyIdentityService(
+            CryptoService cryptoService,
+            UserAdmin userAdmin,
             PasswordStrengthVerificationService passwordStrengthVerificationService) {
 
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;
@@ -83,7 +84,6 @@ public class LegacyIdentityService {
         } else {
             throw new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist");
         }
-
     }
 
     public UserDTO getUser(String userName) throws KuraException {
@@ -105,7 +105,6 @@ public class LegacyIdentityService {
         final Map<String, UserDTO> result = new HashMap<>();
 
         this.userAdminHelper.foreachUser((name, user) -> {
-
             final UserDTO userData = initUserConfig(user);
 
             result.put(user.getName(), userData);
@@ -119,8 +118,8 @@ public class LegacyIdentityService {
     private UserDTO initUserConfig(final User user) {
 
         final boolean isPasswordEnabled = user.getCredentials().get(PASSWORD_PROPERTY) instanceof String;
-        final boolean isPasswordChangeRequired = Objects.equals("true",
-                user.getProperties().get(KURA_NEED_PASSWORD_CHANGE_PROPERTY));
+        final boolean isPasswordChangeRequired =
+                Objects.equals("true", user.getProperties().get(KURA_NEED_PASSWORD_CHANGE_PROPERTY));
 
         return new UserDTO(getBaseName(user), new HashSet<>(), isPasswordEnabled, isPasswordChangeRequired);
     }
@@ -146,9 +145,7 @@ public class LegacyIdentityService {
     }
 
     private void fillPermissions(final Map<String, ? extends UserDTO> userData) {
-        this.userAdminHelper.foreachPermission((permission, group) ->
-
-        forEach(group.getMembers(), member -> {
+        this.userAdminHelper.foreachPermission((permission, group) -> forEach(group.getMembers(), member -> {
             final UserDTO data = userData.get(member.getName());
 
             if (data != null) {
@@ -176,25 +173,24 @@ public class LegacyIdentityService {
             if (permissions != null) {
 
                 this.userAdminHelper.foreachPermission((permissionName, permissionGroup) -> {
-
                     if (permissions.contains(permissionName)) {
                         permissionGroup.addMember(user.get());
                     } else {
                         permissionGroup.removeMember(user.get());
                     }
                 });
-
             }
 
-            updatePasswordOptions(userDTOToUpdate, user.get().getCredentials(), user.get().getProperties());
+            updatePasswordOptions(
+                    userDTOToUpdate, user.get().getCredentials(), user.get().getProperties());
         } else {
             throw new KuraException(KuraErrorCode.NOT_FOUND, IDENTITY + userDTOToUpdate.getUserName() + " not found");
         }
-
     }
 
-    private void updatePasswordOptions(UserDTO userDTO, final Dictionary<String, Object> credentials,
-            final Dictionary<String, Object> properties) throws KuraException {
+    private void updatePasswordOptions(
+            UserDTO userDTO, final Dictionary<String, Object> credentials, final Dictionary<String, Object> properties)
+            throws KuraException {
 
         final Optional<Boolean> isPasswordAuthEnabledParam = userDTO.isPasswordAuthEnabled();
 
@@ -225,9 +221,7 @@ public class LegacyIdentityService {
             } else {
                 properties.remove(KURA_NEED_PASSWORD_CHANGE_PROPERTY);
             }
-
         }
-
     }
 
     public void validateUserPassword(String password) throws KuraException {
@@ -249,10 +243,13 @@ public class LegacyIdentityService {
 
     public ValidatorOptions getValidatorOptions() throws KuraException {
 
-        final PasswordStrengthRequirements requirements = this.passwordStrengthVerificationService
-                .getPasswordStrengthRequirements();
+        final PasswordStrengthRequirements requirements =
+                this.passwordStrengthVerificationService.getPasswordStrengthRequirements();
 
-        return new ValidatorOptions(requirements.getPasswordMinimumLength(), requirements.digitsRequired(),
-                requirements.bothCasesRequired(), requirements.specialCharactersRequired());
+        return new ValidatorOptions(
+                requirements.getPasswordMinimumLength(),
+                requirements.digitsRequired(),
+                requirements.bothCasesRequired(),
+                requirements.specialCharactersRequired());
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.emulator.position;
 
 import java.util.ArrayList;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -80,8 +79,11 @@ public class GpsXmlHandler extends DefaultHandler {
             this.foundTrackPoint = false;
 
             if (this.latitude != null && this.longitude != null && this.elevation != null && this.time != null) {
-                this.gpsPoints.add(new GpsPoint(Double.parseDouble(this.latitude), Double.parseDouble(this.longitude),
-                        Double.parseDouble(this.elevation), this.time));
+                this.gpsPoints.add(new GpsPoint(
+                        Double.parseDouble(this.latitude),
+                        Double.parseDouble(this.longitude),
+                        Double.parseDouble(this.elevation),
+                        this.time));
             } else {
                 System.out.println(LABEL + "the XML file is malformed");
             }
@@ -149,5 +151,4 @@ public class GpsXmlHandler extends DefaultHandler {
             }
         }
     }
-
 }

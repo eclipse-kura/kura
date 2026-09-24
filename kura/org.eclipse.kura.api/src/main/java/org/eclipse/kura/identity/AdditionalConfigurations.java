@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Objects;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -86,5 +85,4 @@ public class AdditionalConfigurations implements IdentityConfigurationComponent 
         AdditionalConfigurations other = (AdditionalConfigurations) obj;
         return Objects.equals(this.configurations, other.configurations);
     }
-
 }

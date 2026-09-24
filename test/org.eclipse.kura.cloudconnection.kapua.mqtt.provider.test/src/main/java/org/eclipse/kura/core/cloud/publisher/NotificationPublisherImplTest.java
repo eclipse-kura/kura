@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.cloud.CloudServiceImpl;
@@ -90,5 +89,4 @@ public class NotificationPublisherImplTest {
         assertNotNull(messageId);
         assertEquals("1", messageId);
     }
-
 }

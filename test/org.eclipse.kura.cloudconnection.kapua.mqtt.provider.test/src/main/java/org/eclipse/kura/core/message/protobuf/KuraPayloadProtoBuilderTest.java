@@ -17,16 +17,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.protobuf.ByteString;
 import java.util.List;
-
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.Builder;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric.ValueType;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition;
 import org.junit.Test;
-
-import com.google.protobuf.ByteString;
 
 public class KuraPayloadProtoBuilderTest {
 
@@ -42,10 +40,17 @@ public class KuraPayloadProtoBuilderTest {
         String bodyTxt = "test";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(metric);
-        KuraPosition pos = KuraPosition.newBuilder().setLongitude(lon).setLatitude(lat).setPrecision(0.01).build();
+        KuraPosition pos = KuraPosition.newBuilder()
+                .setLongitude(lon)
+                .setLatitude(lat)
+                .setPrecision(0.01)
+                .build();
         builder.setPosition(pos);
         builder.setTimestamp(time);
         builder.setBody(ByteString.copyFromUtf8(bodyTxt));
@@ -57,8 +62,11 @@ public class KuraPayloadProtoBuilderTest {
         KuraPayload payload = builder.build();
 
         Builder builder2 = KuraPayload.newBuilder();
-        KuraMetric metric2 = KuraMetric.newBuilder().setName(metric2Name).setType(ValueType.DOUBLE)
-                .setDoubleValue(3.1415926).build();
+        KuraMetric metric2 = KuraMetric.newBuilder()
+                .setName(metric2Name)
+                .setType(ValueType.DOUBLE)
+                .setDoubleValue(3.1415926)
+                .build();
         builder2.addMetric(metric2);
         builder2.setBody(ByteString.copyFromUtf8("test2"));
 
@@ -92,10 +100,17 @@ public class KuraPayloadProtoBuilderTest {
         double lat = 46.0;
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(0, metric);
-        KuraPosition pos = KuraPosition.newBuilder().setLongitude(lon).setLatitude(lat).setPrecision(0.01).build();
+        KuraPosition pos = KuraPosition.newBuilder()
+                .setLongitude(lon)
+                .setLatitude(lat)
+                .setPrecision(0.01)
+                .build();
         builder.setPosition(pos);
 
         assertTrue(builder.isInitialized());
@@ -103,7 +118,11 @@ public class KuraPayloadProtoBuilderTest {
         KuraPayload payload = builder.build();
 
         Builder builder2 = KuraPayload.newBuilder();
-        KuraPosition pos2 = KuraPosition.newBuilder().setLongitude(13.0).setLatitude(40.0).setPrecision(0.01).build();
+        KuraPosition pos2 = KuraPosition.newBuilder()
+                .setLongitude(13.0)
+                .setLatitude(40.0)
+                .setPrecision(0.01)
+                .build();
         builder2.setPosition(pos2);
         builder2.setBody(ByteString.copyFromUtf8("test2"));
 
@@ -132,10 +151,17 @@ public class KuraPayloadProtoBuilderTest {
         String bodyTxt = "test";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(metric);
-        KuraPosition pos = KuraPosition.newBuilder().setLongitude(lon).setLatitude(lat).setPrecision(0.01).build();
+        KuraPosition pos = KuraPosition.newBuilder()
+                .setLongitude(lon)
+                .setLatitude(lat)
+                .setPrecision(0.01)
+                .build();
         builder.setPosition(pos);
         builder.setTimestamp(1503300000000L);
         builder.setBody(ByteString.copyFromUtf8(bodyTxt));
@@ -169,10 +195,17 @@ public class KuraPayloadProtoBuilderTest {
         String bodyTxt = "test";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(metric);
-        KuraPosition pos = KuraPosition.newBuilder().setLongitude(lon).setLatitude(lat).setPrecision(0.01).build();
+        KuraPosition pos = KuraPosition.newBuilder()
+                .setLongitude(lon)
+                .setLatitude(lat)
+                .setPrecision(0.01)
+                .build();
         builder.setPosition(pos);
         builder.setTimestamp(time);
         builder.setBody(ByteString.copyFromUtf8(bodyTxt));
@@ -208,8 +241,8 @@ public class KuraPayloadProtoBuilderTest {
         double lat = 46.0;
 
         Builder builder = KuraPayload.newBuilder();
-        org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition.Builder posBuilder = KuraPosition
-                .newBuilder().setLongitude(lon).setLatitude(lat).setPrecision(0.01);
+        org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition.Builder posBuilder =
+                KuraPosition.newBuilder().setLongitude(lon).setLatitude(lat).setPrecision(0.01);
         builder.setPosition(posBuilder);
 
         assertTrue(builder.hasPosition());
@@ -225,15 +258,18 @@ public class KuraPayloadProtoBuilderTest {
         String metric2Name = "metric2.name";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(metric);
 
         KuraPayload payload = builder.build();
 
         Builder builder2 = KuraPayload.newBuilder();
-        org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric.Builder mBuilder = builder2
-                .addMetricBuilder();
+        org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric.Builder mBuilder =
+                builder2.addMetricBuilder();
 
         assertEquals(1, builder2.getMetricCount()); // it's not valid, but it's still 'there'
 
@@ -258,11 +294,18 @@ public class KuraPayloadProtoBuilderTest {
         String metric2Name = "metric2.name";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(metric);
 
-        metric = KuraMetric.newBuilder().setName(metric2Name).setType(ValueType.INT32).setIntValue(123).build();
+        metric = KuraMetric.newBuilder()
+                .setName(metric2Name)
+                .setType(ValueType.INT32)
+                .setIntValue(123)
+                .build();
         builder.addMetric(0, metric);
 
         KuraPayload payload = builder.build();
@@ -282,11 +325,16 @@ public class KuraPayloadProtoBuilderTest {
         String metric2Name = "metric2.name";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric.Builder metricBuilder = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
+        KuraMetric.Builder metricBuilder = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
                 .setStringValue("metric.value");
         builder.addMetric(metricBuilder);
 
-        metricBuilder = KuraMetric.newBuilder().setName(metric2Name).setType(ValueType.INT32).setIntValue(123);
+        metricBuilder = KuraMetric.newBuilder()
+                .setName(metric2Name)
+                .setType(ValueType.INT32)
+                .setIntValue(123);
         builder.addMetric(0, metricBuilder);
 
         KuraPayload payload = builder.build();
@@ -306,11 +354,18 @@ public class KuraPayloadProtoBuilderTest {
         String metric2Name = "metric2.name";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric metric = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
-                .setStringValue("metric.value").build();
+        KuraMetric metric = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
+                .setStringValue("metric.value")
+                .build();
         builder.addMetric(metric);
 
-        metric = KuraMetric.newBuilder().setName(metric2Name).setType(ValueType.INT32).setIntValue(123).build();
+        metric = KuraMetric.newBuilder()
+                .setName(metric2Name)
+                .setType(ValueType.INT32)
+                .setIntValue(123)
+                .build();
         builder.setMetric(0, metric);
 
         KuraPayload payload = builder.build();
@@ -329,11 +384,16 @@ public class KuraPayloadProtoBuilderTest {
         String metric2Name = "metric2.name";
 
         Builder builder = KuraPayload.newBuilder();
-        KuraMetric.Builder metricBuilder = KuraMetric.newBuilder().setName(metricName).setType(ValueType.STRING)
+        KuraMetric.Builder metricBuilder = KuraMetric.newBuilder()
+                .setName(metricName)
+                .setType(ValueType.STRING)
                 .setStringValue("metric.value");
         builder.addMetric(metricBuilder);
 
-        metricBuilder = KuraMetric.newBuilder().setName(metric2Name).setType(ValueType.INT32).setIntValue(123);
+        metricBuilder = KuraMetric.newBuilder()
+                .setName(metric2Name)
+                .setType(ValueType.INT32)
+                .setIntValue(123);
         builder.setMetric(0, metricBuilder);
 
         KuraPayload payload = builder.build();
@@ -349,12 +409,11 @@ public class KuraPayloadProtoBuilderTest {
         // test if position builder is returned
 
         Builder builder = KuraPayload.newBuilder();
-        org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition.Builder positionBuilder = builder
-                .getPositionBuilder();
+        org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraPosition.Builder positionBuilder =
+                builder.getPositionBuilder();
 
         assertNotNull(positionBuilder);
 
         assertTrue(builder.hasPosition());
     }
-
 }

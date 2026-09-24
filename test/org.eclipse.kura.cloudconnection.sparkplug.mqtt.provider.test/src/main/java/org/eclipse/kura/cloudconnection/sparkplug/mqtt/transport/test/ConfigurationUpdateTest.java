@@ -24,9 +24,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.net.ssl.SSLContext;
-
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransportOptions;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
@@ -36,7 +34,8 @@ import org.junit.Test;
 
 public class ConfigurationUpdateTest {
 
-    private SparkplugDataTransport transport = new SparkplugDataTransport();;
+    private SparkplugDataTransport transport = new SparkplugDataTransport();
+    ;
     private DataTransportListener listener = mock(DataTransportListener.class);
     private SslManagerService sslManagerService = mock(SslManagerService.class);
     private Exception occurredException;
@@ -91,8 +90,14 @@ public class ConfigurationUpdateTest {
      * Given
      */
 
-    private void givenUpdated(String servers, String groupId, String nodeId, String primaryHostId, String clientId,
-            int connectionTimeout, int keepAlive) {
+    private void givenUpdated(
+            String servers,
+            String groupId,
+            String nodeId,
+            String primaryHostId,
+            String clientId,
+            int connectionTimeout,
+            int keepAlive) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(SparkplugDataTransportOptions.KEY_CLIENT_ID, clientId);
         properties.put(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, connectionTimeout);
@@ -151,5 +156,4 @@ public class ConfigurationUpdateTest {
         SSLContext context = mock(SSLContext.class);
         when(this.sslManagerService.getSSLContext()).thenReturn(context);
     }
-
 }

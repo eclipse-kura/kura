@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 import static java.util.Objects.requireNonNull;
@@ -18,7 +17,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -40,12 +38,11 @@ public class ImageInstanceDescriptor {
     private long imageSize = 0;
     private Map<String, String> imageLabels = new HashMap<>();
 
-    private ImageInstanceDescriptor() {
-    }
+    private ImageInstanceDescriptor() {}
 
     /**
      * Returns an Image's name as a String.
-     * 
+     *
      * @return
      */
     public String getImageName() {
@@ -54,7 +51,7 @@ public class ImageInstanceDescriptor {
 
     /**
      * Returns an Image's tag as a String.
-     * 
+     *
      * @return
      */
     public String getImageTag() {
@@ -63,7 +60,7 @@ public class ImageInstanceDescriptor {
 
     /**
      * Returns an Image's id as a String.
-     * 
+     *
      * @return
      */
     public String getImageId() {
@@ -72,7 +69,7 @@ public class ImageInstanceDescriptor {
 
     /**
      * Returns an Image's author as a String.
-     * 
+     *
      * @return
      */
     public String getImageAuthor() {
@@ -81,7 +78,7 @@ public class ImageInstanceDescriptor {
 
     /**
      * Returns an Image's architecture as a String.
-     * 
+     *
      * @return
      */
     public String getImageArch() {
@@ -90,7 +87,7 @@ public class ImageInstanceDescriptor {
 
     /**
      * Returns an Image's size as a long.
-     * 
+     *
      * @return
      */
     public long getImageSize() {
@@ -99,7 +96,7 @@ public class ImageInstanceDescriptor {
 
     /**
      * Returns all of an Image's tags as a Map<String,String>.
-     * 
+     *
      * @return
      */
     public Map<String, String> getImageLabels() {
@@ -118,8 +115,14 @@ public class ImageInstanceDescriptor {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.imageName, this.imageTag, this.imageId, this.imageAuthor, this.imageArch,
-                this.imageSize, this.imageLabels);
+        return Objects.hash(
+                this.imageName,
+                this.imageTag,
+                this.imageId,
+                this.imageAuthor,
+                this.imageArch,
+                this.imageSize,
+                this.imageLabels);
     }
 
     @Override
@@ -131,9 +134,12 @@ public class ImageInstanceDescriptor {
             return false;
         }
         ImageInstanceDescriptor other = (ImageInstanceDescriptor) obj;
-        return Objects.equals(this.imageName, other.imageName) && Objects.equals(this.imageTag, other.imageTag)
-                && Objects.equals(this.imageId, other.imageId) && Objects.equals(this.imageAuthor, other.imageAuthor)
-                && Objects.equals(this.imageArch, other.imageArch) && Objects.equals(this.imageSize, other.imageSize)
+        return Objects.equals(this.imageName, other.imageName)
+                && Objects.equals(this.imageTag, other.imageTag)
+                && Objects.equals(this.imageId, other.imageId)
+                && Objects.equals(this.imageAuthor, other.imageAuthor)
+                && Objects.equals(this.imageArch, other.imageArch)
+                && Objects.equals(this.imageSize, other.imageSize)
                 && Objects.equals(this.imageLabels, other.imageLabels);
     }
 
@@ -203,6 +209,5 @@ public class ImageInstanceDescriptor {
                 return input;
             }
         }
-
     }
 }

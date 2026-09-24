@@ -78,5 +78,4 @@ public class BindingOrderTest extends AbstractJwtScenario {
                 .subject(TEST_IDENTITY) //
                 .signedWith(TestKeys.rsaPrivateKey(SIGNER_KEY));
     }
-
 }

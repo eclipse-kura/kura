@@ -24,9 +24,7 @@ public class TargetFilterTestService implements ConfigurableComponent, TestInter
         logger.info("TargetFilterTestService activated");
     }
 
-    public void update() {
-    }
+    public void update() {}
 
-    public void deactivate() {
-    }
+    public void deactivate() {}
 }

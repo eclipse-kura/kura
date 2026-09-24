@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.net.status.modem;
 
 import java.util.Objects;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -71,7 +70,7 @@ public class Sim {
     }
 
     /**
-     * 
+     *
      * @since 2.8
      */
     public String getOperatorIdentifier() {
@@ -102,8 +101,7 @@ public class Sim {
         private SimType simType = SimType.UNKNOWN;
         private ESimStatus eSimStatus = ESimStatus.UNKNOWN;
 
-        private SimBuilder() {
-        }
+        private SimBuilder() {}
 
         public SimBuilder withActive(boolean active) {
             this.active = active;
@@ -136,7 +134,7 @@ public class Sim {
         }
 
         /**
-         * 
+         *
          * @since 2.8
          */
         public SimBuilder withOperatorIdentifier(String operatorIdentifier) {
@@ -157,13 +155,20 @@ public class Sim {
         public Sim build() {
             return new Sim(this);
         }
-
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.active, this.primary, this.eSimStatus, this.eid, this.iccid, this.imsi,
-                this.operatorName, this.operatorIdentifier, this.simType);
+        return Objects.hash(
+                this.active,
+                this.primary,
+                this.eSimStatus,
+                this.eid,
+                this.iccid,
+                this.imsi,
+                this.operatorName,
+                this.operatorIdentifier,
+                this.simType);
     }
 
     @Override
@@ -175,10 +180,14 @@ public class Sim {
             return false;
         }
         Sim other = (Sim) obj;
-        return this.active == other.active && this.primary == other.primary && this.eSimStatus == other.eSimStatus
-                && Objects.equals(this.eid, other.eid) && Objects.equals(this.iccid, other.iccid)
-                && Objects.equals(this.imsi, other.imsi) && Objects.equals(this.operatorName, other.operatorName)
-                && Objects.equals(this.operatorIdentifier, other.operatorIdentifier) && this.simType == other.simType;
+        return this.active == other.active
+                && this.primary == other.primary
+                && this.eSimStatus == other.eSimStatus
+                && Objects.equals(this.eid, other.eid)
+                && Objects.equals(this.iccid, other.iccid)
+                && Objects.equals(this.imsi, other.imsi)
+                && Objects.equals(this.operatorName, other.operatorName)
+                && Objects.equals(this.operatorIdentifier, other.operatorIdentifier)
+                && this.simType == other.simType;
     }
-
 }

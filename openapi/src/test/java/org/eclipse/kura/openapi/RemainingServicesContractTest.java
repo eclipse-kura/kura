@@ -69,12 +69,12 @@ public class RemainingServicesContractTest {
     }
 
     @Test
-    public void entitylessFailuresDoNotPromiseAnErrorBody() throws Exception {
+    public void entitylessFailuresPromiseAnErrorBody() throws Exception {
         givenGeneratedPaths();
 
-        whenEntitylessNotFoundOperationsAreRead();
+        whenNotFoundOperationsAreRead();
 
-        thenEntitylessOperationsReferenceTheContainerGeneratedResponse();
+        thenEntitylessOperationsReferenceTheJsonErrorResponse();
     }
 
     @Test
@@ -105,7 +105,7 @@ public class RemainingServicesContractTest {
         assertFalse(this.paths.path("/keystores/v1/entries").isMissingNode());
     }
 
-    private void whenEntitylessNotFoundOperationsAreRead() {
+    private void whenNotFoundOperationsAreRead() {
         assertFalse(this.paths.path("/keystores/v1/entries/entry").isMissingNode());
     }
 
@@ -168,12 +168,12 @@ public class RemainingServicesContractTest {
         }
     }
 
-    private void thenEntitylessOperationsReferenceTheContainerGeneratedResponse() {
+    private void thenEntitylessOperationsReferenceTheJsonErrorResponse() {
         for (String operation : new String[] { "get:/keystores/v1/entries/entry",
                 "get:/keystores/v2/entries/entry", "get:/tamper/v1/pid/{pid}",
                 "post:/serviceListing/v1/servicePids/satisfyingReference" }) {
             final String[] parts = operation.split(":", 2);
-            assertEquals(operation, "#/components/responses/EntitylessNotFound",
+            assertEquals(operation, "#/components/responses/NotFound",
                     this.paths.path(parts[1]).path(parts[0]).path("responses").path("404").path("$ref").asText());
         }
     }

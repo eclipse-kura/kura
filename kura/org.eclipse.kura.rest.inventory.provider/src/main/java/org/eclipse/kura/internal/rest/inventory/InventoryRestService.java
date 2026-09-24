@@ -244,7 +244,7 @@ public class InventoryRestService {
     @ApiResponse(responseCode = "200", description = "Requested inventory data.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(ref = "#/components/schemas/DockerContainersSummary")))
-    @ApiResponse(responseCode = "404", ref = "#/components/responses/EntitylessNotFound")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     public Response getContainers() {
         try {
             return makeInventoryDoGetRequest(
@@ -270,7 +270,7 @@ public class InventoryRestService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(ref = "#/components/schemas/InventoryContainerReference"))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
-    @ApiResponse(responseCode = "404", ref = "#/components/responses/InventoryNotFound")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     public Response startContainer(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.START_CONTAINER, bundleJson));
@@ -295,7 +295,7 @@ public class InventoryRestService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(ref = "#/components/schemas/InventoryContainerReference"))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
-    @ApiResponse(responseCode = "404", ref = "#/components/responses/InventoryNotFound")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     public Response stopContainer(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.STOP_CONTAINER, bundleJson));
@@ -319,7 +319,7 @@ public class InventoryRestService {
     @ApiResponse(responseCode = "200", description = "Requested inventory data.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(ref = "#/components/schemas/ContainerImagesSummary")))
-    @ApiResponse(responseCode = "404", ref = "#/components/responses/EntitylessNotFound")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     public Response getImages() {
         try {
             return makeInventoryDoGetRequest(
@@ -345,7 +345,7 @@ public class InventoryRestService {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(ref = "#/components/schemas/InventoryImageReference"))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
-    @ApiResponse(responseCode = "404", ref = "#/components/responses/InventoryNotFound")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     public Response deleteImage(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.DELETE_IMAGE, bundleJson));

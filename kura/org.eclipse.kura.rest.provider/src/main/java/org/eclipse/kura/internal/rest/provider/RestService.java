@@ -142,6 +142,8 @@ public class RestService implements ConfigurableComponent {
                 serviceProperties));
         this.registeredServices.add(
                 bundleContext.registerService(ContainerResponseFilter.class, new AuditFilter(), serviceProperties));
+        this.registeredServices.add(
+                bundleContext.registerService(ContainerResponseFilter.class, new ErrorEntityFilter(), serviceProperties));
         this.registeredServices.add(bundleContext.registerService(
                 new String[] { MessageBodyReader.class.getName(), MessageBodyWriter.class.getName() },
                 new GsonSerializer<Object>(), serviceProperties));

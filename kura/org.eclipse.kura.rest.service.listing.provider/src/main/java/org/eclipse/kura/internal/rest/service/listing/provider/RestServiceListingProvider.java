@@ -235,7 +235,7 @@ public class RestServiceListingProvider {
                     schema = @Schema(implementation = RefDTO.class))))
     @ApiResponses({
             @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
-            @ApiResponse(responseCode = "404", ref = "#/components/responses/EntitylessNotFound")
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
     })
     @ApiResponse(responseCode = "200", description = "Matching PIDs.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))

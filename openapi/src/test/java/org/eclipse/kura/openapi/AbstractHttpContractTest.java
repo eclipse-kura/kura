@@ -65,6 +65,7 @@ import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
 import org.eclipse.kura.internal.rest.configuration.ConfigurationRestService;
 import org.eclipse.kura.internal.rest.provider.AuditFilter;
+import org.eclipse.kura.internal.rest.provider.ErrorEntityFilter;
 import org.eclipse.kura.internal.rest.provider.AuthenticationFilter;
 import org.eclipse.kura.internal.rest.provider.AuthorizationFilter;
 import org.eclipse.kura.internal.rest.provider.GsonSerializer;
@@ -190,6 +191,7 @@ public abstract class AbstractHttpContractTest {
         application.register(this.authentication);
         application.register(AuthorizationFilter.class);
         application.register(AuditFilter.class);
+        application.register(ErrorEntityFilter.class);
         application.register(GsonSerializer.class);
         application.register(RestExceptionMapper.class);
 
@@ -247,10 +249,17 @@ public abstract class AbstractHttpContractTest {
     }
 
     protected void whenRequest(String method, String path, String body, String contentType) throws Exception {
+        whenRequest(method, path, body, contentType, "application/json");
+    }
+
+    protected void whenRequest(String method, String path, String body, String contentType, String accept) throws Exception {
         this.requestPath = path.split("\\?", 2)[0];
         this.requestMethod = method.toLowerCase(java.util.Locale.ROOT);
         final HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(this.base + path))
-                .timeout(Duration.ofSeconds(5)).header("Accept", "application/json");
+                .timeout(Duration.ofSeconds(5));
+        if (accept != null) {
+            request.header("Accept", accept);
+        }
         if (this.authorization != null) {
             request.header("Authorization", this.authorization);
         }

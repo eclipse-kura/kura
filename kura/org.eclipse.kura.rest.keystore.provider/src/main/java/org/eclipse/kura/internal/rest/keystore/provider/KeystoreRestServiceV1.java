@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.Component;
         @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
         @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
         @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
-        @ApiResponse(responseCode = "404", ref = "#/components/responses/EntitylessNotFound"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
         @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
 })
 @Path("/keystores/v1")

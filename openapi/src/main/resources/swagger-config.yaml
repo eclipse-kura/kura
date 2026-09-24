@@ -18,7 +18,8 @@ resourceClasses:
 readerClass: org.eclipse.kura.openapi.KuraOpenApiReader
 readAllResources: true
 openAPI:
-  openapi: 3.0.3
+  openapi: 3.1.2
+  jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/2024-11-10
   info:
     title: Eclipse Kura REST API
     version: '${project.version}'
@@ -32,8 +33,9 @@ openAPI:
       X-XSRF-Token on subsequent requests, including GET. Only xsrfToken is exempt from the token requirement.
       A locked session permits only xsrfToken and changePassword until the password is changed.
       Stateless client-certificate authentication and certificate session login are also supported
-      when configured on a mutual-TLS port. OpenAPI 3.0 cannot express a mutualTLS security scheme;
-      the security requirements below describe Basic and cookie authentication.
+      on configured mutual-TLS ports with trusted client certificates and certificate-to-identity mapping.
+      Certificate session login creates a cookie; obtain xsrfToken before subsequent session-authenticated requests.
+      Authentication alternatives are Basic, session cookie together with XSRF token, or client certificate.
       The cookie name shown is the servlet default and can depend on the deployment.
       Missing or invalid authentication returns a 401 after the audit filter and missing permission
       a 403. Entity-less JAX-RS errors are returned as JSON Error objects regardless of Accept;
@@ -49,8 +51,12 @@ openAPI:
     - basicAuth: []
     - sessionCookie: []
       xsrfToken: []
+    - clientCertificate: []
   components:
     securitySchemes:
+      clientCertificate:
+        type: mutualTLS
+        description: Requires a configured mutual TLS port, trusted client certificates and certificate-to-identity mapping.
       basicAuth:
         type: http
         scheme: basic

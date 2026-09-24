@@ -18,9 +18,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -28,12 +28,11 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Yaml31;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -47,6 +46,7 @@ public class ValidateOpenApiTest {
     private JsonSchema specificationSchema;
     private Set<ValidationMessage> errors;
     private SwaggerParseResult parsed;
+    private JsonNode roundTrip;
 
     @Test
     public void jsonConformsToTheOpenApiSpecification() throws Exception {
@@ -78,16 +78,44 @@ public class ValidateOpenApiTest {
         thenDocumentIsRejected();
     }
 
+    @Test
+    public void schemaKeywordsAreValidated() throws Exception {
+        givenGeneratedDocument("json");
+        givenInvalidSchemaType();
+
+        whenDocumentIsValidated();
+
+        thenDocumentIsRejected();
+    }
+
+    @Test
+    public void serializationPreservesTheOpenApi31Contract() throws Exception {
+        givenGeneratedDocument("json");
+
+        whenDocumentIsRoundTripped();
+
+        thenSchemasAndSecurityArePreserved();
+        thenSchemasUseJsonSchemaNullability(this.roundTrip);
+    }
+
     private void givenGeneratedDocument(String format) throws Exception {
         final String source = Files.readString(Path.of(System.getProperty("openapi.directory"), "openapi." + format));
-        this.document = ("json".equals(format) ? Json.mapper() : Yaml.mapper()).readTree(source);
-        try (InputStream schema = getClass().getResourceAsStream("/openapi-3.0-schema.json")) {
-            this.specificationSchema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4).getSchema(schema);
-        }
+        this.document = ("json".equals(format) ? Json31.mapper() : Yaml31.mapper()).readTree(source);
+        this.specificationSchema = OpenApiSchemaValidator.documentSchema();
     }
 
     private void givenMissingApiTitle() {
         ((ObjectNode) this.document.path("info")).remove("title");
+    }
+
+    private void givenInvalidSchemaType() {
+        ((ObjectNode) this.document.at("/components/schemas/PropertyDTO/properties/value")).put("type", "invalid-type");
+    }
+
+    private void whenDocumentIsRoundTripped() throws Exception {
+        final OpenAPI model = Json31.mapper().treeToValue(this.document, OpenAPI.class);
+        final OpenAPI yamlModel = Yaml31.mapper().readValue(Yaml31.mapper().writeValueAsString(model), OpenAPI.class);
+        this.roundTrip = Json31.mapper().readTree(Json31.mapper().writeValueAsString(yamlModel));
     }
 
     private void whenDocumentIsValidated() {
@@ -99,6 +127,8 @@ public class ValidateOpenApiTest {
 
     private void thenDocumentIsValid() {
         assertTrue(this.errors.toString(), this.errors.isEmpty());
+        assertEquals("3.1.2", this.document.path("openapi").asText());
+        thenSchemasUseJsonSchemaNullability(this.document);
         assertNotNull(this.parsed.getOpenAPI());
         assertTrue(this.parsed.getMessages().toString(), this.parsed.getMessages().isEmpty());
     }
@@ -124,15 +154,36 @@ public class ValidateOpenApiTest {
                 }));
     }
 
-    private void thenSecurityMatchesTheAuthenticationFlow() {
+    private void thenSchemasAndSecurityArePreserved() {
+        assertEquals("3.1.2", this.roundTrip.path("openapi").asText());
+        assertEquals(this.document.path("jsonSchemaDialect"), this.roundTrip.path("jsonSchemaDialect"));
+        assertEquals(this.document.path("components"), this.roundTrip.path("components"));
+        assertEquals(this.document.path("security"), this.roundTrip.path("security"));
+        assertEquals(this.document.path("paths"), this.roundTrip.path("paths"));
+    }
+
+    private void thenSchemasUseJsonSchemaNullability(JsonNode node) {
+        assertFalse("Obsolete nullable keyword: " + node, node.has("nullable"));
+        assertFalse("Internal converter marker: " + node, node.has("x-kura-unconstrained"));
+        node.forEach(this::thenSchemasUseJsonSchemaNullability);
+    }
+
+    private void thenSecurityMatchesTheAuthenticationFlow() throws Exception {
         final JsonNode paths = this.document.path("paths");
-        assertEquals(0, paths.path("/session/v1/login/password").path("post").path("security").size());
-        assertTrue(paths.path("/session/v1/login/password").path("post").has("security"));
-        assertTrue(paths.path("/session/v1/authenticationInfo").path("get").has("security"));
-        assertTrue(paths.path("/session/v1/xsrfToken").path("get").path("security").get(0).has("sessionCookie"));
-        assertFalse(paths.path("/session/v1/xsrfToken").path("get").path("security").get(0).has("xsrfToken"));
-        assertTrue(this.document.path("security").get(0).has("basicAuth"));
-        assertTrue(this.document.path("security").get(1).has("sessionCookie"));
-        assertTrue(this.document.path("security").get(1).has("xsrfToken"));
+        assertEquals(Json31.mapper().readTree("[{\"basicAuth\":[]},{\"sessionCookie\":[],\"xsrfToken\":[]},"
+                + "{\"clientCertificate\":[]}]"), this.document.path("security"));
+        assertEquals("mutualTLS", this.document.at("/components/securitySchemes/clientCertificate/type").asText());
+        assertEquals(Json31.mapper().readTree("[{\"clientCertificate\":[]}]"),
+                paths.path("/session/v1/login/certificate").path("post").path("security"));
+        assertEquals(Json31.mapper().readTree("[{\"sessionCookie\":[]}]"),
+                paths.path("/session/v1/xsrfToken").path("get").path("security"));
+        for (final String path : List.of("/session/v1/authenticationInfo", "/identity/v1/definedPermissions",
+                "/identity/v1/passwordRequirements", "/identity/v2/definedPermissions", "/identity/v2/passwordStrenghtRequirements")) {
+            assertEquals(path, Json31.mapper().createArrayNode(), paths.path(path).path("get").path("security"));
+        }
+        assertEquals(Json31.mapper().createArrayNode(), paths.path("/session/v1/login/password").path("post").path("security"));
+        final JsonNode protectedOperation = paths.path("/system/v1/properties/framework").path("get");
+        assertFalse(protectedOperation.isMissingNode());
+        assertFalse(protectedOperation.has("security"));
     }
 }

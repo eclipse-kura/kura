@@ -39,14 +39,10 @@ import org.eclipse.kura.system.InternetConnectionStatus;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import com.networknt.schema.oas.OpenApi30;
 
-import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 
 public class GsonSchemaTest {
 
@@ -111,7 +107,7 @@ public class GsonSchemaTest {
     }
 
     private void givenGeneratedSchemas() throws Exception {
-        this.document = Json.mapper().readTree(Files.readString(
+        this.document = Json31.mapper().readTree(Files.readString(
                 Path.of(System.getProperty("openapi.directory"), "openapi.json")));
     }
 
@@ -150,14 +146,9 @@ public class GsonSchemaTest {
     }
 
     private void whenPayloadIsValidated() throws Exception {
-        this.payload = Json.mapper().readTree(new Gson().toJson(this.dto));
-        final ObjectNode schema = Json.mapper().createObjectNode();
-        schema.put("$ref", "#/components/schemas/" + this.schemaName);
-        schema.set("components", this.document.path("components"));
-        this.errors = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                .metaSchema(OpenApi30.getInstance())
-                .defaultMetaSchemaIri("https://spec.openapis.org/oas/3.0/dialect")
-                .build().getSchema(schema).validate(this.payload);
+        this.payload = Json31.mapper().readTree(new Gson().toJson(this.dto));
+        this.errors = OpenApiSchemaValidator.payloadSchema(this.document, this.schemaName)
+                .validate(this.payload);
     }
 
     private void thenPayloadIsValid() {

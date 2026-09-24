@@ -24,14 +24,10 @@ import org.eclipse.kura.rest.configuration.api.CreateFactoryComponentConfigurati
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import com.networknt.schema.oas.OpenApi30;
 
-import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 
 public class RequestSchemaTest {
 
@@ -192,19 +188,15 @@ public class RequestSchemaTest {
     }
 
     private void givenRequest(String schemaName, String request) throws Exception {
-        this.document = Json.mapper().readTree(Files.readString(
+        this.document = Json31.mapper().readTree(Files.readString(
                 Path.of(System.getProperty("openapi.directory"), "openapi.json")));
         this.schemaName = schemaName;
         this.request = request;
     }
 
     private void whenRequestIsValidated() throws Exception {
-        final ObjectNode schema = Json.mapper().createObjectNode();
-        schema.put("$ref", "#/components/schemas/" + this.schemaName);
-        schema.set("components", this.document.path("components"));
-        this.errors = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                .metaSchema(OpenApi30.getInstance()).defaultMetaSchemaIri("https://spec.openapis.org/oas/3.0/dialect")
-                .build().getSchema(schema).validate(Json.mapper().readTree(this.request));
+        this.errors = OpenApiSchemaValidator.payloadSchema(this.document, this.schemaName)
+                .validate(Json31.mapper().readTree(this.request));
     }
 
     private void thenRequestIsAccepted() {

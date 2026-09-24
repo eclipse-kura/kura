@@ -107,7 +107,7 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
     @Operation(summary = "Apply security policy",
             description = "Applies a nonempty UTF-8 policy up to 1 MiB and reloads fingerprints.",
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.TEXT_PLAIN,
-                    schema = @Schema(type = "string"))))
+                    schema = @Schema(types = { "string" }))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response applySecurityPolicy(InputStream securityPolicyInputStream) {
         try {

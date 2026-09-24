@@ -160,6 +160,8 @@
                     <outputPath>${project.build.directory}/openapi</outputPath>
                     <outputFileName>openapi</outputFileName>
                     <outputFormat>JSONANDYAML</outputFormat>
+                    <openapi31>true</openapi31>
+                    <openAPIVersion>3.1.2</openAPIVersion>
                     <prettyPrint>true</prettyPrint>
                     <sortOutput>true</sortOutput>
                 </configuration>

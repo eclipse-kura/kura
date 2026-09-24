@@ -27,13 +27,9 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import com.networknt.schema.oas.OpenApi30;
 
-import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 
 public class RequiredRequestFieldsTest {
 
@@ -69,7 +65,7 @@ public class RequiredRequestFieldsTest {
     }
 
     private void givenMinimalRequests() throws Exception {
-        this.document = Json.mapper().readTree(Files.readString(
+        this.document = Json31.mapper().readTree(Files.readString(
                 Path.of(System.getProperty("openapi.directory"), "openapi.json")));
         this.requests.put("IdentityDTO", "{\"name\":\"alice\"}");
         this.requests.put("PermissionDTO", "{\"name\":\"rest.system\"}");
@@ -88,13 +84,13 @@ public class RequiredRequestFieldsTest {
 
     private void whenRequestsAreValidated() throws Exception {
         for (final Map.Entry<String, String> request : this.requests.entrySet()) {
-            whenRequestIsValidated(request.getKey(), request.getKey(), Json.mapper().readTree(request.getValue()));
+            whenRequestIsValidated(request.getKey(), request.getKey(), Json31.mapper().readTree(request.getValue()));
         }
     }
 
     private void whenRequiredFieldsAreRemoved(boolean explicitNull) throws Exception {
         for (final Map.Entry<String, String> request : this.requests.entrySet()) {
-            final ObjectNode original = (ObjectNode) Json.mapper().readTree(request.getValue());
+            final ObjectNode original = (ObjectNode) Json31.mapper().readTree(request.getValue());
             final Iterator<String> fields = original.fieldNames();
             while (fields.hasNext()) {
                 final String field = fields.next();
@@ -110,13 +106,7 @@ public class RequiredRequestFieldsTest {
     }
 
     private void whenRequestIsValidated(String key, String schemaName, JsonNode payload) {
-        final ObjectNode schema = Json.mapper().createObjectNode();
-        schema.put("$ref", "#/components/schemas/" + schemaName);
-        schema.set("components", this.document.path("components"));
-        final JsonSchema validator = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                .metaSchema(OpenApi30.getInstance()).defaultMetaSchemaIri("https://spec.openapis.org/oas/3.0/dialect")
-                .build().getSchema(schema);
-        this.results.put(key, validator.validate(payload));
+        this.results.put(key, OpenApiSchemaValidator.payloadSchema(this.document, schemaName).validate(payload));
     }
 
     private void thenAllRequestsAreAccepted() {

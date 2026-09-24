@@ -21,7 +21,7 @@ public class DeleteFactoryComponentRequest implements Validable {
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final Set<String> pids;
-    @Schema(defaultValue = "true", nullable = true)
+    @Schema(defaultValue = "true", types = { "boolean", "null" })
     private final Boolean takeSnapshot;
 
     public DeleteFactoryComponentRequest(Set<String> pids, boolean takeSnapshot) {

@@ -85,11 +85,11 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.3, Apache-2.0, approved, #21940
 * maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.3, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
 * maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.3, Apache-2.0, approved, #21938
-* maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.84, Apache-2.0, approved, #27145
-* maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.84, MIT, approved, #27142
-* maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.84, MIT AND CC0-1.0, approved, #27143
-* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.84, MIT, approved, #29890
-* maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.84, MIT, approved, #27144
+* maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.86, MIT AND Apache-2.0, approved, #31043
+* maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.86, MIT, approved, #31037
+* maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.86, MIT AND CC0-1.0, approved, #31038
+* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.86, MIT, approved, #31419
+* maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.86, MIT, approved, #31042
 * maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985

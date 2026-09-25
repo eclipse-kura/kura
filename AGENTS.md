@@ -4,12 +4,12 @@
 - **Full Build**: `mvn clean install` from the repository root (single reactor: `bom`, `kura`, `distrib`, and `test` via the `tests` profile)
 - **Skip Tests**: Add `-DskipTests` to any build command (also excludes the integration-test module from the reactor)
 - **Run Single Test**: `mvn -f test/<test-module>/pom.xml test` (e.g., `mvn -f test/org.eclipse.kura.core.configuration.test/pom.xml test`)
-- **Format**: `mvn spotless:apply` reformats the sources. The build itself only verifies them: `spotless:check` runs during `process-sources` and never rewrites the sources under it
+- **Checkstyle**: Runs automatically during `process-sources` phase with config in `checkstyle_checks.xml`
 
 ## Code Style
 - **Java Version**: Java 21 (`maven.compiler.release=21`); building requires JDK 21
-- **Formatting**: Enforced by spotless-maven-plugin with the palantir-java-format style, including the import order. Do not hand-format: run `mvn spotless:apply`
-- **Line Length**: palantir-java-format wraps at 120 characters
+- **Formatting**: Use profiles in `kura/setups/formatting/` (KuraFormatter.xml, KuraCleanupProfile.xml)
+- **Line Length**: Max 150 characters
 - **Imports**: No star imports, remove unused imports
 - **Line Endings**: Unix (LF) only, no Windows CRLF
 - **Comments**: DO NOT ADD COMMENTS unless explicitly requested

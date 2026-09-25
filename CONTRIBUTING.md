@@ -81,9 +81,10 @@ Keep this in mind when contributing to the Eclipse Kura project.
 * Fork the repository on GitHub
 * Create a new branch for your changes
 * Configure your IDE installing:
+  * The formatter profile available in kura/setup/formatting/KuraFormatter*.xml
+  * The cleanup profile available in kura/setup/formatting/KuraCleanupProfile*.xml
   * [SonarLint](http://www.sonarlint.org/eclipse/index.html)
 * Make your changes
-* Format your changes with `mvn spotless:apply`. The formatting, [palantir-java-format](https://github.com/palantir/palantir-java-format), is enforced by the spotless-maven-plugin: every build, local or on CI, verifies it and fails on an unformatted source or POM file
 * Make sure you include test cases for non-trivial features
 * Make sure the test suite passes after your changes
 * Make sure copyright headers are included in (all) files including updated year(s)

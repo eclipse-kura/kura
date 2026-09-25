@@ -24,8 +24,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -37,6 +42,9 @@ public class CleanUpAfterFailedUnZipTest {
     private static final String INPUT_ZIP_FILE = WORK_FOLDER + "input.zip";
     private static final String OUTPUT_FOLDER = WORK_FOLDER + "out/";
     private static final String PRESERVED_FILE = "keepme.txt";
+
+    private static final int SLOWLY_DELIVERED_ENTRIES = 400;
+    private static final long TIME_LIMIT_MILLIS = 200;
 
     private Optional<Exception> exception = Optional.empty();
 
@@ -90,6 +98,28 @@ public class CleanUpAfterFailedUnZipTest {
     }
 
     @Test
+    public void noFilesLeftBehindWhenTheTimeLimitExpires() throws IOException {
+        givenArchiveWithEntryCount(SLOWLY_DELIVERED_ENTRIES);
+
+        whenArchiveIsSlowlyUnzippedIn(OUTPUT_FOLDER);
+
+        thenExceptionIsThrown(InterruptedIOException.class);
+        thenExceptionMessageContains("did not complete within");
+        thenFolderDoesNotExist(OUTPUT_FOLDER);
+    }
+
+    @Test
+    public void preexistingFilesArePreservedWhenTheTimeLimitExpires() throws IOException {
+        givenArchiveWithEntryCount(SLOWLY_DELIVERED_ENTRIES);
+        givenExistingOutputFolderContaining(PRESERVED_FILE);
+
+        whenArchiveIsSlowlyUnzippedIn(OUTPUT_FOLDER);
+
+        thenExceptionIsThrown(InterruptedIOException.class);
+        thenFolderContainsOnly(OUTPUT_FOLDER, PRESERVED_FILE);
+    }
+
+    @Test
     public void extractedFilesAreKeptOnSuccess() throws IOException {
         givenArchiveWithASingleFile();
 
@@ -122,6 +152,32 @@ public class CleanUpAfterFailedUnZipTest {
     private void whenArchiveIsUnzippedIn(String outputFolder) {
         try {
             UnZip.unZipFile(INPUT_ZIP_FILE, outputFolder);
+        } catch (Exception e) {
+            this.exception = Optional.of(e);
+        }
+    }
+
+    /**
+     * Delivers the archive a few bytes at a time, so that the extraction is still running when its time limit expires.
+     */
+    private void whenArchiveIsSlowlyUnzippedIn(String outputFolder) throws IOException {
+        InputStream slowArchive = new FilterInputStream(new FileInputStream(INPUT_ZIP_FILE)) {
+
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new InterruptedIOException();
+                }
+                return super.read(b, off, Math.min(len, 64));
+            }
+        };
+
+        try {
+            UnZip.unZip(new TimeLimitedInputStream(slowArchive, TIME_LIMIT_MILLIS, TimeUnit.MILLISECONDS),
+                    outputFolder);
         } catch (Exception e) {
             this.exception = Optional.of(e);
         }

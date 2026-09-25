@@ -19,171 +19,51 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.kura.executor.CommandExecutorService;
 
 public class UnZip {
 
-    private static final Logger logger = LoggerFactory.getLogger(UnZip.class);
-
-    private static final int BUFFER = 1024;
     private static final int ZIP_MAGIC_FIRST_BYTE = 0x50;  // 'P'
     private static final int ZIP_MAGIC_SECOND_BYTE = 0x4B; // 'K'
-    private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
-    private static int tooMany = 1024;     // Max number of files
 
     private UnZip() {
         // Do nothing...
     }
 
+    public static void unZip(InputStream archive, String outputFolder) throws IOException {
+        ZipExtractor.extract(archive, outputFolder);
+    }
+
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
-        ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
-        unZipZipInputStream(zis, outputFolder);
+        unZip(new ByteArrayInputStream(bytes), outputFolder);
     }
 
     public static void unZipFile(String filename, String outputFolder) throws IOException {
         File file = new File(filename);
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
-        unZipZipInputStream(zis, outputFolder);
+        unZip(new FileInputStream(file), outputFolder);
     }
 
-    private static void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-        File folder = new File(outFolder == null ? System.getProperty("user.dir") : outFolder);
-        Deque<File> createdEntries = new ArrayDeque<>();
-
-        try {
-            createDirectories(folder, createdEntries);
-
-            unZipEntries(zis, folder, createdEntries);
-        } catch (IOException | RuntimeException e) {
-            deleteCreatedEntries(createdEntries);
-            throw e;
-        } finally {
-            zis.close();
-        }
-    }
-
-    private static void unZipEntries(ZipInputStream zis, File folder, Deque<File> createdEntries) throws IOException {
-        int entries = 0;
-        long total = 0;
-
-        ZipEntry ze = zis.getNextEntry();
-
-        while (ze != null) {
-            File newFile = getFile(entryPath(folder, ze), folder);
-
-            if (ze.isDirectory()) {
-                createDirectories(newFile, createdEntries);
-            } else {
-                total = writeEntry(zis, newFile, createdEntries, total);
-                entries++;
-
-                verifyLimits(entries, total);
-            }
-
-            ze = zis.getNextEntry();
-        }
-
-        zis.closeEntry();
-    }
-
-    private static long writeEntry(ZipInputStream zis, File newFile, Deque<File> createdEntries, long writtenSoFar)
+    /**
+     * Extracts the given archive in a dedicated process spawned through the provided {@link CommandExecutorService}.
+     * <p>
+     * The archive is streamed to the standard input of the extraction process. The given stream is not closed by this
+     * method. The extraction fails when it takes longer than {@value ZipExtractor#EXTRACTION_TIMEOUT} seconds.
+     *
+     * @param archive
+     *            the stream the archive is read from
+     * @param outputFolder
+     *            the folder the archive is extracted in
+     * @param executorService
+     *            the executor service used to spawn the extraction process
+     * @throws IOException
+     *             if the extraction fails
+     */
+    public static void unZip(InputStream archive, String outputFolder, CommandExecutorService executorService)
             throws IOException {
-        if (newFile.getParent() != null) {
-            createDirectories(new File(newFile.getParent()), createdEntries);
-        }
-
-        if (!newFile.exists()) {
-            createdEntries.push(newFile);
-        }
-
-        long total = writtenSoFar;
-        try (OutputStream fos = Files.newOutputStream(newFile.toPath(),
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS)) {
-            byte[] buffer = new byte[BUFFER];
-
-            int len = zis.read(buffer);
-            while (total + BUFFER <= tooBig && len > 0) {
-                fos.write(buffer, 0, len);
-                total += len;
-                len = zis.read(buffer);
-            }
-            fos.flush();
-        }
-
-        return total;
-    }
-
-    private static void verifyLimits(int entries, long total) {
-        if (entries > tooMany) {
-            throw new IllegalStateException("Too many files to unzip.");
-        }
-
-        if (total + BUFFER > tooBig) {
-            throw new IllegalStateException("File being unzipped is too big.");
-        }
-    }
-
-    private static String entryPath(File folder, ZipEntry ze) {
-        return new StringBuilder(folder.getPath()).append(File.separator).append(ze.getName()).toString();
-    }
-
-    private static void createDirectories(File directory, Deque<File> createdEntries) {
-        if (directory == null || directory.exists()) {
-            return;
-        }
-
-        createDirectories(directory.getParentFile(), createdEntries);
-
-        if (directory.mkdir()) {
-            createdEntries.push(directory);
-        }
-    }
-
-    private static void deleteCreatedEntries(Deque<File> createdEntries) {
-        while (!createdEntries.isEmpty()) {
-            File entry = createdEntries.pop();
-            try {
-                Files.deleteIfExists(entry.toPath());
-            } catch (IOException e) {
-                logger.warn("Unable to delete {} while cleaning up a failed extraction", entry, e);
-            }
-        }
-    }
-
-    private static File getFile(String expectedFilePath, File folder) throws IOException {
-        String fileName;
-        try {
-            fileName = validateFileName(expectedFilePath, folder.getPath());
-        } catch (KuraException e) {
-            throw new IOException("File is outside extraction target directory.");
-        }
-        return new File(fileName);
-    }
-
-    private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
-        final Path filePath = new File(zipFileName).getCanonicalFile().toPath();
-        final Path intendedCanonicalPath = new File(intendedDir).getCanonicalFile().toPath();
-
-        if (filePath.startsWith(intendedCanonicalPath)) {
-            return filePath.toString();
-        } else {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
-        }
+        UnZipProcess.unZip(archive, outputFolder, executorService);
     }
 
     public static boolean isZipCompressed(String filePath) throws IOException {

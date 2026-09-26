@@ -100,6 +100,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/foo");
 
         thenResponseCodeIs(404);
+        thenResponseBodyEqualsJson("{\"message\":\"Not Found\"}");
     }
 
     @Test
@@ -121,6 +122,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
 
         thenResponseCodeIs(403);
+        thenResponseBodyEqualsJson("{\"message\":\"Forbidden\"}");
     }
 
     @Test
@@ -132,6 +134,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
 
         thenResponseCodeIs(401);
+        thenResponseBodyEqualsJson("{\"message\":\"Unauthorized\"}");
     }
 
     @Test

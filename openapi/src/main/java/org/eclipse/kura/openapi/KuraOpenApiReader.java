@@ -19,6 +19,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.rest.configuration.api.OptionDTO;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +50,9 @@ public class KuraOpenApiReader extends Reader {
         final ModelResolver resolver = new ModelResolver(mapper) {
             @Override
             public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
+                if (type.getType() != null && mapper.constructType(type.getType()).hasRawClass(Option.class)) {
+                    type.type(OptionDTO.class);
+                }
                 if (type.getType() != null && mapper.constructType(type.getType()).isJavaLangObject()) {
                     final Schema<?> schema = new Schema<>();
                     schema.addExtension(UNCONSTRAINED, true);

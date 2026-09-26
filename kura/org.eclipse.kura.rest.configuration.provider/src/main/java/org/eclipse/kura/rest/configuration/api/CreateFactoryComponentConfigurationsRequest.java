@@ -21,7 +21,8 @@ public class CreateFactoryComponentConfigurationsRequest implements Validable {
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final List<FactoryComponentConfigurationDTO> configs;
-    @Schema(defaultValue = "true", nullable = true, description = "Persist a snapshot after the subtasks; omitted or null means true.")
+    @Schema(defaultValue = "true", types = { "boolean", "null" },
+            description = "Persist a snapshot after the subtasks; omitted or null means true.")
     private final Boolean takeSnapshot;
 
     public CreateFactoryComponentConfigurationsRequest(List<FactoryComponentConfigurationDTO> configs,

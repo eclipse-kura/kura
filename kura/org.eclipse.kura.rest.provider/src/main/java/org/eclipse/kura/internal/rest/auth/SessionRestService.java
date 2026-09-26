@@ -113,7 +113,7 @@ public class SessionRestService {
                             schema = @Schema(implementation = UsernamePasswordDTO.class))))
     @ApiResponse(responseCode = "200", description = "Authentication result.",
             headers = @Header(name = "Set-Cookie", description = "Session cookie lifecycle; preserve cookies between requests.",
-                    schema = @Schema(type = "string")),
+                    schema = @Schema(types = { "string" })),
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = AuthenticationResponseDTO.class)))
     @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest")
@@ -168,12 +168,13 @@ public class SessionRestService {
     @POST
     @Path(SessionRestServiceConstants.LOGIN_CERTIFICATE_PATH)
     @Produces(MediaType.APPLICATION_JSON)
-    @SecurityRequirements
+    @SecurityRequirement(name = "clientCertificate")
     @Operation(operationId = "post_session_v1_login_certificate", summary = "Create a certificate session",
-            description = "Requires a trusted client certificate on a mutual-TLS port. Creates a session cookie; fetch xsrfToken next.")
+            description = "Requires a trusted client certificate mapped to an identity on a configured mutual-TLS port. "
+                    + "Creates a session cookie; fetch xsrfToken before subsequent session-authenticated requests.")
     @ApiResponse(responseCode = "200", description = "Authentication result.",
             headers = @Header(name = "Set-Cookie", description = "Session cookie lifecycle; preserve cookies between requests.",
-                    schema = @Schema(type = "string")),
+                    schema = @Schema(types = { "string" })),
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = AuthenticationResponseDTO.class)))
     @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")

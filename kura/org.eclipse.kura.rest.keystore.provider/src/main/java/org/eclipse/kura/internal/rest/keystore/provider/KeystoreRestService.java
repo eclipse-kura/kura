@@ -86,7 +86,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
                     + "Entries are polymorphic: trusted certificates and private keys expose different fields.")
     @ApiResponse(responseCode = "200", description = "Requested entries.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    array = @ArraySchema(schema = @Schema(type = "object", anyOf = { CertificateInfo.class,
+                    array = @ArraySchema(schema = @Schema(types = { "object" }, anyOf = { CertificateInfo.class,
                             PrivateKeyInfo.class }))))
     public List<EntryInfo> getEntries(@QueryParam("keystoreServicePid") String keystoreServicePid,
             @QueryParam("alias") String alias) {

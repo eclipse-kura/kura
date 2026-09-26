@@ -1,6 +1,6 @@
 # Kura OpenAPI
 
-The normal Maven build generates an OpenAPI 3.0.3 document for all operations in
+The normal Maven build generates an OpenAPI 3.1.2 document for all operations in
 the system v1, configuration v2, session v1, identity v1/v2, security v1/v2,
 service listing v1, cloud connection v1, keystore v1/v2, tamper v1, and
 inventory v1 REST resources. This module is a build tool; it is not an OSGi
@@ -16,7 +16,10 @@ The generated documents are `openapi/target/openapi/openapi.json` and
 `openapi/target/openapi/openapi.yaml`. Both are attached to
 `org.eclipse.kura:org.eclipse.kura.openapi` with classifier `openapi` and their
 respective file extensions during `package`, so `install` and `deploy` publish
-them with the Kura version. Generated files are not committed.
+them with the Kura version. Generated files are not committed. Consumers must
+support OpenAPI 3.1 and JSON Schema 2020-12; the same artifacts now contain 3.1.2
+and no separate 3.0 artifact is published. This migration changes the documentation
+contract only; HTTP behavior is unchanged.
 
 Generation runs at `process-classes`, including with `-DskipTests`. That flag
 skips the verification tests, not generation. Neither a running Kura instance
@@ -38,9 +41,13 @@ HTTP Basic is available when enabled. For a password session, call
 subsequent requests, including GET. The token endpoint alone is exempt from
 the token requirement. A session locked for password change permits only
 the token endpoint and `POST /session/v1/changePassword`; obtain a new token
-after changing the password. Kura also supports certificate authentication
-on configured mutual TLS ports. OpenAPI 3.0 cannot express that security
-scheme, so the specification describes the certificate route in prose.
+after changing the password. The global security alternatives are HTTP Basic,
+session cookie **and** XSRF token, or `clientCertificate` (`type: mutualTLS`).
+Certificate authentication requires a configured mutual TLS port, trusted client
+certificates and certificate-to-identity mapping. `POST /session/v1/login/certificate`
+requires `clientCertificate` and creates a session cookie; obtain an XSRF token
+before making subsequent session-authenticated requests. Public operations retain
+empty security overrides, and XSRF retrieval requires only the session cookie.
 System endpoints require `rest.system`, configuration endpoints require
 `rest.configuration`, protected identity endpoints require `rest.identity`,
 protected security endpoints require `rest.security`, cloud connections require
@@ -65,15 +72,21 @@ field names, and keystore entries are polymorphic (`anyOf` trusted-certificate
 and private-key entries). Embedded HTTP contract tests check both.
 
 Tests compare JSON and YAML, check endpoint coverage and reference resolution,
-validate the document with the [official OpenAPI 3.0 schema](https://spec.openapis.org/oas/3.0/schema/2021-09-28)
-and Swagger Parser, and check request requirements and Gson payloads with an
-OpenAPI-aware schema validator. Embedded HTTP tests exercise the actual REST
+validate the document and its schemas with the pinned
+[official OpenAPI 3.1 schema](https://spec.openapis.org/oas/3.1/schema-base/2025-09-15)
+and Swagger Parser, and check request requirements and Gson payloads with networknt's
+OpenAPI 3.1 dialect and JSON Schema 2020-12. Tests also check 3.1 serialization
+round-trips, nullable type unions, and unconstrained dynamic values including null.
+Embedded HTTP tests exercise the actual REST
 resources, authentication filters, authorization, and Gson serializer, then
 compare responses with the generated contract for the previously covered system,
 configuration, session, identity, security, and service-listing resources, and
 for the inventory and keystore resources.
-The vendored schema is supplied
-by the OpenAPI Initiative under the [Apache 2.0 license](https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE).
+The official schemas and their OpenAPI dialect references are vendored unchanged
+in `src/test/resources/oas-3.1`, with the upstream Apache 2.0 `LICENSE`. The document
+schemas are pinned to 2025-09-15 and the dialect/meta schemas to 2024-11-10.
+References resolve to these local resources and the JSON Schema 2020-12 resources
+bundled in networknt; schema validation does not require network access.
 
 ## Known gaps
 

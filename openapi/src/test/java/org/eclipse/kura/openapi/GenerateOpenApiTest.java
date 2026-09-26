@@ -42,8 +42,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.ws.rs.HttpMethod;
@@ -94,8 +94,8 @@ public class GenerateOpenApiTest {
     }
 
     private void whenDocumentsAreRead() throws Exception {
-        this.document = Json.mapper().readTree(Files.readString(this.output.resolve("openapi.json")));
-        this.yaml = Yaml.mapper().readTree(Files.readString(this.output.resolve("openapi.yaml")));
+        this.document = Json31.mapper().readTree(Files.readString(this.output.resolve("openapi.json")));
+        this.yaml = Yaml31.mapper().readTree(Files.readString(this.output.resolve("openapi.yaml")));
     }
 
     private void thenFormatsAreEquivalent() {
@@ -103,7 +103,7 @@ public class GenerateOpenApiTest {
     }
 
     private void thenMetadataDescribesTheApi() {
-        assertEquals("3.0.3", this.document.path("openapi").asText());
+        assertEquals("3.1.2", this.document.path("openapi").asText());
         assertEquals("/services", this.document.at("/servers/0/url").asText());
         assertFalse(this.document.at("/info/version").asText().isEmpty());
         assertFalse(this.document.at("/info/version").asText().contains("${"));

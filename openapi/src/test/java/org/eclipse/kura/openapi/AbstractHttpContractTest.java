@@ -82,13 +82,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import com.networknt.schema.oas.OpenApi30;
 
-import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 
 public abstract class AbstractHttpContractTest {
@@ -125,7 +121,7 @@ public abstract class AbstractHttpContractTest {
     }
 
     protected void givenServer() throws Exception {
-        this.document = Json.mapper().readTree(Files.readString(
+        this.document = Json31.mapper().readTree(Files.readString(
                 Path.of(System.getProperty("openapi.directory"), "openapi.json")));
         when(this.system.getDeviceName()).thenReturn("contract-gateway");
         when(this.system.getInternetConnectionStatus()).thenReturn(InternetConnectionStatus.FULL);
@@ -235,13 +231,13 @@ public abstract class AbstractHttpContractTest {
         whenRequest("GET", "/session/v1/xsrfToken", null);
 
         thenResponseMatchesContract(200);
-        this.token = Json.mapper().readTree(this.response.body()).path("xsrfToken").asText();
+        this.token = Json31.mapper().readTree(this.response.body()).path("xsrfToken").asText();
         assertFalse(this.token.isBlank());
     }
 
     protected void whenTokenIsRefreshed() throws Exception {
         whenRequest("GET", "/session/v1/xsrfToken", null);
-        this.token = Json.mapper().readTree(this.response.body()).path("xsrfToken").asText();
+        this.token = Json31.mapper().readTree(this.response.body()).path("xsrfToken").asText();
     }
 
     protected void whenRequest(String method, String path, String body) throws Exception {
@@ -306,13 +302,9 @@ public abstract class AbstractHttpContractTest {
         final String mediaType = this.response.headers().firstValue("Content-Type").orElse("").split(";", 2)[0].trim();
         assertTrue("Undocumented response media type: " + mediaType, content.has(mediaType));
         final JsonNode schema = content.path(mediaType).path("schema");
-        final ObjectNode resolved = schema.deepCopy();
-        resolved.set("components", this.document.path("components"));
-        final JsonNode payload = "application/json".equals(mediaType) ? Json.mapper().readTree(this.response.body())
-                : Json.mapper().getNodeFactory().textNode(this.response.body());
-        final Set<ValidationMessage> errors = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
-                .metaSchema(OpenApi30.getInstance()).defaultMetaSchemaIri("https://spec.openapis.org/oas/3.0/dialect").build()
-                .getSchema(resolved).validate(payload);
+        final JsonNode payload = "application/json".equals(mediaType) ? Json31.mapper().readTree(this.response.body())
+                : Json31.mapper().getNodeFactory().textNode(this.response.body());
+        final Set<ValidationMessage> errors = OpenApiSchemaValidator.payloadSchema(this.document, schema).validate(payload);
         assertTrue(errors.toString(), errors.isEmpty());
         thenDocumentedPropertiesCoverThePayload(schema, payload);
     }

@@ -27,7 +27,7 @@ public class UpdateComponentConfigurationRequest implements Validable {
     @ArraySchema(arraySchema = @Schema(requiredMode = Schema.RequiredMode.REQUIRED),
             schema = @Schema(ref = "#/components/schemas/ComponentConfigurationUpdate"))
     private final List<ComponentConfigurationDTO> configs;
-    @Schema(defaultValue = "true", nullable = true)
+    @Schema(defaultValue = "true", types = { "boolean", "null" })
     private Boolean takeSnapshot;
 
     public UpdateComponentConfigurationRequest(List<ComponentConfigurationDTO> componentConfigurations,

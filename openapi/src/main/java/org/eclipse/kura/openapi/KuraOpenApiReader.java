@@ -33,7 +33,7 @@ import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.jackson.ModelResolver;
-import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -44,7 +44,7 @@ public class KuraOpenApiReader extends Reader {
 
     @Override
     public OpenAPI read(Set<Class<?>> classes) {
-        final ObjectMapper mapper = Json.mapper().copy();
+        final ObjectMapper mapper = Json31.mapper().copy();
         mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         final ModelResolver resolver = new ModelResolver(mapper) {
@@ -61,7 +61,8 @@ public class KuraOpenApiReader extends Reader {
                 return super.resolve(type, context, chain);
             }
         };
-        final ModelConverters converters = ModelConverters.getInstance();
+        resolver.setOpenapi31(true);
+        final ModelConverters converters = ModelConverters.getInstance(true);
         converters.addConverter(resolver);
         try {
             final OpenAPI result = super.read(classes);
@@ -97,7 +98,7 @@ public class KuraOpenApiReader extends Reader {
     private void normalizeSchema(Schema<?> schema) {
         if (schema.getExtensions() != null && Boolean.TRUE.equals(schema.getExtensions().remove(UNCONSTRAINED))) {
             schema.setType(null);
-            schema.setNullable(true);
+            schema.setTypes(null);
         }
         if (schema.getProperties() != null) {
             schema.getProperties().values().forEach(this::normalizeSchema);

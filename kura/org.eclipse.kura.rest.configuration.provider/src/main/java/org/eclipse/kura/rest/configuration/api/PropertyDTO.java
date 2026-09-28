@@ -28,7 +28,7 @@ import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class PropertyDTO implements Validable {
 
-    @Schema(description = "A scalar or array matching type. Omitted or null clears the property.", nullable = true)
+    @Schema(description = "A scalar or array matching type. Omitted or null clears the property.")
     private final Object value;
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final Scalar type;

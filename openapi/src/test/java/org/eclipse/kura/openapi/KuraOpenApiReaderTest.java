@@ -16,11 +16,16 @@ package org.eclipse.kura.openapi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
 
+import io.swagger.v3.core.converter.ModelConverter;
+import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +40,7 @@ import jakarta.ws.rs.core.MediaType;
 public class KuraOpenApiReaderTest {
 
     private OpenAPI document;
+    private List<ModelConverter> converters;
 
     @Test
     public void inheritedOperationsGetUniquePathDerivedIdentifiers() {
@@ -43,6 +49,7 @@ public class KuraOpenApiReaderTest {
         whenDocumentIsRead();
 
         thenAllOperationIdsAreUnique();
+        thenConverterRegistryIsUnchanged();
         thenInheritedOperationsUseMethodAndPath();
     }
 
@@ -56,11 +63,17 @@ public class KuraOpenApiReaderTest {
     }
 
     private void givenSharedBaseClassResources() {
+        this.converters = new ArrayList<>(ModelConverters.getInstance(true).getConverters());
     }
 
     private void whenDocumentIsRead() {
-        this.document = new KuraOpenApiReader()
-                .read(Set.of(FirstVersionResource.class, SecondVersionResource.class, StandaloneResource.class));
+        final KuraOpenApiReader reader = new KuraOpenApiReader();
+        reader.setConfiguration(new SwaggerConfiguration().openAPI31(true).openAPIVersion("3.1.2"));
+        this.document = reader.read(Set.of(FirstVersionResource.class, SecondVersionResource.class, StandaloneResource.class));
+    }
+
+    private void thenConverterRegistryIsUnchanged() {
+        assertEquals(this.converters, ModelConverters.getInstance(true).getConverters());
     }
 
     private void thenAllOperationIdsAreUnique() {

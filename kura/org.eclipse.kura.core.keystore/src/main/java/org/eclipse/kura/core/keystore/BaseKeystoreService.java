@@ -38,6 +38,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CRL;
+import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -423,10 +424,14 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     @Override
     public void addCRL(X509CRL crl) throws KuraException {
-        this.crlManager.ifPresent(manager -> {
-            StoredCRL storedCRL = new StoredCRL(Collections.emptySet(), crl);
-            manager.getCRLStore().storeCRL(storedCRL);
-        });
+        if (!this.crlManager.isPresent()) {
+            return;
+        }
+        try {
+            this.crlManager.get().getCRLStore().storeCRL(new StoredCRL(Collections.emptySet(), crl));
+        } catch (final CRLException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to add the CRL");
+        }
     }
 
     protected void postChangedEvent() {

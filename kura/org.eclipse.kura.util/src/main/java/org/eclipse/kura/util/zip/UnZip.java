@@ -33,14 +33,66 @@ public class UnZip {
         // Do nothing...
     }
 
+    /**
+     * Extracts the zip archive read from the given stream in the given folder.
+     * <p>
+     * The extraction runs in the calling thread, so the files are written with the permissions of the user Kura has
+     * been launched with. To extract with the permissions of another user, use
+     * {@link #unZip(InputStream, String, CommandExecutorService)}.
+     * <p>
+     * Entries that would be written outside the output folder are refused, as well as archives with more than 1024
+     * files or more than 100MB of uncompressed data. When the extraction fails, the files and folders it created so far
+     * are removed.
+     * <p>
+     * The given stream is closed by this method.
+     *
+     * @param archive
+     *            the stream the archive is read from
+     * @param outputFolder
+     *            the folder the archive is extracted in, created if missing; the current working directory if
+     *            {@code null}
+     * @throws IOException
+     *             if the archive cannot be read or contains an entry that would be written outside the output folder
+     * @throws IllegalStateException
+     *             if the archive contains too many files or too much data
+     */
     public static void unZip(InputStream archive, String outputFolder) throws IOException {
         ZipExtractor.extract(archive, outputFolder);
     }
 
+    /**
+     * Extracts the given zip archive in the given folder, in the calling thread and with the permissions of the user
+     * Kura has been launched with.
+     *
+     * @param bytes
+     *            the content of the archive
+     * @param outputFolder
+     *            the folder the archive is extracted in
+     * @throws IOException
+     *             if the archive cannot be read or contains an entry that would be written outside the output folder
+     * @throws IllegalStateException
+     *             if the archive contains too many files or too much data
+     * @see #unZip(InputStream, String)
+     */
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
         unZip(new ByteArrayInputStream(bytes), outputFolder);
     }
 
+    /**
+     * Extracts the given zip file in the given folder, in the calling thread and with the permissions of the user Kura
+     * has been launched with.
+     *
+     * @param filename
+     *            the path of the zip file
+     * @param outputFolder
+     *            the folder the archive is extracted in
+     * @throws IOException
+     *             if the file does not exist, cannot be read or contains an entry that would be written outside the
+     *             output folder
+     * @throws IllegalStateException
+     *             if the archive contains too many files or too much data
+     * @see #unZip(InputStream, String)
+     */
     public static void unZipFile(String filename, String outputFolder) throws IOException {
         File file = new File(filename);
         unZip(new FileInputStream(file), outputFolder);
@@ -66,12 +118,31 @@ public class UnZip {
         UnZipProcess.unZip(archive, outputFolder, executorService);
     }
 
+    /**
+     * Tells whether the given file is a zip archive, by checking that it starts with the zip signature ("PK"). The
+     * rest of the file is not validated.
+     *
+     * @param filePath
+     *            the path of the file to check
+     * @return {@code true} if the file starts with the zip signature, {@code false} otherwise
+     * @throws IOException
+     *             if the file does not exist or cannot be read
+     */
     public static boolean isZipCompressed(String filePath) throws IOException {
         try (InputStream is = Files.newInputStream(Paths.get(filePath))) {
             return is.read() == ZIP_MAGIC_FIRST_BYTE && is.read() == ZIP_MAGIC_SECOND_BYTE;
         }
     }
 
+    /**
+     * Tells whether the given content is a zip archive.
+     *
+     * @param bytes
+     *            the content to check
+     * @return {@code true} if the content is longer than two bytes and starts with the zip signature, {@code false}
+     *         otherwise
+     * @see #isZipCompressed(String)
+     */
     public static boolean isZipCompressed(byte[] bytes) {
         if (bytes.length > 2) {
             return bytes[0] == ZIP_MAGIC_FIRST_BYTE && bytes[1] == ZIP_MAGIC_SECOND_BYTE;

@@ -27,9 +27,9 @@
 # (mvn verify -Presolve-integration-tests)
 #
 -runbundles: \
-	bcpkix;version='1.84.0',\
-	bcprov;version='1.84.0',\
-	bcutil;version='1.84.0',\
+	bcpkix;version='1.86.0',\
+	bcprov;version='1.86.0',\
+	bcutil;version='1.86.0',\
 	com.google.gson;version='2.9.0',\
 	com.google.guava;version='32.1.1',\
 	com.google.guava.failureaccess;version='1.0.1',\

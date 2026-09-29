@@ -34,8 +34,9 @@ import java.util.zip.ZipInputStream;
  * Extracts zip archives for {@link UnZip}, refusing entries that would be written outside the target folder and
  * archives that are too large.
  * <p>
- * This class must depend on the JDK only: {@link UnZipProcess} runs {@link #main(String[])} in a separate JVM whose
- * class path contains nothing but this bundle.
+ * This class must depend on the JDK and on {@link TimeLimitedInputStream} only, and must not have nested or anonymous
+ * classes: {@link UnZipProcess} runs {@link #main(String[])} in a separate JVM whose class path contains nothing but a
+ * copy of those two class files.
  */
 final class ZipExtractor {
 

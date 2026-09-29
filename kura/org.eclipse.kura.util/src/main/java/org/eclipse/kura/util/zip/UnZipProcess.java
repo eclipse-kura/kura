@@ -18,15 +18,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.security.CodeSource;
 
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -43,7 +40,9 @@ final class UnZipProcess {
     // ZipExtractor.main enforces EXTRACTION_TIMEOUT itself, so that it can remove what it extracted so far. The executor
     // kills the process only if it hangs, for instance on a stalled read, and then a partial extraction is left behind.
     private static final int PROCESS_TIMEOUT = ZipExtractor.EXTRACTION_TIMEOUT + 30;
-    private static final String EXTRACTION_LIBRARY_PREFIX = "kura-unzip-lib-";
+    private static final String EXTRACTION_CLASSES_PREFIX = "kura-unzip-classes-";
+
+    private static final Class<?>[] EXTRACTION_CLASSES = { ZipExtractor.class, TimeLimitedInputStream.class };
 
     private static volatile String extractionClassPath;
 
@@ -91,7 +90,7 @@ final class UnZipProcess {
         if (classPath == null) {
             synchronized (UnZipProcess.class) {
                 if (extractionClassPath == null) {
-                    extractionClassPath = copyExtractionLibrary();
+                    extractionClassPath = copyExtractionClasses();
                 }
                 classPath = extractionClassPath;
             }
@@ -101,26 +100,41 @@ final class UnZipProcess {
     }
 
     // On a packaged installation the bundles are in a folder that only the framework user can read (/opt/eclipse is
-    // go-rwx), so the one providing ZipExtractor is copied where the command user can read it. Since ZipExtractor
-    // depends on the JDK only, that copy is the whole class path of the extraction process.
-    private static String copyExtractionLibrary() throws IOException {
-        Path source = extractionLibrary();
+    // go-rwx), so the classes run by the extraction process are copied where the command user can read them
+    private static String copyExtractionClasses() throws IOException {
+        Path classesFolder = Files.createTempDirectory(EXTRACTION_CLASSES_PREFIX, ownerOnly());
+        classesFolder.toFile().deleteOnExit();
 
-        if (!Files.isRegularFile(source)) {
-            return source.toString(); // A folder of classes, as in development and in unit tests
+        Path packageFolder = classesFolder;
+        for (String packageName : ZipExtractor.class.getPackage().getName().split("\\.")) {
+            packageFolder = packageFolder.resolve(packageName);
+            Files.createDirectory(packageFolder);
+            packageFolder.toFile().deleteOnExit();
         }
 
-        Path libraryFolder = Files.createTempDirectory(EXTRACTION_LIBRARY_PREFIX, ownerOnly());
-        libraryFolder.toFile().deleteOnExit();
+        for (Class<?> extractionClass : EXTRACTION_CLASSES) {
+            Path target = packageFolder.resolve(extractionClass.getSimpleName() + ".class");
+            copyClass(extractionClass, target);
+            target.toFile().deleteOnExit();
 
-        Path target = libraryFolder.resolve(source.getFileName());
-        Files.copy(source, target);
-        target.toFile().deleteOnExit();
+            shareWithExtractionUser(target, false);
+        }
 
-        shareWithExtractionUser(target, false);
-        shareWithExtractionUser(libraryFolder, true);
+        for (Path folder = packageFolder; folder.startsWith(classesFolder); folder = folder.getParent()) {
+            shareWithExtractionUser(folder, true);
+        }
 
-        return target.toString();
+        return classesFolder.toString();
+    }
+
+    private static void copyClass(Class<?> extractionClass, Path target) throws IOException {
+        try (InputStream classFile = extractionClass.getResourceAsStream(extractionClass.getSimpleName() + ".class")) {
+            if (classFile == null) {
+                throw new IOException("Unable to read the class file of " + extractionClass.getName());
+            }
+
+            Files.copy(classFile, target);
+        }
     }
 
     private static FileAttribute<?>[] ownerOnly() {
@@ -137,20 +151,6 @@ final class UnZipProcess {
 
         if (!file.setReadable(true, false) || (traversable && !file.setExecutable(true, false))) {
             throw new IOException("Unable to make " + path + " readable by the user performing the extraction");
-        }
-    }
-
-    private static Path extractionLibrary() throws IOException {
-        CodeSource codeSource = ZipExtractor.class.getProtectionDomain().getCodeSource();
-
-        if (codeSource == null || codeSource.getLocation() == null) {
-            throw new IOException("Unable to locate the archive providing " + ZipExtractor.class.getName());
-        }
-
-        try {
-            return Paths.get(codeSource.getLocation().toURI());
-        } catch (URISyntaxException | RuntimeException e) {
-            throw new IOException("Unable to locate the archive providing " + ZipExtractor.class.getName(), e);
         }
     }
 

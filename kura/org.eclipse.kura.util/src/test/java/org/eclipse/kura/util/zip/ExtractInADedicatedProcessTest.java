@@ -35,7 +35,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.executor.Command;
@@ -78,16 +82,16 @@ public class ExtractInADedicatedProcessTest {
     }
 
     @Test
-    public void extractionLibrariesAreCopiedWhereTheCommandUserCanReadThem() throws IOException {
+    public void onlyTheExtractionClassesAreCopiedWhereTheCommandUserCanReadThem() throws IOException {
         givenArchiveWithASingleFile();
         givenAnExtractionProcessExitingWith(0);
 
         whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenNoExceptionIsThrown();
-        thenTheProcessClassPathIsNotEmpty();
-        thenEveryClassPathLibraryIsACopyInTheTemporaryFolder();
-        thenEveryClassPathLibraryIsReadableByEveryUser();
+        thenTheProcessClassPathIsAFolderInTheTemporaryFolder();
+        thenTheClassPathContainsOnly(ZipExtractor.class, TimeLimitedInputStream.class);
+        thenTheClassPathIsReadableByEveryUser();
     }
 
     @Test
@@ -186,31 +190,43 @@ public class ExtractInADedicatedProcessTest {
         assertArrayEquals(this.archive, IOUtils.toByteArray(this.executedCommand.getInputStream()));
     }
 
-    private void thenTheProcessClassPathIsNotEmpty() {
-        assertTrue(processClassPath().length > 0);
+    private void thenTheProcessClassPathIsAFolderInTheTemporaryFolder() {
+        String[] classPath = processClassPath();
+        assertEquals(1, classPath.length);
+
+        Path classesFolder = Paths.get(classPath[0]);
+        assertTrue(classesFolder + " is not a folder", Files.isDirectory(classesFolder));
+        assertTrue(classesFolder + " is not a copy the command user can reach",
+                classesFolder.startsWith(Paths.get(System.getProperty("java.io.tmpdir"))));
     }
 
-    private void thenEveryClassPathLibraryIsACopyInTheTemporaryFolder() {
-        Path temporaryFolder = Paths.get(System.getProperty("java.io.tmpdir"));
+    private void thenTheClassPathContainsOnly(Class<?>... classes) throws IOException {
+        Path classesFolder = Paths.get(processClassPath()[0]);
 
-        for (String entry : processClassPath()) {
-            Path library = Paths.get(entry);
+        Set<Path> expected = new HashSet<>();
+        for (Class<?> classz : classes) {
+            expected.add(classesFolder.resolve(classz.getName().replace('.', File.separatorChar) + ".class"));
+        }
 
-            if (Files.isRegularFile(library)) {
-                assertTrue(entry + " is not a copy the command user can reach",
-                        library.startsWith(temporaryFolder));
-            }
+        try (Stream<Path> files = Files.walk(classesFolder)) {
+            assertEquals(expected, files.filter(Files::isRegularFile).collect(Collectors.toSet()));
         }
     }
 
-    private void thenEveryClassPathLibraryIsReadableByEveryUser() throws IOException {
-        for (String entry : processClassPath()) {
-            Path library = Paths.get(entry);
-            assertTrue(entry + " does not exist", Files.exists(library));
+    private void thenTheClassPathIsReadableByEveryUser() throws IOException {
+        try (Stream<Path> entries = Files.walk(Paths.get(processClassPath()[0]))) {
+            for (Path entry : (Iterable<Path>) entries::iterator) {
+                Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(entry);
 
-            if (Files.isRegularFile(library)) {
                 assertTrue(entry + " is not readable by the command user",
-                        Files.getPosixFilePermissions(library).contains(PosixFilePermission.OTHERS_READ));
+                        permissions.contains(PosixFilePermission.OTHERS_READ));
+                assertFalse(entry + " is writable by the command user",
+                        permissions.contains(PosixFilePermission.OTHERS_WRITE));
+
+                if (Files.isDirectory(entry)) {
+                    assertTrue(entry + " is not traversable by the command user",
+                            permissions.contains(PosixFilePermission.OTHERS_EXECUTE));
+                }
             }
         }
     }

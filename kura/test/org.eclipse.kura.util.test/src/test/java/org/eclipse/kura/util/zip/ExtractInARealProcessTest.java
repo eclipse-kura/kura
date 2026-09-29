@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -170,7 +171,7 @@ public class ExtractInARealProcessTest {
         private static Thread pump(InputStream from, OutputStream to) {
             Thread pump = new Thread(() -> {
                 try (OutputStream out = to) {
-                    from.transferTo(out);
+                    IOUtils.copy(from, out);
                 } catch (IOException e) {
                     // The process exited before reading its whole input
                 }

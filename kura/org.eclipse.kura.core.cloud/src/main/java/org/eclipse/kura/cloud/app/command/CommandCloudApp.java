@@ -234,17 +234,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
 
             byte[] zipBytes = commandReq.getZipBytes();
             if (zipBytes != null) {
-                try {
-                    CommandExecutorService executorService = getExecutorService();
-                    if (executorService instanceof UnprivilegedExecutorService) {
-                        UnZip.unZip(new ByteArrayInputStream(zipBytes), dir, executorService);
-                    } else {
-                        UnZip.unZip(new ByteArrayInputStream(zipBytes), dir);
-                    }
-                } catch (IOException | IllegalStateException e) {
-                    logger.error("Error unzipping command zip bytes", e);
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR, "file");
-                }
+                unzip(zipBytes, dir);
             }
 
             boolean runAsync = commandReq.isRunAsync() != null && commandReq.isRunAsync();
@@ -395,6 +385,20 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
 
     private CommandExecutorService getExecutorService() {
         return this.isPrivileged ? this.privilegedExecutorService : this.unprivilegedExecutorService;
+    }
+
+    private void unzip(byte[] zipBytes, String dir) throws KuraException {
+        try {
+            CommandExecutorService executorService = getExecutorService();
+            if (executorService instanceof UnprivilegedExecutorService) {
+                UnZip.unZip(new ByteArrayInputStream(zipBytes), dir, executorService);
+            } else {
+                UnZip.unZip(new ByteArrayInputStream(zipBytes), dir);
+            }
+        } catch (IOException | IllegalStateException e) {
+            logger.error("Error unzipping command zip bytes", e);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, "file");
+        }
     }
 
     private Map<String, String> getEnvironmentMap(String[] envp) {

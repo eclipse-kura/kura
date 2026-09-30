@@ -57,7 +57,6 @@ import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.executor.UnprivilegedExecutorService;
@@ -952,7 +951,7 @@ public class CommandCloudAppTest {
         }
     }
 
-    private CommandCloudApp givenCommandCloudApp(boolean privileged, Path workDir) throws KuraException {
+    private CommandCloudApp givenCommandCloudApp(boolean privileged, Path workDir) {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
 
         this.unprivilegedExecutorServiceMock = mock(UnprivilegedExecutorService.class);

@@ -14,6 +14,7 @@
 package org.eclipse.kura.openapi;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -74,7 +75,7 @@ public class KuraOpenApiReader extends Reader {
                     .collect(Collectors.toSet());
             result.getPaths().forEach((path, item) -> item.readOperationsMap().forEach((method, operation) -> {
                 if (publicOperations.contains(operation.getOperationId())) {
-                    operation.setSecurity(java.util.Collections.emptyList());
+                    operation.setSecurity(Collections.emptyList());
                 }
                 final String operationId = operation.getOperationId();
                 if (operationId == null || operationId.isBlank() || !explicitOperationIds.contains(operationId)) {

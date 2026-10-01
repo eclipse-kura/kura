@@ -56,6 +56,7 @@ public class LifeCyclePayloadBuilder {
     private static final String EXTENDED_PROPERTIES_KEY = "extended_properties";
 
     private static final String ERROR = "ERROR";
+    private static final String NOT_AVAILABLE = "NA";
 
     private static final Logger logger = LoggerFactory.getLogger(LifeCyclePayloadBuilder.class);
 
@@ -120,8 +121,8 @@ public class LifeCyclePayloadBuilder {
             birthPayloadBuilder.withModemImsi(this.cloudServiceImpl.imsi);
         }
 
-        if (this.cloudServiceImpl.eid != null && this.cloudServiceImpl.eid.length() > 0
-                && !this.cloudServiceImpl.eid.equals(ERROR)) {
+        if (this.cloudServiceImpl.eid != null && !this.cloudServiceImpl.eid.trim().isEmpty()
+                && !this.cloudServiceImpl.eid.equals(ERROR) && !this.cloudServiceImpl.eid.equals(NOT_AVAILABLE)) {
             birthPayloadBuilder.withModemEid(this.cloudServiceImpl.eid);
         }
 

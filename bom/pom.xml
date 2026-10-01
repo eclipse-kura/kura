@@ -30,7 +30,7 @@
         <hk2.version>3.1.1</hk2.version>
         <io.netty.version>4.1.137.Final</io.netty.version>
         <jackson.core.version>2.19.2</jackson.core.version>
-        <jackson3.core.version>3.2.3</jackson3.core.version>
+        <jackson3.core.version>3.1.7</jackson3.core.version>
         <jersey.version>3.1.11</jersey.version>
         <log4j.version>2.25.3</log4j.version>
         <objenesis.version>3.3</objenesis.version>

@@ -1247,12 +1247,7 @@ public class CloudServiceImpl
             if (nonNull(modemStatuses) && !modemStatuses.isEmpty()) {
                 readModemInfos(modemStatuses);
             } else {
-                this.imei = null;
-                this.iccid = null;
-                this.imsi = null;
-                this.eid = null;
-                this.rssi = null;
-                this.modemFwVer = null;
+                clearModemInfo();
             }
         });
     }
@@ -1289,9 +1284,7 @@ public class CloudServiceImpl
             }
         }
 
-        this.iccid = null;
-        this.imsi = null;
-        this.eid = null;
+        clearModemInfo();
         activeSim.ifPresent(sim -> {
             this.iccid = sim.getIccid();
             this.imsi = sim.getImsi();
@@ -1301,5 +1294,14 @@ public class CloudServiceImpl
         this.rssi = String.valueOf(modemStatus.getSignalStrength());
         this.modemFwVer = modemStatus.getFirmwareVersion();
 
+    }
+
+    private void clearModemInfo() {
+        this.imei = null;
+        this.iccid = null;
+        this.imsi = null;
+        this.eid = null;
+        this.rssi = null;
+        this.modemFwVer = null;
     }
 }

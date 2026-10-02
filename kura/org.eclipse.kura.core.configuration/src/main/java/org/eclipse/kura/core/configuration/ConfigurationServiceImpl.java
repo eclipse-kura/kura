@@ -1533,25 +1533,33 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // Unmarshall
         logger.info("Loading init configurations from: {}...", lastestID);
 
-        List<ComponentConfiguration> configs = null;
         try {
-            XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
-            if (xmlConfigs != null) {
-                configs = xmlConfigs.getConfigurations();
-            }
+            return loadSnapshotConfigurations(lastestID);
         } catch (Exception e) {
             logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
-            try {
-                if (allSnapshotsUnencrypted()) {
-                    encryptPlainSnapshots();
-                    configs = loadLatestSnapshotConfigurations();
-                }
-            } catch (Exception ex) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
-            }
         }
 
-        return configs;
+        try {
+            if (!allSnapshotsUnencrypted()) {
+                return null;
+            }
+            encryptPlainSnapshots();
+        } catch (Exception ex) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+        }
+
+        // single retry: if the snapshot still cannot be loaded after encryption, give up
+        try {
+            return loadSnapshotConfigurations(lastestID);
+        } catch (Exception e) {
+            logger.warn("Unable to load snapshot {} after encrypting the plain snapshots", lastestID, e);
+            return null;
+        }
+    }
+
+    private List<ComponentConfiguration> loadSnapshotConfigurations(long snapshotID) throws KuraException {
+        XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(snapshotID);
+        return xmlConfigs != null ? xmlConfigs.getConfigurations() : null;
     }
 
     XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {

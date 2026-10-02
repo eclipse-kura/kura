@@ -37,3 +37,6 @@ bin/
 maven.deps
 DEPENDENCIES
 .java-version
+
+# KJCS PMD self-test output
+tools/pmd/selftest/actual-*.csv

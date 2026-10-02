@@ -1,3 +1,5 @@
+import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+
 def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
     if (!env.CHANGE_TARGET) {
         echo "CHANGE_TARGET not set. Skipping check"
@@ -58,6 +60,25 @@ node {
     stage('Archive .deb artifacts') {
         dir("kura") {
             archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
+        }
+    }
+
+    stage('generate-EN50716-report') {
+        if (!env.CHANGE_TARGET) {
+            dir("kura") {
+                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', publisherStrategy: 'EXPLICIT') {
+                    // Generate PMD report without suppressions
+                    sh '''
+                        mvn -B -f kura/pom.xml pmd:aggregate-pmd-check@en50716-consolidated \
+                            -Dkura.pmd.baseline= \
+                            -Dkura.pmd.failOnViolation=false
+                    '''
+                }
+                archiveArtifacts artifacts: 'kura/target/pmd.xml', followSymlinks: false, allowEmptyArchive: false
+            }
+        } else {
+            echo "Skipping EN50716 report generation on PR"
+            Utils.markStageSkippedForConditional(STAGE_NAME)
         }
     }
 

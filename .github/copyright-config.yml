@@ -41,3 +41,4 @@ ignore:
   - test/org.eclipse.kura.core.configuration.test/src/main/resources/expected_snapshot_without_description.xml
   - suppressions.xml
   - /kura/emulator/org.eclipse.kura.emulator.position/src/main/resources/*.gpx
+  - .idea

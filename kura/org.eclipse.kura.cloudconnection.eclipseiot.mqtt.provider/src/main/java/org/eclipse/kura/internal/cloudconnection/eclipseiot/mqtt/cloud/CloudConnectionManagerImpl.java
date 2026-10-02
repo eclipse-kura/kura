@@ -904,7 +904,7 @@ public class CloudConnectionManagerImpl
         }
     }
 
-    private void readModemProfile() {
+    void readModemProfile() {
         this.networkStatusService.ifPresent(statusService -> {
             List<ModemInterfaceStatus> modemStatuses = getModemsStatuses(statusService);
             if (nonNull(modemStatuses) && !modemStatuses.isEmpty()) {

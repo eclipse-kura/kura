@@ -90,7 +90,7 @@ public final class TypeUtil {
             return value -> new BooleanValue((Boolean) value);
         } else if (sourceType == String.class) {
             return value -> new BooleanValue(Boolean.parseBoolean((String) value));
-        } else if (sourceType.isAssignableFrom(Number.class)) {
+        } else if (Number.class.isAssignableFrom(sourceType)) {
             return value -> new BooleanValue(isNonZero(((Number) value).doubleValue()));
         }
         throw new IllegalArgumentException(CANNOT_CONVERT_FROM_NATIVE_TYPE_MESSAGE + sourceType.getSimpleName()

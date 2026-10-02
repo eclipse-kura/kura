@@ -291,13 +291,14 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
                 || signatureAlgorithm.trim().isEmpty()) {
             throw new IllegalArgumentException("Parameters cannot be null or empty!");
         }
+        final X500Name subject = parseDistinguishedName(attributes);
         KeyPair keyPair;
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm, "BC");
             keyGen.initialize(keySize, secureRandom);
             keyPair = keyGen.generateKeyPair();
             setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
-                    generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
+                    generateCertificateChain(keyPair, signatureAlgorithm, subject)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
             logger.error("Error occured. Exception: {}.", e.getClass());
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -313,13 +314,14 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
                 || signatureAlgorithm.trim().isEmpty() || isNull(algorithmParameter)) {
             throw new IllegalArgumentException("Parameters cannot be null or empty!");
         }
+        final X500Name subject = parseDistinguishedName(attributes);
         KeyPair keyPair;
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm, "BC");
             keyGen.initialize(algorithmParameter, secureRandom);
             keyPair = keyGen.generateKeyPair();
             setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
-                    generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
+                    generateCertificateChain(keyPair, signatureAlgorithm, subject)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -440,11 +442,15 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     protected X509Certificate[] generateCertificateChain(KeyPair keyPair, String signatureAlgorithm, String attributes)
             throws OperatorCreationException, CertificateException {
+        return generateCertificateChain(keyPair, signatureAlgorithm, new X500Name(attributes));
+    }
+
+    private X509Certificate[] generateCertificateChain(KeyPair keyPair, String signatureAlgorithm, X500Name dnName)
+            throws OperatorCreationException, CertificateException {
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);
         long now = System.currentTimeMillis();
         Date startDate = new Date(now);
-        X500Name dnName = new X500Name(attributes);
         // Use the timestamp as serial number
         BigInteger certSerialNumber = new BigInteger(Long.toString(now));
         Calendar calendar = Calendar.getInstance();
@@ -460,6 +466,14 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
 
         return new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(certificateHolder) };
+    }
+
+    private static X500Name parseDistinguishedName(final String attributes) throws KuraException {
+        try {
+            return new X500Name(attributes);
+        } catch (final IllegalArgumentException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Invalid distinguished name: " + e.getMessage());
+        }
     }
 
     protected Optional<X509Certificate> extractCertificate(final Entry entry) {

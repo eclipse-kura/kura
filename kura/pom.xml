@@ -634,7 +634,6 @@
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>${maven-pmd-plugin.version}</version>
                 <configuration>
-                    <format>csv</format>
                     <rulesets>
                         <ruleset>${maven.multiModuleProjectDirectory}/tools/pmd/eurotech-java-ruleset.xml</ruleset>
                     </rulesets>

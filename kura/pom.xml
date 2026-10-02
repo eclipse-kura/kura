@@ -173,6 +173,8 @@
         <slf4j.version>1.7.36</slf4j.version>
         <wagon-ssh.version>1.0-beta-6</wagon-ssh.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
+        <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
+        <pmd.version>7.27.0</pmd.version>
     </properties>
 
     <distributionManagement>
@@ -543,6 +545,8 @@
                     <showWarnings>true</showWarnings>
                     <!-- Kura does not set bootdelegation, we let the compiler check for this -->
                     <requireJavaPackageImports>true</requireJavaPackageImports>
+                    <useProjectSettings>false</useProjectSettings>
+                    <failOnWarning>false</failOnWarning>
                 </configuration>
             </plugin>
             <plugin>
@@ -622,6 +626,73 @@
                             <skipIfSnapshot>true</skipIfSnapshot>
                             <failIfExists>${check.plugins.exist.remote}</failIfExists>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <format>csv</format>
+                    <rulesets>
+                        <ruleset>${maven.multiModuleProjectDirectory}/tools/pmd/eurotech-java-ruleset.xml</ruleset>
+                    </rulesets>
+                    <excludeFromFailureFile>${maven.multiModuleProjectDirectory}/tools/pmd/pmd-baseline.properties</excludeFromFailureFile>
+                    <failOnViolation>true</failOnViolation>
+                    <printFailingErrors>true</printFailingErrors>
+                    <includeTests>false</includeTests>
+                    <!-- plugin level, not execution level: the forked aggregate-pmd does not see the
+                    configuration of the execution that forks it -->
+                    <excludeRoots>
+                        <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+                        <excludeRoot>${maven.multiModuleProjectDirectory}/test</excludeRoot>
+                        <excludeRoot>${maven.multiModuleProjectDirectory}/test-util</excludeRoot>
+                        <excludeRoot>${maven.multiModuleProjectDirectory}/emulator</excludeRoot>
+                        <excludeRoot>${maven.multiModuleProjectDirectory}/org.eclipse.kura.web2</excludeRoot>
+                    </excludeRoots>
+                    <excludes>
+                        <exclude>**/KuraPayloadProto.java</exclude>
+                        <exclude>org/eclipse/tahu/protobuf/**</exclude>
+                        <exclude>org/freedesktop/**</exclude>
+                        <exclude>fi/w1/**</exclude>
+                        <exclude>**/LibGpiodV1Native.java</exclude>
+                        <exclude>**/LibGpiodV2Native.java</exclude>
+                    </excludes>
+                    <analysisCache>false</analysisCache>
+                    <targetJdk>${maven.compiler.target}</targetJdk>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-core</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>en50716-coding-standard</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                    <!-- on demand only: one consolidated report (target/pmd.xml) for the whole codebase.
+                        It forks test-compile over the reactor, where the distrib copies would run before
+                        packaging, so run it with them skipped:
+                    mvn pmd:aggregate-pmd-check@en50716-consolidated -Dmdep.skip -Dmaven.antrun.skip -->
+                    <execution>
+                        <id>en50716-consolidated</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>aggregate-pmd-check</goal>
+                        </goals>
+                        <inherited>false</inherited>
                     </execution>
                 </executions>
             </plugin>

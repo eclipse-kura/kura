@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Eurotech Java Coding Standard - PMD ruleset for SIL 2
+  Configuration of record for clause 7 of the standard. Requires PMD 7.27.0.
+  Applied to the SIL 2 bundles only (the SIL 2 perimeter of the SAS): the Basic
+  Integrity ruleset eurotech-java-ruleset.xml plus the rules of EJCS clause 5.11
+  (X10 for EJCS-101; X13 and X14 for EJCS-102).
+  A change to this file is a change to the standard (clause 9.1). Every rule other
+  than X10, X13 and X14 shall be identical to eurotech-java-ruleset.xml: the
+  self-test fails if they differ.
+  Every entry names the EJCS rule it enforces. Custom rules (EJCS-Xnn) are
+  exercised by selftest/ on every build and every PMD upgrade.
+-->
+<ruleset name="Eurotech EJCS - SIL 2"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+  <description>Eurotech Java Coding Standard, SIL 2: every rule, including clause 5.11</description>
+
+  <!-- ============================================================ built-in rules -->
+
+  <!-- EJCS-001 No labels -->
+  <rule ref="category/java/bestpractices.xml/LabeledStatement">
+    <properties><property name="allowLoops" value="false"/></properties>
+  </rule>
+
+  <!-- EJCS-003 Switch statements -->
+  <rule ref="category/java/errorprone.xml/ImplicitSwitchFallThrough"/>
+  <rule ref="category/java/bestpractices.xml/NonExhaustiveSwitch"/>
+
+  <!-- EJCS-004 No jumps out of finally (return, throw; break/continue: X02) -->
+  <rule ref="category/java/errorprone.xml/ReturnFromFinallyBlock"/>
+  <rule ref="category/java/errorprone.xml/DoNotThrowExceptionInFinally"/>
+
+  <!-- EJCS-005 Method complexity. Limit of clause 5.12 is 15; PMD reports at or above
+       reportLevel, so reportLevel = limit + 1 -->
+  <rule ref="category/java/design.xml/CognitiveComplexity">
+    <properties><property name="reportLevel" value="16"/></properties>
+  </rule>
+
+  <!-- EJCS-007 Loop integrity (floating-point counters: X04) -->
+  <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables">
+    <properties>
+      <property name="forReassign" value="deny"/>
+      <property name="foreachReassign" value="deny"/>
+    </properties>
+  </rule>
+
+  <!-- EJCS-008 Null checks -->
+  <rule ref="category/java/errorprone.xml/BrokenNullCheck"/>
+  <rule ref="category/java/errorprone.xml/MisplacedNullCheck"/>
+
+  <!-- EJCS-009 Resource release -->
+  <rule ref="category/java/errorprone.xml/CloseResource"/>
+  <rule ref="category/java/bestpractices.xml/UseTryWithResources"/>
+
+  <!-- EJCS-010 Object lifetime (finalize() overrides: X05) -->
+  <rule ref="category/java/errorprone.xml/AvoidCallingFinalize"/>
+  <rule ref="category/java/errorprone.xml/DoNotCallGarbageCollectionExplicitly"/>
+
+  <!-- EJCS-011 Thread lifecycle (interrupt handling: X06) -->
+  <rule ref="category/java/multithreading.xml/AvoidThreadGroup"/>
+  <rule ref="category/java/multithreading.xml/DontCallThreadRun"/>
+
+  <!-- EJCS-012 Locks and monitors (lock release: X07, wait(): X08) -->
+  <rule ref="category/java/multithreading.xml/DoubleCheckedLocking"/>
+
+  <!-- EJCS-013 Naming. The patterns of clause 5.12 are the PMD defaults; loggers are constants named LOG -->
+  <rule ref="category/java/codestyle.xml/ClassNamingConventions"/>
+  <rule ref="category/java/codestyle.xml/MethodNamingConventions"/>
+  <rule ref="category/java/codestyle.xml/FieldNamingConventions"/>
+  <rule ref="category/java/codestyle.xml/FormalParameterNamingConventions"/>
+  <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions"/>
+
+  <!-- EJCS-016 Reference equality -->
+  <rule ref="category/java/errorprone.xml/CompareObjectsWithEquals"/>
+
+  <!-- EJCS-019 No catching of Throwable or Error -->
+  <rule ref="category/java/errorprone.xml/AvoidCatchingGenericException">
+    <properties>
+      <property name="typesThatShouldNotBeCaught" value="java.lang.Throwable,java.lang.Error"/>
+    </properties>
+  </rule>
+
+  <!-- EJCS-020 No empty handlers: no name- or comment-based exemption -->
+  <rule ref="category/java/errorprone.xml/EmptyCatchBlock">
+    <properties>
+      <property name="allowCommentedBlocks" value="false"/>
+      <property name="allowExceptionNameRegex" value="^$"/>
+    </properties>
+  </rule>
+
+  <!-- EJCS-021 No unsupported JDK APIs -->
+  <rule ref="category/java/errorprone.xml/UnsupportedJdkApiUsage"/>
+
+  <!-- EJCS-022 No accessibility alteration -->
+  <rule ref="category/java/errorprone.xml/AvoidAccessibilityAlteration"/>
+
+  <!-- EJCS-024 Braces (layout: formatter) -->
+  <rule ref="category/java/codestyle.xml/ControlStatementBraces"/>
+
+  <!-- ============================================================ custom rules -->
+
+  <rule name="EJCS-X01-LoopWithMultipleExits" language="java" since="7.27.0"
+        message="EJCS-002: a loop shall contain no more than one break or continue"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>More than one break or continue targeting the same loop.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//(ForStatement | ForeachStatement | WhileStatement | DoStatement)
+  [ let $loop := . return
+      count(.//BreakStatement
+              [ancestor::*[self::ForStatement or self::ForeachStatement or self::WhileStatement
+                           or self::DoStatement or self::SwitchStatement][1] is $loop])
+    + count(.//ContinueStatement
+              [ancestor::*[self::ForStatement or self::ForeachStatement or self::WhileStatement
+                           or self::DoStatement][1] is $loop])
+    > 1 ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X02-JumpOutOfFinally" language="java" since="7.27.0"
+        message="EJCS-004: break or continue shall not leave a finally block"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>break or continue in a finally block whose target lies outside that block.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//FinallyClause//BreakStatement
+  [ let $f := ancestor::FinallyClause[1] return
+      not(ancestor::*[self::ForStatement or self::ForeachStatement or self::WhileStatement
+                      or self::DoStatement or self::SwitchStatement][1][ancestor::FinallyClause[1] is $f]) ]
+| //FinallyClause//ContinueStatement
+  [ let $f := ancestor::FinallyClause[1] return
+      not(ancestor::*[self::ForStatement or self::ForeachStatement or self::WhileStatement
+                      or self::DoStatement][1][ancestor::FinallyClause[1] is $f]) ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X03-DirectRecursion" language="java" since="7.27.0"
+        message="EJCS-006: a method shall not call itself"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Call whose target is statically the enclosing method: same name and arity, and
+      unqualified, this-qualified, qualified by the enclosing class name, or made on an expression
+      of the enclosing class type. Calls through an interface or superclass that may dispatch back
+      are indirect recursion and are found by the call-graph scan. An overload of equal arity is
+      also reported; that over-report is intended.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//MethodCall
+  [@MethodName = ancestor::MethodDeclaration[1]/@Name]
+  [count(ArgumentList/*) = ancestor::MethodDeclaration[1]/@Arity]
+  [ let $cls := string(ancestor::*[self::ClassDeclaration or self::EnumDeclaration
+                                   or self::RecordDeclaration][1]/@BinaryName) return
+      not(*[1][not(self::ArgumentList)])
+      or *[1][self::ThisExpression]
+      or ($cls != '' and *[1][pmd-java:typeIs($cls)]) ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X04-FloatingPointLoopCounter" language="java" since="7.27.0"
+        message="EJCS-007: a loop control variable shall not be of floating-point type"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>for loop whose control variable is float or double.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//ForStatement
+  [ ForInit//VariableId[pmd-java:typeIs('float') or pmd-java:typeIs('double')]
+    or ForUpdate//VariableAccess[pmd-java:typeIs('float') or pmd-java:typeIs('double')] ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X05-FinalizeOverride" language="java" since="7.27.0"
+        message="EJCS-010: finalize() shall not be overridden"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Declaration of finalize() with no parameters.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//MethodDeclaration[@Name = 'finalize'][@Arity = 0]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X06-InterruptedExceptionSwallowed" language="java" since="7.27.0"
+        message="EJCS-011: an InterruptedException handler shall restore the interrupt or rethrow"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Handler of InterruptedException that neither calls interrupt() nor throws.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//CatchClause
+  [CatchParameter//ClassType[pmd-java:typeIsExactly('java.lang.InterruptedException')]]
+  [not(.//ThrowStatement)]
+  [not(.//MethodCall[@MethodName = 'interrupt'])]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X07-LockNotReleasedInFinally" language="java" since="7.27.0"
+        message="EJCS-012: lock() shall be followed immediately by try with unlock() in finally"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Lock.lock() or lockInterruptibly() not immediately followed by a try statement
+      whose finally block calls unlock() on the same lock.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//ExpressionStatement
+  [MethodCall[pmd-java:matchesSig('java.util.concurrent.locks.Lock#lock()')
+              or pmd-java:matchesSig('java.util.concurrent.locks.Lock#lockInterruptibly()')]]
+  [ let $name := MethodCall/*[1]/@Name return
+      not(following-sibling::*[1][self::TryStatement]/FinallyClause
+            //MethodCall[pmd-java:matchesSig('java.util.concurrent.locks.Lock#unlock()')]
+                        [*[1]/@Name = $name]) ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X08-WaitOutsideLoop" language="java" since="7.27.0"
+        message="EJCS-012: wait() shall be called in synchronized code, inside a while loop"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Object.wait() not enclosed in a while or do loop and in synchronized code
+      of the same method.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//MethodCall
+  [pmd-java:matchesSig('java.lang.Object#wait()')
+   or pmd-java:matchesSig('java.lang.Object#wait(long)')
+   or pmd-java:matchesSig('java.lang.Object#wait(long,int)')]
+  [ let $m := ancestor::*[self::MethodDeclaration or self::LambdaExpression][1] return
+      not(ancestor::*[self::WhileStatement or self::DoStatement][ancestor::*[self::MethodDeclaration or self::LambdaExpression][1] is $m])
+      or not(ancestor::SynchronizedStatement[ancestor::*[self::MethodDeclaration or self::LambdaExpression][1] is $m]
+             or $m[self::MethodDeclaration][pmd-java:modifiers() = 'synchronized']) ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X09-LocalShadowsField" language="java" since="7.27.0"
+        message="EJCS-014: a local variable shall not have the name of a field of its class"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Local variable named as a field declared in the enclosing class body.
+      Parameters are not reported.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//LocalVariableDeclaration/VariableDeclarator/VariableId
+  [@Name = ancestor::*[self::ClassBody or self::EnumBody or self::RecordBody][1]
+             /FieldDeclaration/VariableDeclarator/VariableId/@Name]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X10-UncheckedIntegerArithmetic" language="java" since="7.27.0"
+        message="EJCS-101: int and long arithmetic shall use the Math.*Exact methods"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Non-constant +, -, *, +=, -=, *=, unary minus and Math.abs on int or long. The ruleset is applied to
+      SIL 2 bundles only, so every package is in the SIL 2 perimeter. The update clause of a for statement and ++/-- are exempt.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//( InfixExpression[@Operator = ('+', '-', '*')][@CompileTimeConstant = false()]
+      [pmd-java:typeIs('int') or pmd-java:typeIs('long')]
+  | AssignmentExpression[@Operator = ('+=', '-=', '*=')]
+      [*[1][pmd-java:typeIs('int') or pmd-java:typeIs('long')]]
+  | UnaryExpression[@Operator = '-'][@CompileTimeConstant = false()]
+      [pmd-java:typeIs('int') or pmd-java:typeIs('long')]
+  | MethodCall[pmd-java:matchesSig('java.lang.Math#abs(int)') or pmd-java:matchesSig('java.lang.Math#abs(long)')] )
+  [not(ancestor::ForUpdate)]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X11-FloatingPointEquality" language="java" since="7.27.0"
+        message="EJCS-015: floating-point values shall not be compared with == or !="
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>== or != with a float or double operand.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//InfixExpression[@Operator = ('==', '!=')]
+  [*[pmd-java:typeIs('double') or pmd-java:typeIs('float')]]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X12-BigDecimalFromDouble" language="java" since="7.27.0"
+        message="EJCS-015: a BigDecimal shall not be constructed from a double"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>new BigDecimal(...) whose first argument is float or double.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//ConstructorCall[pmd-java:typeIs('java.math.BigDecimal')]
+  [ArgumentList/*[1][pmd-java:typeIs('double') or pmd-java:typeIs('float')]]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X13-UnvalidatedBoundaryParameter" language="java" since="7.27.0"
+        message="EJCS-102: a boundary method shall check its parameters before use"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Public or protected method or constructor of a public type in a boundary package,
+      with a non-boolean parameter, whose body has no guard: no Objects.requireNonNull call on a
+      parameter, and no if statement that tests a parameter and throws.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="scope" type="String" value=".*"
+                description="Regex of the packages exported by the SIL 2 bundles (input boundary, SAS 7); .* until set"/>
+      <property name="xpath"><value><![CDATA[
+/CompilationUnit[matches(string(PackageDeclaration/@Name), $scope)]
+//(MethodDeclaration | ConstructorDeclaration)
+  [pmd-java:modifiers() = ('public', 'protected')]
+  [ancestor::*[self::ClassDeclaration or self::EnumDeclaration or self::RecordDeclaration][1][pmd-java:modifiers() = 'public']]
+  [Block]
+  [FormalParameters/FormalParameter[not(PrimitiveType[@Kind = 'boolean'])]]
+  [ let $p := FormalParameters/FormalParameter/VariableId/@Name return
+      not( Block//MethodCall[@MethodName = 'requireNonNull']
+                            [ArgumentList/*[1][self::VariableAccess][@Name = $p]]
+        or Block//IfStatement[.//ThrowStatement][*[1]//VariableAccess[@Name = $p]] ) ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X14-AssertForValidation" language="java" since="7.27.0"
+        message="EJCS-102: assert shall not be used to check a boundary method's parameters"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>assert referring to a parameter of a public or protected method or constructor
+      in a boundary package.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="scope" type="String" value=".*"
+                description="Regex of the packages exported by the SIL 2 bundles (input boundary, SAS 7); .* until set"/>
+      <property name="xpath"><value><![CDATA[
+/CompilationUnit[matches(string(PackageDeclaration/@Name), $scope)]
+//(MethodDeclaration | ConstructorDeclaration)[pmd-java:modifiers() = ('public', 'protected')]
+  //AssertStatement[.//VariableAccess[@Name = ancestor::*[self::MethodDeclaration or self::ConstructorDeclaration][1]
+                                                  /FormalParameters/FormalParameter/VariableId/@Name]]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X15-DiscardedStatusResult" language="java" since="7.27.0"
+        message="EJCS-017: the status result of this method shall not be discarded"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Call used as a statement, to a method whose result reports whether the operation
+      succeeded or how much it did.</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//ExpressionStatement/MethodCall
+  [ pmd-java:matchesSig('java.io.File#delete()')
+ or pmd-java:matchesSig('java.io.File#mkdir()')
+ or pmd-java:matchesSig('java.io.File#mkdirs()')
+ or pmd-java:matchesSig('java.io.File#renameTo(java.io.File)')
+ or pmd-java:matchesSig('java.io.File#createNewFile()')
+ or pmd-java:matchesSig('java.io.File#setLastModified(long)')
+ or pmd-java:matchesSig('java.io.File#setReadable(_*)')
+ or pmd-java:matchesSig('java.io.File#setWritable(_*)')
+ or pmd-java:matchesSig('java.io.File#setExecutable(_*)')
+ or pmd-java:matchesSig('java.io.InputStream#read(byte[])')
+ or pmd-java:matchesSig('java.io.InputStream#read(byte[],int,int)')
+ or pmd-java:matchesSig('java.io.InputStream#skip(long)')
+ or pmd-java:matchesSig('java.io.Reader#read(char[])')
+ or pmd-java:matchesSig('java.io.Reader#read(char[],int,int)')
+ or pmd-java:matchesSig('java.io.Reader#skip(long)')
+ or pmd-java:matchesSig('java.util.Queue#offer(_)')
+ or pmd-java:matchesSig('java.util.concurrent.BlockingQueue#offer(_,long,java.util.concurrent.TimeUnit)')
+ or pmd-java:matchesSig('java.util.concurrent.locks.Lock#tryLock(_*)')
+ or pmd-java:matchesSig('java.util.concurrent.locks.Condition#await(long,java.util.concurrent.TimeUnit)')
+ or pmd-java:matchesSig('java.util.concurrent.locks.Condition#awaitNanos(long)')
+ or pmd-java:matchesSig('java.util.concurrent.locks.Condition#awaitUntil(java.util.Date)')
+ or pmd-java:matchesSig('java.util.concurrent.Semaphore#tryAcquire(_*)')
+ or pmd-java:matchesSig('java.util.concurrent.CountDownLatch#await(long,java.util.concurrent.TimeUnit)')
+ or pmd-java:matchesSig('java.util.concurrent.ExecutorService#awaitTermination(long,java.util.concurrent.TimeUnit)')
+ or pmd-java:matchesSig('java.sql.ResultSet#next()') ]
+]]></value></property>
+    </properties>
+  </rule>
+
+  <rule name="EJCS-X17-PublicMutableField" language="java" since="7.27.0"
+        message="EJCS-023: a public field shall be static and final"
+        class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>public field that is not both static and final (implicit interface modifiers count).</description>
+    <priority>1</priority>
+    <properties>
+      <property name="xpath"><value><![CDATA[
+//FieldDeclaration[pmd-java:modifiers() = 'public']
+  [not(pmd-java:modifiers() = 'static' and pmd-java:modifiers() = 'final')]
+]]></value></property>
+    </properties>
+  </rule>
+
+</ruleset>

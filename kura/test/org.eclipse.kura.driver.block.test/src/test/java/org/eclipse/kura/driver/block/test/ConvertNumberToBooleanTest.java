@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -89,6 +90,13 @@ public class ConvertNumberToBooleanTest {
         thenAllConvertersReturn(true);
     }
 
+    @Test
+    public void convertsConcreteNumberTypesToBoolean() {
+        whenConcreteNumbersAreConvertedToTypedBoolean((short) 0, 5, 7L, 0.0f, 2.5);
+
+        thenResultsAre(false, true, true, false, true);
+    }
+
     /*
      * Steps
      */
@@ -96,6 +104,17 @@ public class ConvertNumberToBooleanTest {
     private void whenConvertedByAllConverters(double value) {
         this.results = Arrays.asList(convertToTypedBoolean(value), convertFromTypedValue(value),
                 convertWithToBoolean(value));
+    }
+
+    private void whenConcreteNumbersAreConvertedToTypedBoolean(Number... values) {
+        this.results = new ArrayList<>();
+        for (final Number value : values) {
+            this.results.add(convertToTypedBoolean(value));
+        }
+    }
+
+    private void thenResultsAre(Boolean... expected) {
+        assertEquals(Arrays.asList(expected), this.results);
     }
 
     private void thenAllConvertersReturn(boolean expected) {
@@ -109,6 +128,13 @@ public class ConvertNumberToBooleanTest {
     @SuppressWarnings("unchecked")
     private static boolean convertToTypedBoolean(double value) {
         final Function<Number, TypedValue<?>> converter = TypeUtil.toTypedValue(Number.class, DataType.BOOLEAN);
+        return (Boolean) converter.apply(value).getValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean convertToTypedBoolean(Number value) {
+        final Function<Number, TypedValue<?>> converter = (Function<Number, TypedValue<?>>) (Function<?, ?>) TypeUtil
+                .toTypedValue(value.getClass(), DataType.BOOLEAN);
         return (Boolean) converter.apply(value).getValue();
     }
 

@@ -645,7 +645,11 @@
                     <!-- plugin level, not execution level: the forked aggregate-pmd does not see the
                     configuration of the execution that forks it -->
                     <excludeRoots>
+                        <!-- resolves to the current module's target: covers the per-module check only -->
                         <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+                        <!-- aggregate-pmd-check runs on the root project only, so modules adding
+                        generated sources to their compile source roots must be listed explicitly -->
+                        <excludeRoot>${maven.multiModuleProjectDirectory}/org.eclipse.kura.ai.triton.server/target/generated-sources</excludeRoot>
                         <excludeRoot>${maven.multiModuleProjectDirectory}/test</excludeRoot>
                         <excludeRoot>${maven.multiModuleProjectDirectory}/test-util</excludeRoot>
                         <excludeRoot>${maven.multiModuleProjectDirectory}/emulator</excludeRoot>

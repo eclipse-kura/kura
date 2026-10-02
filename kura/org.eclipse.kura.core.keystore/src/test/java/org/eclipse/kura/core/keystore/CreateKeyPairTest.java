@@ -1,0 +1,155 @@
+/*******************************************************************************
+ * Copyright (c) 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
+package org.eclipse.kura.core.keystore;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyStore.Entry;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.Security;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.crypto.CryptoService;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.EventAdmin;
+
+public class CreateKeyPairTest {
+
+    private static final String ALIAS = "alias";
+    private static final String STORE_PASS = "pass";
+    private static final Path STORE_PATH = Paths.get("target", "create-key-pair-test.ks");
+
+    @BeforeClass
+    public static void setupProvider() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
+    @Test
+    public void shouldCreateKeyPairWithValidDistinguishedName() throws IOException, KuraException {
+        givenKeystoreService();
+
+        whenKeyPairIsCreated("CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        thenNoExceptionIsThrown();
+        thenPrivateKeyEntryIsStored();
+    }
+
+    @Test
+    public void shouldRejectCountryCodeNotTwoCharactersLong() throws IOException, KuraException {
+        givenKeystoreService();
+
+        whenKeyPairIsCreated("CN=Kura, OU=IoT, O=Eclipse, C=USA");
+
+        thenBadRequestIsThrown();
+        thenNoEntryIsStored();
+    }
+
+    @Test
+    public void shouldRejectCommonNameLongerThan64Characters() throws IOException, KuraException {
+        givenKeystoreService();
+
+        whenKeyPairIsCreated("CN=" + repeat('a', 65) + ", O=Eclipse, C=US");
+
+        thenBadRequestIsThrown();
+        thenNoEntryIsStored();
+    }
+
+    @Test
+    public void shouldRejectMalformedDistinguishedName() throws IOException, KuraException {
+        givenKeystoreService();
+
+        whenKeyPairIsCreated("not a distinguished name");
+
+        thenBadRequestIsThrown();
+        thenNoEntryIsStored();
+    }
+
+    private FilesystemKeystoreServiceImpl keystoreService;
+    private Optional<Exception> exception = Optional.empty();
+
+    private void givenKeystoreService() throws IOException, KuraException {
+        Files.deleteIfExists(STORE_PATH);
+
+        final CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH.toString())).thenReturn(STORE_PASS.toCharArray());
+
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put("keystore.path", STORE_PATH.toString());
+        properties.put("keystore.password", STORE_PASS);
+
+        this.keystoreService = new FilesystemKeystoreServiceImpl();
+        this.keystoreService.setEventAdmin(mock(EventAdmin.class));
+        this.keystoreService.setCryptoService(cryptoService);
+        this.keystoreService.activate(mock(ComponentContext.class), properties);
+    }
+
+    private void whenKeyPairIsCreated(final String distinguishedName) {
+        try {
+            this.keystoreService.createKeyPair(ALIAS, "RSA", 1024, "SHA256WithRSA", distinguishedName);
+        } catch (final Exception e) {
+            this.exception = Optional.of(e);
+        }
+    }
+
+    private void thenNoExceptionIsThrown() {
+        if (this.exception.isPresent()) {
+            fail("unexpected exception: " + this.exception.get());
+        }
+    }
+
+    private void thenBadRequestIsThrown() {
+        assertTrue(this.exception.isPresent());
+        assertTrue("unexpected exception: " + this.exception.get(), this.exception.get() instanceof KuraException);
+        assertEquals(KuraErrorCode.BAD_REQUEST, ((KuraException) this.exception.get()).getCode());
+    }
+
+    private void thenPrivateKeyEntryIsStored() {
+        assertTrue(getEntry() instanceof PrivateKeyEntry);
+    }
+
+    private void thenNoEntryIsStored() {
+        assertEquals(null, getEntry());
+    }
+
+    private Entry getEntry() {
+        try {
+            return this.keystoreService.getEntry(ALIAS);
+        } catch (final KuraException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static String repeat(final char c, final int count) {
+        final StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            builder.append(c);
+        }
+        return builder.toString();
+    }
+}

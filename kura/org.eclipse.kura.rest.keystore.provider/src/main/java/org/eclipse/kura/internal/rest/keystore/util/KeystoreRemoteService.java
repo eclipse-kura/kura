@@ -51,6 +51,7 @@ import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.core.keystore.util.KeystoreUtils;
 import org.eclipse.kura.core.keystore.util.PrivateKeyInfo;
 import org.eclipse.kura.internal.rest.keystore.request.CsrReadRequest;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.osgi.framework.BundleContext;
@@ -237,7 +238,7 @@ public class KeystoreRemoteService {
                     writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
                     writeRequest.getAttributes());
         } catch (KuraException e) {
-            throw new WebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 

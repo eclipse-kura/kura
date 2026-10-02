@@ -107,33 +107,7 @@ public class LifeCyclePayloadBuilder {
 
         tryAddTamperStatus(birthPayloadBuilder);
 
-        if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
-                && !this.cloudServiceImpl.imei.equals(ERROR)) {
-            birthPayloadBuilder.withModemImei(this.cloudServiceImpl.imei);
-        }
-        if (this.cloudServiceImpl.iccid != null && this.cloudServiceImpl.iccid.length() > 0
-                && !this.cloudServiceImpl.iccid.equals(ERROR)) {
-            birthPayloadBuilder.withModemIccid(this.cloudServiceImpl.iccid);
-        }
-
-        if (this.cloudServiceImpl.imsi != null && this.cloudServiceImpl.imsi.length() > 0
-                && !this.cloudServiceImpl.imsi.equals(ERROR)) {
-            birthPayloadBuilder.withModemImsi(this.cloudServiceImpl.imsi);
-        }
-
-        if (this.cloudServiceImpl.eid != null && !this.cloudServiceImpl.eid.trim().isEmpty()
-                && !this.cloudServiceImpl.eid.equals(ERROR) && !this.cloudServiceImpl.eid.equals(NOT_AVAILABLE)) {
-            birthPayloadBuilder.withModemEid(this.cloudServiceImpl.eid);
-        }
-
-        if (this.cloudServiceImpl.rssi != null && this.cloudServiceImpl.rssi.length() > 0) {
-            birthPayloadBuilder.withModemRssi(this.cloudServiceImpl.rssi);
-        }
-
-        if (this.cloudServiceImpl.modemFwVer != null && this.cloudServiceImpl.modemFwVer.length() > 0
-                && !this.cloudServiceImpl.modemFwVer.equals(ERROR)) {
-            birthPayloadBuilder.withModemFirmwareVersion(this.cloudServiceImpl.modemFwVer);
-        }
+        addModemInfo(birthPayloadBuilder);
 
         if (deviceProfile.getLatitude() != null && deviceProfile.getLongitude() != null) {
             KuraPosition kuraPosition = new KuraPosition();
@@ -180,6 +154,36 @@ public class LifeCyclePayloadBuilder {
 
             birthPayloadBuilder.withTamperStatus(isDeviceTampered ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
         });
+    }
+
+    private void addModemInfo(KuraBirthPayloadBuilder birthPayloadBuilder) {
+        if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
+                && !this.cloudServiceImpl.imei.equals(ERROR)) {
+            birthPayloadBuilder.withModemImei(this.cloudServiceImpl.imei);
+        }
+        if (this.cloudServiceImpl.iccid != null && this.cloudServiceImpl.iccid.length() > 0
+                && !this.cloudServiceImpl.iccid.equals(ERROR)) {
+            birthPayloadBuilder.withModemIccid(this.cloudServiceImpl.iccid);
+        }
+
+        if (this.cloudServiceImpl.imsi != null && this.cloudServiceImpl.imsi.length() > 0
+                && !this.cloudServiceImpl.imsi.equals(ERROR)) {
+            birthPayloadBuilder.withModemImsi(this.cloudServiceImpl.imsi);
+        }
+
+        if (this.cloudServiceImpl.eid != null && !this.cloudServiceImpl.eid.trim().isEmpty()
+                && !this.cloudServiceImpl.eid.equals(ERROR) && !this.cloudServiceImpl.eid.equals(NOT_AVAILABLE)) {
+            birthPayloadBuilder.withModemEid(this.cloudServiceImpl.eid);
+        }
+
+        if (this.cloudServiceImpl.rssi != null && this.cloudServiceImpl.rssi.length() > 0) {
+            birthPayloadBuilder.withModemRssi(this.cloudServiceImpl.rssi);
+        }
+
+        if (this.cloudServiceImpl.modemFwVer != null && this.cloudServiceImpl.modemFwVer.length() > 0
+                && !this.cloudServiceImpl.modemFwVer.equals(ERROR)) {
+            birthPayloadBuilder.withModemFirmwareVersion(this.cloudServiceImpl.modemFwVer);
+        }
     }
 
     public KuraDisconnectPayload buildDisconnectPayload() {

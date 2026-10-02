@@ -657,8 +657,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 if (config != null) {
                     try {
                         decryptConfigurationProperties(config.getConfigurationProperties());
-                    } catch (Throwable t) {
-                        logger.warn("Error during snapshot password decryption");
+                    } catch (Exception e) {
+                        logger.warn("Error during snapshot password decryption for {}", config.getPid(), e);
                     }
                 }
             }

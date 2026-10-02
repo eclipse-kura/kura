@@ -664,6 +664,7 @@
                         <exclude>**/LibGpiodV2Native.java</exclude>
                     </excludes>
                     <analysisCache>false</analysisCache>
+                    <linkXRef>false</linkXRef>
                     <targetJdk>${maven.compiler.target}</targetJdk>
                 </configuration>
                 <dependencies>

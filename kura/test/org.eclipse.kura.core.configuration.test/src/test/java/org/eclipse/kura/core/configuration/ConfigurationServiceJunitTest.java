@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1537,7 +1537,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testLoadLatestSnapshotConfigurationsRecursiveAfterEncryption() throws Throwable {
+    public void testLoadLatestSnapshotConfigurationsRetriedOnceAfterEncryption() throws Throwable {
         // test scenario where latest snapshot is not encrypted and all snapshots are encrypted before being loaded
 
         final Set<Long> snapshotList = new TreeSet<>();
@@ -1586,8 +1586,8 @@ public class ConfigurationServiceJunitTest {
 
         assertNull("xml config null", result);
 
-        assertEquals("call snapshots", 4, calls[0]);
-        assertEquals("call load xml", 3, calls[1]);
+        assertEquals("call snapshots", 3, calls[0]);
+        assertEquals("call load xml", 4, calls[1]);
     }
 
     @Test

@@ -795,6 +795,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     Object decryptedValue = decryptPasswordProperties(configValue);
                     configProperties.put(property.getKey(), decryptedValue);
                 } catch (Exception e) {
+                    logger.debug("Unable to decrypt the value of property {}", property.getKey(), e);
                 }
             }
         }
@@ -1077,6 +1078,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             this.cryptoService.decryptAes(configPassword.getPassword());
             result = true;
         } catch (Exception e1) {
+            result = false;
         }
         return result;
     }
@@ -1111,6 +1113,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     loadEncryptedSnapshotFileContent(snapshot);
                     return false;
                 } catch (Exception e) {
+                    logger.debug("Snapshot {} is not encrypted", snapshot);
                 }
             }
             return true;
@@ -1242,7 +1245,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 try {
                     Files.delete(tempSnapshotFile.toPath());
                 } catch (IOException e) {
-                    // Ignore cleanup errors
+                    logger.warn("Unable to delete the temporary snapshot file {}", tempSnapshotFile, e);
                 }
             }
         }

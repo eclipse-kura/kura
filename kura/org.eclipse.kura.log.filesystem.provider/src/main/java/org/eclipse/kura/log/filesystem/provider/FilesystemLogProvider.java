@@ -131,7 +131,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             } catch (FileNotFoundException fnf) {
                 logger.error("File '{}' not found.", this.logFile.getPath());
             } catch (InterruptedException ie) {
-                // nothing to do
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 logger.error("Unexpected exception in FilesystemLogProvider.", e);
             } finally {

@@ -153,13 +153,13 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                 try {
                     HttpDownloadCountingOutputStream.this.is.close();
                 } catch (IOException e) {
-                    // Ignore
+                    logger.debug("Failed to close the download input stream", e);
                 }
             }
             try {
                 close();
             } catch (IOException e) {
-                // Ignore
+                logger.debug("Failed to close the download output stream", e);
             }
             if (shouldAuthenticate) {
                 Authenticator.setDefault(null);

@@ -143,7 +143,8 @@ public class RestService
                     new ServletContainerBridgeFix(bundleContext));
             this.tracker.open();
         } catch (InvalidSyntaxException e) {
-            // no need
+            // cannot happen: the filter is a valid constant
+            throw new IllegalStateException(e);
         }
 
         this.userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);

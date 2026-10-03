@@ -212,11 +212,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             } else if (kuraUserConfig != null) {
                 File kuraCustomPropsFile = new File(kuraUserConfig + File.separator + KURA_CUSTOM_PROPS_FILE);
                 if (kuraCustomPropsFile.exists()) {
-                    Reader reader = new FileReader(kuraCustomPropsFile);
-                    try {
+                    try (Reader reader = new FileReader(kuraCustomPropsFile)) {
                         kuraCustomProps.load(reader);
-                    } finally {
-                        reader.close();
                     }
                     logger.info("Loaded File {}: {}", KURA_CUSTOM_PROPS_FILE, kuraCustomPropsFile);
                 } else {

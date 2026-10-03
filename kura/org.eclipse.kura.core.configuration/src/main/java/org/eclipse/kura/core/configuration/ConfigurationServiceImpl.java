@@ -1682,9 +1682,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (!this.activatedSelfConfigComponents.contains(pid)) {
 
             // load the ocd to do the validation
-            BundleContext ctx = this.ctx.getBundleContext();
+            BundleContext componentBundleContext = this.ctx.getBundleContext();
             // FIXME: why the returned ocd is always null?
-            ObjectClassDefinition ocd = ComponentUtil.getObjectClassDefinition(ctx, this.servicePidByPid.get(pid));
+            ObjectClassDefinition ocd = ComponentUtil.getObjectClassDefinition(componentBundleContext, this.servicePidByPid.get(pid));
 
             // Validate the properties to be applied and set them
             validateProperties(pid, ocd, mergedProperties);

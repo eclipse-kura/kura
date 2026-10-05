@@ -82,6 +82,8 @@
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
+        <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
+        <pmd.version>7.27.0</pmd.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
@@ -180,6 +182,26 @@
     </profiles>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <executions>
+                    <!-- on demand only: one consolidated report (target/pmd.xml) for the whole codebase.
+                        The bundles cannot be processed by bnd before packaging, so instead of forking
+                        compile it analyses a reactor already built in a previous invocation:
+                    mvn install -DskipTests && mvn pmd:aggregate-pmd-no-fork@en50716-consolidated -->
+                    <execution>
+                        <id>en50716-consolidated</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>aggregate-pmd-no-fork</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -353,6 +375,53 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven-checkstyle-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>${maven-pmd-plugin.version}</version>
+                    <configuration>
+                        <rulesets>
+                            <ruleset>${maven.multiModuleProjectDirectory}/tools/pmd/eurotech-java-ruleset.xml</ruleset>
+                        </rulesets>
+                        <includeTests>false</includeTests>
+                        <!-- plugin level, not execution level: shared by the per-module and the consolidated reports -->
+                        <excludeRoots>
+                            <!-- resolves to the current module's target: covers the per-module report only -->
+                            <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/test</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/test-util</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/emulator</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/com.codeminders.hidapi-parent</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/emulator</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/log4j2-api-config</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/org.eclipse.soda.dk.comm-parent</excludeRoot>
+                            <excludeRoot>${maven.multiModuleProjectDirectory}/kura/org.moka7</excludeRoot>
+                        </excludeRoots>
+                        <excludes>
+                            <exclude>**/KuraPayloadProto.java</exclude>
+                            <exclude>org/eclipse/tahu/protobuf/**</exclude>
+                            <exclude>org/freedesktop/**</exclude>
+                            <exclude>fi/w1/**</exclude>
+                            <exclude>**/LibGpiodV1Native.java</exclude>
+                            <exclude>**/LibGpiodV2Native.java</exclude>
+                        </excludes>
+                        <analysisCache>false</analysisCache>
+                        <linkXRef>false</linkXRef>
+                        <targetJdk>${maven.compiler.release}</targetJdk>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-core</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-java</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.honton.chas</groupId>

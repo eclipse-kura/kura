@@ -233,6 +233,10 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         assertEquals(refreshTokenDuration, lifetime(this.refreshToken));
     }
 
+    protected void thenResponseContainsHeader(final String headerName, final String expectedHeaderValue) {
+        assertEquals(List.of(expectedHeaderValue), expectResponse().getHeader(headerName));
+    }
+
     protected void thenTheReturnedRefreshTokenDiffersFromTheExchangedOne() {
         assertNotEquals(this.exchangedRefreshTokens.get(this.exchangedRefreshTokens.size() - 1), this.refreshToken);
     }

@@ -265,9 +265,11 @@ public class RestTransport implements Transport {
             final Optional<String> body = getBody(connection);
             storeCookies(urlPrefix, relativeUri, connection);
 
+            final Map<String, List<String>> responseHeaders = connection.getHeaderFields();
+
             connection.disconnect();
 
-            return new Response(status, body.filter(b -> !b.isEmpty()));
+            return new Response(status, body.filter(b -> !b.isEmpty()), responseHeaders);
         } catch (final Exception e) {
             throw new IllegalStateException("request failed", e);
         }

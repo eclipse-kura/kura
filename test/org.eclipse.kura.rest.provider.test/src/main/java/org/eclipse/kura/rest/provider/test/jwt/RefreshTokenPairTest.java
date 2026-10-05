@@ -26,6 +26,8 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
         whenTheRefreshEndpointReceives(theRefreshToken());
 
         thenATokenPairIsReturned();
+        thenResponseContainsHeader("Cache-Control", "no-store");
+        thenResponseContainsHeader("Pragma", "no-cache");
         thenTheReturnedRefreshTokenDiffersFromTheExchangedOne();
         thenTheReturnedAccessTokenGrantsAccessToTheProtectedResource();
     }

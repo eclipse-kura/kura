@@ -28,6 +28,8 @@ public class IssueTokenPairTest extends AbstractJwtRestScenario {
         whenATokenPairIsRequestedWith(basic(IDENTITY));
 
         thenATokenPairIsReturned();
+        thenResponseContainsHeader("Cache-Control", "no-store");
+        thenResponseContainsHeader("Pragma", "no-cache");
     }
 
     @Test

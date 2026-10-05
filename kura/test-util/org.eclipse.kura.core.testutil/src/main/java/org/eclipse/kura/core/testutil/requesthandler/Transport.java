@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.core.testutil.requesthandler;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface Transport {
@@ -26,10 +29,16 @@ public interface Transport {
 
         private final int status;
         private final Optional<String> body;
+        private final Map<String, List<String>> headers;
 
         public Response(int status, Optional<String> body) {
+            this(status, body, Collections.emptyMap());
+        }
+
+        public Response(int status, Optional<String> body, Map<String, List<String>> headers) {
             this.status = status;
             this.body = body;
+            this.headers = headers;
         }
 
         public int getStatus() {
@@ -38,6 +47,17 @@ public interface Transport {
 
         public Optional<String> getBody() {
             return body;
+        }
+
+        /**
+         * Returns the values of a response header, matching its name case-insensitively.
+         */
+        public List<String> getHeader(final String name) {
+            return this.headers.entrySet().stream() //
+                    .filter(e -> name.equalsIgnoreCase(e.getKey())) //
+                    .map(Map.Entry::getValue) //
+                    .findFirst() //
+                    .orElse(Collections.emptyList());
         }
     }
 

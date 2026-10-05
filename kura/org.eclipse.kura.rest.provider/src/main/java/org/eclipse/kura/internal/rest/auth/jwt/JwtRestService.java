@@ -46,6 +46,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -101,7 +102,7 @@ public class JwtRestService {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path(JwtRestServiceConstants.ISSUE_PATH)
-    public TokenPairDTO issue(@Context final ContainerRequestContext requestContext) {
+    public Response issue(@Context final ContainerRequestContext requestContext) {
         checkServiceEnabled();
         final TokenIssuingService issuer = requireService(this.tokenIssuer);
         final String identityName = requireCorrectPrincipal(requestContext);
@@ -112,7 +113,7 @@ public class JwtRestService {
 
             final TokenPairDTO result = issueTokenPair(identityName, issuer);
             auditLogger.info("{} Rest - Success - JWT token pair issued", auditContext);
-            return result;
+            return response(result);
         } catch (final KuraException e) {
             throw toWebApplicationException(e);
         }
@@ -128,7 +129,7 @@ public class JwtRestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     @Path(JwtRestServiceConstants.REFRESH_PATH)
-    public TokenPairDTO refresh(final InputStream body) {
+    public Response refresh(final InputStream body) {
         checkServiceEnabled();
         final TokenIssuingService issuer = requireService(this.tokenIssuer);
         final TokenVerificationService verifier = requireService(this.tokenVerifier);
@@ -148,7 +149,7 @@ public class JwtRestService {
             updateUsedRefreshTokens(id, proof.getExpiresAt());
 
             auditLogger.info("{} Rest - Success - JWT token pair refreshed", auditContext);
-            return result;
+            return response(result);
         } catch (final KuraAuthenticationFailedException e) {
             auditLogger.warn(JwtRestServiceConstants.AUDIT_FAILURE_FORMAT_STRING, auditContext,
                     "JWT token refresh failed, " + e.getMessage());
@@ -238,6 +239,13 @@ public class JwtRestService {
 
         return new TokenPairDTO(JwtRestServiceConstants.TOKEN_TYPE, accessToken, accessTokenLifetime.toSeconds(),
                 refreshToken, refreshTokenLifetime.toSeconds());
+    }
+
+    private static Response response(final TokenPairDTO tokenPair) {
+        return Response.ok(tokenPair) //
+                .header(HttpHeaders.CACHE_CONTROL, "no-store") //
+                .header("Pragma", "no-cache") //
+                .build();
     }
 
     private static Duration cappedLifetime(final Duration configured, final TokenIssuingService issuer) {

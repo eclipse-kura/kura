@@ -279,23 +279,20 @@ public class WpaSupplicantConfigWriter extends AbstractLinuxConfigWriter {
         return fileAsString;
     }
 
+    private static boolean isHexEncodedPasskey(final String passKey) {
+        try {
+            return TypeUtil.parseHexBinary(passKey).length == 32;
+        } catch (IllegalArgumentException e) {
+            // not a valid hex string: it is a plain text passphrase
+            return false;
+        }
+    }
+
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         String result = fileAsString;
         String passKey = new String(wifiConfig.getPasskey().getPassword());
 
-        boolean doCheckAndEncode = true;
-
-        try {
-            byte[] encodedPasskey = TypeUtil.parseHexBinary(passKey);
-            if (encodedPasskey.length == 32) {
-                doCheckAndEncode = false;
-            }
-        } catch (Exception e) {
-            // not a valid hex string: it is a plain text passphrase
-            doCheckAndEncode = true;
-        }
-
-        if (doCheckAndEncode) {
+        if (!isHexEncodedPasskey(passKey)) {
             if (passKey.trim().length() > 0) {
                 if (passKey.length() < 8 || passKey.length() > 63) {
                     throw KuraException.internalError(

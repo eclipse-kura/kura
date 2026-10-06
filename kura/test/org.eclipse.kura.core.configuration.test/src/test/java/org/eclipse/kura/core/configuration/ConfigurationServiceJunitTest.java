@@ -1435,7 +1435,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("null result", result);
+        assertTrue("empty result", result.isEmpty());
     }
 
     @Test
@@ -1455,7 +1455,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("null result", result);
+        assertTrue("empty result", result.isEmpty());
     }
 
     @Test
@@ -1489,7 +1489,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("null result", result);
+        assertTrue("empty result", result.isEmpty());
 
         assertTrue("call snapshots", calls[0]);
         assertTrue("call load xml", calls[1]);
@@ -1584,7 +1584,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("xml config null", result);
+        assertTrue("xml config empty", result.isEmpty());
 
         assertEquals("call snapshots", 3, calls[0]);
         assertEquals("call load xml", 4, calls[1]);

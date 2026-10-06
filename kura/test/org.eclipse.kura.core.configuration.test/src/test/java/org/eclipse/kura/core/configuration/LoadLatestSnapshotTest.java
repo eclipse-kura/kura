@@ -15,6 +15,7 @@ package org.eclipse.kura.core.configuration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
@@ -162,7 +163,7 @@ public class LoadLatestSnapshotTest {
     }
 
     private void thenNoConfigurationsLoaded() {
-        assertNull(this.loadedConfigurations);
+        assertTrue(this.loadedConfigurations.isEmpty());
     }
 
     private void thenSnapshotOnDiskIs(String expectedContent) throws IOException {

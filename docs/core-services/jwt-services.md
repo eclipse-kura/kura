@@ -2,6 +2,8 @@
 
 Two services issue and verify JSON Web Tokens (JWT): the **JWT Issuing Service** mints them, the **JWT Verification Service** accepts them. Tokens are signed with **RS256** using an RSA private key held in a `KeystoreService`, and verified against the X.509 certificates of a `KeystoreService`. Each service is configured independently and points at its own keystore, so the key store holding the signing key and the trust store holding the accepted certificates need not be the same.
 
+These services back the JWT bearer authentication of the REST APIs, see [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api-v1.md).
+
 Contents:
 
 - [Introduction to JWT](#introduction-to-jwt): how JWT works and main characteristics

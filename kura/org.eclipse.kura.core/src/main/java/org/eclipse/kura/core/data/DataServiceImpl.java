@@ -1015,15 +1015,16 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             }
             try {
                 DataServiceImpl.this.lock.lock();
-                if (!DataServiceImpl.this.notifyPending) {
-                    if (timeout == -1) {
-                        logger.debug("Suspending publishing thread indefinitely");
+                if (timeout == -1) {
+                    logger.debug("Suspending publishing thread indefinitely");
+                    while (!DataServiceImpl.this.notifyPending) {
                         DataServiceImpl.this.lockCondition.await();
-                    } else {
-                        logger.debug("Suspending publishing thread for {} nanoseconds", timeout);
-                        if (!DataServiceImpl.this.lockCondition.await(timeout, timeUnit)) {
-                            logger.trace("Publishing thread suspension timed out");
-                        }
+                    }
+                } else {
+                    logger.debug("Suspending publishing thread for {} nanoseconds", timeout);
+                    long remainingNanos = timeUnit.toNanos(timeout);
+                    while (!DataServiceImpl.this.notifyPending && remainingNanos > 0) {
+                        remainingNanos = DataServiceImpl.this.lockCondition.awaitNanos(remainingNanos);
                     }
                 }
                 DataServiceImpl.this.notifyPending = false;

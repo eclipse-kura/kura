@@ -10,7 +10,7 @@ REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Config
 
 Certificate authentication support is only available on the **HTTPS With Certificate Authentication Ports** configured in [HTTP/HTTPS Configuration](doc:httphttps-configuration) section.
 
-Clients can also authenticate with short-lived **JWT bearer tokens**, obtained through the [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api.md) (disabled by default, see **JWT Authentication Enabled** below).
+Clients can also authenticate with short-lived **JWT bearer tokens**, obtained through the [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api-v1.md) (disabled by default, see **JWT Authentication Enabled** below).
 
 Kura Identity names and passwords can be used for **BASIC** Authentication. Certificate authentication follows the same rules as [Gateway Administration Console Authentication](../gateway-configuration/gateway-administration-console-authentication.md).
 

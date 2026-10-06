@@ -308,8 +308,10 @@ public class DownloadImpl implements ProgressListener {
     }
 
     private static void deleteDeploymentPackageFile(final File dpFile) {
-        if (!dpFile.delete()) {
-            s_logger.warn("Unable to delete the deployment package file {}", dpFile);
+        try {
+            Files.deleteIfExists(dpFile.toPath());
+        } catch (IOException e) {
+            s_logger.warn("Unable to delete the deployment package file {}", dpFile, e);
         }
     }
 }

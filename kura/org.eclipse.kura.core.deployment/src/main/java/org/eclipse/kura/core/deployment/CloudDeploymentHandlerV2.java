@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -944,8 +945,10 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     }
 
     private static void deleteDeploymentPackageFile(final File dpFile) {
-        if (!dpFile.delete()) {
-            logger.warn("Unable to delete the deployment package file {}", dpFile);
+        try {
+            Files.deleteIfExists(dpFile.toPath());
+        } catch (IOException e) {
+            logger.warn("Unable to delete the deployment package file {}", dpFile, e);
         }
     }
 }

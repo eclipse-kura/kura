@@ -503,8 +503,10 @@ public class InstallImpl {
     }
 
     private static void deleteDownloadedFile(final File downloadedFile) {
-        if (!downloadedFile.delete()) {
-            logger.warn("Unable to delete the downloaded deployment package file {}", downloadedFile);
+        try {
+            Files.deleteIfExists(downloadedFile.toPath());
+        } catch (IOException e) {
+            logger.warn("Unable to delete the downloaded deployment package file {}", downloadedFile, e);
         }
     }
 }

@@ -60,9 +60,15 @@ public class RebootCauseFileWriter {
         } catch (Exception e) {
             logger.warn("failed to write reboot cause file", e);
         } finally {
-            if (tmpFile.exists() && !tmpFile.delete()) {
-                logger.warn("failed to delete temporary reboot cause file {}", tmpFile);
-            }
+            deleteTemporaryFile(tmpFile);
+        }
+    }
+
+    private static void deleteTemporaryFile(final File tmpFile) {
+        try {
+            Files.deleteIfExists(tmpFile.toPath());
+        } catch (IOException e) {
+            logger.warn("failed to delete temporary reboot cause file {}", tmpFile, e);
         }
     }
 

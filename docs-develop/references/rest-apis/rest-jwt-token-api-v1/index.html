@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-develop/java-application-development/contributing/">
+        <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-jwt-token-api-v1/">
       
       
-        <link rel="prev" href="../ram-usage-considerations/">
+        <link rel="prev" href="../rest-inventory-api/">
       
       
-        <link rel="next" href="../../quality-assurance/intro/">
+        <link rel="next" href="../rest-network-configuration-api/">
       
       
-      <link rel="icon" href="../../assets/favicon.png">
+      <link rel="icon" href="../../../assets/favicon.png">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.6.2">
     
     
       
-        <title>Contributing - Eclipse Kura™ Documentation</title>
+        <title>JWT Token V1 - Eclipse Kura™ Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.d7758b05.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.d7758b05.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#contributing" class="md-skip">
+        <a href="#jwt-token-v1-rest-apis" class="md-skip">
           Skip to content
         </a>
       
@@ -99,12 +99,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
-<a href="../../.."> 
+<a href="../../../.."> 
     <strong>Click here to go to latest stable release.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -116,9 +116,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+    <a href="../../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
       
-  <img src="../../assets/kura_logo_small.png" alt="logo">
+  <img src="../../../assets/kura_logo_small.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -135,7 +135,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Contributing
+              JWT Token V1
             
           </span>
         </div>
@@ -248,9 +248,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+    <a href="../../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
       
-  <img src="../../assets/kura_logo_small.png" alt="logo">
+  <img src="../../../assets/kura_logo_small.png" alt="logo">
 
     </a>
     Eclipse Kura™ Documentation
@@ -313,7 +313,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/install-kura/" class="md-nav__link">
+      <a href="../../../getting-started/install-kura/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -335,7 +335,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/raspberry-pi-raspberryos-quick-start/" class="md-nav__link">
+      <a href="../../../getting-started/raspberry-pi-raspberryos-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -357,7 +357,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+      <a href="../../../getting-started/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -379,7 +379,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/docker-quick-start/" class="md-nav__link">
+      <a href="../../../getting-started/docker-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -401,7 +401,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/zima-board-quick-start/" class="md-nav__link">
+      <a href="../../../getting-started/zima-board-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -423,7 +423,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/nvidia-jetson-orin-quick-start/" class="md-nav__link">
+      <a href="../../../getting-started/nvidia-jetson-orin-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -488,7 +488,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/gateway-administration-console/" class="md-nav__link">
+      <a href="../../../gateway-configuration/gateway-administration-console/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -510,7 +510,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/gateway-status/" class="md-nav__link">
+      <a href="../../../gateway-configuration/gateway-status/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -532,7 +532,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/device-information/" class="md-nav__link">
+      <a href="../../../gateway-configuration/device-information/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -590,7 +590,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/network-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/network-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -612,7 +612,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/network-failover/" class="md-nav__link">
+      <a href="../../../gateway-configuration/network-failover/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -634,7 +634,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/ethernet-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/ethernet-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -656,7 +656,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/wifi-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/wifi-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -678,7 +678,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/wifi-configuration-8021x/" class="md-nav__link">
+      <a href="../../../gateway-configuration/wifi-configuration-8021x/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -700,7 +700,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/cellular-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/cellular-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -722,7 +722,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/vlan-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/vlan-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -744,7 +744,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/network-advanced/" class="md-nav__link">
+      <a href="../../../gateway-configuration/network-advanced/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -766,7 +766,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/network-hardware/" class="md-nav__link">
+      <a href="../../../gateway-configuration/network-hardware/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -796,7 +796,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/firewall-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/firewall-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -818,7 +818,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/network-threat-manager/" class="md-nav__link">
+      <a href="../../../gateway-configuration/network-threat-manager/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -876,7 +876,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/cloud-connections/" class="md-nav__link">
+      <a href="../../../gateway-configuration/cloud-connections/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -898,7 +898,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/cloud-service-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/cloud-service-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -920,7 +920,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/data-service-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/data-service-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -942,7 +942,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/data-transport-service-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/data-transport-service-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -972,7 +972,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/keystores-management/" class="md-nav__link">
+      <a href="../../../gateway-configuration/keystores-management/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -994,7 +994,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/keys-and-certificates/" class="md-nav__link">
+      <a href="../../../gateway-configuration/keys-and-certificates/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1016,7 +1016,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/ssl-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/ssl-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1038,7 +1038,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/web-console-configuration/" class="md-nav__link">
+      <a href="../../../gateway-configuration/web-console-configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1060,7 +1060,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/access-banner/" class="md-nav__link">
+      <a href="../../../gateway-configuration/access-banner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1082,7 +1082,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/password-strength/" class="md-nav__link">
+      <a href="../../../gateway-configuration/password-strength/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1104,7 +1104,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/gateway-administration-console-authentication/" class="md-nav__link">
+      <a href="../../../gateway-configuration/gateway-administration-console-authentication/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1126,7 +1126,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../gateway-configuration/authentication-and-authorization/" class="md-nav__link">
+      <a href="../../../gateway-configuration/authentication-and-authorization/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1191,7 +1191,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../administration/directory-layout/" class="md-nav__link">
+      <a href="../../../administration/directory-layout/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1213,7 +1213,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../administration/logging-level/" class="md-nav__link">
+      <a href="../../../administration/logging-level/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1235,7 +1235,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../administration/snapshot-management/" class="md-nav__link">
+      <a href="../../../administration/snapshot-management/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1257,7 +1257,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../administration/application-management/" class="md-nav__link">
+      <a href="../../../administration/application-management/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1279,7 +1279,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../administration/remote-management-kapua/" class="md-nav__link">
+      <a href="../../../administration/remote-management-kapua/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1301,7 +1301,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../administration/system-component-inventory/" class="md-nav__link">
+      <a href="../../../administration/system-component-inventory/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1366,7 +1366,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/introduction/" class="md-nav__link">
+      <a href="../../../core-services/introduction/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1388,7 +1388,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/clock-service/" class="md-nav__link">
+      <a href="../../../core-services/clock-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1410,7 +1410,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/deployment-service/" class="md-nav__link">
+      <a href="../../../core-services/deployment-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1432,7 +1432,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/command-service/" class="md-nav__link">
+      <a href="../../../core-services/command-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1454,7 +1454,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/configuration-service/" class="md-nav__link">
+      <a href="../../../core-services/configuration-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1476,7 +1476,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/h2db-service/" class="md-nav__link">
+      <a href="../../../core-services/h2db-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1498,7 +1498,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+      <a href="../../../core-services/sqlite-db-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1520,7 +1520,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/position-service/" class="md-nav__link">
+      <a href="../../../core-services/position-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1542,7 +1542,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/rest-service/" class="md-nav__link">
+      <a href="../../../core-services/rest-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1564,7 +1564,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/watchdog-service/" class="md-nav__link">
+      <a href="../../../core-services/watchdog-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1622,7 +1622,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider/" class="md-nav__link">
+      <a href="../../../core-services/container-orchestration-provider/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1644,7 +1644,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider-apis/" class="md-nav__link">
+      <a href="../../../core-services/container-orchestration-provider-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1666,7 +1666,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider-usage/" class="md-nav__link">
+      <a href="../../../core-services/container-orchestration-provider-usage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1688,7 +1688,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider-authenticated-registries/" class="md-nav__link">
+      <a href="../../../core-services/container-orchestration-provider-authenticated-registries/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1710,7 +1710,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-image-auth/" class="md-nav__link">
+      <a href="../../../core-services/container-orchestration-image-auth/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1740,7 +1740,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/nvidia-triton-server-inference-engine/" class="md-nav__link">
+      <a href="../../../core-services/nvidia-triton-server-inference-engine/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1762,7 +1762,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/device-configuration-changes/" class="md-nav__link">
+      <a href="../../../core-services/device-configuration-changes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1784,7 +1784,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/network-status-rest-v1/" class="md-nav__link">
+      <a href="../../../core-services/network-status-rest-v1/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1806,7 +1806,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/crypto-service/" class="md-nav__link">
+      <a href="../../../core-services/crypto-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1828,7 +1828,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/jwt-services/" class="md-nav__link">
+      <a href="../../../core-services/jwt-services/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1893,7 +1893,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-api/overview/" class="md-nav__link">
+      <a href="../../../cloud-api/overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1915,7 +1915,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-api/user-guide/" class="md-nav__link">
+      <a href="../../../cloud-api/user-guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1937,7 +1937,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-api/app-dev-guide/" class="md-nav__link">
+      <a href="../../../cloud-api/app-dev-guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1959,7 +1959,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-api/cloud-conn-dev-guide/" class="md-nav__link">
+      <a href="../../../cloud-api/cloud-conn-dev-guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1981,7 +1981,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-api/built-in-cloud/" class="md-nav__link">
+      <a href="../../../cloud-api/built-in-cloud/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2046,7 +2046,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/kura-ec-cloud/" class="md-nav__link">
+      <a href="../../../cloud-platform/kura-ec-cloud/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2068,7 +2068,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/kura-aws-cloud/" class="md-nav__link">
+      <a href="../../../cloud-platform/kura-aws-cloud/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2090,7 +2090,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/kura-azure/" class="md-nav__link">
+      <a href="../../../cloud-platform/kura-azure/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2112,7 +2112,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/kura-kapua/" class="md-nav__link">
+      <a href="../../../cloud-platform/kura-kapua/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2134,7 +2134,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/kura-hono/" class="md-nav__link">
+      <a href="../../../cloud-platform/kura-hono/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2192,7 +2192,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/apache-camel-integration/kura-camel/" class="md-nav__link">
+      <a href="../../../cloud-platform/apache-camel-integration/kura-camel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2214,7 +2214,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/apache-camel-integration/kura-camel-app/" class="md-nav__link">
+      <a href="../../../cloud-platform/apache-camel-integration/kura-camel-app/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2236,7 +2236,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/apache-camel-integration/kura-camel-cloud/" class="md-nav__link">
+      <a href="../../../cloud-platform/apache-camel-integration/kura-camel-cloud/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2266,7 +2266,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/kura-sparkplug/" class="md-nav__link">
+      <a href="../../../cloud-platform/kura-sparkplug/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2288,7 +2288,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../cloud-platform/raw-cloud-connection/" class="md-nav__link">
+      <a href="../../../cloud-platform/raw-cloud-connection/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2353,7 +2353,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/driver-and-assets/" class="md-nav__link">
+      <a href="../../../connect-field-devices/driver-and-assets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2375,7 +2375,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/asset-implemetation/" class="md-nav__link">
+      <a href="../../../connect-field-devices/asset-implemetation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2397,7 +2397,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/driver-implemetation/" class="md-nav__link">
+      <a href="../../../connect-field-devices/driver-implemetation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2419,7 +2419,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/IO-apis/" class="md-nav__link">
+      <a href="../../../connect-field-devices/IO-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2441,7 +2441,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/field-protocols/" class="md-nav__link">
+      <a href="../../../connect-field-devices/field-protocols/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2499,7 +2499,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/opcua-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/opcua-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2521,7 +2521,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/s7-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/s7-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2543,7 +2543,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/gpio-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/gpio-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2565,7 +2565,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/sensortag-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/sensortag-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2587,7 +2587,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/sensehat-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/sensehat-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2609,7 +2609,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/ibeacon-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/ibeacon-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2631,7 +2631,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/eddystone-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/eddystone-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2653,7 +2653,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/xdk-driver/" class="md-nav__link">
+      <a href="../../../connect-field-devices/xdk-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2683,7 +2683,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../connect-field-devices/asset-v1-mqtt-namespace/" class="md-nav__link">
+      <a href="../../../connect-field-devices/asset-v1-mqtt-namespace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2748,7 +2748,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/introduction/" class="md-nav__link">
+      <a href="../../../kura-wires/introduction/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2770,7 +2770,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/assets-as-wire-components/" class="md-nav__link">
+      <a href="../../../kura-wires/assets-as-wire-components/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2828,7 +2828,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/single-port-wire-components/db-store-and-filter/" class="md-nav__link">
+      <a href="../../../kura-wires/single-port-wire-components/db-store-and-filter/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2850,7 +2850,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/single-port-wire-components/fifo-component/" class="md-nav__link">
+      <a href="../../../kura-wires/single-port-wire-components/fifo-component/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2872,7 +2872,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/single-port-wire-components/ai-wire-component/" class="md-nav__link">
+      <a href="../../../kura-wires/single-port-wire-components/ai-wire-component/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2938,7 +2938,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/multiport-wire-components/multiport-wire-components/" class="md-nav__link">
+      <a href="../../../kura-wires/multiport-wire-components/multiport-wire-components/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2960,7 +2960,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/multiport-wire-components/join-component/" class="md-nav__link">
+      <a href="../../../kura-wires/multiport-wire-components/join-component/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2982,7 +2982,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/multiport-wire-components/mathematical-components-example/" class="md-nav__link">
+      <a href="../../../kura-wires/multiport-wire-components/mathematical-components-example/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3048,7 +3048,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/script-components/overview/" class="md-nav__link">
+      <a href="../../../kura-wires/script-components/overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3070,7 +3070,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/script-components/graalvm-filter-component/" class="md-nav__link">
+      <a href="../../../kura-wires/script-components/graalvm-filter-component/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3092,7 +3092,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/script-components/graalvm-conditional-component/" class="md-nav__link">
+      <a href="../../../kura-wires/script-components/graalvm-conditional-component/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3158,7 +3158,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/usage-examples/opcua-application/" class="md-nav__link">
+      <a href="../../../kura-wires/usage-examples/opcua-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3180,7 +3180,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/usage-examples/ti-sensortag-application/" class="md-nav__link">
+      <a href="../../../kura-wires/usage-examples/ti-sensortag-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3202,7 +3202,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/usage-examples/gpio-driver-application/" class="md-nav__link">
+      <a href="../../../kura-wires/usage-examples/gpio-driver-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3224,7 +3224,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/usage-examples/ibeacon-driver-application/" class="md-nav__link">
+      <a href="../../../kura-wires/usage-examples/ibeacon-driver-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3246,7 +3246,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/usage-examples/eddystone-driver-application/" class="md-nav__link">
+      <a href="../../../kura-wires/usage-examples/eddystone-driver-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3276,7 +3276,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/wires-mqtt-namespace/" class="md-nav__link">
+      <a href="../../../kura-wires/wires-mqtt-namespace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3298,7 +3298,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/wire-graph-service-configuration-format/" class="md-nav__link">
+      <a href="../../../kura-wires/wire-graph-service-configuration-format/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3320,7 +3320,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/wire-service-rest-v1/" class="md-nav__link">
+      <a href="../../../kura-wires/wire-service-rest-v1/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3342,7 +3342,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/wire-service-references/" class="md-nav__link">
+      <a href="../../../kura-wires/wire-service-references/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3368,19 +3368,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
@@ -3395,7 +3393,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Java Application Development
@@ -3409,7 +3407,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../development-environment-setup/" class="md-nav__link">
+      <a href="../../../java-application-development/development-environment-setup/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3431,7 +3429,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../target-platform-dependencies/" class="md-nav__link">
+      <a href="../../../java-application-development/target-platform-dependencies/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3453,7 +3451,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../kura-addon-archetype/" class="md-nav__link">
+      <a href="../../../java-application-development/kura-addon-archetype/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3475,7 +3473,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../hello-world-application/" class="md-nav__link">
+      <a href="../../../java-application-development/hello-world-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3497,7 +3495,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../deploy-and-debug-applications/" class="md-nav__link">
+      <a href="../../../java-application-development/deploy-and-debug-applications/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3519,7 +3517,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../remote-debugging-on-target-platform/" class="md-nav__link">
+      <a href="../../../java-application-development/remote-debugging-on-target-platform/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3541,7 +3539,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../configurable-application/" class="md-nav__link">
+      <a href="../../../java-application-development/configurable-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3563,7 +3561,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../connected-application/" class="md-nav__link">
+      <a href="../../../java-application-development/connected-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3621,7 +3619,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-serial-ports/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-serial-ports/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3643,7 +3641,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-gpio/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-gpio/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3665,7 +3663,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-modbus/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-modbus/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3687,7 +3685,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-can-bus/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-can-bus/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3709,7 +3707,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-watchdog/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-watchdog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3731,7 +3729,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-manage-network-settings/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-manage-network-settings/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3753,7 +3751,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-bt-le-apis/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-bt-le-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3775,7 +3773,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-beacon-apis/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-beacon-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3797,7 +3795,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-temporary-identity-service/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-temporary-identity-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3819,7 +3817,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-dummy-signature-service/" class="md-nav__link">
+      <a href="../../../java-application-development/how-to-use-dummy-signature-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3849,7 +3847,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../ram-usage-considerations/" class="md-nav__link">
+      <a href="../../../java-application-development/ram-usage-considerations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3868,31 +3866,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Contributing
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../java-application-development/contributing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3902,35 +3879,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#kura-dev-meeting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kura Dev Meeting
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3986,7 +3934,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../quality-assurance/intro/" class="md-nav__link">
+      <a href="../../../quality-assurance/intro/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4008,7 +3956,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../quality-assurance/unit-testing/" class="md-nav__link">
+      <a href="../../../quality-assurance/unit-testing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4030,7 +3978,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../quality-assurance/system-testing/" class="md-nav__link">
+      <a href="../../../quality-assurance/system-testing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4056,17 +4004,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
         
           
           <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
@@ -4081,7 +4031,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             References
@@ -4095,7 +4045,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/mqtt-namespace/" class="md-nav__link">
+      <a href="../../mqtt-namespace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4117,7 +4067,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/javadoc/" class="md-nav__link">
+      <a href="../../javadoc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4136,17 +4086,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11_3" checked>
         
           
           <label class="md-nav__link" for="__nav_11_3" id="__nav_11_3_label" tabindex="0">
@@ -4161,7 +4113,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_11_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_11_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_11_3">
             <span class="md-nav__icon md-icon"></span>
             REST-APIs
@@ -4175,7 +4127,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-configuration-service-v1/" class="md-nav__link">
+      <a href="../rest-configuration-service-v1/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4197,7 +4149,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-configuration-service-v2/" class="md-nav__link">
+      <a href="../rest-configuration-service-v2/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4219,7 +4171,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-cloudconnection-api/" class="md-nav__link">
+      <a href="../rest-cloudconnection-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4241,7 +4193,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-command-api/" class="md-nav__link">
+      <a href="../rest-command-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4263,7 +4215,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-deploy-api/" class="md-nav__link">
+      <a href="../rest-deploy-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4285,7 +4237,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-identity-api-v1/" class="md-nav__link">
+      <a href="../rest-identity-api-v1/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4307,7 +4259,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-identity-api-v2/" class="md-nav__link">
+      <a href="../rest-identity-api-v2/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4329,7 +4281,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-inventory-api/" class="md-nav__link">
+      <a href="../rest-inventory-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4348,10 +4300,31 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-jwt-token-api-v1/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    JWT Token V1
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -4361,6 +4334,134 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-with-curl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example with curl
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Behavior
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request definitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Request definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#postissue" class="md-nav__link">
+    <span class="md-ellipsis">
+      POST/issue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postrefresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      POST/refresh
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON definitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="JSON definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tokenpair" class="md-nav__link">
+    <span class="md-ellipsis">
+      TokenPair
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -4373,7 +4474,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-network-configuration-api/" class="md-nav__link">
+      <a href="../rest-network-configuration-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4395,7 +4496,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-position-api/" class="md-nav__link">
+      <a href="../rest-position-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4417,7 +4518,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-security-api-v1/" class="md-nav__link">
+      <a href="../rest-security-api-v1/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4439,7 +4540,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-security-api-v2/" class="md-nav__link">
+      <a href="../rest-security-api-v2/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4461,7 +4562,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-service-listing-api/" class="md-nav__link">
+      <a href="../rest-service-listing-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4483,7 +4584,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-session-api/" class="md-nav__link">
+      <a href="../rest-session-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4505,7 +4606,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../references/rest-apis/rest-system-api/" class="md-nav__link">
+      <a href="../rest-system-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4578,7 +4679,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/AD-EdgeAI/" class="md-nav__link">
+      <a href="../../../tutorials/AD-EdgeAI/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4627,11 +4728,110 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#kura-dev-meeting" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Kura Dev Meeting
+      Prerequisites
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-with-curl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example with curl
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Behavior
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request definitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Request definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#postissue" class="md-nav__link">
+    <span class="md-ellipsis">
+      POST/issue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postrefresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      POST/refresh
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON definitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="JSON definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tokenpair" class="md-nav__link">
+    <span class="md-ellipsis">
+      TokenPair
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4651,18 +4851,178 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 
-<h1 id="contributing">Contributing</h1>
-<p>Contributing to Eclipse Kura project is very easy.</p>
-<p>The steps required to submit code to the project can be found on <a href="https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md">Github Contributing Page</a>.</p>
-<p>If you face any issues, or just want to get involved with the kura community feel free to join us on:</p>
+<h1 id="jwt-token-v1-rest-apis">JWT Token V1 REST APIs</h1>
+<p>The JWT token REST APIs let a client exchange its credentials for a pair of <a href="../../../core-services/jwt-services/">JSON Web Tokens</a> and then access the Kura REST APIs with a bearer token, without sending the identity password or keeping a session cookie on every request. They are suited to scripts, backend services and non-browser clients.</p>
+<p>A token pair is made of:</p>
 <ul>
-<li><a href="https://github.com/eclipse/kura/issues"><strong>Github Issues</strong></a>: for bug reporting.</li>
-<li><a href="https://github.com/eclipse/kura/discussions"><strong>Github Discussions</strong></a>: for receiving feedback, making new proposals and generally talking about the project.</li>
+<li>an <strong>access token</strong>: sent as <code>Authorization: Bearer &lt;token&gt;</code> to access any REST API. It is short lived and cannot be revoked.</li>
+<li>a <strong>refresh token</strong>: exchanged once at <a href="#postrefresh">POST/refresh</a> for a new token pair. It is never accepted as an access token.</li>
 </ul>
-<h2 id="kura-dev-meeting">Kura Dev Meeting</h2>
-<p>If you want to get involved in the development process you can join us at the Kura Dev Meeting. The meeting is held every 2 weeks on Wednesday, at 5 PM CEST on Microsoft Teams. </p>
-<p>You can join by using <a href="https://teams.microsoft.com/l/meetup-join/19%3ameeting_N2I1OTc3ZWEtZGNkYy00NjVkLWJhNTUtYjJjNzEwMWZkMTM5%40thread.v2/0?context=%7b%22Tid%22%3a%22fc01f1f7-7425-4de2-ba8a-a7cc0ded6b72%22%2c%22Oid%22%3a%22dc13c82d-2440-47da-a2cb-6b581115fbf4%22%7d">this link</a>.</p>
-<p>The scheduled dates for the meeting can be found <a href="https://github.com/eclipse/kura/files/12539667/kura-dev-meeting.zip">here</a>. Unzip the calendar file and double-click on it to add the scheduled dates to your calendar.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ol>
+<li>Configure a <strong>JWT Issuing Service</strong> and a <strong>JWT Verification Service</strong> as described in <a href="../../../core-services/jwt-services/">JWT Services</a>. The verification trust store must contain the certificate of the signing key and, if <em>Trusted Issuers</em> is set, it must include the <em>Issuer</em> of the issuing service.</li>
+<li>In the <a href="../../../core-services/rest-service/#rest-service-configuration">REST Service</a> configuration set <strong>JWT Authentication Enabled</strong> to true. If several issuing or verification services are available, select them with <strong>Token Issuing Service Target</strong> and <strong>Token Verification Service Target</strong>, for example <code>(kura.service.pid=org.eclipse.kura.core.token.jwt.issuer.JwtIssuingService)</code>.</li>
+</ol>
+<p>While JWT authentication is disabled, both endpoints return 404 and bearer tokens are not accepted.</p>
+<h2 id="workflow">Workflow</h2>
+<ol>
+<li>Call <a href="#postissue">POST/issue</a> authenticating with any other enabled method: BASIC credentials, a session (with the <code>X-XSRF-Token</code> header, see <a href="../rest-session-api/">Session V1 REST APIs</a>) or a client certificate. A caller authenticated with a JWT access token is refused, so a leaked access token cannot be used to obtain new tokens.</li>
+<li>Access the REST APIs with the header <code>Authorization: Bearer &lt;accessToken&gt;</code>.</li>
+<li>Before the access token expires, or when a request fails with 401, call <a href="#postrefresh">POST/refresh</a> with the refresh token. Replace both stored tokens with the returned ones: the used refresh token can no longer be exchanged.</li>
+<li>If the refresh fails with 401, the refresh token is expired, already used or no longer valid: go back to step 1.</li>
+</ol>
+<h3 id="example-with-curl">Example with <code>curl</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 1. issue a token pair (BASIC authentication, requires Basic Authentication Enabled)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>curl<span class="w"> </span>-k<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-u<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$KURA_USER</span><span class="s2">:</span><span class="nv">$KURA_PASS</span><span class="s2">&quot;</span><span class="w"> </span>https://<span class="nv">$ADDRESS</span>/services/token/jwt/v1/issue
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;tokenType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;accessToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOi...&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;accessTokenExpiresInSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;refreshToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOi...&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">&quot;refreshTokenExpiresInSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 2. access a resource</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-k<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://<span class="nv">$ADDRESS</span>/services/<span class="nv">$RESOURCE_PATH</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># 3. refresh: the body is the bare refresh token, no other credentials are needed</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-k<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: text/plain&#39;</span><span class="w"> </span>--data<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REFRESH_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span>https://<span class="nv">$ADDRESS</span>/services/token/jwt/v1/refresh
+</code></pre></div>
+<h2 id="behavior">Behavior</h2>
+<ul>
+<li><strong>Authorization</strong>: tokens carry only the identity name. Permissions are read from the identity on every request, so permission changes apply immediately and a token never grants more than the identity currently has. No permission is needed to call the token endpoints.</li>
+<li><strong>Identity checks</strong>: issuing, refreshing and every bearer request fail if the identity no longer exists or must <a href="../../../gateway-configuration/gateway-administration-console-authentication/#forced-password-change-on-login">change its password</a>.</li>
+<li><strong>Revocation</strong>: a single token cannot be revoked. To cut off a client, delete the identity, force a password change, disable JWT authentication, or replace the signing key / trusted certificates.</li>
+<li><strong>Lifetimes</strong>: set by <em>JWT Access Token Duration</em> and <em>JWT Refresh Token Duration</em>, silently capped by the <em>Maximum Token Lifetime</em> of the issuing service. The <code>...ExpiresInSeconds</code> fields report the effective values. Since each refresh token works once, the refresh token duration is the maximum inactivity time of a client.</li>
+<li><strong>Refresh token rotation and replay</strong>: every successful refresh consumes the refresh token. Used tokens are tracked in memory until they expire plus <em>JWT Used Refresh Token Retention</em>, which must be greater than or equal to the <em>Clock Skew Tolerance</em> of the verification service. After a Kura restart, the tracking is lost and already used refresh tokens are accepted again until they expire. Serialize refreshes in the client: two concurrent refreshes with the same token make one of them fail with 401.</li>
+<li><strong>Failed issuing</strong>: if a new pair cannot be issued during a refresh (500 or 503), the refresh token is not consumed and can be retried.</li>
+<li><strong>External refresh tokens</strong>: <a href="#postrefresh">POST/refresh</a> accepts any refresh token trusted by the verification service, including tokens issued outside Kura, provided <code>sub</code> is an existing Kura identity, <code>aud</code> contains <code>/token/jwt/v1/refresh</code>, and <code>iss</code> and <code>jti</code> are present. Access tokens are verified with the audience <code>/token/jwt/v1/access</code>.</li>
+<li><strong>Caching</strong>: token responses carry <code>Cache-Control: no-store</code> and <code>Pragma: no-cache</code>. Store tokens as credentials: never log them or put them in URLs.</li>
+<li><strong>Provider order</strong>: bearer authentication is attempted after the certificate, BASIC and session providers. The <strong>Allowed Ports</strong> restriction applies as for any other REST API.</li>
+</ul>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a href="#jwt-token-v1-rest-apis">JWT Token V1 REST APIs</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#workflow">Workflow</a><ul>
+<li><a href="#example-with-curl">Example with <code>curl</code></a></li>
+</ul>
+</li>
+<li><a href="#behavior">Behavior</a></li>
+<li><a href="#reference">Reference</a></li>
+<li><a href="#request-definitions">Request definitions</a><ul>
+<li><a href="#postissue">POST/issue</a></li>
+<li><a href="#postrefresh">POST/refresh</a></li>
+</ul>
+</li>
+<li><a href="#json-definitions">JSON definitions</a><ul>
+<li><a href="#tokenpair">TokenPair</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="request-definitions">Request definitions</h2>
+<h3 id="postissue">POST/issue</h3>
+<ul>
+<li><strong>REST API path</strong> : /services/token/jwt/v1/issue</li>
+<li><strong>description</strong> : Issues a new token pair for the identity that authenticated the request. Authentication with a JWT access token is not accepted.</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong><ul>
+<li><strong>description</strong> : Request succeeded.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#tokenpair">TokenPair</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>401</strong><ul>
+<li><strong>description</strong> : The request is not authenticated, it is authenticated with a JWT access token, or the identity does not exist.</li>
+</ul>
+</li>
+<li><strong>403</strong><ul>
+<li><strong>description</strong> : The identity must change its password.</li>
+</ul>
+</li>
+<li><strong>404</strong><ul>
+<li><strong>description</strong> : JWT authentication is disabled or no token issuing service matches the configured target.</li>
+</ul>
+</li>
+<li><strong>500</strong><ul>
+<li><strong>description</strong> : Token issuing failed, for example the signing key is not available.</li>
+</ul>
+</li>
+<li><strong>503</strong><ul>
+<li><strong>description</strong> : The token issuing service is temporarily unavailable.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="postrefresh">POST/refresh</h3>
+<ul>
+<li><strong>REST API path</strong> : /services/token/jwt/v1/refresh</li>
+<li><strong>description</strong> : Exchanges a refresh token for a new token pair. No other authentication is needed. The request body must be the refresh token as <code>text/plain</code>; surrounding whitespace is ignored and the body is limited to 8 KiB.</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong><ul>
+<li><strong>description</strong> : Request succeeded, the exchanged refresh token can no longer be used.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#tokenpair">TokenPair</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>400</strong><ul>
+<li><strong>description</strong> : The request body is empty.</li>
+</ul>
+</li>
+<li><strong>401</strong><ul>
+<li><strong>description</strong> : The refresh token is invalid, expired, already used or not a refresh token, or its identity does not exist or must change its password.</li>
+</ul>
+</li>
+<li><strong>404</strong><ul>
+<li><strong>description</strong> : JWT authentication is disabled or no token issuing or verification service matches the configured targets.</li>
+</ul>
+</li>
+<li><strong>413</strong><ul>
+<li><strong>description</strong> : The request body is larger than 8 KiB.</li>
+</ul>
+</li>
+<li><strong>500</strong><ul>
+<li><strong>description</strong> : Token issuing failed. The refresh token is not consumed.</li>
+</ul>
+</li>
+<li><strong>503</strong><ul>
+<li><strong>description</strong> : The token issuing or verification service is temporarily unavailable. The refresh token is not consumed.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="json-definitions">JSON definitions</h2>
+<h3 id="tokenpair">TokenPair</h3>
+<p>A newly issued access and refresh token pair.</p>
+<p><br><strong>Properties</strong>:</p>
+<ul>
+<li><strong>tokenType</strong>: <code>string</code>
+      Always <code>Bearer</code>.</li>
+<li><strong>accessToken</strong>: <code>string</code>
+      The access token, to be sent in the <code>Authorization: Bearer</code> header.</li>
+<li><strong>accessTokenExpiresInSeconds</strong>: <code>number</code>
+      Effective lifetime of the access token, in seconds.</li>
+<li><strong>refreshToken</strong>: <code>string</code>
+      The refresh token, to be sent to <a href="#postrefresh">POST/refresh</a>.</li>
+<li><strong>refreshTokenExpiresInSeconds</strong>: <code>number</code>
+      Effective lifetime of the refresh token, in seconds.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;tokenType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;accessToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOi...&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">&quot;accessTokenExpiresInSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">&quot;refreshToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOi...&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">&quot;refreshTokenExpiresInSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
+</code></pre></div>
 
 
 
@@ -4708,7 +5068,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
                 
               
-              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/eclipse-kura/kura/issues/new/?title=[Feedback]+/java-application-development/contributing/+-+" target="_blank" rel="noopener">feedback form</a>.
+              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/eclipse-kura/kura/issues/new/?title=[Feedback]+/references/rest-apis/rest-jwt-token-api-v1/+-+" target="_blank" rel="noopener">feedback form</a>.
             </div>
           
         </div>
@@ -4862,10 +5222,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "announce.dismiss"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.f13b1293.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.f13b1293.min.js"></script>
       
     
   </body>

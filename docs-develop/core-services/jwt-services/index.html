@@ -4570,6 +4570,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-jwt-token-api-v1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    JWT Token V1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../references/rest-apis/rest-network-configuration-api/" class="md-nav__link">
         
   
@@ -5069,6 +5091,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="json-web-token-jwt-services">JSON Web Token (JWT) Services</h1>
 <p>Two services issue and verify JSON Web Tokens (JWT): the <strong>JWT Issuing Service</strong> mints them, the <strong>JWT Verification Service</strong> accepts them. Tokens are signed with <strong>RS256</strong> using an RSA private key held in a <code>KeystoreService</code>, and verified against the X.509 certificates of a <code>KeystoreService</code>. Each service is configured independently and points at its own keystore, so the key store holding the signing key and the trust store holding the accepted certificates need not be the same.</p>
+<p>These services back the JWT bearer authentication of the REST APIs, see <a href="../../references/rest-apis/rest-jwt-token-api-v1/">JWT Token V1 REST APIs</a>.</p>
 <p>Contents:</p>
 <ul>
 <li><a href="#introduction-to-jwt">Introduction to JWT</a>: how JWT works and main characteristics</li>

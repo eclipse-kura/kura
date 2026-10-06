@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.concurrent.CancellationException;
 
@@ -288,8 +289,10 @@ public class DownloadImpl implements ProgressListener {
     }
 
     private static void deleteDeploymentPackageFile(final File dpFile) {
-        if (!dpFile.delete()) {
-            s_logger.warn("Unable to delete the deployment package file {}", dpFile);
+        try {
+            Files.deleteIfExists(dpFile.toPath());
+        } catch (IOException e) {
+            s_logger.warn("Unable to delete the deployment package file {}", dpFile, e);
         }
     }
 }

@@ -10,6 +10,8 @@ REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Config
 
 Certificate authentication support is only available on the **HTTPS With Certificate Authentication Ports** configured in [HTTP/HTTPS Configuration](doc:httphttps-configuration) section.
 
+Clients can also authenticate with short-lived **JWT bearer tokens**, obtained through the [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api.md) (disabled by default, see **JWT Authentication Enabled** below).
+
 Kura Identity names and passwords can be used for **BASIC** Authentication. Certificate authentication follows the same rules as [Gateway Administration Console Authentication](../gateway-configuration/gateway-administration-console-authentication.md).
 
 !!! warning
@@ -36,6 +38,18 @@ The available configuration parameters are the following:
 * **Basic Authentication Enabled**: Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the **Password Authentication Enabled parameter** is set to true. (Default: false)
 
 * **Enable Certificate Authentication Without Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: false)
+
+* **JWT Authentication Enabled**: Enables JWT bearer authentication and the `/services/token/jwt/v1` endpoints that issue and refresh tokens. Requires a configured [JWT Issuing Service and JWT Verification Service](jwt-services.md). See [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api.md). (Default: false)
+
+* **Token Issuing Service Target**: OSGi filter selecting the `TokenIssuingService` that signs access and refresh tokens. Without a match, tokens cannot be issued or refreshed. (Default: `(objectClass=org.eclipse.kura.security.token.TokenIssuingService)`)
+
+* **Token Verification Service Target**: OSGi filter selecting the `TokenVerificationService` that verifies access and refresh tokens, including those issued by other trusted services. Without a match, JWT authentication and refresh are unavailable. (Default: `(objectClass=org.eclipse.kura.security.token.TokenVerificationService)`)
+
+* **JWT Access Token Duration (Seconds)**: Lifetime of access tokens. They cannot be revoked, so short values limit the use of a leaked token. Capped by the *Maximum Token Lifetime* of the issuing service. (Default: 60)
+
+* **JWT Refresh Token Duration (Seconds)**: Lifetime of refresh tokens. Each one can be exchanged only once, so this is the inactivity timeout of a client. Should be greater than the access token duration. Capped by the *Maximum Token Lifetime* of the issuing service. (Default: 900)
+
+* **JWT Used Refresh Token Retention (Seconds)**: How long a used refresh token is still tracked after it expires, so that it cannot be exchanged again. Must be greater than or equal to the *Clock Skew Tolerance* of the verification service. Used tokens are tracked in memory: after a restart they are accepted again until they expire. (Default: 300)
 
 ## Custom authentication methods
 

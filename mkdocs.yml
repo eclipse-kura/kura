@@ -164,6 +164,7 @@ nav:
         - Identity V1: references/rest-apis/rest-identity-api-v1.md
         - Identity V2: references/rest-apis/rest-identity-api-v2.md
         - Inventory: references/rest-apis/rest-inventory-api.md
+        - JWT Token V1: references/rest-apis/rest-jwt-token-api-v1.md
         - Network Configuration: references/rest-apis/rest-network-configuration-api.md
         - Position: references/rest-apis/rest-position-api.md
         - Security V1: references/rest-apis/rest-security-api-v1.md

@@ -139,7 +139,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         private final Condition producer = this.lock.newCondition();
         private final Condition consumer = this.lock.newCondition();
 
-        private boolean run = true;
+        private volatile boolean run = true;
         private final ArrayList<WireEnvelope> queue;
         private final int queueCapacity;
 
@@ -215,26 +215,32 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
         public void run() {
             while (this.run) {
                 try {
-                    WireEnvelope next = null;
-                    this.lock.lock();
-                    try {
-                        while (this.run && this.queue.isEmpty()) {
-                            this.producer.await();
-                        }
-                        if (!this.run) {
-                            break;
-                        }
-                        next = this.queue.remove(0);
-                        this.consumer.signal();
-                    } finally {
-                        this.lock.unlock();
+                    final WireEnvelope next = takeNext();
+                    if (next != null) {
+                        Fifo.this.wireSupport.emit(next.getRecords());
                     }
-                    Fifo.this.wireSupport.emit(next.getRecords());
                 } catch (Exception e) {
                     logger.warn("Unexpected exception while dispatching envelope", e);
                 }
             }
             logger.debug("exiting");
+        }
+
+        private WireEnvelope takeNext() throws InterruptedException {
+            this.lock.lock();
+            try {
+                while (this.run && this.queue.isEmpty()) {
+                    this.producer.await();
+                }
+                if (!this.run) {
+                    return null;
+                }
+                final WireEnvelope next = this.queue.remove(0);
+                this.consumer.signal();
+                return next;
+            } finally {
+                this.lock.unlock();
+            }
         }
     }
 }

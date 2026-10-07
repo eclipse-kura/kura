@@ -90,7 +90,7 @@ node {
                                     -Dsonar.java.source=8 \
                                     -Dsonar.java.binaries='target/classes' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
-                                    -Dsonar.java.pmd.reportPaths=${pwd()}/kura/target/pmd.xml \
+                                    -Dsonar.java.pmd.reportPaths=${PWD}/kura/target/pmd.xml \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
                                     -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
                             '''

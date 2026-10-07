@@ -633,7 +633,7 @@
                 <version>${maven-pmd-plugin.version}</version>
                 <configuration>
                     <rulesets>
-                        <ruleset>https://raw.githubusercontent.com/eclipse-kura/kura/64a5005b7600b2176601a5e7dbbfd0f29a3b01a4/kura/tools/pmd/eurotech-java-ruleset.xml</ruleset>
+                        <ruleset>https://raw.githubusercontent.com/eclipse-kura/pmd-rulesets/refs/heads/develop/src/main/resources/eurotech-java-ruleset-BI.xml</ruleset>
                     </rulesets>
                     <excludeFromFailureFile>${maven.multiModuleProjectDirectory}/tools/pmd/pmd-baseline.properties</excludeFromFailureFile>
                     <failOnViolation>false</failOnViolation>

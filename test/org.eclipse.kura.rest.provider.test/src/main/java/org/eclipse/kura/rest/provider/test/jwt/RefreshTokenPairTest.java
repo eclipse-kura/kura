@@ -98,10 +98,6 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
         thenResponseCodeIs(401);
     }
 
-    /*
-     * JwtRestService refuses the exchange with 403, but the AuditFilter reports a 403 on an unauthenticated request,
-     * like the refresh one, as 401.
-     */
     @Test
     public void aRefreshTokenCannotBeExchangedOnceTheIdentityMustChangeItsPassword() throws Exception {
         givenAnIdentityWithPermissions(ASSETS_PERMISSION);
@@ -110,7 +106,7 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
 
         whenTheRefreshEndpointReceives(theRefreshToken());
 
-        thenResponseCodeIs(401);
+        thenResponseCodeIs(403);
     }
 
     @Test

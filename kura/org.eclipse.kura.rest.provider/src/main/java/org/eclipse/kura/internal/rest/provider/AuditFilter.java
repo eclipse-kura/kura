@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -46,15 +46,9 @@ public class AuditFilter implements ContainerResponseFilter {
             }
 
             if (responseContext.getStatus() == 403) {
-                if (requestContext.getSecurityContext() == null
-                        || requestContext.getSecurityContext().getUserPrincipal() == null) {
-                    responseContext.setStatus(401);
-                } else {
-                    auditLogger.warn("{} Rest - Failure - User not authorized to perform the requested operation",
-                            auditContext);
-                    return;
-                }
-
+                auditLogger.warn("{} Rest - Failure - User not authorized to perform the requested operation",
+                        auditContext);
+                return;
             }
 
             if (responseContext.getStatus() == 401) {

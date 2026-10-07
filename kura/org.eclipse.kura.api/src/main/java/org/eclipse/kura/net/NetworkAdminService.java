@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,12 @@ import org.osgi.annotation.versioning.ProviderType;
  * Service API for getting and setting network interface configurations.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated since 2.9. This service will be removed in 3.0. Use the
+ *             {@link org.eclipse.kura.configuration.ConfigurationService} to manage the network configuration
+ *             instead.
  */
 @ProviderType
+@Deprecated
 public interface NetworkAdminService {
 
     /**

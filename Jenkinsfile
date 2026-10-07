@@ -49,6 +49,18 @@ node {
         }
     }
 
+    stage('Generate PMD report') {
+        timeout(time: 2, unit: 'HOURS') {
+            dir("kura") {
+                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', publisherStrategy: 'EXPLICIT') {
+                    sh "mvn -f kura/pom.xml pmd:aggregate-pmd-check@en50716"
+                }
+
+                archiveArtifacts artifacts: 'target/pmd.xml', allowEmptyArchive: false
+            }
+        }
+    }
+
     stage('Generate test reports') {
         dir("kura") {
             junit 'kura/test/*/target/surefire-reports/*.xml,kura/examples/test/*/target/surefire-reports/*.xml'
@@ -78,6 +90,7 @@ node {
                                     -Dsonar.java.source=8 \
                                     -Dsonar.java.binaries='target/classes' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
+                                    -Dsonar.java.pmd.reportPaths=${pwd()}/target/pmd.xml \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
                                     -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
                             '''

@@ -545,8 +545,6 @@
                     <showWarnings>true</showWarnings>
                     <!-- Kura does not set bootdelegation, we let the compiler check for this -->
                     <requireJavaPackageImports>true</requireJavaPackageImports>
-                    <useProjectSettings>false</useProjectSettings>
-                    <failOnWarning>false</failOnWarning>
                 </configuration>
             </plugin>
             <plugin>

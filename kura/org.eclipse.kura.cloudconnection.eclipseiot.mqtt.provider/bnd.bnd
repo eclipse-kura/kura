@@ -2,7 +2,7 @@ Bundle-SymbolicName: ${project.artifactId};singleton:=true
 Import-Package: \
     org.eclipse.kura;version="[1.0,2.0)",\
     org.eclipse.kura.audit;version="[1.0,2.0)",\
-    org.eclipse.kura.certificate;version="[2.0,3.0)",\
+    org.eclipse.kura.certificate;version="[3.0,4.0)",\
     org.eclipse.kura.cloud;version="[1.1,1.2)",\
     org.eclipse.kura.cloudconnection;version="[1.0,1.1)",\
     org.eclipse.kura.cloudconnection.factory;version="[1.0,1.1)",\

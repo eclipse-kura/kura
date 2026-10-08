@@ -80,10 +80,7 @@ Keep this in mind when contributing to the Eclipse Kura project.
 
 * Fork the repository on GitHub
 * Create a new branch for your changes
-* Configure your IDE installing:
-  * The formatter profile available in kura/setup/formatting/KuraFormatter*.xml
-  * The cleanup profile available in kura/setup/formatting/KuraCleanupProfile*.xml
-  * [SonarLint](http://www.sonarlint.org/eclipse/index.html)
+* Configure your IDE (see [IDE setup](#ide-setup) below)
 * Make your changes
 * Make sure you include test cases for non-trivial features
 * Make sure the test suite passes after your changes
@@ -96,6 +93,52 @@ Keep this in mind when contributing to the Eclipse Kura project.
 * Make sure you use the `-s` flag when committing as explained above
 * Push your changes to your branch in your forked repository
 * Make a full clean build (locally and/or using [Travis CI](http://travis-ci.org)) before you submit a pull request
+
+## IDE setup
+
+The formatter profile (`kura/setups/formatting/KuraFormatter.xml`, profile `Kura_formatter_v_3`) and the clean up
+profile (`kura/setups/formatting/KuraCleanupProfile.xml`, profile `KuraCleanup_v3`) are the reference for all IDEs.
+A `.editorconfig` at the root of the repository pins the settings every editor understands (LF endings, UTF-8,
+4 space indentation, trailing whitespace trimming, no newline at end of Java files).
+
+[SonarLint](https://www.sonarsource.com/products/sonarlint/) is recommended for every IDE.
+
+### Eclipse
+
+Import both profiles from `kura/setups/formatting/`:
+
+* *Preferences > Java > Code Style > Formatter > Import...* > `KuraFormatter.xml`
+* *Preferences > Java > Code Style > Clean Up > Import...* > `KuraCleanupProfile.xml`
+
+### IntelliJ IDEA
+
+The project ships the shareable part of the configuration under `.idea/` (code style, inspection profile and
+formatter plugin settings); it is applied automatically when the project is opened. Two steps are manual:
+
+1. **Install the required plugins.** IntelliJ prompts for them on the first project open
+   (`.idea/externalDependencies.xml`); otherwise install *Adapter for Eclipse Code Formatter* and *SonarLint* from
+   the marketplace. The Eclipse formatter adapter runs the same engine as Eclipse and VS Code, so the
+   output is identical across the three IDEs. Without it, IntelliJ falls back to `.idea/codeStyles/Project.xml`, which
+   only approximates `KuraFormatter.xml`.
+2. **Enable the save actions.** These are stored in `.idea/workspace.xml`, which is per developer and cannot be shared
+   through Git. In *Settings > Tools > Actions on Save* enable:
+   * *Reformat code*, scope **Whole file** (`cleanup.format_source_code_changes_only = false`)
+   * *Optimize imports*
+   * *Run code cleanup*
+   * *Remove trailing spaces*, scope **All**
+
+   Leave *Rearrange code* off (`cleanup.sort_members = false`).
+
+The `Kura` inspection profile mirrors the clean up profile. Note that unused declarations are reported but are not
+removed automatically: members wired through OSGi declarative services can look unused to the IDE, so apply those
+fixes manually with `Alt+Enter`.
+
+### VS Code
+
+Open the repository and accept the recommended extensions; `.vscode/settings.json` wires up the formatter and the
+clean up actions supported by [vscode-java](https://github.com/redhat-developer/vscode-java). Its clean up action list
+is coarser than the Eclipse profile, so a few rules (`this.` on field access, static access qualification and `final`
+on private fields) are reported by SonarLint and enforced by review rather than applied on save.
 
 ## Tests
 

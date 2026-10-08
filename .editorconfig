@@ -1,0 +1,20 @@
+# Cross-IDE baseline for Eclipse Kura.
+# Authoritative Java formatting lives in kura/setups/formatting/KuraFormatter.xml;
+# this file only pins the settings every editor can agree on.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.java]
+# KuraFormatter.xml: lineSplit = 120 (checkstyle LineLength max = 150)
+max_line_length = 120
+# KuraFormatter.xml: insert_new_line_at_end_of_file_if_missing = do not insert
+insert_final_newline = false
+
+[*.md]
+trim_trailing_whitespace = true

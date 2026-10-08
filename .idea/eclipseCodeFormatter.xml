@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="EclipseCodeFormatterProjectSettings">
+    <option name="projectSpecificProfile">
+      <ProjectSpecificProfile>
+        <option name="formatter" value="ECLIPSE" />
+        <option name="enableJavaFormatting" value="true" />
+        <option name="pathToConfigFileJava" value="$PROJECT_DIR$/kura/setups/formatting/KuraFormatter.xml" />
+        <option name="selectedJavaProfile" value="Kura_formatter_v_3" />
+        <option name="optimizeImports" value="true" />
+        <option name="importOrder" value="java;javax;org;com;" />
+        <option name="formatOtherFileTypesWithIntelliJ" value="true" />
+      </ProjectSpecificProfile>
+    </option>
+  </component>
+</project>

@@ -635,7 +635,6 @@
                     <rulesets>
                         <ruleset>https://raw.githubusercontent.com/eclipse-kura/pmd-rulesets/refs/heads/develop/src/main/resources/eurotech-java-ruleset-BI.xml</ruleset>
                     </rulesets>
-                    <excludeFromFailureFile>${maven.multiModuleProjectDirectory}/tools/pmd/pmd-baseline.properties</excludeFromFailureFile>
                     <failOnViolation>false</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
                     <includeTests>false</includeTests>

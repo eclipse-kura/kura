@@ -378,6 +378,22 @@
                 <check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
+        <!--
+            Consolidated JaCoCo report (coverage-report/target/site/jacoco-aggregate) built from the
+            execution data of all the test modules. Keep this profile last: modules of active profiles
+            are appended in declaration order, so the report runs after every other module.
+        -->
+        <profile>
+            <id>coverage-report</id>
+            <activation>
+                <property>
+                    <name>!skipTests</name>
+                </property>
+            </activation>
+            <modules>
+                <module>coverage-report</module>
+            </modules>
+        </profile>
     </profiles>
 
     <repositories>

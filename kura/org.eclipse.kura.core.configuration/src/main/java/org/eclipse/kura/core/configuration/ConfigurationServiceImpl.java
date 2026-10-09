@@ -1523,7 +1523,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // Get the latest snapshot file to use as initialization
         Set<Long> snapshotIDs = getSnapshots();
         if (snapshotIDs == null || snapshotIDs.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
 
         Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -1533,25 +1533,36 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // Unmarshall
         logger.info("Loading init configurations from: {}...", lastestID);
 
-        List<ComponentConfiguration> configs = null;
         try {
-            XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
-            if (xmlConfigs != null) {
-                configs = xmlConfigs.getConfigurations();
-            }
+            return loadSnapshotConfigurations(lastestID);
         } catch (Exception e) {
             logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
-            try {
-                if (allSnapshotsUnencrypted()) {
-                    encryptPlainSnapshots();
-                    configs = loadLatestSnapshotConfigurations();
-                }
-            } catch (Exception ex) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
-            }
         }
 
-        return configs;
+        try {
+            if (!allSnapshotsUnencrypted()) {
+                return Collections.emptyList();
+            }
+            encryptPlainSnapshots();
+        } catch (Exception ex) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+        }
+
+        // single retry: if the snapshot still cannot be loaded after encryption, give up
+        try {
+            return loadSnapshotConfigurations(lastestID);
+        } catch (Exception e) {
+            logger.warn("Unable to load snapshot {} after encrypting the plain snapshots", lastestID, e);
+            return Collections.emptyList();
+        }
+    }
+
+    private List<ComponentConfiguration> loadSnapshotConfigurations(long snapshotID) throws KuraException {
+        XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(snapshotID);
+        if (xmlConfigs == null || xmlConfigs.getConfigurations() == null) {
+            return Collections.emptyList();
+        }
+        return xmlConfigs.getConfigurations();
     }
 
     XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
@@ -1811,19 +1822,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // complete the returned configurations adding the snapshot configurations
         // of those components not yet in the list.
         List<ComponentConfiguration> snapshotConfigs = loadLatestSnapshotConfigurations();
-        if (snapshotConfigs != null) {
-            for (ComponentConfiguration snapshotConfig : snapshotConfigs) {
-                boolean found = false;
-                for (ComponentConfiguration config : result) {
-                    if (config.getPid().equals(snapshotConfig.getPid())) {
-                        found = true;
-                        break;
-                    }
+        for (ComponentConfiguration snapshotConfig : snapshotConfigs) {
+            boolean found = false;
+            for (ComponentConfiguration config : result) {
+                if (config.getPid().equals(snapshotConfig.getPid())) {
+                    found = true;
+                    break;
                 }
-                if (!found) {
-                    // Add old configurations (or not yet tracked ones) present
-                    result.add(snapshotConfig);
-                }
+            }
+            if (!found) {
+                // Add old configurations (or not yet tracked ones) present
+                result.add(snapshotConfig);
             }
         }
 

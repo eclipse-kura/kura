@@ -16,31 +16,32 @@ package org.eclipse.kura.container.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -50,31 +51,37 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.PasswordStrengthRequirements;
-import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.security.token.TokenIssueRequest;
+import org.eclipse.kura.security.token.TokenIssuingService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 /**
- * Feature: Container instance identity integration with temporary identities enabled.
+ * Feature: Container instance identity integration with temporary identities and JWT token pairs.
  */
 public class ContainerIdentityIntegrationTest {
 
     private static final String CONTAINER_NAME = "kura-test-container";
+    private static final String IDENTITY_BASE_NAME = "container_kura_test_container";
     private static final String CONTAINER_IMAGE = "nginx";
     private static final String CONTAINER_TAG = "latest";
     private static final String PERMISSIONS = "rest.read,rest.write";
@@ -84,7 +91,10 @@ public class ContainerIdentityIntegrationTest {
     private static final String UPDATED_CONTAINER_NAME = CONTAINER_NAME + "-v2";
     private static final String INVALID_CONTAINER_NAME = "....@@@....";
     private static final String TMPFS_BASE_PROPERTY = "kura.tmpfs.base";
-    private static final String TOKEN_VOLUME_VALUE = "/run/secrets/kura-token:ro";
+    private static final String JWT_FILE_CONTAINER_PATH = "/run/secrets/kura-jwt.json";
+    private static final String JWT_FILE_VOLUME_VALUE = JWT_FILE_CONTAINER_PATH + ":ro";
+    private static final String ACCESS_TOKEN_CONSUMER = "/token/jwt/v1/access";
+    private static final String REFRESH_TOKEN_CONSUMER = "/token/jwt/v1/refresh";
 
     @Rule
     public TemporaryFolder tmpfsBase = new TemporaryFolder();
@@ -94,20 +104,20 @@ public class ContainerIdentityIntegrationTest {
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
     private IdentityService identityService;
-    private PasswordStrengthVerificationService passwordStrengthVerificationService;
+    private TokenIssuingService tokenIssuingService;
     private ConfigurationService configurationService;
     private Map<String, Object> properties;
     private CountDownLatch startLatch;
     private AtomicInteger createCount;
     private AtomicInteger deleteCount;
     private AtomicInteger startCount;
+    private AtomicInteger pullCount;
+    private AtomicInteger issuedAccessTokenCount;
+    private AtomicInteger issuedRefreshTokenCount;
     private ArgumentCaptor<ContainerConfiguration> configurationCaptor;
-    private ArgumentCaptor<String> identityNameCaptor;
-    private ArgumentCaptor<IdentityConfiguration> identityConfigCaptor;
-    private ArgumentCaptor<Duration> durationCaptor;
-    private List<String> capturedPasswords = new ArrayList<>();
-    private List<String> capturedIdentityNames = new ArrayList<>();
-    private char[] lastTemporaryPassword;
+    private final List<IdentityConfiguration> createdIdentities = new CopyOnWriteArrayList<>();
+    private final List<Duration> identityLifetimes = new CopyOnWriteArrayList<>();
+    private final List<TokenIssueRequest> issueRequests = new CopyOnWriteArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -117,26 +127,28 @@ public class ContainerIdentityIntegrationTest {
         this.containerInstance = new ContainerInstance();
         this.containerOrchestrationService = Mockito.mock(ContainerOrchestrationService.class);
         this.identityService = Mockito.mock(IdentityService.class);
-        this.passwordStrengthVerificationService = Mockito.mock(PasswordStrengthVerificationService.class);
+        this.tokenIssuingService = Mockito.mock(TokenIssuingService.class);
         this.configurationService = Mockito.mock(ConfigurationService.class);
         this.properties = new HashMap<>();
         this.startLatch = new CountDownLatch(1);
         this.createCount = new AtomicInteger(0);
         this.deleteCount = new AtomicInteger(0);
         this.startCount = new AtomicInteger(0);
+        this.pullCount = new AtomicInteger(0);
+        this.issuedAccessTokenCount = new AtomicInteger(0);
+        this.issuedRefreshTokenCount = new AtomicInteger(0);
         this.configurationCaptor = ArgumentCaptor.forClass(ContainerConfiguration.class);
-        this.identityNameCaptor = ArgumentCaptor.forClass(String.class);
-        this.identityConfigCaptor = ArgumentCaptor.forClass(IdentityConfiguration.class);
-        this.durationCaptor = ArgumentCaptor.forClass(Duration.class);
 
         this.containerInstance.setContainerOrchestrationService(this.containerOrchestrationService);
         this.containerInstance.setIdentityService(this.identityService);
-        this.containerInstance.setPasswordStrengthVerificationService(this.passwordStrengthVerificationService);
         this.containerInstance.setConfigurationService(this.configurationService);
 
         when(this.containerOrchestrationService.listContainerDescriptors()).thenReturn(Collections.emptyList());
-        Mockito.doReturn(new PasswordStrengthRequirements(12, true, true, true))
-                .when(this.passwordStrengthVerificationService).getPasswordStrengthRequirements();
+        doAnswer(invocation -> {
+            this.pullCount.incrementAndGet();
+            return null;
+        }).when(this.containerOrchestrationService).pullImage(any(ImageConfiguration.class));
+        when(this.tokenIssuingService.getMaximumLifetime()).thenReturn(Optional.empty());
     }
 
     @After
@@ -151,21 +163,179 @@ public class ContainerIdentityIntegrationTest {
     }
 
     @Test
-    public void createsTemporaryIdentityAndInjectsToken() throws Exception {
+    public void createsTemporaryIdentityAndInjectsJwtFile() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivated();
 
         thenTemporaryIdentityIsCreatedWithPermissions();
-        thenStartContainerReceivesTokenEnvironment();
+        thenStartContainerReceivesJwtEnvironment();
+        thenJwtFileContainsTokenPair(this.configurationCaptor.getValue(), 1);
+    }
+
+    @Test
+    public void createsTemporaryIdentityWithPasswordAuthDisabled() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenTemporaryIdentityHasPasswordAuthDisabled();
+    }
+
+    @Test
+    public void issuesTokenPairForTemporaryIdentity() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenTokenIsIssuedForLatestIdentity(ACCESS_TOKEN_CONSUMER);
+        thenTokenIsIssuedForLatestIdentity(REFRESH_TOKEN_CONSUMER);
+    }
+
+    @Test
+    public void issuesTokenPairWithConfiguredDurations() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenJwtTokenDurations(30, 600);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenTokenIsIssuedWithLifetime(ACCESS_TOKEN_CONSUMER, Duration.ofSeconds(30));
+        thenTokenIsIssuedWithLifetime(REFRESH_TOKEN_CONSUMER, Duration.ofSeconds(600));
+    }
+
+    @Test
+    public void pullsImageBeforeIssuingTokenPair() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenImageIsPulledBeforeTokenPairIsIssuedAndContainerIsStarted();
+    }
+
+    @Test
+    public void issuesNewTokenPairOnEachStartAttempt() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenRetryConfiguration(2);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorFailsFirstAttemptThenStarts();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+
+        thenTemporaryIdentityIsCreatedTimes(1);
+        thenTokenPairIsIssuedTimes(2);
+        thenJwtFileIsDeleted(this.configurationCaptor.getAllValues().get(0));
+        thenJwtFileContainsTokenPair(latestConfiguration(), 2);
+    }
+
+    @Test
+    public void retriesStartupWhenTokenIssuingFails() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenRetryConfiguration(2);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceFailsOnce();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+
+        thenTemporaryIdentityIsCreatedTimes(1);
+        thenContainerIsStartedTimes(1);
+        thenStartContainerReceivesJwtEnvironment();
+    }
+
+    @Test
+    public void retriesStartupWhenTokenIssuingServiceIsNotBound() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenRetryConfiguration(2);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBoundOnSecondImagePull();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+
+        thenTemporaryIdentityIsCreatedTimes(1);
+        thenContainerIsStartedTimes(1);
+        thenStartContainerReceivesJwtEnvironment();
+    }
+
+    @Test
+    public void failsStartupWhenTokenIssuingKeepsFailingBeyondMaxRetries() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenRetryConfiguration(2);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceAlwaysFails();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilDisabled();
+
+        thenImageIsPulledTimes(2);
+        thenContainerIsNeverStarted();
+        thenTemporaryIdentityIsDeleted();
+    }
+
+    @Test
+    public void failsStartupWhenTemporaryIdentityCreationFails() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityCreationFails();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilDisabled();
+
+        thenTemporaryIdentityIsCreatedTimes(1);
+        thenNoTokenIsIssued();
+        thenContainerIsNeverStarted();
+    }
+
+    @Test
+    public void generatesUniqueIdentityNamePerStart() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
+
+        whenContainerInstanceIsActivatedUntilCreated();
+        whenContainerInstanceIsDisabled();
+        whenContainerInstanceIsEnabledUntilCreated();
+
+        thenTemporaryIdentityIsCreatedTimes(2);
+        thenTemporaryIdentityNamesStartWith(IDENTITY_BASE_NAME + "_");
+        thenTemporaryIdentityNamesAreDifferent();
+    }
+
+    @Test
+    public void generatesValidTemporaryIdentityNameFromInvalidContainerName() throws Exception {
+        givenIdentityIntegrationIsEnabled(INVALID_CONTAINER_NAME);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenTemporaryIdentityNamesStartWith("container_auto_");
+        thenStartContainerReceivesJwtEnvironment();
     }
 
     @Test
     public void deletesTemporaryIdentityWhenContainerIsDisabled() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
@@ -177,103 +347,36 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void recreatesTemporaryIdentityOnConfigurationChange() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
 
         whenContainerInstanceIsActivatedUntilCreated();
         whenContainerConfigurationIsUpdatedWithNewName();
 
         thenTemporaryIdentityIsRecreated();
-        thenLatestContainerStartReceivesRefreshedPassword();
+        thenJwtFileContainsTokenPair(latestConfiguration(), 2);
     }
 
     @Test
     public void cleansUpTemporaryIdentityOnceAcrossMultipleShutdowns() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
         whenContainerInstanceIsDisabled();
         whenContainerInstanceIsDeactivated();
 
-        thenTemporaryIdentityIsDeletedOnlyOnce();
-    }
-
-    @Test
-    public void clearsTemporaryPasswordArrayAndReference() throws Exception {
-        givenTemporaryPasswordIsSet();
-
-        whenTemporaryPasswordIsCleared();
-
-        thenTemporaryPasswordArrayIsCleared();
-        thenTemporaryPasswordIsCleared();
-    }
-
-    @Test
-    public void clearsTemporaryPasswordAfterContainerStarts() throws Exception {
-        givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
-        givenContainerOrchestratorStartsSuccessfully();
-
-        whenContainerInstanceIsActivatedUntilCreated();
-
-        thenTemporaryPasswordIsCleared();
-    }
-
-    @Test
-    public void clearsTemporaryPasswordAfterStartupFailure() throws Exception {
-        givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
-        givenContainerOrchestratorFailsToStart();
-        givenFastRetryConfiguration();
-
-        whenContainerInstanceIsActivatedUntilDisabled();
-
-        thenTemporaryPasswordIsCleared();
-    }
-
-    @Test
-    public void clearsTemporaryPasswordAfterCleanupTemporaryIdentity() throws Exception {
-        givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
-        givenTemporaryIdentityNameIsSet();
-        givenTemporaryPasswordIsSet();
-
-        whenTemporaryIdentityIsCleanedUp();
-
-        thenTemporaryPasswordArrayIsCleared();
-        thenTemporaryPasswordIsCleared();
-    }
-
-    @Test
-    public void generatesValidTemporaryIdentityNameFromInvalidContainerName() throws Exception {
-        givenIdentityIntegrationIsEnabled(INVALID_CONTAINER_NAME);
-        givenTemporaryIdentityServiceProvidesPassword();
-        givenContainerOrchestratorStartsSuccessfully();
-
-        whenContainerInstanceIsActivated();
-
-        thenTemporaryIdentityUsesName("container_auto");
-        thenStartContainerReceivesTokenEnvironment();
-    }
-
-    @Test
-    public void retriesTemporaryIdentityCreationWhenNameAlreadyExists() throws Exception {
-        givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceRetriesNameConflict();
-        givenContainerOrchestratorStartsSuccessfully();
-
-        whenContainerInstanceIsActivated();
-
-        thenTemporaryIdentityCreationIsRetriedWithSuffixedName();
-        thenStartContainerReceivesTokenEnvironment();
+        thenTemporaryIdentityIsDeleted();
     }
 
     @Test
     public void injectsUrlEncodedIpv6RestBaseUrlForDockerBridge() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
         givenHttpsServiceIsEnabledOnPort(443);
         givenDockerBridgeAddressIs("fe80::7024:e3ff:feb9:997d%docker0");
@@ -284,109 +387,115 @@ public class ContainerIdentityIntegrationTest {
     }
 
     @Test
-    public void mountsTokenFileReadOnlyIntoContainer() throws Exception {
+    public void mountsJwtFileReadOnlyIntoContainer() throws Exception {
         givenIdentityIntegrationIsEnabled();
         givenUserConfiguredVolume();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivated();
 
-        thenStartContainerReceivesReadOnlyTokenVolume();
+        thenStartContainerReceivesReadOnlyJwtFileVolume();
         thenStartContainerReceivesUserConfiguredVolume();
     }
 
     @Test
-    public void tokenFileSurvivesAfterContainerIsCreated() throws Exception {
+    public void jwtFileSurvivesAfterContainerIsCreated() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
 
-        thenTemporaryPasswordIsCleared();
-        thenTokenFileContains(this.configurationCaptor.getValue(),
-                this.capturedPasswords.get(this.capturedPasswords.size() - 1));
+        thenJwtFileContainsTokenPair(this.configurationCaptor.getValue(), 1);
     }
 
     @Test
-    public void deletesTokenFileWhenContainerIsDisabled() throws Exception {
+    public void deletesJwtFileWhenContainerIsDisabled() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
         whenContainerInstanceIsDisabled();
 
-        awaitCounterAtLeast(this.deleteCount, 1);
-        thenTokenFileIsDeleted(this.configurationCaptor.getValue());
+        thenTemporaryIdentityIsDeleted();
+        thenJwtFileIsDeleted(this.configurationCaptor.getValue());
     }
 
     @Test
-    public void deletesTokenFileOnConfigurationChange() throws Exception {
+    public void deletesJwtFileOnConfigurationChange() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
 
         whenContainerInstanceIsActivatedUntilCreated();
-        final ContainerConfiguration firstConfiguration = this.configurationCaptor.getValue();
         whenContainerConfigurationIsUpdatedWithNewName();
 
-        awaitCounterAtLeast(this.startCount, 2);
-        thenTokenFileIsDeleted(firstConfiguration);
-        thenLatestContainerStartReceivesRefreshedPassword();
+        thenContainerIsStartedTimes(2);
+        thenJwtFileIsDeleted(this.configurationCaptor.getAllValues().get(0));
+        thenJwtFileContainsTokenPair(latestConfiguration(), 2);
     }
 
     @Test
-    public void deletesTokenFileOnDeactivate() throws Exception {
+    public void deletesJwtFileOnDeactivate() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
         whenContainerInstanceIsDeactivated();
 
-        thenTokenFileIsDeleted(this.configurationCaptor.getValue());
+        thenJwtFileIsDeleted(this.configurationCaptor.getValue());
     }
 
     @Test
-    public void deletesTokenFileOnStartupFailure() throws Exception {
+    public void deletesJwtFileOnStartupFailure() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenRetryConfiguration(1);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorFailsToStart();
-        givenFastRetryConfiguration();
 
         whenContainerInstanceIsActivatedUntilDisabled();
 
-        thenTokenFileIsDeleted(this.configurationCaptor.getValue());
+        thenTemporaryIdentityIsDeleted();
+        thenJwtFileIsDeleted(this.configurationCaptor.getValue());
     }
 
     @Test
     public void failsStartupWhenTmpfsBaseIsMissing() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenRetryConfiguration(1);
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenContainerOrchestratorStartsSuccessfully();
         givenMissingTmpfsBase();
 
         whenContainerInstanceIsActivatedUntilDisabled();
 
-        awaitCounterAtLeast(this.deleteCount, 1);
+        thenTemporaryIdentityIsDeleted();
         thenContainerIsNeverStarted();
-        thenTemporaryPasswordIsCleared();
     }
 
     @Test
     public void recreatesSurvivingContainerToRefreshCredentialsOnStartup() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
         givenSurvivingContainerExists(SURVIVING_CONTAINER_ID);
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivated();
 
         thenSurvivingContainerIsRecreated(SURVIVING_CONTAINER_ID);
-        thenStartContainerReceivesTokenEnvironment();
-        thenStartContainerReceivesReadOnlyTokenVolume();
+        thenStartContainerReceivesJwtEnvironment();
+        thenStartContainerReceivesReadOnlyJwtFileVolume();
     }
 
     /*
@@ -407,80 +516,23 @@ public class ContainerIdentityIntegrationTest {
         this.properties.put("container.permissions", PERMISSIONS);
     }
 
-    private void givenTemporaryIdentityServiceProvidesPassword() throws Exception {
+    private void givenJwtTokenDurations(final int accessTokenDuration, final int refreshTokenDuration) {
+        this.properties.put("container.identity.jwt.access.token.duration", accessTokenDuration);
+        this.properties.put("container.identity.jwt.refresh.token.duration", refreshTokenDuration);
+    }
+
+    private void givenRetryConfiguration(final int retries) {
+        this.properties.put("container.image.download.retries", retries);
+        this.properties.put("container.image.download.interval", 0);
+    }
+
+    private void givenTemporaryIdentitiesCanBeCreated() throws Exception {
         doAnswer(invocation -> {
+            this.createdIdentities.add(invocation.getArgument(0));
+            this.identityLifetimes.add(invocation.getArgument(1));
             this.createCount.incrementAndGet();
-
-            final String identityName = invocation.getArgument(0);
-            this.capturedIdentityNames.add(identityName);
-
-            return null; // API returns void
-        }).when(this.identityService).createTemporaryIdentity(
-                this.identityNameCaptor.capture(), this.durationCaptor.capture());
-
-        doAnswer(invocation -> {
-            final IdentityConfiguration config = invocation.getArgument(0);
-            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
-                    .getNewPassword().orElseThrow();
-            this.capturedPasswords.add(new String(newPassword));
-
             return null;
-        }).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
-
-        doAnswer(invocation -> {
-            this.deleteCount.incrementAndGet();
-            return true; // New API returns boolean
-        }).when(this.identityService).deleteIdentity(anyString());
-    }
-
-    private void givenContainerOrchestratorStartsSuccessfully() throws Exception {
-        doAnswer(invocation -> {
-            this.startLatch.countDown();
-            this.startCount.incrementAndGet();
-            return CONTAINER_ID;
-        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
-    }
-
-    private void givenContainerOrchestratorStartsSuccessfullyWithIds(final String... containerIds) throws Exception {
-        this.startLatch = new CountDownLatch(containerIds.length);
-        this.startCount.set(0);
-        final AtomicInteger index = new AtomicInteger(0);
-
-        doAnswer(invocation -> {
-            this.startLatch.countDown();
-            this.startCount.incrementAndGet();
-            final int current = Math.min(index.getAndIncrement(), containerIds.length - 1);
-            return containerIds[current];
-        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
-    }
-
-    private void givenTemporaryIdentityServiceRetriesNameConflict() throws Exception {
-        final AtomicBoolean conflictRaised = new AtomicBoolean(false);
-
-        doAnswer(invocation -> {
-            this.createCount.incrementAndGet();
-
-            final String identityName = invocation.getArgument(0);
-            this.capturedIdentityNames.add(identityName);
-
-            final String expectedBaseName = "container_" + CONTAINER_NAME.replace("-", "_");
-            if (!conflictRaised.get() && expectedBaseName.equals(identityName)) {
-                conflictRaised.set(true);
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                        "An identity with name '" + identityName + "' already exists");
-            }
-
-            return null;
-        }).when(this.identityService).createTemporaryIdentity(
-                this.identityNameCaptor.capture(), this.durationCaptor.capture());
-
-        doAnswer(invocation -> {
-            final IdentityConfiguration config = invocation.getArgument(0);
-            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
-                    .getNewPassword().orElseThrow();
-            this.capturedPasswords.add(new String(newPassword));
-            return null;
-        }).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
+        }).when(this.identityService).createTemporaryIdentity(any(IdentityConfiguration.class), any(Duration.class));
 
         doAnswer(invocation -> {
             this.deleteCount.incrementAndGet();
@@ -488,21 +540,80 @@ public class ContainerIdentityIntegrationTest {
         }).when(this.identityService).deleteIdentity(anyString());
     }
 
-    private void givenTemporaryPasswordIsSet() throws Exception {
-        final Field field = ContainerInstance.class.getDeclaredField("currentTemporaryPassword");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        final AtomicReference<char[]> passwordRef = (AtomicReference<char[]>) field.get(this.containerInstance);
-        this.lastTemporaryPassword = "temp-password".toCharArray();
-        passwordRef.set(this.lastTemporaryPassword);
+    private void givenTemporaryIdentityCreationFails() throws Exception {
+        doAnswer(invocation -> {
+            this.createCount.incrementAndGet();
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "invalid identity");
+        }).when(this.identityService).createTemporaryIdentity(any(IdentityConfiguration.class), any(Duration.class));
     }
 
-    private void givenTemporaryIdentityNameIsSet() throws Exception {
-        final Field field = ContainerInstance.class.getDeclaredField("currentTemporaryIdentityName");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        final AtomicReference<String> identityRef = (AtomicReference<String>) field.get(this.containerInstance);
-        identityRef.set("temporary_identity");
+    private void givenTokenIssuingServiceIsBound() throws Exception {
+        givenTokenIssuingServiceIssuesTokens();
+        this.containerInstance.setTokenIssuingService(this.tokenIssuingService);
+    }
+
+    private void givenTokenIssuingServiceIssuesTokens() throws Exception {
+        when(this.tokenIssuingService.issue(any(TokenIssueRequest.class))).thenAnswer(invocation -> issueToken(
+                invocation.getArgument(0)));
+    }
+
+    private void givenTokenIssuingServiceFailsOnce() throws Exception {
+        final AtomicInteger calls = new AtomicInteger(0);
+
+        when(this.tokenIssuingService.issue(any(TokenIssueRequest.class))).thenAnswer(invocation -> {
+            if (calls.getAndIncrement() == 0) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "not yet ready");
+            }
+            return issueToken(invocation.getArgument(0));
+        });
+        this.containerInstance.setTokenIssuingService(this.tokenIssuingService);
+    }
+
+    private void givenTokenIssuingServiceAlwaysFails() throws Exception {
+        when(this.tokenIssuingService.issue(any(TokenIssueRequest.class)))
+                .thenThrow(new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "not yet ready"));
+        this.containerInstance.setTokenIssuingService(this.tokenIssuingService);
+    }
+
+    private void givenTokenIssuingServiceIsBoundOnSecondImagePull() throws Exception {
+        givenTokenIssuingServiceIssuesTokens();
+
+        doAnswer(invocation -> {
+            if (this.pullCount.incrementAndGet() == 2) {
+                this.containerInstance.setTokenIssuingService(this.tokenIssuingService);
+            }
+            return null;
+        }).when(this.containerOrchestrationService).pullImage(any(ImageConfiguration.class));
+    }
+
+    private void givenContainerOrchestratorStartsSuccessfully() throws Exception {
+        doAnswer(invocation -> {
+            this.startCount.incrementAndGet();
+            this.startLatch.countDown();
+            return CONTAINER_ID;
+        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
+    }
+
+    private void givenContainerOrchestratorStartsSuccessfullyWithIds(final String... containerIds) throws Exception {
+        this.startLatch = new CountDownLatch(containerIds.length);
+        final AtomicInteger index = new AtomicInteger(0);
+
+        doAnswer(invocation -> {
+            this.startCount.incrementAndGet();
+            this.startLatch.countDown();
+            final int current = Math.min(index.getAndIncrement(), containerIds.length - 1);
+            return containerIds[current];
+        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
+    }
+
+    private void givenContainerOrchestratorFailsFirstAttemptThenStarts() throws Exception {
+        doAnswer(invocation -> {
+            if (this.startCount.incrementAndGet() == 1) {
+                throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
+            }
+            this.startLatch.countDown();
+            return CONTAINER_ID;
+        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
     }
 
     private void givenContainerOrchestratorFailsToStart() throws Exception {
@@ -510,11 +621,6 @@ public class ContainerIdentityIntegrationTest {
             this.startCount.incrementAndGet();
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
         }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
-    }
-
-    private void givenFastRetryConfiguration() {
-        this.properties.put("container.image.download.retries", 1);
-        this.properties.put("container.image.download.interval", 0);
     }
 
     private void givenUserConfiguredVolume() {
@@ -536,9 +642,9 @@ public class ContainerIdentityIntegrationTest {
 
     private void givenHttpsServiceIsEnabledOnPort(final int port) throws Exception {
         final ComponentConfiguration componentConfiguration = Mockito.mock(ComponentConfiguration.class);
-        final Map<String, Object> properties = new HashMap<>();
-        properties.put("https.ports", new Integer[] { port });
-        when(componentConfiguration.getConfigurationProperties()).thenReturn(properties);
+        final Map<String, Object> httpServiceProperties = new HashMap<>();
+        httpServiceProperties.put("https.ports", new Integer[] { port });
+        when(componentConfiguration.getConfigurationProperties()).thenReturn(httpServiceProperties);
         when(this.configurationService.getComponentConfiguration("org.eclipse.kura.http.server.manager.HttpService"))
                 .thenReturn(componentConfiguration);
     }
@@ -569,24 +675,12 @@ public class ContainerIdentityIntegrationTest {
 
     private void whenContainerInstanceIsActivatedUntilCreated() throws InterruptedException {
         this.containerInstance.activate(this.properties);
-        thenWaitForContainerState("Created");
+        waitForContainerState("Created");
     }
 
     private void whenContainerInstanceIsActivatedUntilDisabled() throws InterruptedException {
         this.containerInstance.activate(this.properties);
-        thenWaitForContainerState("Disabled");
-    }
-
-    private void whenTemporaryPasswordIsCleared() throws Exception {
-        final Method method = ContainerInstance.class.getDeclaredMethod("clearTemporaryPassword");
-        method.setAccessible(true);
-        method.invoke(this.containerInstance);
-    }
-
-    private void whenTemporaryIdentityIsCleanedUp() throws Exception {
-        final Method method = ContainerInstance.class.getDeclaredMethod("cleanupTemporaryIdentity");
-        method.setAccessible(true);
-        method.invoke(this.containerInstance);
+        waitForContainerState("Disabled");
     }
 
     private void whenContainerConfigurationIsUpdatedWithNewName() throws InterruptedException {
@@ -595,7 +689,7 @@ public class ContainerIdentityIntegrationTest {
         updated.put("kura.service.pid", UPDATED_CONTAINER_NAME);
 
         this.containerInstance.updated(updated);
-        thenWaitForContainerState("Created");
+        waitForContainerState("Created");
     }
 
     private void whenContainerInstanceIsDisabled() {
@@ -603,6 +697,11 @@ public class ContainerIdentityIntegrationTest {
         disabled.put("container.enabled", false);
 
         this.containerInstance.updated(disabled);
+    }
+
+    private void whenContainerInstanceIsEnabledUntilCreated() throws InterruptedException {
+        this.containerInstance.updated(new HashMap<>(this.properties));
+        waitForContainerState("Created");
     }
 
     private void whenContainerInstanceIsDeactivated() {
@@ -616,188 +715,213 @@ public class ContainerIdentityIntegrationTest {
     private void thenTemporaryIdentityIsCreatedWithPermissions() throws Exception {
         awaitCounterAtLeast(this.createCount, 1);
 
-        final String expectedIdentityName = "container_" + CONTAINER_NAME.replace("-", "_");
-        verify(this.identityService).createTemporaryIdentity(
-                this.identityNameCaptor.capture(), this.durationCaptor.capture());
+        final IdentityConfiguration configuration = this.createdIdentities.get(0);
+        final Set<Permission> permissions = configuration.getComponent(AssignedPermissions.class).orElseThrow()
+                .getPermissions();
 
-        final String createdIdentityName = this.identityNameCaptor.getValue();
-        assertEquals("Identity name should match expected", expectedIdentityName, createdIdentityName);
-
-        verify(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
-
-        // Verify identity name from configuration
-        IdentityConfiguration config = this.identityConfigCaptor.getValue();
-        assertEquals("Identity name should match expected", expectedIdentityName, config.getName());
-
-        // Verify permissions from IdentityConfiguration
-        AssignedPermissions assignedPermissions = config.getComponent(AssignedPermissions.class).orElseThrow();
-        Set<Permission> permissions = assignedPermissions.getPermissions();
-
-        assertTrue("Expected rest.read permission",
-                permissions.stream().anyMatch(permission -> "rest.read".equals(permission.getName())));
-        assertTrue("Expected rest.write permission",
-                permissions.stream().anyMatch(permission -> "rest.write".equals(permission.getName())));
+        assertTrue(configuration.getName().startsWith(IDENTITY_BASE_NAME + "_"));
+        assertTrue(permissions.contains(new Permission("rest.read")));
+        assertTrue(permissions.contains(new Permission("rest.write")));
+        assertEquals(Duration.ofSeconds(ContainerInstanceOptions.TEMPORARY_IDENTITY_LIFETIME_SECONDS),
+                this.identityLifetimes.get(0));
     }
 
-    private void thenTemporaryIdentityUsesName(final String expectedIdentityName) throws Exception {
+    private void thenTemporaryIdentityHasPasswordAuthDisabled() throws Exception {
         awaitCounterAtLeast(this.createCount, 1);
 
-        verify(this.identityService).createTemporaryIdentity(
-                this.identityNameCaptor.capture(), this.durationCaptor.capture());
+        final PasswordConfiguration passwordConfiguration = this.createdIdentities.get(0)
+                .getComponent(PasswordConfiguration.class).orElseThrow();
 
-        assertEquals("Identity name should be normalized", expectedIdentityName, this.identityNameCaptor.getValue());
+        assertFalse(passwordConfiguration.isPasswordAuthEnabled());
+        assertFalse(passwordConfiguration.isPasswordChangeNeeded());
+        assertFalse(passwordConfiguration.getNewPassword().isPresent());
+        assertFalse(passwordConfiguration.getPasswordHash().isPresent());
     }
 
-    private void thenStartContainerReceivesTokenEnvironment() throws Exception {
-        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+    private void thenTemporaryIdentityIsCreatedTimes(final int times) throws Exception {
+        awaitCounterAtLeast(this.createCount, times);
+        assertEquals(times, this.createCount.get());
+    }
 
-        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
-        final List<String> envVars = configuration.getContainerEnvVars();
-        final String latestIdentityName = this.capturedIdentityNames.get(this.capturedIdentityNames.size() - 1);
-        final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
+    private void thenTemporaryIdentityNamesStartWith(final String prefix) throws Exception {
+        awaitCounterAtLeast(this.createCount, 1);
 
-        assertTrue("Identity name var missing",
-                envVars.contains("KURA_IDENTITY_NAME=" + latestIdentityName));
-        assertTrue("Token file env var missing",
-                envVars.contains("KURA_TOKEN_FILE=/run/secrets/kura-token"));
-        assertTrue("Password must not be passed through the environment",
-                envVars.stream().noneMatch(envVar -> envVar.startsWith("KURA_IDENTITY_PASSWORD")));
-        // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
-        assertTrue("Base URL env var missing",
-                envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
+        for (final IdentityConfiguration identity : this.createdIdentities) {
+            assertTrue(identity.getName() + " does not start with " + prefix, identity.getName().startsWith(prefix));
+        }
+    }
 
-        thenTokenFileContains(configuration, latestPassword);
+    private void thenTemporaryIdentityNamesAreDifferent() {
+        assertNotEquals(this.createdIdentities.get(0).getName(), this.createdIdentities.get(1).getName());
+    }
+
+    private void thenTokenIsIssuedForLatestIdentity(final String intendedConsumer) throws Exception {
+        awaitStart();
+
+        final TokenIssueRequest request = latestIssueRequestFor(intendedConsumer);
+
+        assertEquals(latestIdentityName(), request.getIdentityName());
+        assertEquals(Collections.singleton(intendedConsumer), request.getIntendedConsumers());
+    }
+
+    private void thenTokenIsIssuedWithLifetime(final String intendedConsumer, final Duration lifetime)
+            throws Exception {
+        awaitStart();
+
+        final TokenIssueRequest request = latestIssueRequestFor(intendedConsumer);
+
+        assertEquals(lifetime,
+                Duration.between(request.getNotBefore().orElseThrow(), request.getExpiresAt().orElseThrow()));
+    }
+
+    private void thenTokenPairIsIssuedTimes(final int times) {
+        assertEquals(times, this.issuedAccessTokenCount.get());
+        assertEquals(times, this.issuedRefreshTokenCount.get());
+    }
+
+    private void thenNoTokenIsIssued() throws Exception {
+        verify(this.tokenIssuingService, never()).issue(any(TokenIssueRequest.class));
+    }
+
+    private void thenImageIsPulledBeforeTokenPairIsIssuedAndContainerIsStarted() throws Exception {
+        awaitStart();
+
+        final InOrder order = inOrder(this.containerOrchestrationService, this.tokenIssuingService);
+        order.verify(this.containerOrchestrationService).pullImage(any(ImageConfiguration.class));
+        order.verify(this.tokenIssuingService, atLeastOnce()).issue(any(TokenIssueRequest.class));
+        order.verify(this.containerOrchestrationService).startContainer(any(ContainerConfiguration.class));
+    }
+
+    private void thenImageIsPulledTimes(final int times) {
+        assertEquals(times, this.pullCount.get());
+    }
+
+    private void thenStartContainerReceivesJwtEnvironment() throws Exception {
+        awaitStart();
+
+        final List<String> envVars = latestConfiguration().getContainerEnvVars();
+
+        assertTrue(envVars.contains("KURA_IDENTITY_NAME=" + latestIdentityName()));
+        assertTrue(envVars.contains("KURA_JWT_FILE=" + JWT_FILE_CONTAINER_PATH));
+        assertTrue(envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
+        assertTrue(envVars.stream().noneMatch(envVar -> envVar.startsWith("KURA_TOKEN_FILE=")));
     }
 
     private void thenTemporaryIdentityIsDeleted() throws Exception {
         awaitCounterAtLeast(this.deleteCount, 1);
-        assertEquals("Temporary identity was not deleted", 1, this.deleteCount.get());
-        verify(this.identityService).deleteIdentity(this.capturedIdentityNames.get(0));
-    }
-
-    private void thenTemporaryIdentityIsDeletedOnlyOnce() throws Exception {
-        awaitCounterAtLeast(this.deleteCount, 1);
-        assertEquals("Temporary identity was not deleted", 1, this.deleteCount.get());
-        verify(this.identityService, times(1)).deleteIdentity(this.capturedIdentityNames.get(0));
+        assertEquals(1, this.deleteCount.get());
+        verify(this.identityService).deleteIdentity(this.createdIdentities.get(0).getName());
     }
 
     private void thenTemporaryIdentityIsRecreated() throws Exception {
         awaitCounterAtLeast(this.createCount, 2);
         awaitCounterAtLeast(this.deleteCount, 1);
-        awaitCounterAtLeast(this.startCount, 2);
 
-        assertEquals("Temporary identities were not created twice", 2, this.createCount.get());
-        assertEquals("Original temporary identity was not cleaned up", 1, this.deleteCount.get());
-        assertTrue("Container was not started twice", this.startLatch.await(5, TimeUnit.SECONDS));
-    }
-
-    private void thenLatestContainerStartReceivesRefreshedPassword() throws Exception {
-        // Extract the latest token from captured IdentityConfiguration
-        final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
-
-        // Verify the latest token file contains this password
-        final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
-        final ContainerConfiguration latestConfiguration = configurations.get(configurations.size() - 1);
-
-        thenTokenFileContains(latestConfiguration, latestPassword);
-    }
-
-    private void thenTemporaryIdentityCreationIsRetriedWithSuffixedName() throws Exception {
-        awaitCounterAtLeast(this.createCount, 2);
-
-        final String expectedBaseName = "container_" + CONTAINER_NAME.replace("-", "_");
-        assertEquals("First identity creation should use base name", expectedBaseName, this.capturedIdentityNames.get(0));
-        assertEquals("Second identity creation should use suffixed name", expectedBaseName + "_1",
-                this.capturedIdentityNames.get(1));
+        assertEquals(2, this.createCount.get());
+        assertEquals(1, this.deleteCount.get());
+        verify(this.identityService).deleteIdentity(this.createdIdentities.get(0).getName());
+        assertTrue(latestConfiguration().getContainerEnvVars().contains("KURA_IDENTITY_NAME=" + latestIdentityName()));
     }
 
     private void thenRestBaseUrlIs(final String expectedBaseUrl) throws Exception {
-        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+        awaitStart();
 
-        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
-        final List<String> envVars = configuration.getContainerEnvVars();
-        final String expectedEnvVar = "KURA_REST_BASE_URL=" + expectedBaseUrl;
-
-        assertTrue("Base URL env var did not match expected value", envVars.contains(expectedEnvVar));
+        assertTrue(latestConfiguration().getContainerEnvVars().contains("KURA_REST_BASE_URL=" + expectedBaseUrl));
     }
 
-    private void thenTemporaryPasswordIsCleared() throws Exception {
-        final Field field = ContainerInstance.class.getDeclaredField("currentTemporaryPassword");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        final AtomicReference<char[]> passwordRef = (AtomicReference<char[]>) field.get(this.containerInstance);
+    private void thenStartContainerReceivesReadOnlyJwtFileVolume() throws Exception {
+        awaitStart();
 
-        assertTrue("Temporary password should be cleared", passwordRef.get() == null);
-    }
+        final Path jwtFile = jwtFileHostPathOf(latestConfiguration());
 
-    private void thenTemporaryPasswordArrayIsCleared() throws Exception {
-        if (this.lastTemporaryPassword == null) {
-            return;
-        }
-
-        for (char value : this.lastTemporaryPassword) {
-            assertTrue("Temporary password array should be cleared", value == '\0');
-        }
-    }
-
-    private void thenStartContainerReceivesReadOnlyTokenVolume() throws Exception {
-        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
-
-        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
-        final Path tokenFile = tokenHostPathOf(configuration);
-
-        assertTrue("Token file should live under the tmpfs base",
-                tokenFile.startsWith(Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "kura-tokens")));
-        assertEquals("Unexpected token file name", "kura-token", tokenFile.getFileName().toString());
+        assertTrue(jwtFile.startsWith(Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "kura-tokens")));
+        assertEquals("kura-jwt.json", jwtFile.getFileName().toString());
     }
 
     private void thenStartContainerReceivesUserConfiguredVolume() {
-        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
-
-        assertEquals("User configured volume should be preserved", "/container/data",
-                configuration.getContainerVolumes().get("/host/data"));
+        assertEquals("/container/data", latestConfiguration().getContainerVolumes().get("/host/data"));
     }
 
-    private void thenTokenFileContains(final ContainerConfiguration configuration, final String expectedPassword)
+    private void thenJwtFileContainsTokenPair(final ContainerConfiguration configuration, final int tokenPairNumber)
             throws Exception {
-        final Path tokenFile = tokenHostPathOf(configuration);
+        final Path jwtFile = jwtFileHostPathOf(configuration);
+        final JsonObject tokenPair = new Gson()
+                .fromJson(new String(Files.readAllBytes(jwtFile), StandardCharsets.UTF_8), JsonObject.class);
 
-        assertTrue("Token file should exist", Files.exists(tokenFile));
-        assertEquals("Token file should contain only the password", expectedPassword,
-                new String(Files.readAllBytes(tokenFile), StandardCharsets.UTF_8));
+        assertEquals("Bearer", tokenPair.get("tokenType").getAsString());
+        assertEquals("access-token-" + tokenPairNumber, tokenPair.get("accessToken").getAsString());
+        assertEquals("refresh-token-" + tokenPairNumber, tokenPair.get("refreshToken").getAsString());
     }
 
-    private void thenTokenFileIsDeleted(final ContainerConfiguration configuration) {
-        final Path tokenFile = tokenHostPathOf(configuration);
+    private void thenJwtFileIsDeleted(final ContainerConfiguration configuration) {
+        final Path jwtFile = jwtFileHostPathOf(configuration);
 
-        assertFalse("Token file should be deleted", Files.exists(tokenFile));
-        assertFalse("Token directory should be deleted", Files.exists(tokenFile.getParent()));
+        assertFalse(Files.exists(jwtFile));
+        assertFalse(Files.exists(jwtFile.getParent()));
+    }
+
+    private void thenContainerIsStartedTimes(final int times) throws Exception {
+        awaitCounterAtLeast(this.startCount, times);
+        assertEquals(times, this.startCount.get());
     }
 
     private void thenContainerIsNeverStarted() throws Exception {
-        verify(this.containerOrchestrationService, Mockito.never())
-                .startContainer(Mockito.any(ContainerConfiguration.class));
+        verify(this.containerOrchestrationService, never()).startContainer(any(ContainerConfiguration.class));
     }
 
     private void thenSurvivingContainerIsRecreated(final String containerId) throws Exception {
-        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+        awaitStart();
+
         verify(this.containerOrchestrationService).stopContainer(containerId);
         verify(this.containerOrchestrationService).deleteContainer(containerId);
     }
 
-    private Path tokenHostPathOf(final ContainerConfiguration configuration) {
-        return configuration.getContainerVolumes().entrySet().stream()
-                .filter(entry -> TOKEN_VOLUME_VALUE.equals(entry.getValue()))
-                .map(entry -> Paths.get(entry.getKey()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("token volume not found in container configuration"));
+    /*
+     * Helpers
+     */
+
+    private String issueToken(final TokenIssueRequest request) {
+        this.issueRequests.add(request);
+
+        if (request.getIntendedConsumers().contains(ACCESS_TOKEN_CONSUMER)) {
+            return "access-token-" + this.issuedAccessTokenCount.incrementAndGet();
+        }
+
+        return "refresh-token-" + this.issuedRefreshTokenCount.incrementAndGet();
     }
 
-    private void thenWaitForContainerState(String expectedState) throws InterruptedException {
+    private TokenIssueRequest latestIssueRequestFor(final String intendedConsumer) {
+        return this.issueRequests.stream().filter(request -> request.getIntendedConsumers().contains(intendedConsumer))
+                .reduce((first, second) -> second)
+                .orElseThrow(() -> new AssertionError("no token issued for " + intendedConsumer));
+    }
+
+    private String latestIdentityName() {
+        return this.createdIdentities.get(this.createdIdentities.size() - 1).getName();
+    }
+
+    private ContainerConfiguration latestConfiguration() {
+        final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
+        return configurations.get(configurations.size() - 1);
+    }
+
+    private Path jwtFileHostPathOf(final ContainerConfiguration configuration) {
+        return configuration.getContainerVolumes().entrySet().stream()
+                .filter(entry -> JWT_FILE_VOLUME_VALUE.equals(entry.getValue())).map(entry -> Paths.get(entry.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("JWT file volume not found in container configuration"));
+    }
+
+    private void awaitStart() throws InterruptedException {
+        assertTrue("Container start was not invoked", this.startLatch.await(5, TimeUnit.SECONDS));
+    }
+
+    private void waitForContainerState(final String expectedState) throws InterruptedException {
         int attempts = 50;
         while (!expectedState.equals(this.containerInstance.getState()) && attempts-- > 0) {
             Thread.sleep(100);
         }
+        assertEquals(expectedState, this.containerInstance.getState());
     }
 
     private void awaitCounterAtLeast(final AtomicInteger counter, final int expected) throws InterruptedException {

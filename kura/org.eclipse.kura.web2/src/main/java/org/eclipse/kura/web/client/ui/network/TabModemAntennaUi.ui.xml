@@ -136,7 +136,7 @@
         <b:Column size="MD_5" addStyleNames="{style.center-panel}" visibleOn="MD_LG">
             <b:Column size="MD_12">
                 <b:Row>
-                    <b:Panel>
+                    <b:Panel ui:field="helpPanel">
                         <b:PanelHeader addStyleNames="{style.help-header}" ui:field="helpTitle" />
                         <b:PanelBody>
                             <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />

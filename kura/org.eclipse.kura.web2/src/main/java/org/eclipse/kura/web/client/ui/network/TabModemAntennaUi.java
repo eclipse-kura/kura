@@ -23,6 +23,7 @@ import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.InlineRadio;
+import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -95,6 +96,8 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
     InlineRadio radio1;
 
     @UiField
+    Panel helpPanel;
+    @UiField
     PanelHeader helpTitle;
 
     @UiField
@@ -116,8 +119,10 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
         this.isNet2 = isNet2;
         initForm();
 
-        // the NetworkManager based backend does not apply the diversity antenna setting
+        // the NetworkManager based backend does not apply the diversity antenna setting, which is also the only
+        // option described in the help panel
         this.antennaGroup.setVisible(!isNet2);
+        this.helpPanel.setVisible(!isNet2);
 
         this.antennaHelp.setHelpText(MSGS.netModemToolTipAntenna());
         this.labelRegistration.setText(MSGS.netHwRegistration());

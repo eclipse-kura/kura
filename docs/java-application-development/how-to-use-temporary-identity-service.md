@@ -81,14 +81,14 @@ public class TemporaryIdentityExample {
 
 ## REST Authentication Example
 
-When the Container Orchestration Provider provisions a temporary identity for a container, it delivers the password through a read-only file whose path is exported in the `KURA_TOKEN_FILE` environment variable (see [Container Identity Integration](/core-services/container-orchestration-provider-usage/#container-identity-integration)):
+When the Container Orchestration Provider provisions a temporary identity for a container, the identity has no password: the container receives a JWT token pair issued for it, through a read-only file whose path is exported in the `KURA_JWT_FILE` environment variable (see [Container Identity Integration](/core-services/container-orchestration-provider-usage/#container-identity-integration)):
 
 ```bash
-curl -k -u "${KURA_IDENTITY_NAME}:$(cat "${KURA_TOKEN_FILE}")" \
-  "${KURA_REST_BASE_URL}/system/info"
+curl -k -H "Authorization: Bearer $(jq -r .accessToken "${KURA_JWT_FILE}")" \
+  "${KURA_REST_BASE_URL}/system/v1/properties/framework"
 ```
 
-Basic authentication must be enabled in the **RestService** configuration for password-based access. Certificate-based access requires certificate authentication to be enabled and a client certificate whose CN matches the temporary identity name.
+JWT authentication must be enabled in the **RestService** configuration. A temporary identity created through the API with a password can instead be used for password-based access, which requires Basic authentication to be enabled. Certificate-based access requires certificate authentication to be enabled and a client certificate whose CN matches the temporary identity name.
 
 ## Best Practices
 

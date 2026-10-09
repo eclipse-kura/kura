@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2026 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>5.6.3-SNAPSHOT</version>
+    </parent>
+
+    <!--
+        Consolidated JaCoCo report for the whole codebase: merges the execution data produced by
+        every test module and reports it against the classes of all the bundles in the reactor.
+        Must be the last module of the reactor, see the coverage-report profile in the parent pom.
+    -->
+    <artifactId>coverage-report</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
+        <jacoco.merged.file>${project.build.directory}/jacoco.exec</jacoco.merged.file>
+        <jacoco.report.directory>${project.build.directory}/site/jacoco-aggregate</jacoco.report.directory>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>org.jacoco.ant</artifactId>
+                        <version>${jacoco.version}</version>
+                        <classifier>nodeps</classifier>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>jacoco-consolidated-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <jacoco:merge xmlns:jacoco="antlib:org.jacoco.ant"
+                                    destfile="${jacoco.merged.file}">
+                                    <fileset dir="${kura.basedir}/test" includes="*/target/jacoco.exec" />
+                                </jacoco:merge>
+
+                                <!-- same exclusions as the Sonar analysis in the Jenkinsfile -->
+                                <property name="coverage.excludes"
+                                    value="org/freedesktop/**,fi/w1/**,**/LibGpiodV1Native.class,**/LibGpiodV1Native$*.class,**/LibGpiodV2Native.class,**/LibGpiodV2Native$*.class" />
+
+                                <!-- one group per bundle, like report-aggregate does: some classes are
+                                    duplicated across bundles (e.g. net.admin and net.admin.firewall) and
+                                    cannot be analyzed in the same group -->
+                                <pathconvert property="coverage.groups" pathsep="${line.separator}">
+                                    <sort>
+                                        <dirset dir="${kura.basedir}">
+                                            <include name="*" />
+                                            <include name="emulator/*" />
+                                            <exclude name="test" />
+                                            <exclude name="test-util" />
+                                            <exclude name="org.eclipse.kura.web2" />
+                                            <!-- skip leftovers of bundles that are no longer in the reactor
+                                                (e.g. after a branch switch) -->
+                                            <present targetdir="${kura.basedir}">
+                                                <mapper type="glob" from="*" to="*/pom.xml" />
+                                            </present>
+                                            <present targetdir="${kura.basedir}">
+                                                <mapper type="glob" from="*" to="*/target/classes" />
+                                            </present>
+                                        </dirset>
+                                    </sort>
+                                    <mapper type="regexp" from="^(.*[/\\]([^/\\]+))$"
+                                        to="&lt;group name='\2'&gt;&lt;classfiles&gt;&lt;fileset dir='\1/target/classes' includes='**/*.class' excludes='${coverage.excludes}' /&gt;&lt;/classfiles&gt;&lt;sourcefiles encoding='${project.build.sourceEncoding}'&gt;&lt;fileset dir='\1/src/main/java' erroronmissingdir='false' /&gt;&lt;/sourcefiles&gt;&lt;/group&gt;" />
+                                </pathconvert>
+
+                                <echo file="${project.build.directory}/jacoco-report.xml"><![CDATA[
+<project name="jacoco-report" default="report" xmlns:jacoco="antlib:org.jacoco.ant">
+    <target name="report">
+        <jacoco:report>
+            <executiondata>
+                <file file="${jacoco.merged.file}" />
+            </executiondata>
+            <structure name="Eclipse Kura">
+${coverage.groups}
+            </structure>
+            <html destdir="${jacoco.report.directory}" />
+            <xml destfile="${jacoco.report.directory}/jacoco.xml" />
+            <csv destfile="${jacoco.report.directory}/jacoco.csv" />
+        </jacoco:report>
+    </target>
+</project>
+]]></echo>
+                                <ant antfile="${project.build.directory}/jacoco-report.xml" inheritall="false" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

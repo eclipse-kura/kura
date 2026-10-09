@@ -65,9 +65,11 @@
                                     <fileset dir="${kura.basedir}/test" includes="*/target/jacoco.exec" />
                                 </jacoco:merge>
 
-                                <!-- same exclusions as the Sonar analysis in the Jenkinsfile -->
+                                <!-- same exclusions as the Sonar analysis in the Jenkinsfile, plus the classes
+                                    compiled from target/generated-sources (protobuf/gRPC stubs of
+                                    ai.triton.server and sparkplug), that Sonar skips being outside src/main/java -->
                                 <property name="coverage.excludes"
-                                    value="org/freedesktop/**,fi/w1/**,**/LibGpiodV1Native.class,**/LibGpiodV1Native$*.class,**/LibGpiodV2Native.class,**/LibGpiodV2Native$*.class" />
+                                    value="org/freedesktop/**,fi/w1/**,**/LibGpiodV1Native.class,**/LibGpiodV1Native$*.class,**/LibGpiodV2Native.class,**/LibGpiodV2Native$*.class,inference/**,org/eclipse/tahu/protobuf/**" />
 
                                 <!-- one group per bundle, like report-aggregate does: some classes are
                                     duplicated across bundles (e.g. net.admin and net.admin.firewall) and

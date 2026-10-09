@@ -105,7 +105,9 @@ curl -k -X POST -H 'Content-Type: text/plain' --data "$REFRESH_TOKEN" \
       * **400**
           * **description** : The request body is empty.
       * **401**
-          * **description** : The refresh token is invalid, expired, already used or not a refresh token, or its identity does not exist or must change its password.
+          * **description** : The refresh token is invalid, expired, already used or not a refresh token, or its identity does not exist.
+      * **403**
+          * **description** : The identity must change its password.
       * **404**
           * **description** : JWT authentication is disabled or no token issuing or verification service matches the configured targets.
       * **413**

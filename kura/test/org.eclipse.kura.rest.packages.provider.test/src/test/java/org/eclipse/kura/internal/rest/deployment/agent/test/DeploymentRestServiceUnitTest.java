@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.rest.deployment.agent.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -30,11 +31,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -50,6 +56,7 @@ import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Test;
 import org.osgi.framework.Version;
+import org.mockito.ArgumentCaptor;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
@@ -74,6 +81,7 @@ public class DeploymentRestServiceUnitTest {
     private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
 
     private MarketplacePackageDescriptor resultingMarketplacePackageDescriptor;
+    private Set<String> uploadedFilesBefore;
 
     @Test
     public void installDeploymentPackageWorksWithAreadyIssuedRequest() throws Exception {
@@ -293,6 +301,32 @@ public class DeploymentRestServiceUnitTest {
                 .isCompatible(true).build());
     }
 
+    @Test
+    public void installUploadedDeploymentPackageDeletesFileOnInputStreamReadFailure() throws Exception {
+        givenDeploymentRestService();
+        givenAMockInputStreamThrowingOnRead();
+        givenAMockFormDataContentWithFileName("mock.dp");
+        givenTheUploadedFilesInTmpDir();
+
+        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockInputStream, this.mockFormDataContent);
+
+        thenExceptionOccurred(WebApplicationException.class);
+        thenNoUploadedFileIsLeftInTmpDir();
+    }
+
+    @Test
+    public void installUploadedDeploymentPackageDeletesFileOnInstallFailure() throws Exception {
+        givenDeploymentRestService();
+        givenAMockInputStream();
+        givenAMockFormDataContentWithFileName("mock.dp");
+        givenDeploymentAgentServiceThrowsExceptionOnInstall();
+
+        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockInputStream, this.mockFormDataContent);
+
+        thenExceptionOccurred(WebApplicationException.class);
+        thenUploadedFilePassedToDeploymentAgentServiceIsDeleted();
+    }
+
     /*
      * GIVEN
      */
@@ -352,6 +386,10 @@ public class DeploymentRestServiceUnitTest {
     private void givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor() {
         when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any()))
                 .thenThrow(new RuntimeException());
+    }
+
+    private void givenTheUploadedFilesInTmpDir() {
+        this.uploadedFilesBefore = listUploadedFilesInTmpDir();
     }
 
     /*
@@ -473,6 +511,16 @@ public class DeploymentRestServiceUnitTest {
         verify(this.mockDeploymentAgentService, never()).uninstallDeploymentPackageAsync(any());
     }
 
+    private void thenNoUploadedFileIsLeftInTmpDir() {
+        assertEquals(this.uploadedFilesBefore, listUploadedFilesInTmpDir());
+    }
+
+    private void thenUploadedFilePassedToDeploymentAgentServiceIsDeleted() throws Exception {
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.mockDeploymentAgentService, times(1)).installDeploymentPackageAsync(urlCaptor.capture());
+        assertFalse(new File(new URI(urlCaptor.getValue())).exists());
+    }
+
     private void thenResultingPackageDescriptorEquals(MarketplacePackageDescriptor expectedDescriptor) {
         assertEquals(expectedDescriptor, this.resultingMarketplacePackageDescriptor);
     }
@@ -481,4 +529,16 @@ public class DeploymentRestServiceUnitTest {
         verify(this.mockDeploymentAgentService, times(1)).getMarketplacePackageDescriptor(expectedUrl);
     }
 
+    /*
+     * Utilities
+     */
+
+    private static Set<String> listUploadedFilesInTmpDir() {
+        File[] files = new File(System.getProperty(JAVA_IO_TMPDIR)).listFiles((dir, name) -> name.endsWith(".dp"));
+        if (files == null) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(files).map(File::getName).collect(Collectors.toSet());
+    }
+    
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -163,10 +163,9 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * Installs the deployment package specified in the {@link InstallRequest}. If
-     * the request was already issued for
-     * the same {@link InstallRequest}, it returns the status of the installation
-     * process.
+     * Installs the deployment package specified in the {@link InstallRequest}. 
+     * If the request was already issued for the same {@link InstallRequest}, 
+     * it returns the status of the installation process.
      *
      * @param installRequest
      * @return a {@link DeploymentRequestStatus} object that represents the status
@@ -231,19 +230,17 @@ public class DeploymentRestService {
             if (!file.createNewFile()) {
                 throw new IOException("File " + uploadedFileLocation + " was not created");
             }
-            file.deleteOnExit();
         } catch (IOException e) {
             logger.warn("Cannot create file: {}, caused by", file, e);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
 
-        try {
-            FileOutputStream os = new FileOutputStream(file);
+        try (FileOutputStream os = new FileOutputStream(file)) {
             IOUtils.copy(uploadedInputStream, os);
-            os.close();
         } catch (IOException e) {
             logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
+            deleteUploadedFile(file);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
@@ -254,11 +251,22 @@ public class DeploymentRestService {
             this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
         } catch (Exception e) {
             logger.warn("Cannot install deployment package : {}, caused by", uploadedFileName, e);
+            deleteUploadedFile(file);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
 
+        file.deleteOnExit();
+
         return DeploymentRequestStatus.REQUEST_RECEIVED;
+    }
+
+    private static void deleteUploadedFile(File file) {
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            logger.warn("Cannot delete uploaded file: {}", file.getAbsolutePath(), e);
+        }
     }
 
     /**

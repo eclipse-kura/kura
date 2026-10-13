@@ -14,7 +14,7 @@ def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
 node {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
-        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '3')),
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '3')),
         gitLabConnection('gitlab.eclipse.org'),
         [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
         [$class: 'JobLocalConfiguration', changeReasonComment: '']
@@ -69,7 +69,7 @@ node {
 
     stage('Archive .deb artifacts') {
         dir("kura") {
-            archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
+            archiveArtifacts artifacts: 'kura/distrib/target/*generic*.deb', onlyIfSuccessful: true
         }
     }
 

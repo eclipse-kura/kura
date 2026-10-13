@@ -427,6 +427,21 @@ public class ContainerIdentityIntegrationTest {
     }
 
     @Test
+    public void deletesTemporaryIdentityWhenOrchestratorIsDisabledBeforeContainerExists() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentitiesCanBeCreated();
+        givenTokenIssuingServiceIsBound();
+        givenContainerOrchestratorBlocksOnStart();
+
+        whenContainerInstanceIsActivatedUntilStartIsInvoked();
+        whenContainerOrchestratorIsDisabled();
+
+        thenContainerInstanceIsDisabled();
+        thenTemporaryIdentityIsDeleted();
+        thenJwtFileIsDeleted(this.configurationCaptor.getValue());
+    }
+
+    @Test
     public void deletesJwtFileOnConfigurationChange() throws Exception {
         givenIdentityIntegrationIsEnabled();
         givenTemporaryIdentitiesCanBeCreated();
@@ -623,6 +638,21 @@ public class ContainerIdentityIntegrationTest {
         }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
     }
 
+    private void givenContainerOrchestratorBlocksOnStart() throws Exception {
+        final CountDownLatch neverReleased = new CountDownLatch(1);
+
+        doAnswer(invocation -> {
+            this.startCount.incrementAndGet();
+            this.startLatch.countDown();
+            try {
+                neverReleased.await(10, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
+        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
+    }
+
     private void givenUserConfiguredVolume() {
         this.properties.put("container.volume", "/host/data:/container/data");
     }
@@ -681,6 +711,15 @@ public class ContainerIdentityIntegrationTest {
     private void whenContainerInstanceIsActivatedUntilDisabled() throws InterruptedException {
         this.containerInstance.activate(this.properties);
         waitForContainerState("Disabled");
+    }
+
+    private void whenContainerInstanceIsActivatedUntilStartIsInvoked() throws InterruptedException {
+        this.containerInstance.activate(this.properties);
+        awaitStart();
+    }
+
+    private void whenContainerOrchestratorIsDisabled() {
+        this.containerInstance.onDisabled();
     }
 
     private void whenContainerConfigurationIsUpdatedWithNewName() throws InterruptedException {
@@ -805,6 +844,10 @@ public class ContainerIdentityIntegrationTest {
         assertTrue(envVars.contains("KURA_JWT_FILE=" + JWT_FILE_CONTAINER_PATH));
         assertTrue(envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
         assertTrue(envVars.stream().noneMatch(envVar -> envVar.startsWith("KURA_TOKEN_FILE=")));
+    }
+
+    private void thenContainerInstanceIsDisabled() throws InterruptedException {
+        waitForContainerState("Disabled");
     }
 
     private void thenTemporaryIdentityIsDeleted() throws Exception {

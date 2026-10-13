@@ -572,6 +572,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 logger.warn("failed to check container state", e);
             }
 
+            cleanupTemporaryIdentity();
             return new Disabled(this.options);
         }
 

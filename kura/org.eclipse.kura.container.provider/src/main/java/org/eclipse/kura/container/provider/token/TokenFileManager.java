@@ -14,9 +14,17 @@
 package org.eclipse.kura.container.provider.token;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.channels.Channels;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -34,6 +42,11 @@ class TokenFileManager {
     static final String DEFAULT_TMPFS_BASE = "/dev/shm";
     static final String TOKENS_DIRECTORY_NAME = "kura-tokens";
     static final String TOKEN_FILE_NAME = "kura-jwt.json";
+
+    private static final FileAttribute<Set<PosixFilePermission>> OWNER_ONLY_DIRECTORY = PosixFilePermissions
+            .asFileAttribute(PosixFilePermissions.fromString("rwx------"));
+    private static final FileAttribute<Set<PosixFilePermission>> OWNER_READ_ONLY_FILE = PosixFilePermissions
+            .asFileAttribute(PosixFilePermissions.fromString("r--------"));
 
     private static final Logger logger = LoggerFactory.getLogger(TokenFileManager.class);
 
@@ -58,15 +71,19 @@ class TokenFileManager {
         final Path tokenFile = directory.resolve(TOKEN_FILE_NAME);
 
         try {
-            Files.createDirectories(directory);
-            // Restrict both the shared "kura-tokens" root and the per-token UUID directory to the owner so that
-            // the token file cannot be traversed to by other local users.
-            setPosixPermissions(tokensRoot, "rwx------");
-            setPosixPermissions(directory, "rwx------");
+            Files.createDirectories(tokensRoot, OWNER_ONLY_DIRECTORY);
 
-            Files.write(tokenFile, content);
+            if (!Files.isDirectory(tokensRoot, LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException(tokensRoot.toAbsolutePath() + " is not a directory");
+            }
 
-            setPosixPermissions(tokenFile, "r--------");
+            Files.createDirectory(directory, OWNER_ONLY_DIRECTORY);
+
+            if (!Files.getOwner(directory).equals(Files.getOwner(tokensRoot, LinkOption.NOFOLLOW_LINKS))) {
+                throw new IOException(tokensRoot.toAbsolutePath() + " is not owned by the Kura user");
+            }
+
+            writeAndSetPermissions(tokenFile, content, OWNER_READ_ONLY_FILE);
         } catch (final IOException e) {
             deleteBestEffort(tokenFile, directory);
             throw new KuraException(KuraErrorCode.IO_ERROR, e,
@@ -89,24 +106,20 @@ class TokenFileManager {
         deleteBestEffort(directory.resolve(TOKEN_FILE_NAME), directory);
     }
 
-    private static void setPosixPermissions(final Path path, final String permissions) throws IOException {
-        try {
-            Files.setPosixFilePermissions(path,
-                    java.nio.file.attribute.PosixFilePermissions.fromString(permissions));
-        } catch (final UnsupportedOperationException e) {
-            // Non-POSIX platform (e.g. Windows during development): nothing we can do, warn and continue.
-            logger.warn("POSIX file permissions are not supported, unable to restrict access to {}", path, e);
-        }
-        // An IOException here means we could not restrict access on a POSIX platform: let it propagate so that the
-        // caller aborts and deletes the partially created token rather than exposing a world-readable secret.
-    }
-
     private static void deleteBestEffort(final Path tokenFile, final Path directory) {
         try {
             Files.deleteIfExists(tokenFile);
             Files.deleteIfExists(directory);
         } catch (final IOException e) {
             logger.warn("failed to delete token directory {}", directory, e);
+        }
+    }
+
+    private static void writeAndSetPermissions(final Path tokenFile, final byte[] content,
+            final FileAttribute<Set<PosixFilePermission>> permissions) throws IOException {
+        try (OutputStream out = Channels.newOutputStream(Files.newByteChannel(tokenFile,
+                Set.of(StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE), permissions))) {
+            out.write(content);
         }
     }
 }

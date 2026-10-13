@@ -17,6 +17,7 @@ package org.eclipse.kura.container.provider.token;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -29,6 +30,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraException;
 import org.junit.After;
@@ -53,6 +55,7 @@ public class TokenFileManagerTest {
     private TokenFileManager tokenFileManager;
     private Path tokenFile;
     private KuraException writeException;
+    private Path foreignDirectory;
 
     @Before
     public void setUp() {
@@ -163,9 +166,42 @@ public class TokenFileManagerTest {
         assertTrue("New token file should exist", Files.exists(this.tokenFile));
     }
 
+    @Test
+    public void refusesSymlinkedTokensDirectory() throws Exception {
+        givenPosixFileSystem();
+        givenTokensDirectoryIsSymlinkToForeignDirectory();
+
+        whenTokenWriteIsAttempted();
+
+        thenWriteFailed();
+        thenForeignDirectoryIsEmpty();
+    }
+
+    @Test
+    public void refusesTokensPathThatIsNotADirectory() throws Exception {
+        givenTokensPathIsRegularFile();
+
+        whenTokenWriteIsAttempted();
+
+        thenWriteFailed();
+    }
+
     /*
      * Steps
      */
+
+    private Path tokensRoot() {
+        return this.tmpfsBase.getRoot().toPath().resolve("kura-tokens");
+    }
+
+    private void givenTokensDirectoryIsSymlinkToForeignDirectory() throws Exception {
+        this.foreignDirectory = this.tmpfsBase.newFolder("foreign").toPath();
+        Files.createSymbolicLink(tokensRoot(), this.foreignDirectory);
+    }
+
+    private void givenTokensPathIsRegularFile() throws Exception {
+        Files.createFile(tokensRoot());
+    }
 
     private void givenPosixFileSystem() {
         Assume.assumeTrue("POSIX permissions are not supported on this platform",
@@ -182,6 +218,16 @@ public class TokenFileManagerTest {
             fail("write should have thrown a KuraException");
         } catch (final KuraException e) {
             this.writeException = e;
+        }
+    }
+
+    private void thenWriteFailed() {
+        assertNotNull("A KuraException should be thrown", this.writeException);
+    }
+
+    private void thenForeignDirectoryIsEmpty() throws Exception {
+        try (Stream<Path> entries = Files.list(this.foreignDirectory)) {
+            assertEquals("Nothing should be written through the symlink", 0, entries.count());
         }
     }
 

@@ -45,58 +45,6 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
     /**
      * The basic Constructor for a DhcpServerConfigIP
      *
-     * @param interfaceName
-     *                         the interface name associated with the
-     *                         DhcpServerConfig
-     * @param enabled
-     *                         the status of the DhcpServer as a boolean
-     * @param subnet
-     *                         the subnet of the DhcpServerConfig
-     * @param routerAddress
-     *                         the router IPAddress
-     * @param subnetMask
-     *                         the subnet mask of the DhcpServerConfig
-     * @param defaultLeaseTime
-     *                         the default lease time to issue to DHCP clients
-     * @param maximumLeaseTime
-     *                         the maximum lease time to issue to DHCP clients
-     * @param prefix
-     *                         the network prefix associated with the
-     *                         DhcpServerConfig
-     * @param rangeStart
-     *                         the network starting address to issue to DHCP clients
-     * @param rangeEnd
-     *                         the network ending address to issue to DHCP clients
-     * @param passDns
-     *                         whether or not to pass DNS to DHCP clients
-     * @param dnsServers
-     *                         the DNS servers that will get passed to DHCP clients
-     *                         if passDns is true
-     */
-    @Deprecated
-    @SuppressWarnings("checkstyle:parameterNumber")
-    public DhcpServerConfigIP(String interfaceName, boolean enabled, T subnet, T routerAddress, T subnetMask,
-            int defaultLeaseTime, int maximumLeaseTime, short prefix, T rangeStart, T rangeEnd, boolean passDns,
-            List<T> dnsServers) {
-        super();
-
-        this.interfaceName = interfaceName;
-        this.enabled = enabled;
-        this.subnet = subnet;
-        this.routerAddress = routerAddress;
-        this.subnetMask = subnetMask;
-        this.defaultLeaseTime = defaultLeaseTime;
-        this.maximumLeaseTime = maximumLeaseTime;
-        this.prefix = prefix;
-        this.rangeStart = rangeStart;
-        this.rangeEnd = rangeEnd;
-        this.passDns = passDns;
-        this.dnsServers = dnsServers;
-    }
-
-    /**
-     * The basic Constructor for a DhcpServerConfigIP
-     *
      * @param dhcpServerCfg
      *                        DHCP server configuration
      * @param dhcpServerCfgIP

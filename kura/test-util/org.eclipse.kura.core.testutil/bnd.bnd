@@ -23,7 +23,7 @@ Import-Package: \
     org.eclipse.kura;version="[1.6,2.0)",\
     org.eclipse.kura.configuration;version="[1.2,2.0)",\
     org.eclipse.kura.core.data.util;version="[1.0,2.0)",\
-    org.eclipse.kura.data;version="[1.1,2.0)",\
+    org.eclipse.kura.data;version="[2.0,3.0)",\
     org.eclipse.kura.data.transport.listener;version="[1.0,2.0)",\
     org.eclipse.kura.marshalling;version="[1.0,2.0)",\
     org.eclipse.kura.message;version="[1.4,2.0)",\

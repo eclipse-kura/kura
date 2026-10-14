@@ -93,6 +93,9 @@ The properties are not present in the start scripts by default. To enable one of
 
 and restart Kura. The properties are read only at startup and cannot be modified through the REST APIs, the cloud request handlers or the Kura Web UI. A warning is logged at startup for each enabled property.
 
+!!! note
+    The properties are taken into account only if they are specified as `-D` options on the Java command line of the Kura process. The same properties set through other mechanisms, for example in the Equinox `config.ini` file or in the `JAVA_TOOL_OPTIONS` or `JDK_JAVA_OPTIONS` environment variables, are ignored and a warning is logged. Enabling one of the properties therefore always requires a change of the Java command line used to start Kura.
+
 !!! warning
     These properties restore a less restrictive behaviour: an identity holding `rest.identity` or `rest.configuration` will be able to modify any identity, including the ones holding `kura.admin`. Enable them only if required by existing applications, and only for the time needed to adapt them.
 

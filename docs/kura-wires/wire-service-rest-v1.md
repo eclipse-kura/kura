@@ -86,6 +86,8 @@ The received configuration must satisfy the following requirements. If any of th
 
 If a component already exists on the system and its configuration is supplied as part of the request, the component configuration will be updated. In this case the usual configuration merge semantics will be applied, the set of received properties will be merged with the existing one. The properties in the request body will overwrite the existing ones with the same name.
 
+Starting from Kura 5.6.3, if a component already exists on the system, the `service.factoryPid` property specified in the request must match the factory pid of the existing component, otherwise the request is rejected with the `400` status and no changes are applied to the system.
+
 WireAsset configurations are treated sligtly differently, an update to a WireAsset configuration is performed by deleting the existing component and creating a new instance with the received configuration. This behavior is necessary in order to allow channel removal.
 
 It is also allowed to specify Driver or Asset configurations that are not referenced by the Wire Graph included in the request body.
@@ -189,7 +191,7 @@ It is also allowed to specify Driver or Asset configurations that are not refere
     * **200**
       * **description** : The request succeeded
     * **400**
-      * **description** : The request body is not valid JSON or it contains invalid parameters. This status will be returned also if the request involves the creation of components that are not Wire Components, Driver or Asset instances, or the creation of Wire Components that are not referenced by the current Wire Graph. If this status is retured, no changes will be applied to the system.
+      * **description** : The request body is not valid JSON or it contains invalid parameters. This status will be returned also if the request involves the creation of components that are not Wire Components, Driver or Asset instances, or the creation of Wire Components that are not referenced by the current Wire Graph. Starting from Kura 5.6.3, this status is also returned if the `service.factoryPid` specified for an existing component does not match its factory pid. If this status is retured, no changes will be applied to the system.
       * **response body** :
         * [GenericFailureReport](doc:configuration-v2-rest-apis-and-conf-v2-request-handler#genericfailurereport)
     * **500**

@@ -2,6 +2,9 @@
 
 This page describes the CONF-V2 request handler and `configuration/v2` rest APIs. Accessing the REST APIs requires to use an identity with the `rest.configuration` permission assigned.
 
+!!! note
+    Starting from Kura 5.6.3, the configuration of the UserAdmin persistence component (`org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl`), which contains identities and permissions, is returned and can be updated through the REST APIs only by identities holding the `kura.admin` permission. Snapshot rollback requires `kura.admin` as well. Requests received through the CONF-V2 request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup property that restores the previous behaviour.
+
 - [Request definitions](#request-definitions)
     - [GET/snapshots](#getsnapshots)
     - [GET/factoryComponents](#getfactorycomponents)
@@ -171,7 +174,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### GET/configurableComponents/configurations
   * **REST API path** : `/services/configuration/v2/configurableComponents/configurations`
-  * **description** : Returns all of component configurations available on the system. This request will return the `pid`, `ocd` and `properties`. For password properties, the `placeholder` string will be returned instead of the configured password.
+  * **description** : Returns all of component configurations available on the system. This request will return the `pid`, `ocd` and `properties`. For password properties, the `placeholder` string will be returned instead of the configured password. Starting from Kura 5.6.3, the UserAdmin persistence component configuration is included only if the requesting identity holds the `kura.admin` permission.
   * **responses** :
     * **200**
       * **description** : The request succeeded.
@@ -184,7 +187,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### POST/configurableComponents/configurations/byPid
   * **REST API path** : `/services/configuration/v2/configurableComponents/configurations/byPid`
-  * **description** : Returns a user selected set of configurations. This request will return the `pid`, `ocd` and `properties`. For password properties, the `placeholder` string will be returned instead of the configured password.
+  * **description** : Returns a user selected set of configurations. This request will return the `pid`, `ocd` and `properties`. For password properties, the `placeholder` string will be returned instead of the configured password. Starting from Kura 5.6.3, the UserAdmin persistence component configuration is included only if the requesting identity holds the `kura.admin` permission.
   * **request body** :
     * [PidSet](#pidset)
   * **responses** :
@@ -232,6 +235,8 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
       * **description** : The request body is not valid JSON or it contains invalid parameters.
       * **response body** :
         * [GenericFailureReport](#genericfailurereport)
+    * **403**
+      * **description** : Since Kura 5.6.3, the request includes the UserAdmin persistence component configuration and the requesting identity does not hold the `kura.admin` permission. No changes are applied to the system.
     * **500**
       * **description** : In case of processing errors, the device will attempt to return a detailed error response containing a message describing the failure reason for each operation. The operation ids are the following: `update:$pid` for component update operations, where `$pid` is the pid of the instance, and `snapshot`, for the snapshot creation operation. In case of an unexpected failure, a generic error response will be returned.
       * **response body** :
@@ -258,12 +263,14 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### EXEC/snapshots/_rollback
   * **REST API path** : `/services/configuration/v2/snapshots/_rollback`
-  * **description** : Rollbacks the framework to the last saved snapshot if available. If this request is used through REST API, the POST method must be used.
+  * **description** : Rollbacks the framework to the last saved snapshot if available. If this request is used through REST API, the POST method must be used. Starting from Kura 5.6.3, this request requires the `kura.admin` permission.
   * **responses** :
     * **200**
       * **description** : The request succeeded. The result contains the id of the snapshot used for rollback.
       * **response body** :
         * [SnaphsotId](#snaphsotid)
+    * **403**
+      * **description** : Since Kura 5.6.3, the requesting identity does not hold the `kura.admin` permission.
     * **500**
       * **description** : An unexpected internal error occurred.
       * **response body** :
@@ -271,7 +278,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### GET/snapshots/byId
   * **REST API path** : /services/configuration/v2/snapshots/byId
-  * **description** : Retrieves the snapshot with the given id. Password property values will be returned in plain text.
+  * **description** : Retrieves the snapshot with the given id. Password property values will be returned in plain text. Starting from Kura 5.6.3, the UserAdmin persistence component configuration is included only if the requesting identity holds the `kura.admin` permission.
   * **request body** :
     * [SnaphsotId](#snaphsotid)
   * **responses** :
@@ -298,7 +305,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### EXEC/snapshots/byId/_rollback
   * **REST API path** : `/services/configuration/v2/snapshots/byId/_rollback`
-  * **description** : Performs a rollback to the snapshot id specified by the user.
+  * **description** : Performs a rollback to the snapshot id specified by the user. Starting from Kura 5.6.3, this request requires the `kura.admin` permission.
   * **request body** :
     * [SnaphsotId](#snaphsotid)
   * **responses** :
@@ -308,6 +315,8 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
       * **description** : The request body is not valid JSON or it contains invalid parameters.
       * **response body** :
         * [GenericFailureReport](#genericfailurereport)
+    * **403**
+      * **description** : Since Kura 5.6.3, the requesting identity does not hold the `kura.admin` permission.
     * **500**
       * **description** : An unexpected internal error occurred.
       * **response body** :

@@ -7,6 +7,9 @@
 The `IdentityRestService` APIs provides methods to manage the system identities.
 Unless otherwise specified, identities with `rest.identity` permissions can access these APIs.
 
+!!! note
+    Starting from Kura 5.6.3, an identity holding the `rest.identity` permission, but not `kura.admin`, can only create, update or delete identities whose permissions are a subset of its own permissions, and can only assign permissions that it holds; requests that do not satisfy these rules are rejected with the `403 Forbidden` status. Creating and deleting permissions requires `kura.admin`. Requests received through the request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup property that restores the previous behaviour.
+
 ## POST methods
 
 #### Create User
@@ -170,6 +173,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 - 200 OK status
 - 400 Missing or mispelled field `name` (eg: `nme`)
 - 400 Bad Request (Permission name not valid)
+- 403 Forbidden (since Kura 5.6.3, the requesting identity does not hold the `kura.admin` permission)
 - 409 Conflict (Permission already exists)
 - 500 Internal Server Error
 
@@ -425,6 +429,7 @@ No specific permission is required to access this resource.
 
 - 200 OK status
 - 400 Missing or mispelled field `name` (eg: `nme`)
+- 403 Forbidden (since Kura 5.6.3, the target identity or the assigned permissions are not within the permissions of the requesting identity)
 - 500 Internal Server Error
 
 ## DELETE methods
@@ -447,6 +452,7 @@ No specific permission is required to access this resource.
 - 200 OK status
 - 404 `username` does not exist
 - 400 Missing or mispelled field `name` (eg: `nme`)
+- 403 Forbidden (since Kura 5.6.3, the permissions of the target identity are not within the permissions of the requesting identity)
 - 500 Internal Server Error
 
 #### Delete Permission
@@ -467,4 +473,5 @@ No specific permission is required to access this resource.
 - 200 OK status
 - 404 `permission` does not exist
 - 400 Missing or mispelled field `name` (eg: `nme`)
+- 403 Forbidden (since Kura 5.6.3, the requesting identity does not hold the `kura.admin` permission)
 - 500 Internal Server Error

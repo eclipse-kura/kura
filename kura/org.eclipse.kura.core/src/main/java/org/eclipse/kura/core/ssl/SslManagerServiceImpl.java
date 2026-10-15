@@ -213,18 +213,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         String ciphers = this.options.getSslCiphers();
         boolean hostnameVerifcation = this.options.isSslHostnameVerification();
 
-        return getSSLContext(protocol, ciphers, null, null, null, keyAlias, hostnameVerifcation);
+        return getSSLContext(protocol, ciphers, keyAlias, hostnameVerifcation);
     }
 
-    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
-            char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
+    private SSLContext getSSLContext(String protocol, String ciphers, String keyAlias, boolean hostnameVerification)
             throws GeneralSecurityException, IOException {
         ConnectionSslOptions connSslOpts = new ConnectionSslOptions(this.options);
         connSslOpts.setProtocol(protocol);
         connSslOpts.setCiphers(ciphers);
-        connSslOpts.setTrustStore(trustStore);
-        connSslOpts.setKeyStore(keyStore);
-        connSslOpts.setKeyStorePassword(keyStorePassword);
         connSslOpts.setAlias(keyAlias);
         connSslOpts.setHostnameVerification(hostnameVerification);
 

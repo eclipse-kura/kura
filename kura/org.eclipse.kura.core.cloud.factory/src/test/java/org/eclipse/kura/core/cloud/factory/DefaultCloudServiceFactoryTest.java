@@ -48,17 +48,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 
-public class KapuaCloudConnectionFactoryTest {
+public class DefaultCloudServiceFactoryTest {
 
     private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
-    private static final String FACTORY_PID = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory";
 
     @Test
     public void testCreateConfigurationWrongPid() {
         String pid = "test.service.pid";
 
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         try {
             factory.createConfiguration(pid);
@@ -74,7 +73,7 @@ public class KapuaCloudConnectionFactoryTest {
 
         ConfigurationService csMock = mock(ConfigurationService.class);
 
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
         factory.setConfigurationService(csMock);
 
         doAnswer(new Answer<Void>() {
@@ -113,7 +112,7 @@ public class KapuaCloudConnectionFactoryTest {
 
         ConfigurationService csMock = mock(ConfigurationService.class);
 
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
         factory.setConfigurationService(csMock);
 
         factory.deleteConfiguration(pid);
@@ -127,7 +126,7 @@ public class KapuaCloudConnectionFactoryTest {
 
         ConfigurationService csMock = mock(ConfigurationService.class);
 
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
         factory.setConfigurationService(csMock);
 
         factory.deleteConfiguration(pid);
@@ -142,7 +141,7 @@ public class KapuaCloudConnectionFactoryTest {
     public void testGetStackComponentsPidsWrongPid() {
         String pid = "test.service.pid";
 
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         try {
             factory.getStackComponentsPids(pid);
@@ -156,7 +155,7 @@ public class KapuaCloudConnectionFactoryTest {
     public void testGetStackComponentsPids() throws KuraException {
         String pid = "org.eclipse.kura.cloud.CloudService-1";
 
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         List<String> stackComponentsPids = factory.getStackComponentsPids(pid);
 
@@ -168,7 +167,7 @@ public class KapuaCloudConnectionFactoryTest {
 
     @Test
     public void testGetManagedCloudServicePidsEmpty() throws KuraException {
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         factory.activate(getMockComponentContext(Collections.emptyList()));
 
@@ -217,15 +216,15 @@ public class KapuaCloudConnectionFactoryTest {
 
     @Test
     public void testGetManagedCloudServicePids() throws KuraException {
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         List<ServiceReference<CloudConnectionManager>> list = new ArrayList<>();
         list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-FOO", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(KURA_CLOUD_SERVICE_FACTORY_PID,
-                        FACTORY_PID)));
+                        DefaultCloudServiceFactory.class.getName())));
 
         list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
-                KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID)));
+                KURA_CLOUD_SERVICE_FACTORY_PID, DefaultCloudServiceFactory.class.getName())));
 
         factory.activate(getMockComponentContext(list));
 
@@ -239,22 +238,22 @@ public class KapuaCloudConnectionFactoryTest {
 
     @Test
     public void testGetManagedCloudServiceShouldOnlyReturnManagedEntries() throws KuraException {
-        KapuaCloudConnectionFactory factory = new KapuaCloudConnectionFactory();
+        DefaultCloudServiceFactory factory = new DefaultCloudServiceFactory();
 
         List<ServiceReference<CloudConnectionManager>> list = new ArrayList<>();
         list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-OK", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(KURA_CLOUD_SERVICE_FACTORY_PID,
-                        FACTORY_PID)));
+                        DefaultCloudServiceFactory.class.getName())));
 
         list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-OK2", CLOUD_SERVICE_FACTORY_PID,
                 Collections.singletonMap(KURA_CLOUD_SERVICE_FACTORY_PID,
-                        FACTORY_PID)));
+                        DefaultCloudServiceFactory.class.getName())));
 
         list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID + "-BAR", CLOUD_SERVICE_FACTORY_PID, Collections
                 .singletonMap(KURA_CLOUD_SERVICE_FACTORY_PID, "OtherCloudServiceFactory")));
 
         list.add(createMockReference(CLOUD_SERVICE_FACTORY_PID, CLOUD_SERVICE_FACTORY_PID, Collections.singletonMap(
-                KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID)));
+                KURA_CLOUD_SERVICE_FACTORY_PID, DefaultCloudServiceFactory.class.getName())));
 
         list.add(createMockReference("CloudServiceBaz", CLOUD_SERVICE_FACTORY_PID, Collections.emptyMap()));
         list.add(createMockReference("OtherCloudService", CLOUD_SERVICE_FACTORY_PID,

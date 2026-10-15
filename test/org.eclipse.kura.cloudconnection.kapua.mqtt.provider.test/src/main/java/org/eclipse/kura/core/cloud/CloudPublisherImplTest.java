@@ -42,7 +42,7 @@ public class CloudPublisherImplTest {
 
     private static CloudConnectionFactory cloudConnectionFactory;
 
-    private static CloudServiceImpl cloudServiceImpl;
+    private static KapuaCloudConnectionManager cloudConnectionManager;
 
     private static CloudPublisher cloudPublisher;
 
@@ -73,7 +73,7 @@ public class CloudPublisherImplTest {
     }
 
     public void bindCloudService(CloudConnectionManager cloudService) throws KuraException {
-        cloudServiceImpl = (CloudServiceImpl) cloudService;
+        cloudConnectionManager = (KapuaCloudConnectionManager) cloudService;
         cfgSvc.createFactoryConfiguration("org.eclipse.kura.cloud.publisher.CloudPublisher",
                 "org.eclipse.kura.cloud.publisher.CloudPublisher-1",
                 Collections.singletonMap(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
@@ -83,7 +83,7 @@ public class CloudPublisherImplTest {
     }
 
     public void unbindCloudService(CloudConnectionManager cloudService) {
-        cloudServiceImpl = null;
+        cloudConnectionManager = null;
     }
 
     public void unbindCloudFactory(CloudConnectionFactory cloudConnectionFactory) {
@@ -104,7 +104,7 @@ public class CloudPublisherImplTest {
     public void testServiceExists() {
         assertNotNull(CloudPublisherImplTest.cfgSvc);
         assertNotNull(CloudPublisherImplTest.cloudConnectionFactory);
-        assertNotNull(CloudPublisherImplTest.cloudServiceImpl);
+        assertNotNull(CloudPublisherImplTest.cloudConnectionManager);
         assertNotNull(CloudPublisherImplTest.cloudPublisher);
     }
 

@@ -129,12 +129,12 @@ import org.osgi.service.metatype.annotations.Designate;
             org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
             org.eclipse.kura.cloudconnection.CloudEndpoint.class },
     property = { "kura.ui.service.hide:Boolean=true" })
-@Designate(ocd = CloudServiceMetatype.class, factory = true)
-public class CloudServiceImpl
+@Designate(ocd = KapuaCloudConnectionManagerMetatype.class, factory = true)
+public class KapuaCloudConnectionManager
         implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
-    private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(KapuaCloudConnectionManager.class);
 
     private static final String TOPIC_BA_APP = "BA";
     private static final String TOPIC_MQTT_APP = "MQTT";
@@ -151,7 +151,7 @@ public class CloudServiceImpl
 
     private ComponentContext ctx;
 
-    private CloudServiceOptions options;
+    private KapuaCloudConnectionManagerOptions options;
 
     private DataService dataService;
     private SystemService systemService;
@@ -196,7 +196,7 @@ public class CloudServiceImpl
     private final ScheduledExecutorService scheduledBirthPublisher = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean shouldPublishDelayedBirth = new AtomicBoolean();
 
-    public CloudServiceImpl() {
+    public KapuaCloudConnectionManager() {
         this.messageId = new AtomicInteger();
         this.registeredRequestHandlers = new HashMap<>();
         this.registeredSubscribers = new ConcurrentHashMap<>();
@@ -386,7 +386,7 @@ public class CloudServiceImpl
         //
         // save the bundle context and the properties
         this.ctx = componentContext;
-        this.options = new CloudServiceOptions(properties, this.systemService);
+        this.options = new KapuaCloudConnectionManagerOptions(properties, this.systemService);
         //
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
@@ -425,7 +425,7 @@ public class CloudServiceImpl
         logger.info("updated {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         // Update properties and re-publish Birth certificate
-        this.options = new CloudServiceOptions(properties, this.systemService);
+        this.options = new KapuaCloudConnectionManagerOptions(properties, this.systemService);
         if (isConnected()) {
             try {
                 setupCloudConnection(false);
@@ -472,14 +472,14 @@ public class CloudServiceImpl
 
         if (TamperEvent.TAMPER_EVENT_TOPIC.equals(topic) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
-            logger.debug("CloudServiceImpl: received tamper event, publishing BIRTH.");
+            logger.debug("KapuaCloudConnectionManager: received tamper event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
             return;
         }
 
         if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic) || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic))
                 && this.dataService.isConnected()) {
-            logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
+            logger.debug("KapuaCloudConnectionManager: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
     }
@@ -526,7 +526,7 @@ public class CloudServiceImpl
     //
     // ----------------------------------------------------------------
 
-    public CloudServiceOptions getCloudServiceOptions() {
+    public KapuaCloudConnectionManagerOptions getCloudConnectionManagerOptions() {
         return this.options;
     }
 
@@ -568,9 +568,9 @@ public class CloudServiceImpl
     private void setupDeviceSubscriptions(boolean subscribe) throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
         sbDeviceSubscription.append(this.options.getTopicControlPrefix())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicAccountToken())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicClientIdToken())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicWildCard());
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(KapuaCloudConnectionManagerOptions.getTopicAccountToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(KapuaCloudConnectionManagerOptions.getTopicClientIdToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(KapuaCloudConnectionManagerOptions.getTopicWildCard());
 
         // restore or remove default subscriptions
         if (subscribe) {
@@ -847,10 +847,10 @@ public class CloudServiceImpl
 
             if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
                 this.scheduledBirthPublisherFuture.cancel(false);
-                logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
+                logger.debug("KapuaCloudConnectionManager: BIRTH message cache timer restarted.");
             }
 
-            logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
+            logger.debug("KapuaCloudConnectionManager: BIRTH message cached for 30s.");
 
             this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(this::publishDelayedMessage, 30L,
                     TimeUnit.SECONDS);
@@ -867,7 +867,7 @@ public class CloudServiceImpl
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
             int id = this.dataService.publish(message.getTopic(), encodedPayload, message.getQos(),
-                    CloudServiceOptions.getLifeCycleMessageRetain(), CloudServiceOptions.getLifeCycleMessagePriority());
+                    KapuaCloudConnectionManagerOptions.getLifeCycleMessageRetain(), KapuaCloudConnectionManagerOptions.getLifeCycleMessagePriority());
             this.messageId.set(id);
             try {
                 this.messageId.wait(1000);
@@ -1026,7 +1026,7 @@ public class CloudServiceImpl
             String appTopic = (String) messageProps.get(APP_TOPIC.name());
             boolean isControl = (Boolean) messageProps.get(CONTROL.name());
 
-            String deviceId = CloudServiceOptions.getTopicClientIdToken();
+            String deviceId = KapuaCloudConnectionManagerOptions.getTopicClientIdToken();
 
             fullTopic = encodeTopic(appId, deviceId, appTopic, isControl);
         }
@@ -1052,7 +1052,7 @@ public class CloudServiceImpl
             return;
         }
 
-        String fullTopic = encodeTopic(appId, CloudServiceOptions.getTopicClientIdToken(), appTopic, isControl);
+        String fullTopic = encodeTopic(appId, KapuaCloudConnectionManagerOptions.getTopicClientIdToken(), appTopic, isControl);
 
         CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos);
 
@@ -1123,14 +1123,14 @@ public class CloudServiceImpl
     private String encodeTopic(String appId, String deviceId, String appTopic, boolean isControl) {
         StringBuilder sb = new StringBuilder();
         if (isControl) {
-            sb.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
+            sb.append(this.options.getTopicControlPrefix()).append(KapuaCloudConnectionManagerOptions.getTopicSeparator());
         }
 
-        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(appId);
+        sb.append(KapuaCloudConnectionManagerOptions.getTopicAccountToken()).append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(deviceId).append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
+            sb.append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();
@@ -1159,7 +1159,7 @@ public class CloudServiceImpl
 
     private boolean isFrameworkStopping() {
         try {
-            final Bundle ownBundle = FrameworkUtil.getBundle(CloudServiceImpl.class);
+            final Bundle ownBundle = FrameworkUtil.getBundle(KapuaCloudConnectionManager.class);
 
             if (ownBundle == null) {
                 return false; // not running in an OSGi framework? e.g. unit test

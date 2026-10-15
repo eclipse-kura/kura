@@ -44,7 +44,7 @@ public class LifeCyclePayloadBuilderTest {
     private SystemAdminService sysAdminService;
     private Optional<NetworkService> networkService;
     private Optional<PositionService> positionService;
-    private CloudServiceImpl cloudServiceImpl;
+    private KapuaCloudConnectionManager cloudConnectionManager;
     private LifeCyclePayloadBuilder lifeCyclePayloadBuilder;
     private KuraDeviceProfile kuraDeviceProfile;
     private KuraBirthPayload kuraBirthPayload;
@@ -57,7 +57,7 @@ public class LifeCyclePayloadBuilderTest {
         givenSystemAdminService();
         givenNetworkService(emptyNetInterfacesList);
         givenPositionService();
-        givenCloudServiceImpl();
+        givenCloudConnectionManager();
         givenLifeCyclePayloadBuilder();
 
         whenBuildDeviceProfile();
@@ -70,7 +70,7 @@ public class LifeCyclePayloadBuilderTest {
         givenSystemService();
         givenSystemAdminService();
         givenNetworkService(emptyNetInterfacesList);
-        givenCloudServiceImpl();
+        givenCloudConnectionManager();
         givenLifeCyclePayloadBuilder();
 
         whenBuildDeviceProfile();
@@ -148,32 +148,32 @@ public class LifeCyclePayloadBuilderTest {
         givenSystemService();
         givenSystemAdminService();
         givenNetworkService(emptyNetInterfacesList);
-        givenCloudServiceImpl();
-        givenCloudServiceOptions();
+        givenCloudConnectionManager();
+        givenCloudConnectionManagerOptions();
     }
 
-    private void givenCloudServiceOptions() {
-        CloudServiceOptions cloudServiceOptions = mock(CloudServiceOptions.class);
+    private void givenCloudConnectionManagerOptions() {
+        KapuaCloudConnectionManagerOptions cloudServiceOptions = mock(KapuaCloudConnectionManagerOptions.class);
         when(cloudServiceOptions.getDeviceDisplayName()).thenReturn("displayName");
         when(cloudServiceOptions.getPayloadEncoding()).thenReturn(CloudPayloadEncoding.KURA_PROTOBUF);
-        when(this.cloudServiceImpl.getCloudServiceOptions()).thenReturn(cloudServiceOptions);
-        when(this.cloudServiceImpl.getCloudApplicationIdentifiers()).thenReturn(new String[0]);
+        when(this.cloudConnectionManager.getCloudConnectionManagerOptions()).thenReturn(cloudServiceOptions);
+        when(this.cloudConnectionManager.getCloudApplicationIdentifiers()).thenReturn(new String[0]);
     }
 
     private void givenModemEid(String eid) {
-        this.cloudServiceImpl.eid = eid;
+        this.cloudConnectionManager.eid = eid;
     }
 
-    private void givenCloudServiceImpl() {
-        this.cloudServiceImpl = mock(CloudServiceImpl.class);
-        when(this.cloudServiceImpl.getSystemService()).thenReturn(this.systemService);
-        when(this.cloudServiceImpl.getSystemAdminService()).thenReturn(this.sysAdminService);
-        when(this.cloudServiceImpl.getNetworkService()).thenReturn(this.networkService);
-        when(this.cloudServiceImpl.getPositionService()).thenReturn(this.positionService);
+    private void givenCloudConnectionManager() {
+        this.cloudConnectionManager = mock(KapuaCloudConnectionManager.class);
+        when(this.cloudConnectionManager.getSystemService()).thenReturn(this.systemService);
+        when(this.cloudConnectionManager.getSystemAdminService()).thenReturn(this.sysAdminService);
+        when(this.cloudConnectionManager.getNetworkService()).thenReturn(this.networkService);
+        when(this.cloudConnectionManager.getPositionService()).thenReturn(this.positionService);
     }
 
     private void givenLifeCyclePayloadBuilder() {
-        this.lifeCyclePayloadBuilder = new LifeCyclePayloadBuilder(this.cloudServiceImpl);
+        this.lifeCyclePayloadBuilder = new LifeCyclePayloadBuilder(this.cloudConnectionManager);
     }
 
     private void givenSystemService() {

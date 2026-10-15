@@ -54,20 +54,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
 import org.eclipse.kura.certificate.CertificatesService;
-import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
 import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
-import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
@@ -125,8 +122,7 @@ import org.osgi.service.metatype.annotations.Designate;
     name = "org.eclipse.kura.cloud.CloudService",
     immediate = false,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloud.CloudService.class,
-            org.eclipse.kura.configuration.ConfigurableComponent.class,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
             org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
             org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
@@ -135,7 +131,7 @@ import org.osgi.service.metatype.annotations.Designate;
     property = { "kura.ui.service.hide:Boolean=true" })
 @Designate(ocd = CloudServiceMetatype.class, factory = true)
 public class CloudServiceImpl
-        implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
+        implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
@@ -168,8 +164,6 @@ public class CloudServiceImpl
     private Marshaller jsonMarshaller;
     private Optional<NetworkStatusService> networkStatusService = Optional.empty();
 
-    // use a synchronized implementation for the list
-    private final List<CloudClientImpl> cloudClients;
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
     private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
@@ -203,7 +197,6 @@ public class CloudServiceImpl
     private final AtomicBoolean shouldPublishDelayedBirth = new AtomicBoolean();
 
     public CloudServiceImpl() {
-        this.cloudClients = new CopyOnWriteArrayList<>();
         this.messageId = new AtomicInteger();
         this.registeredRequestHandlers = new HashMap<>();
         this.registeredSubscribers = new ConcurrentHashMap<>();
@@ -456,11 +449,6 @@ public class CloudServiceImpl
 
         this.dataService.removeDataServiceListener(this);
 
-        // no need to release the cloud clients as the updated app
-        // certificate is already published due the missing dependency
-        // we only need to empty our CloudClient list
-        this.cloudClients.clear();
-
         this.dataService = null;
         this.systemService = null;
         this.systemAdminService = null;
@@ -519,28 +507,8 @@ public class CloudServiceImpl
     //
     // ----------------------------------------------------------------
 
-    @Override
-    public CloudClient newCloudClient(String applicationId) throws KuraException {
-        // create new instance
-        CloudClientImpl cloudClient = new CloudClientImpl(applicationId, this.dataService, this);
-        this.cloudClients.add(cloudClient);
-
-        // publish updated birth certificate with list of active apps
-        if (isConnected()) {
-            publishAppCertificate();
-        }
-
-        // return
-        return cloudClient;
-    }
-
-    @Override
     public String[] getCloudApplicationIdentifiers() {
         List<String> appIds = new ArrayList<>();
-        for (CloudClientImpl cloudClient : this.cloudClients) {
-            appIds.add(cloudClient.getApplicationId());
-        }
-
         for (Entry<String, RequestHandler> entry : this.registeredRequestHandlers.entrySet()) {
             appIds.add(entry.getKey());
         }
@@ -560,16 +528,6 @@ public class CloudServiceImpl
 
     public CloudServiceOptions getCloudServiceOptions() {
         return this.options;
-    }
-
-    public void removeCloudClient(CloudClientImpl cloudClient) {
-        // remove the client
-        this.cloudClients.remove(cloudClient);
-
-        // publish updated birth certificate with updated list of active apps
-        if (isConnected()) {
-            publishAppCertificate();
-        }
     }
 
     public byte[] encodePayload(KuraPayload payload) throws KuraException {
@@ -603,8 +561,6 @@ public class CloudServiceImpl
         this.registeredSubscribers.keySet().forEach(this::subscribe);
 
         postConnectionStateChangeEvent(true);
-
-        this.cloudClients.forEach(CloudClientImpl::onConnectionEstablished);
 
         this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onConnectionEstablished);
     }
@@ -647,8 +603,6 @@ public class CloudServiceImpl
         // raise event
         postConnectionStateChangeEvent(false);
 
-        this.cloudClients.forEach(CloudClientImpl::onConnectionLost);
-
         this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onConnectionLost);
     }
 
@@ -668,15 +622,15 @@ public class CloudServiceImpl
                     boolean validMessage = isValidMessage(kuraTopic, kuraPayload);
 
                     if (validMessage) {
-                        dispatchControlMessage(qos, retained, kuraTopic, kuraPayload);
+                        dispatchControlMessage(kuraTopic, kuraPayload);
                     } else {
                         logger.warn("Message verification failed! Not valid signature or message not signed.");
                     }
                 } else {
-                    dispatchDataMessage(qos, retained, kuraTopic, kuraPayload);
+                    dispatchDataMessage(kuraTopic, kuraPayload);
                 }
             } catch (Exception e) {
-                logger.error("Error during CloudClientListener notification.", e);
+                logger.error("Error during message dispatch.", e);
             }
         }
 
@@ -696,7 +650,7 @@ public class CloudServiceImpl
         return kuraPayload;
     }
 
-    private void dispatchControlMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
+    private void dispatchControlMessage(KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         String applicationId = kuraTopic.getApplicationId();
 
         RequestHandler cloudlet = this.registeredRequestHandlers.get(applicationId);
@@ -711,10 +665,6 @@ public class CloudServiceImpl
             callbackExecutor.submit(new MessageHandlerCallable(cloudlet, applicationId, kuraTopic.getApplicationTopic(),
                     kuraPayload, this));
         }
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudClient -> cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(),
-                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("deviceId", kuraTopic.getDeviceId());
@@ -727,12 +677,7 @@ public class CloudServiceImpl
                 .forEach(e -> dispatchMessage(receivedMessage, e.getValue()));
     }
 
-    private void dispatchDataMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudClient -> cloudClient.onMessageArrived(kuraTopic.getDeviceId(),
-                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
-
+    private void dispatchDataMessage(KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("deviceId", kuraTopic.getDeviceId());
         properties.put("appTopic", kuraTopic.getApplicationTopic());
@@ -778,13 +723,6 @@ public class CloudServiceImpl
                 return;
             }
         }
-
-        // notify listeners
-        KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .collect(Collectors.toList())
-                .forEach(cloudClient -> cloudClient.onMessagePublished(messageId, kuraTopic.getApplicationTopic()));
     }
 
     @Override
@@ -796,13 +734,6 @@ public class CloudServiceImpl
                 return;
             }
         }
-
-        // notify listeners
-        KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .collect(Collectors.toList())
-                .forEach(cloudClient -> cloudClient.onMessageConfirmed(messageId, kuraTopic.getApplicationTopic()));
 
         this.registeredCloudPublisherDeliveryListeners
                 .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));

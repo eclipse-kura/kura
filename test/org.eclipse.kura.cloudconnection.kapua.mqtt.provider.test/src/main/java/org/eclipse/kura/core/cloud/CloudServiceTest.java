@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.util.MqttTopicUtil;
@@ -181,12 +181,12 @@ public class CloudServiceTest {
         }
     }
 
-    public void bindCloudService(CloudService cloudService) {
+    public void bindCloudService(CloudConnectionManager cloudService) {
         cloudServiceImpl = (CloudServiceImpl) cloudService;
         dependencyLatch.countDown();
     }
 
-    public void unbindCloudService(CloudService cloudService) {
+    public void unbindCloudService(CloudConnectionManager cloudService) {
         cloudServiceImpl = null;
     }
 

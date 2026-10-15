@@ -76,7 +76,7 @@ import io.moquette.broker.Server;
 import io.moquette.broker.config.FluentConfig;
 import io.moquette.broker.config.IConfig;
 
-public class CloudServiceTest {
+public class KapuaCloudConnectionManagerIntegrationTest {
 
     private static final String MODEM_RSSI = "modem_rssi";
     private static final String MODEM_ICCID = "modem_iccid";
@@ -93,7 +93,7 @@ public class CloudServiceTest {
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
-    private static final Logger logger = LoggerFactory.getLogger(CloudServiceTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(KapuaCloudConnectionManagerIntegrationTest.class);
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(6);
     private static ConfigurationService cfgSvc;
@@ -101,7 +101,7 @@ public class CloudServiceTest {
     private static DataTransportService mqttDataTransport;
     private static DataTransportInspector underTestInspector;
     private static CryptoService cryptoService;
-    private static CloudServiceImpl cloudServiceImpl;
+    private static KapuaCloudConnectionManager cloudConnectionManager;
     private static DataTransportInspector observerInspector;
     private static EventAdmin eventAdmin;
     private static NetworkStatusService networkStatusService;
@@ -165,16 +165,16 @@ public class CloudServiceTest {
     }
 
     public void bindCfgSvc(ConfigurationService cfgSvc) {
-        CloudServiceTest.cfgSvc = cfgSvc;
+        KapuaCloudConnectionManagerIntegrationTest.cfgSvc = cfgSvc;
         dependencyLatch.countDown();
     }
 
     public void unbindCfgSvc(ConfigurationService cfgSvc) {
-        CloudServiceTest.cfgSvc = null;
+        KapuaCloudConnectionManagerIntegrationTest.cfgSvc = null;
     }
 
     public void bindCloudFactory(CloudConnectionFactory cloudConnectionFactory) throws KuraException {
-        CloudServiceTest.cloudConnectionFactory = cloudConnectionFactory;
+        KapuaCloudConnectionManagerIntegrationTest.cloudConnectionFactory = cloudConnectionFactory;
         if (DEFAULT_CLOUD_SERVICE_PID.equals(cloudConnectionFactory.getFactoryPid())) {
             cloudConnectionFactory.createConfiguration(DEFAULT_CLOUD_SERVICE_PID);
             dependencyLatch.countDown();
@@ -182,12 +182,12 @@ public class CloudServiceTest {
     }
 
     public void bindCloudService(CloudConnectionManager cloudService) {
-        cloudServiceImpl = (CloudServiceImpl) cloudService;
+        cloudConnectionManager = (KapuaCloudConnectionManager) cloudService;
         dependencyLatch.countDown();
     }
 
     public void unbindCloudService(CloudConnectionManager cloudService) {
-        cloudServiceImpl = null;
+        cloudConnectionManager = null;
     }
 
     public void bindDataTransportService(DataTransportService service) {
@@ -196,7 +196,7 @@ public class CloudServiceTest {
     }
 
     public void unbindCloudFactory(CloudConnectionFactory cloudConnectionFactory) {
-        CloudServiceTest.cloudConnectionFactory = null;
+        KapuaCloudConnectionManagerIntegrationTest.cloudConnectionFactory = null;
     }
 
     public void bindCryptoService(CryptoService service) {
@@ -212,9 +212,9 @@ public class CloudServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
-        assertNotNull(CloudServiceTest.cfgSvc);
-        assertNotNull(CloudServiceTest.cloudConnectionFactory);
-        assertNotNull(CloudServiceTest.cloudServiceImpl);
+        assertNotNull(KapuaCloudConnectionManagerIntegrationTest.cfgSvc);
+        assertNotNull(KapuaCloudConnectionManagerIntegrationTest.cloudConnectionFactory);
+        assertNotNull(KapuaCloudConnectionManagerIntegrationTest.cloudConnectionManager);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -224,26 +224,26 @@ public class CloudServiceTest {
 
         final CompletableFuture<Void> diconnected = underTestInspector.disconnected();
 
-        cloudServiceImpl.disconnect();
+        cloudConnectionManager.disconnect();
 
         diconnected.get(30, TimeUnit.SECONDS);
 
         updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID, getConfigForNonExistingBroker())
                 .get(1, TimeUnit.MINUTES);
 
-        cloudServiceImpl.connect();
+        cloudConnectionManager.connect();
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testDisconnect() {
-        cloudServiceImpl.disconnect();
+        cloudConnectionManager.disconnect();
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetConnectionInfo() {
-        Map<String, String> connectionProps = cloudServiceImpl.getInfo();
+        Map<String, String> connectionProps = cloudConnectionManager.getInfo();
 
         assertNotNull(connectionProps);
         assertEquals(4, connectionProps.size());
@@ -256,7 +256,7 @@ public class CloudServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetNotificationPublisherPid() {
-        String pid = cloudServiceImpl.getNotificationPublisherPid();
+        String pid = cloudConnectionManager.getNotificationPublisherPid();
         assertEquals("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher", pid);
     }
 
@@ -266,7 +266,7 @@ public class CloudServiceTest {
 
         clearNetworkStatusServiceMock();
 
-        cloudServiceImpl.setSystemService(createMockSystemService(Optional.empty()));
+        cloudConnectionManager.setSystemService(createMockSystemService(Optional.empty()));
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         assertEquals("getCpuVersion", metrics.get(KuraDeviceProfile.CPU_VERSION_KEY).asString());
@@ -277,7 +277,7 @@ public class CloudServiceTest {
     public void shouldSupportEmptyExtendedProperties()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
-        cloudServiceImpl.setSystemService(createMockSystemService(Optional.empty()));
+        cloudConnectionManager.setSystemService(createMockSystemService(Optional.empty()));
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         assertNull(metrics.get("extended_properties"));
@@ -299,7 +299,7 @@ public class CloudServiceTest {
 
         final ExtendedProperties properties = new ExtendedProperties("1.5", Arrays.asList(firstGroup, emptyGroup));
 
-        cloudServiceImpl.setSystemService(createMockSystemService(Optional.of(properties)));
+        cloudConnectionManager.setSystemService(createMockSystemService(Optional.of(properties)));
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         final JsonObject parsedExtendedPropertes = Json.parse(metrics.get("extended_properties").asString()).asObject();
@@ -337,7 +337,7 @@ public class CloudServiceTest {
         Mockito.when(tamperDetectionService.getTamperStatus())
                 .thenReturn(new TamperStatus(true, Collections.emptyMap()));
 
-        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class).getBundleContext()
+        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(KapuaCloudConnectionManagerIntegrationTest.class).getBundleContext()
                 .registerService(TamperDetectionService.class, tamperDetectionService, null);
 
         try {
@@ -364,7 +364,7 @@ public class CloudServiceTest {
         Mockito.when(tamperDetectionService.getTamperStatus())
                 .thenReturn(new TamperStatus(true, Collections.emptyMap()));
 
-        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class).getBundleContext()
+        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(KapuaCloudConnectionManagerIntegrationTest.class).getBundleContext()
                 .registerService(TamperDetectionService.class, tamperDetectionService, null);
 
         try {
@@ -423,7 +423,7 @@ public class CloudServiceTest {
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
         final CompletableFuture<Void> disconnected = underTestInspector.disconnected();
 
-        cloudServiceImpl.disconnect();
+        cloudConnectionManager.disconnect();
 
         disconnected.get(30, TimeUnit.SECONDS);
 
@@ -436,7 +436,7 @@ public class CloudServiceTest {
             try {
                 final CompletableFuture<Void> connected = underTestInspector.connected();
 
-                cloudServiceImpl.connect();
+                cloudConnectionManager.connect();
 
                 connected.get(30, TimeUnit.SECONDS);
                 break;
@@ -446,7 +446,7 @@ public class CloudServiceTest {
             }
         }
 
-        assertEquals(true, cloudServiceImpl.isConnected());
+        assertEquals(true, cloudConnectionManager.isConnected());
 
         return getMetrics(message.get(30, TimeUnit.SECONDS));
     }
@@ -477,7 +477,7 @@ public class CloudServiceTest {
     }
 
     private static SystemService createMockSystemService(final Optional<ExtendedProperties> extendedProperties) {
-        return (SystemService) Proxy.newProxyInstance(CloudServiceTest.class.getClassLoader(),
+        return (SystemService) Proxy.newProxyInstance(KapuaCloudConnectionManagerIntegrationTest.class.getClassLoader(),
                 new Class<?>[] { SystemService.class }, (obj, method, args) -> {
                     if ("getExtendedProperties".equals(method.getName())) {
                         return extendedProperties;
@@ -628,7 +628,7 @@ public class CloudServiceTest {
         modemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim }));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatusBuilder.build()));
 
-        cloudServiceImpl.setNetworkStatusService(networkStatusService);
+        cloudConnectionManager.setNetworkStatusService(networkStatusService);
     }
 
     private void createNetworkStatusServiceMockWithMultipleModems() throws KuraException {
@@ -651,12 +651,12 @@ public class CloudServiceTest {
         secondModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim2 }));
         when(networkStatusService.getNetworkStatus("1-6")).thenReturn(Optional.of(secondModemStatusBuilder.build()));
 
-        cloudServiceImpl.setNetworkStatusService(networkStatusService);
+        cloudConnectionManager.setNetworkStatusService(networkStatusService);
     }
 
     private void clearNetworkStatusServiceMock() {
         if (networkStatusService != null) {
-            cloudServiceImpl.unsetNetworkStatusService(networkStatusService);
+            cloudConnectionManager.unsetNetworkStatusService(networkStatusService);
         }
     }
 }

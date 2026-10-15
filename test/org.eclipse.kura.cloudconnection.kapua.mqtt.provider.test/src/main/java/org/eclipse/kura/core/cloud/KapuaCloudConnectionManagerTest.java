@@ -31,9 +31,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 
-public class CloudServiceImplTest {
+public class KapuaCloudConnectionManagerTest {
     
-    static CloudServiceImpl cloudServiceImpl;
+    static KapuaCloudConnectionManager cloudConnectionManager;
     
     
     @BeforeClass
@@ -41,17 +41,17 @@ public class CloudServiceImplTest {
         DataService dataService = mock(DataService.class);
         SystemService systemService = mock(SystemService.class);
         
-        cloudServiceImpl = new CloudServiceImpl();
+        cloudConnectionManager = new KapuaCloudConnectionManager();
         
-        cloudServiceImpl.setDataService(dataService);
-        cloudServiceImpl.setSystemService(systemService);
+        cloudConnectionManager.setDataService(dataService);
+        cloudConnectionManager.setSystemService(systemService);
     }
 
     @Test
     public void testNewCloudClientGetCloudApplicationIdentifiersEmpty() throws KuraException {
-        CloudServiceImpl cloudServiceImpl = new CloudServiceImpl();
+        KapuaCloudConnectionManager cloudConnectionManager = new KapuaCloudConnectionManager();
         
-        String[] cloudAppsIds = cloudServiceImpl.getCloudApplicationIdentifiers();
+        String[] cloudAppsIds = cloudConnectionManager.getCloudApplicationIdentifiers();
         
         assertNotNull(cloudAppsIds);
         assertArrayEquals(new String[0], cloudAppsIds);
@@ -59,13 +59,13 @@ public class CloudServiceImplTest {
     
     @Test
     public void testNewCloudClientGetCloudApplicationIdentifiersOneRequestHandler() throws KuraException {
-        CloudServiceImpl cloudServiceImpl = new CloudServiceImpl();
+        KapuaCloudConnectionManager cloudConnectionManager = new KapuaCloudConnectionManager();
         
         String testAppId = "testAPP";
         RequestHandler requestHandler = mock(RequestHandler.class);
-        cloudServiceImpl.registerRequestHandler(testAppId, requestHandler);
+        cloudConnectionManager.registerRequestHandler(testAppId, requestHandler);
         
-        String[] cloudAppsIds = cloudServiceImpl.getCloudApplicationIdentifiers();
+        String[] cloudAppsIds = cloudConnectionManager.getCloudApplicationIdentifiers();
         
         assertNotNull(cloudAppsIds);
         assertEquals(1, cloudAppsIds.length);
@@ -73,7 +73,7 @@ public class CloudServiceImplTest {
     }
     
     @Test
-    public void testGetCloudServiceOptions() {
+    public void testGetCloudConnectionManagerOptions() {
         ComponentContext componentContext = mock(ComponentContext.class);
         Map<String, Object> properties = new HashMap<>();
         properties.put(ConfigurationService.KURA_SERVICE_PID, "Cloud Service");
@@ -81,9 +81,9 @@ public class CloudServiceImplTest {
         BundleContext bundleContext = mock(BundleContext.class);
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
         
-        cloudServiceImpl.activate(componentContext, properties);
+        cloudConnectionManager.activate(componentContext, properties);
         
-        CloudServiceOptions options = cloudServiceImpl.getCloudServiceOptions();
+        KapuaCloudConnectionManagerOptions options = cloudConnectionManager.getCloudConnectionManagerOptions();
         
         assertNotNull(options);
     }

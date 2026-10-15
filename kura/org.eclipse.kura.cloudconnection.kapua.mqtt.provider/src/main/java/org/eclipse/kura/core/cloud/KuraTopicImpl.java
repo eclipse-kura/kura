@@ -18,7 +18,7 @@ import org.eclipse.kura.message.KuraApplicationTopic;
 /**
  * Models a topic for messages posted to the Kura platform.
  * Topics are expected to be in the form of "account/asset/&lt;application_specific&gt;";
- * The system control topic prefix is defined in the {@link CloudServiceImpl} configuration and defaults
+ * The system control topic prefix is defined in the {@link KapuaCloudConnectionManager} configuration and defaults
  * to $EDC.
  *
  */

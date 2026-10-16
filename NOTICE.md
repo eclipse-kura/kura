@@ -50,7 +50,7 @@ This project leverages the following third party content.
 * maven/mavencentral/com.github.docker-java/docker-java/3.5.3, Apache-2.0, approved, #22666
 * maven/mavencentral/com.github.hypfvieh/bluez-dbus-osgi/0.1.4, MIT, approved, clearlydefined
 * maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
+* maven/mavencentral/com.google.code.gson/gson/2.12.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.guava/failureaccess/1.0.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.protobuf/protobuf-java/3.19.3, BSD-3-Clause, approved, clearlydefined

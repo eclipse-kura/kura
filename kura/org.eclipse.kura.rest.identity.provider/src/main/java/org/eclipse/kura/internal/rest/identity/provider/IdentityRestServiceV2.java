@@ -50,6 +50,16 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -63,6 +73,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+@Tag(name = "Identity", description = "Protected operations require rest.identity or kura.admin permission.")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
+        @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
+})
 @Path("identity/v2")
 @Component(immediate = true, property = {
         "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2",
@@ -122,6 +140,13 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_identity_v2_identities", summary = "Create an identity",
+            description = "Creates an identity with the supplied name.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = IdentityDTO.class))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
+    @ApiResponse(responseCode = "409", description = "Identity or permission already exists.", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON, schema = @Schema(ref = "#/components/schemas/Error")))
     public Response createIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
@@ -145,6 +170,11 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "put_identity_v2_identities", summary = "Update an identity",
+            description = "Updates the identity configuration.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = IdentityConfigurationDTO.class))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response updateIdentity(final IdentityConfigurationDTO identityConfigurationDTO) {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
@@ -165,6 +195,12 @@ public class IdentityRestServiceV2 {
     @Path("/identities/byName")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_identity_v2_identities_byName", summary = "Read an identity configuration",
+            description = "Returns selected configuration components for the named identity.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = IdentityConfigurationRequestDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Requested data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityConfigurationDTO.class)))
     public IdentityConfigurationDTO getIdentityByName(
             final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
@@ -194,6 +230,12 @@ public class IdentityRestServiceV2 {
     @Path("/identities/default/byName")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_identity_v2_identities_default_byName", summary = "Read default identity configuration",
+            description = "Returns default configuration components for the named identity.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = IdentityConfigurationRequestDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Requested data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityConfigurationDTO.class)))
     public IdentityConfigurationDTO getIdentityDefaultByName(
             final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
         logger.debug(DEBUG_MESSAGE, "getIdentityDefaultByName");
@@ -210,7 +252,7 @@ public class IdentityRestServiceV2 {
                             identityConfigurationRequestDTO.getConfigurationComponents()));
 
             return IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration);
-        } catch (KuraException e) {
+        } catch (Exception e) {
             throw toWebApplicationException(e);
         }
 
@@ -220,6 +262,11 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "delete_identity_v2_identities", summary = "Delete an identity",
+            description = "Deletes the named identity.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = IdentityDTO.class))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response deleteIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
@@ -240,6 +287,12 @@ public class IdentityRestServiceV2 {
     @GET
     @Path("/definedPermissions")
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirements
+    @Operation(operationId = "get_identity_v2_definedPermissions", summary = "List defined permissions",
+            description = "Returns defined permissions without requiring the identity role.")
+    @ApiResponse(responseCode = "200", description = "Requested data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    array = @ArraySchema(schema = @Schema(implementation = PermissionDTO.class))))
     public Set<PermissionDTO> getDefinedPermissions() {
         logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
         try {
@@ -254,6 +307,11 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_identity_v2_identities", summary = "List identity configurations",
+            description = "Returns configurations for all identities.")
+    @ApiResponse(responseCode = "200", description = "Requested data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    array = @ArraySchema(schema = @Schema(implementation = IdentityConfigurationDTO.class))))
     public List<IdentityConfigurationDTO> getIdentities() {
         logger.debug(DEBUG_MESSAGE, "getIdentities");
         try {
@@ -268,6 +326,11 @@ public class IdentityRestServiceV2 {
     @GET
     @Path("/passwordStrenghtRequirements")
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirements
+    @Operation(operationId = "get_identity_v2_passwordStrenghtRequirements", summary = "Read password strength requirements",
+            description = "Returns password strength requirements without requiring the identity role.")
+    @ApiResponse(responseCode = "200", description = "Requested data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PasswordStrenghtRequirementsDTO.class)))
     public PasswordStrenghtRequirementsDTO getPasswordStrenghtRequirements() {
         logger.debug(DEBUG_MESSAGE, "getPasswordStrenghtRequirements");
         try {
@@ -282,6 +345,13 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/permissions")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_identity_v2_permissions", summary = "Create a permission",
+            description = "Creates the named permission.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = PermissionDTO.class))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
+    @ApiResponse(responseCode = "409", description = "Identity or permission already exists.", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON, schema = @Schema(ref = "#/components/schemas/Error")))
     public Response createPermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
@@ -305,6 +375,11 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/permissions")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "delete_identity_v2_permissions", summary = "Delete a permission",
+            description = "Deletes the named permission.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = PermissionDTO.class))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
 
@@ -328,6 +403,11 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities/validate")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_identity_v2_identities_validate", summary = "Validate identity configuration",
+            description = "Validates a proposed identity configuration without saving it.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = IdentityConfigurationDTO.class))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
 
@@ -349,6 +429,8 @@ public class IdentityRestServiceV2 {
 
     private WebApplicationException toWebApplicationException(final Exception e) {
         if (e instanceof KuraException && ((KuraException) e).getCode() == KuraErrorCode.INVALID_PARAMETER) {
+            return DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
+        } else if (e instanceof IllegalArgumentException) {
             return DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
         } else {
             return DefaultExceptionHandler.toWebApplicationException(e);

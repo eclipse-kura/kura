@@ -101,11 +101,20 @@ public @interface ContainerInstanceMetatype {
     @AttributeDefinition(name = "Restart Container On Failure", cardinality = 1, description = "Automatically restart the container when it has failed. Default: false")
     boolean container_restart_onfailure() default false;
 
-    @AttributeDefinition(name = "Enable Identity Integration", cardinality = 1, description = "Enable integration with Kura Identity Service to provide temporary credentials to the container. Default: false")
+    @AttributeDefinition(name = "Enable Identity Integration", cardinality = 1, description = "Enable integration with Kura Identity Service to provide temporary credentials to the container. The container gets a temporary identity, without password authentication, and a JWT token pair issued for it, available in the file referenced by the KURA_JWT_FILE environment variable. Requires the Token Issuing Service to be configured and JWT authentication to be enabled in the REST Service. Default: false")
     boolean container_identity_enabled() default false;
 
     @AttributeDefinition(name = "Container Permissions", cardinality = 1, required = false, description = "Comma-separated list of permissions to grant to the container when identity integration is enabled. Example: rest.assets,rest.configuration")
     String container_permissions() default "";
+
+    @AttributeDefinition(name = "Token Issuing Service Target", required = false, description = "OSGi filter selecting the TokenIssuingService that issues the JWT token pair provided to the container when identity integration is enabled. It must select an issuer whose tokens are accepted by the token verification service used by the REST Service. Without a match, the container startup is retried and eventually fails.")
+    String TokenIssuingService_target() default "(objectClass=org.eclipse.kura.security.token.TokenIssuingService)";
+
+    @AttributeDefinition(name = "JWT Access Token Duration (Seconds)", cardinality = 1, min = "1", description = "Lifetime of the access token provided to the container when identity integration is enabled. Capped by the maximum token lifetime of the Token Issuing Service. Default: 60")
+    int container_identity_jwt_access_token_duration() default 60;
+
+    @AttributeDefinition(name = "JWT Refresh Token Duration (Seconds)", cardinality = 1, min = "1", max = "" + ContainerInstanceOptions.TEMPORARY_IDENTITY_LIFETIME_SECONDS, description = "Lifetime of the refresh token provided to the container when identity integration is enabled. The container must exchange it for a new token pair through the REST JWT refresh endpoint before it expires, otherwise it loses access to the Kura APIs. Tokens obtained through the refresh endpoint follow the durations configured in the REST Service. Capped by the maximum token lifetime of the Token Issuing Service. Default: 900")
+    int container_identity_jwt_refresh_token_duration() default 900;
 
 }
 

@@ -256,9 +256,8 @@ public class WatchdogServiceImplTest {
 
         assertEquals(criticalComponentRegistrations.size(), components.size());
 
-        // the deprecated method also does the same
         CriticalComponent cc3 = new TestCC("3", 1);
-        svc.registerCriticalService(cc3);
+        svc.registerCriticalComponent(cc3);
 
         components = svc.getCriticalComponents();
         assertEquals(3, components.size());
@@ -298,8 +297,7 @@ public class WatchdogServiceImplTest {
         components = svc.getCriticalComponents();
         assertEquals(2, components.size());
 
-        // the deprecated method also works
-        svc.unregisterCriticalService(cc3);
+        svc.unregisterCriticalComponent(cc3);
 
         components = svc.getCriticalComponents();
         assertEquals(1, components.size());

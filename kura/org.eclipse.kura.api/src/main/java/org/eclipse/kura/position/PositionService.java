@@ -26,9 +26,7 @@ import org.osgi.util.position.Position;
  * <p>
  * Position(Measurement lat, Measurement lon, Measurement alt, Measurement speed, Measurement track)
  * <p>
- * The interface also return a NmeaPosition, subclass of Position
  *
- * @see org.eclipse.kura.position.NmeaPosition NmeaPosition
  * @see org.osgi.util.position.Position Position
  * @see org.osgi.util.measurement.Measurement Measurement
  *

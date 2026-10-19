@@ -50,10 +50,12 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
+        "service.pid=org.eclipse.kura.cloud.subscriber.CloudSubscriber",
         "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide=true" })

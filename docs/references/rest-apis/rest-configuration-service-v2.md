@@ -3,7 +3,7 @@
 This page describes the CONF-V2 request handler and `configuration/v2` rest APIs. Accessing the REST APIs requires to use an identity with the `rest.configuration` permission assigned.
 
 !!! note
-    Starting from Kura 5.6.3, the configuration of the UserAdmin persistence component (`org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl`), which contains identities and permissions, is returned and can be updated through the REST APIs only by identities holding the `kura.admin` permission. Snapshot rollback requires `kura.admin` as well. Requests received through the CONF-V2 request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup argument that restores the previous behaviour.
+    Starting from Kura 5.6.3, the configuration of the UserAdmin persistence component (`org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl`), which contains identities and permissions, is returned and can be updated through the REST APIs only by identities holding the `kura.admin` permission; for other identities its pid is also omitted from the pid lists and from the default configuration requests. Snapshot rollback requires `kura.admin` as well. Requests received through the CONF-V2 request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup argument that restores the previous behaviour.
 
 - [Request definitions](#request-definitions)
     - [GET/snapshots](#getsnapshots)
@@ -148,7 +148,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### GET/configurableComponents
   * **REST API path** : `/services/configuration/v2/configurableComponents`
-  * **description** : Returns the list of the pids available on the system.
+  * **description** : Returns the list of the pids available on the system. Starting from Kura 5.6.3, the UserAdmin persistence component pid is included only if the requesting identity holds the `kura.admin` permission.
   * **responses** :
     * **200**
       * **description** : The request succeeded.
@@ -161,7 +161,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### GET/configurableComponents/pidsWithFactory
   * **REST API path** : `/services/configuration/v2/configurableComponents/pidsWithFactory`
-  * **description** : Returns the list of the pids available on the system, reporting also the factory pid where applicable.
+  * **description** : Returns the list of the pids available on the system, reporting also the factory pid where applicable. Starting from Kura 5.6.3, the UserAdmin persistence component pid is included only if the requesting identity holds the `kura.admin` permission.
   * **responses** :
     * **200**
       * **description** : The request succeeded.
@@ -206,7 +206,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### POST/configurableComponents/configurations/byPid/_default
   * **REST API path** : `/services/configuration/v2/configurableComponents/configurations/byPid/_default`
-  * **description** : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the `pid`, `ocd` and `properties`. Password property values will be returned in plain text.
+  * **description** : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the `pid`, `ocd` and `properties`. Password property values will be returned in plain text. Starting from Kura 5.6.3, the default configuration of the UserAdmin persistence component is returned only if the requesting identity holds the `kura.admin` permission.
   * **request body** :
     * [PidSet](#pidset)
   * **responses** :

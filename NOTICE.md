@@ -41,7 +41,7 @@ This project leverages the following third party content.
 * maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.5.3, Apache-2.0, approved, #22669
 * maven/mavencentral/com.github.docker-java/docker-java-transport/3.5.3, Apache-2.0, approved, #22667
 * maven/mavencentral/com.github.docker-java/docker-java/3.5.3, Apache-2.0, approved, #22666
-* maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.google.code.gson/gson/2.12.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0 AND CC0-1.0 AND LicenseRef-Public-Domain, approved, #9229
 * maven/mavencentral/com.google.guava/failureaccess/1.0.1, Apache-2.0, approved, CQ22654
 * maven/mavencentral/com.google.protobuf/protobuf-java/4.30.2, BSD-3-Clause, approved, clearlydefined

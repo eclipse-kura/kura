@@ -8,7 +8,7 @@ The `IdentityRestService` APIs provides methods to manage the system identities.
 Unless otherwise specified, identities with `rest.identity` permissions can access these APIs.
 
 !!! note
-    Starting from Kura 5.6.3, an identity holding the `rest.identity` permission, but not `kura.admin`, can only create, update or delete identities whose permissions are a subset of its own permissions, and can only assign permissions that it holds; requests that do not satisfy these rules are rejected with the `403 Forbidden` status. Creating and deleting permissions requires `kura.admin`. Requests received through the request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup argument that restores the previous behaviour.
+    Starting from Kura 5.6.3, an identity holding the `rest.identity` permission, but not `kura.admin`, can only create, update or delete identities whose permissions are a subset of its own permissions, and can only assign permissions that it holds; requests that do not satisfy these rules are rejected with the `403 Forbidden` status. Creating and deleting permissions requires `kura.admin`. The additional configurations of an identity are returned to such an identity only if it is allowed to manage that identity. Requests received through the request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup argument that restores the previous behaviour.
 
 ## POST methods
 
@@ -34,7 +34,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 
 #### Get User by Name
 
-- Description: This method allows to get data about an identity in the system. The request body's `identity` field is used to get only the name of specific identity. It is also possible to retrieve information about the specific user's component configuration, specifying the type of interest.
+- Description: This method allows to get data about an identity in the system. The request body's `identity` field is used to get only the name of specific identity. It is also possible to retrieve information about the specific user's component configuration, specifying the type of interest. Starting from Kura 5.6.3, if the requesting identity does not hold `kura.admin`, the additional configurations are returned only for the identities whose permissions are a subset of the permissions of the requesting identity.
 - Method: POST
 - API PATH: `services/identity/v2/identities/byName`
 
@@ -290,7 +290,7 @@ No specific permission is required to access this resource.
 
 #### Get users configuration
 
-- Description: This method allows you to get the list of the users and their configuration on the system.
+- Description: This method allows you to get the list of the users and their configuration on the system. Starting from Kura 5.6.3, if the requesting identity does not hold `kura.admin`, the additional configurations are returned only for the identities whose permissions are a subset of the permissions of the requesting identity.
 - Method: GET
 - API PATH: `services/identity/v2/identities`
 

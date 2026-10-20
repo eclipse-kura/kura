@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,13 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
+ * @deprecated since 2.9. This class is used only by the {@link org.eclipse.kura.net.NetworkAdminService} and will be
+ *             removed in 3.0 together with it. Use the
+ *             {@link org.eclipse.kura.configuration.ConfigurationService} to manage the network configuration
+ *             instead.
  */
 @ProviderType
+@Deprecated
 public class WifiHotspotInfo {
 
     private final String ssid;

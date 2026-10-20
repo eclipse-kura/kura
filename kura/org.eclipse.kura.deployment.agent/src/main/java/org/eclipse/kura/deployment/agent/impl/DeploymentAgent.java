@@ -171,7 +171,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
         File dpaConfFile = new File(this.dpaConfPath);
         if (dpaConfFile.getParentFile() != null && !dpaConfFile.getParentFile().exists()) {
-            dpaConfFile.getParentFile().mkdirs();
+            createDirectories(dpaConfFile.getParentFile());
         }
         try {
             if (!dpaConfFile.createNewFile()) {
@@ -199,7 +199,9 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         logger.debug("Terminating DeploymentAgent Thread ...");
         this.executor.shutdownNow();
         try {
-            this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+            if (!this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS)) {
+                logger.warn("The DeploymentAgent executor did not terminate within {} {}", THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.warn("Interrupted", e);
@@ -640,6 +642,12 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             fos.getFD().sync();
         } catch (IOException e) {
             logger.error("Error writing package configuration file", e);
+        }
+    }
+
+    private static void createDirectories(final File directory) {
+        if (!directory.mkdirs()) {
+            logger.warn("Unable to create the directory {}", directory);
         }
     }
 }

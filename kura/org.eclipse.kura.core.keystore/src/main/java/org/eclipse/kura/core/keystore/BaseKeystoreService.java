@@ -295,7 +295,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             keyGen.initialize(keySize, secureRandom);
             keyPair = keyGen.generateKeyPair();
             setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
-                    generateCertificateChain(keyPair, signatureAlgorithm, subject)));
+                    buildCertificateChain(keyPair, signatureAlgorithm, subject)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
             logger.error("Error occured. Exception: {}.", e.getClass());
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -318,7 +318,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             keyGen.initialize(algorithmParameter, secureRandom);
             keyPair = keyGen.generateKeyPair();
             setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
-                    generateCertificateChain(keyPair, signatureAlgorithm, subject)));
+                    buildCertificateChain(keyPair, signatureAlgorithm, subject)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -435,10 +435,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     protected X509Certificate[] generateCertificateChain(KeyPair keyPair, String signatureAlgorithm, String attributes)
             throws OperatorCreationException, CertificateException {
-        return generateCertificateChain(keyPair, signatureAlgorithm, new X500Name(attributes));
+        return buildCertificateChain(keyPair, signatureAlgorithm, new X500Name(attributes));
     }
 
-    private X509Certificate[] generateCertificateChain(KeyPair keyPair, String signatureAlgorithm, X500Name dnName)
+    private X509Certificate[] buildCertificateChain(KeyPair keyPair, String signatureAlgorithm, X500Name dnName)
             throws OperatorCreationException, CertificateException {
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);

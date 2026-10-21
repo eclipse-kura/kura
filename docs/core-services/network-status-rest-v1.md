@@ -520,8 +520,9 @@ Object that contains specific properties to describe the status of a Modem inter
       * [ModemPorts](#modemports)
   
   * **supportedModemCapabilities**: `array` 
-      * array element type: `string (enumerated)`
-          * [ModemCapability](#modemcapability)
+      * array element type: `array`
+          * array element type: `string (enumerated)`
+              * [ModemCapability](#modemcapability)
   
   * **currentModemCapabilities**: `array` 
       * array element type: `string (enumerated)`
@@ -729,7 +730,9 @@ Object that contains specific properties to describe the status of a Modem inter
     "UTRAN_4"
   ],
   "supportedModemCapabilities": [
-    "NONE"
+    [
+      "NONE"
+    ]
   ],
   "supportedModes": [
     {

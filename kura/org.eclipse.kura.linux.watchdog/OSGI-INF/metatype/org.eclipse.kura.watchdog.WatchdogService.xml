@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -52,6 +52,14 @@
             required="true"
             default="/opt/eclipse/kura/data/kura-reboot-cause"
             description="The path for the file that will contain the reboot cause information."/>
+
+        <AD id="failOnUnavailableDevice"
+            name="Fail on unavailable device"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If enabled and the watchdog device does not exist or cannot be opened, the WatchdogService requests a system reboot instead of running without hardware supervision. The reboot cause is written to the reboot cause file, as for a critical component timeout."/>
             
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">

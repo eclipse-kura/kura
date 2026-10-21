@@ -97,7 +97,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         });
     }
 
-    private void stopWatchdogd() {
+    protected void stopWatchdogd() {
         for (final String stopCommand : STOP_WATCHDOGD_COMMANDS) {
             try {
                 runCommand(stopCommand);
@@ -135,6 +135,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
         if (!isWatchdogDeviceAvailable(watchdogDevice)) {
             logger.error("Watchdog device '{}' does not exist", watchdogDevice);
+            handleUnavailableDevice(newOptions, "Watchdog device '" + watchdogDevice + "' does not exist");
             return;
         }
 
@@ -142,6 +143,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             openWatchdog(watchdogDevice, true);
         } catch (IOException e) {
             logger.error("Failed to open watchdog device", e);
+            handleUnavailableDevice(newOptions, "Failed to open watchdog device '" + watchdogDevice + "'");
             return;
         }
 
@@ -157,6 +159,17 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             Thread.currentThread().setName("WatchdogServiceImpl");
             checkCriticalComponents();
         }, 0, this.options.getPingInterval(), TimeUnit.MILLISECONDS);
+    }
+
+    private void handleUnavailableDevice(final WatchdogServiceOptions newOptions, final String rebootCause) {
+        if (!newOptions.isFailOnUnavailableDevice()) {
+            return;
+        }
+
+        logger.error("Watchdog device is unavailable and fail on unavailable device is enabled. System will reboot");
+        if (!requestReboot(newOptions, rebootCause)) {
+            logger.error("System reboot failed. The system is running without hardware watchdog supervision");
+        }
     }
 
     protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
@@ -224,15 +237,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 this.timedOutOn = System.nanoTime();
                 logger.warn("Critical component '{}' timed out. System will reboot", ccr.getCriticalComponentName());
 
-                RebootCauseFileWriter rebootCauseWriter = new RebootCauseFileWriter(
-                        this.options.getRebootCauseFilePath());
-                rebootCauseWriter.writeRebootCause(ccr.getCriticalComponentName());
-
-                try {
-                    logger.debug("Requesting debug.");
-                    rebootSystem();
-                } catch (KuraException e) {
-                    logger.error("System reboot failed. Watchdog will not be refreshed", e);
+                if (!requestReboot(this.options, ccr.getCriticalComponentName())) {
+                    logger.error("System reboot failed. Watchdog will not be refreshed");
                     this.timedOutOn -= GRACE_PERIOD;
                 }
             }
@@ -257,7 +263,21 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         return result;
     }
 
-    private synchronized void rebootSystem() throws KuraException {
+    private boolean requestReboot(final WatchdogServiceOptions currentOptions, final String rebootCause) {
+        RebootCauseFileWriter rebootCauseWriter = new RebootCauseFileWriter(currentOptions.getRebootCauseFilePath());
+        rebootCauseWriter.writeRebootCause(rebootCause);
+
+        try {
+            logger.debug("Requesting reboot.");
+            rebootSystem();
+            return true;
+        } catch (KuraException e) {
+            logger.error("System reboot failed", e);
+            return false;
+        }
+    }
+
+    protected synchronized void rebootSystem() throws KuraException {
         try {
             runCommand("sync");
         } catch (KuraException e) {

@@ -31,6 +31,9 @@ public @interface WatchdogServiceMetatype {
     @AttributeDefinition(name = "Reboot Cause File Path", description = "The path for the file that will contain the reboot cause information.")
     String rebootCauseFilePath() default "/opt/eclipse/kura/data/kura-reboot-cause";
 
+    @AttributeDefinition(name = "Fail on unavailable device", description = "If enabled and the watchdog device does not exist or cannot be opened, the WatchdogService requests a system reboot instead of running without hardware supervision. The reboot cause is written to the reboot cause file, as for a critical component timeout.")
+    boolean failOnUnavailableDevice() default false;
+
 }
 
 

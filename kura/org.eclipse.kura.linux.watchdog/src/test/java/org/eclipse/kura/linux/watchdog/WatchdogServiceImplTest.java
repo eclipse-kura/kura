@@ -46,6 +46,8 @@ public class WatchdogServiceImplTest {
 
     private static final String WATCHDOG_TEST_DEVICE = "target/watchdogTestDevice";
     private static final String UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE = "target/watchdogUnavailableDeviceRebootCause";
+    private static final long TEST_REBOOT_RETRY_INTERVAL_MS = 50;
+    private static final int ALWAYS_FAIL = Integer.MAX_VALUE;
 
     private WatchdogServiceImpl scenarioSvc;
     private File scenarioWatchdogEnabledFile;
@@ -134,12 +136,12 @@ public class WatchdogServiceImplTest {
     public class UnavailableDeviceWatchdogServiceImpl extends WatchdogServiceImpl {
 
         private final boolean deviceExists;
-        private final boolean rebootFails;
+        private final int failingReboots;
         private int rebootRequests;
 
-        public UnavailableDeviceWatchdogServiceImpl(boolean deviceExists, boolean rebootFails) {
+        public UnavailableDeviceWatchdogServiceImpl(boolean deviceExists, int failingReboots) {
             this.deviceExists = deviceExists;
-            this.rebootFails = rebootFails;
+            this.failingReboots = failingReboots;
         }
 
         @Override
@@ -158,9 +160,15 @@ public class WatchdogServiceImplTest {
         }
 
         @Override
+        protected long getRebootRetryInterval() {
+            return TEST_REBOOT_RETRY_INTERVAL_MS;
+        }
+
+        @Override
         protected synchronized void rebootSystem() throws KuraException {
             this.rebootRequests++;
-            if (this.rebootFails) {
+            notifyAll();
+            if (this.rebootRequests <= this.failingReboots) {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "reboot", 1);
             }
         }
@@ -168,11 +176,22 @@ public class WatchdogServiceImplTest {
         public synchronized int getRebootRequests() {
             return this.rebootRequests;
         }
+
+        public synchronized boolean waitForRebootRequests(int expectedRebootRequests, long timeoutMs)
+                throws InterruptedException {
+            final long deadline = System.currentTimeMillis() + timeoutMs;
+            long remaining = timeoutMs;
+            while (this.rebootRequests < expectedRebootRequests && remaining > 0) {
+                wait(remaining);
+                remaining = deadline - System.currentTimeMillis();
+            }
+            return this.rebootRequests >= expectedRebootRequests;
+        }
     }
 
     @Test
     public void rebootRequestedWhenDeviceDoesNotExistAndFailOnUnavailableDeviceEnabled() throws Throwable {
-        givenUnavailableDeviceWatchdogService(false, false);
+        givenUnavailableDeviceWatchdogService(false, 0);
 
         whenUnavailableDeviceWatchdogServiceIsActivated(true);
 
@@ -183,7 +202,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void rebootRequestedWhenDeviceCannotBeOpenedAndFailOnUnavailableDeviceEnabled() throws Throwable {
-        givenUnavailableDeviceWatchdogService(true, false);
+        givenUnavailableDeviceWatchdogService(true, 0);
 
         whenUnavailableDeviceWatchdogServiceIsActivated(true);
 
@@ -194,7 +213,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void noRebootWhenDeviceDoesNotExistAndFailOnUnavailableDeviceDisabled() throws Throwable {
-        givenUnavailableDeviceWatchdogService(false, false);
+        givenUnavailableDeviceWatchdogService(false, 0);
 
         whenUnavailableDeviceWatchdogServiceIsActivated(false);
 
@@ -205,7 +224,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void noRebootWhenDeviceCannotBeOpenedAndFailOnUnavailableDeviceDisabled() throws Throwable {
-        givenUnavailableDeviceWatchdogService(true, false);
+        givenUnavailableDeviceWatchdogService(true, 0);
 
         whenUnavailableDeviceWatchdogServiceIsActivated(false);
 
@@ -215,13 +234,47 @@ public class WatchdogServiceImplTest {
     }
 
     @Test
-    public void serviceNotSupervisingWhenRebootForUnavailableDeviceFails() throws Throwable {
-        givenUnavailableDeviceWatchdogService(false, true);
+    public void rebootRetriedWhenRebootForUnavailableDeviceFails() throws Throwable {
+        givenUnavailableDeviceWatchdogService(false, ALWAYS_FAIL);
 
         whenUnavailableDeviceWatchdogServiceIsActivated(true);
 
-        thenRebootRequests(1);
+        thenRebootIsRetried(3);
         thenRebootCauseContains("Watchdog device '" + WATCHDOG_TEST_DEVICE + "' does not exist");
+        thenWatchdogDeviceIsNotOpen();
+    }
+
+    @Test
+    public void rebootRetryStopsWhenRebootSucceeds() throws Throwable {
+        givenUnavailableDeviceWatchdogService(true, 2);
+
+        whenUnavailableDeviceWatchdogServiceIsActivated(true);
+
+        thenRebootIsRetried(3);
+        thenNoFurtherRebootRequests();
+        thenRebootCauseContains("Failed to open watchdog device '" + WATCHDOG_TEST_DEVICE + "'");
+        thenWatchdogIsNotSupervising();
+    }
+
+    @Test
+    public void rebootRetryCancelledWhenConfigurationIsUpdated() throws Throwable {
+        givenUnavailableDeviceWatchdogService(false, ALWAYS_FAIL);
+        givenUnavailableDeviceWatchdogServiceActivatedAndRetryingReboot();
+
+        whenUnavailableDeviceWatchdogServiceIsUpdated(false);
+
+        thenNoFurtherRebootRequests();
+        thenWatchdogIsNotSupervising();
+    }
+
+    @Test
+    public void rebootRetryCancelledWhenServiceIsDeactivated() throws Throwable {
+        givenUnavailableDeviceWatchdogService(false, ALWAYS_FAIL);
+        givenUnavailableDeviceWatchdogServiceActivatedAndRetryingReboot();
+
+        whenUnavailableDeviceWatchdogServiceIsDeactivated();
+
+        thenNoFurtherRebootRequests();
         thenWatchdogIsNotSupervising();
     }
 
@@ -458,19 +511,47 @@ public class WatchdogServiceImplTest {
         assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
     }
 
-    private void givenUnavailableDeviceWatchdogService(boolean deviceExists, boolean rebootFails) {
+    private void givenUnavailableDeviceWatchdogService(boolean deviceExists, int failingReboots) {
         new File(UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE).delete();
-        this.unavailableDeviceSvc = new UnavailableDeviceWatchdogServiceImpl(deviceExists, rebootFails);
+        this.unavailableDeviceSvc = new UnavailableDeviceWatchdogServiceImpl(deviceExists, failingReboots);
+    }
+
+    private void givenUnavailableDeviceWatchdogServiceActivatedAndRetryingReboot() throws Throwable {
+        whenUnavailableDeviceWatchdogServiceIsActivated(true);
+        thenRebootIsRetried(2);
     }
 
     private void whenUnavailableDeviceWatchdogServiceIsActivated(boolean failOnUnavailableDevice)
             throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        this.unavailableDeviceSvc.activate(getUnavailableDeviceProperties(failOnUnavailableDevice));
+        awaitPendingUpdate(this.unavailableDeviceSvc);
+    }
+
+    private void whenUnavailableDeviceWatchdogServiceIsUpdated(boolean failOnUnavailableDevice)
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        this.unavailableDeviceSvc.updated(getUnavailableDeviceProperties(failOnUnavailableDevice));
+        awaitPendingUpdate(this.unavailableDeviceSvc);
+    }
+
+    private void whenUnavailableDeviceWatchdogServiceIsDeactivated() {
+        this.unavailableDeviceSvc.deactivate();
+    }
+
+    private Map<String, Object> getUnavailableDeviceProperties(boolean failOnUnavailableDevice) {
         Map<String, Object> properties = getProperties(true);
         properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
         properties.put("failOnUnavailableDevice", failOnUnavailableDevice);
+        return properties;
+    }
 
-        this.unavailableDeviceSvc.activate(properties);
-        awaitPendingUpdate(this.unavailableDeviceSvc);
+    private void thenRebootIsRetried(int expectedRebootRequests) throws InterruptedException {
+        assertTrue(this.unavailableDeviceSvc.waitForRebootRequests(expectedRebootRequests, 10000));
+    }
+
+    private void thenNoFurtherRebootRequests() throws InterruptedException {
+        final int rebootRequests = this.unavailableDeviceSvc.getRebootRequests();
+        Thread.sleep(TEST_REBOOT_RETRY_INTERVAL_MS * 5);
+        assertEquals(rebootRequests, this.unavailableDeviceSvc.getRebootRequests());
     }
 
     private void thenRebootRequests(int expectedRebootRequests) {
@@ -488,9 +569,17 @@ public class WatchdogServiceImplTest {
         assertFalse(new File(UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE).exists());
     }
 
-    private void thenWatchdogIsNotSupervising() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
+    private void thenWatchdogIsNotSupervising()
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        if (TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollExecutor") != null) {
+            awaitPendingUpdate(this.unavailableDeviceSvc);
+        }
+        thenWatchdogDeviceIsNotOpen();
         assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollTask"));
+    }
+
+    private void thenWatchdogDeviceIsNotOpen() throws NoSuchFieldException {
+        assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
     }
 
     private void givenWatchdogServiceEnabled() throws Throwable {

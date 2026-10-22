@@ -5995,8 +5995,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p><strong>supportedModemCapabilities</strong>: <code>array</code> </p>
 <ul>
+<li>array element type: <code>array</code><ul>
 <li>array element type: <code>string (enumerated)</code><ul>
 <li><a href="#modemcapability">ModemCapability</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -6261,27 +6264,29 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-7-149" name="__codelineno-7-149" href="#__codelineno-7-149"></a><span class="w">    </span><span class="s2">&quot;UTRAN_4&quot;</span>
 <a id="__codelineno-7-150" name="__codelineno-7-150" href="#__codelineno-7-150"></a><span class="w">  </span><span class="p">],</span>
 <a id="__codelineno-7-151" name="__codelineno-7-151" href="#__codelineno-7-151"></a><span class="w">  </span><span class="nt">&quot;supportedModemCapabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-7-152" name="__codelineno-7-152" href="#__codelineno-7-152"></a><span class="w">    </span><span class="s2">&quot;NONE&quot;</span>
-<a id="__codelineno-7-153" name="__codelineno-7-153" href="#__codelineno-7-153"></a><span class="w">  </span><span class="p">],</span>
-<a id="__codelineno-7-154" name="__codelineno-7-154" href="#__codelineno-7-154"></a><span class="w">  </span><span class="nt">&quot;supportedModes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-7-155" name="__codelineno-7-155" href="#__codelineno-7-155"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-7-156" name="__codelineno-7-156" href="#__codelineno-7-156"></a><span class="w">      </span><span class="nt">&quot;modes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-7-157" name="__codelineno-7-157" href="#__codelineno-7-157"></a><span class="w">        </span><span class="s2">&quot;MODE_4G&quot;</span>
-<a id="__codelineno-7-158" name="__codelineno-7-158" href="#__codelineno-7-158"></a><span class="w">      </span><span class="p">],</span>
-<a id="__codelineno-7-159" name="__codelineno-7-159" href="#__codelineno-7-159"></a><span class="w">      </span><span class="nt">&quot;preferredMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NONE&quot;</span>
-<a id="__codelineno-7-160" name="__codelineno-7-160" href="#__codelineno-7-160"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-7-161" name="__codelineno-7-161" href="#__codelineno-7-161"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-7-162" name="__codelineno-7-162" href="#__codelineno-7-162"></a><span class="w">      </span><span class="nt">&quot;modes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-7-163" name="__codelineno-7-163" href="#__codelineno-7-163"></a><span class="w">        </span><span class="s2">&quot;MODE_2G&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-164" name="__codelineno-7-164" href="#__codelineno-7-164"></a><span class="w">        </span><span class="s2">&quot;MODE_3G&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-165" name="__codelineno-7-165" href="#__codelineno-7-165"></a><span class="w">        </span><span class="s2">&quot;MODE_4G&quot;</span>
-<a id="__codelineno-7-166" name="__codelineno-7-166" href="#__codelineno-7-166"></a><span class="w">      </span><span class="p">],</span>
-<a id="__codelineno-7-167" name="__codelineno-7-167" href="#__codelineno-7-167"></a><span class="w">      </span><span class="nt">&quot;preferredMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MODE_4G&quot;</span>
-<a id="__codelineno-7-168" name="__codelineno-7-168" href="#__codelineno-7-168"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-7-169" name="__codelineno-7-169" href="#__codelineno-7-169"></a><span class="w">  </span><span class="p">],</span>
-<a id="__codelineno-7-170" name="__codelineno-7-170" href="#__codelineno-7-170"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MODEM&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-171" name="__codelineno-7-171" href="#__codelineno-7-171"></a><span class="w">  </span><span class="nt">&quot;virtual&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-7-172" name="__codelineno-7-172" href="#__codelineno-7-172"></a><span class="p">}</span>
+<a id="__codelineno-7-152" name="__codelineno-7-152" href="#__codelineno-7-152"></a><span class="w">    </span><span class="p">[</span>
+<a id="__codelineno-7-153" name="__codelineno-7-153" href="#__codelineno-7-153"></a><span class="w">      </span><span class="s2">&quot;NONE&quot;</span>
+<a id="__codelineno-7-154" name="__codelineno-7-154" href="#__codelineno-7-154"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-7-155" name="__codelineno-7-155" href="#__codelineno-7-155"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-7-156" name="__codelineno-7-156" href="#__codelineno-7-156"></a><span class="w">  </span><span class="nt">&quot;supportedModes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-7-157" name="__codelineno-7-157" href="#__codelineno-7-157"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-7-158" name="__codelineno-7-158" href="#__codelineno-7-158"></a><span class="w">      </span><span class="nt">&quot;modes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-7-159" name="__codelineno-7-159" href="#__codelineno-7-159"></a><span class="w">        </span><span class="s2">&quot;MODE_4G&quot;</span>
+<a id="__codelineno-7-160" name="__codelineno-7-160" href="#__codelineno-7-160"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-7-161" name="__codelineno-7-161" href="#__codelineno-7-161"></a><span class="w">      </span><span class="nt">&quot;preferredMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NONE&quot;</span>
+<a id="__codelineno-7-162" name="__codelineno-7-162" href="#__codelineno-7-162"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-7-163" name="__codelineno-7-163" href="#__codelineno-7-163"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-7-164" name="__codelineno-7-164" href="#__codelineno-7-164"></a><span class="w">      </span><span class="nt">&quot;modes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-7-165" name="__codelineno-7-165" href="#__codelineno-7-165"></a><span class="w">        </span><span class="s2">&quot;MODE_2G&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-166" name="__codelineno-7-166" href="#__codelineno-7-166"></a><span class="w">        </span><span class="s2">&quot;MODE_3G&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-167" name="__codelineno-7-167" href="#__codelineno-7-167"></a><span class="w">        </span><span class="s2">&quot;MODE_4G&quot;</span>
+<a id="__codelineno-7-168" name="__codelineno-7-168" href="#__codelineno-7-168"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-7-169" name="__codelineno-7-169" href="#__codelineno-7-169"></a><span class="w">      </span><span class="nt">&quot;preferredMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MODE_4G&quot;</span>
+<a id="__codelineno-7-170" name="__codelineno-7-170" href="#__codelineno-7-170"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-171" name="__codelineno-7-171" href="#__codelineno-7-171"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-7-172" name="__codelineno-7-172" href="#__codelineno-7-172"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MODEM&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-173" name="__codelineno-7-173" href="#__codelineno-7-173"></a><span class="w">  </span><span class="nt">&quot;virtual&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<a id="__codelineno-7-174" name="__codelineno-7-174" href="#__codelineno-7-174"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="networkinterfacestatus">NetworkInterfaceStatus</h3>
 <p>This object contains the common properties contained by the status object reported for a network interface. A network interface is identified by Kura using the id field. It is used to internally manage the interface. The interfaceName, instead, is the IP interface as it may appear on the system. For Ethernet and WiFi interfaces the two values coincide (i.e. eth0, wlp1s0, ...). For modems, instead, the id is typically the usb or pci path, while the interfaceName is the IP interface created when they are connected. When the modem is disconnected the interfaceName can have a different value.</p>

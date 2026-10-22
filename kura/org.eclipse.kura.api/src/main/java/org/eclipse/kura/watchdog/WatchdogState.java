@@ -32,14 +32,15 @@ public enum WatchdogState {
 
     /**
      * The {@link WatchdogService} is enabled but the watchdog device does not exist or cannot be opened. The system
-     * is not under hardware watchdog supervision.
+     * is not under hardware watchdog supervision. If the service is configured to fail on unavailable device, this
+     * is also the state during the grace period that precedes the reboot request.
      */
     DEVICE_UNAVAILABLE,
 
     /**
      * A system reboot has been requested, either because a {@link CriticalComponent} timed out or because the
-     * watchdog device is unavailable and the service is configured to fail on unavailable device. The
-     * state is kept while a failed reboot is being retried.
+     * watchdog device is still unavailable at the end of the grace period and the service is configured to fail on
+     * unavailable device. The state is kept while a failed reboot is being retried.
      */
     REBOOT_REQUESTED
 }

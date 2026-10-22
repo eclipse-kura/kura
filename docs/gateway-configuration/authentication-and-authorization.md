@@ -82,12 +82,12 @@ Kura 6 introduces temporary identity support in the **IdentityService**, a set o
 
 The main use case for temporary identities is the **Container Identity Integration** feature, which automatically provisions authentication credentials for containerized applications. When a container is configured with identity integration enabled:
 
-1. Kura creates a temporary identity with the specified permissions
-2. Generates a temporary password for the identity
-3. Provides the identity name and password to the container via environment variables
+1. Kura creates a temporary identity with the specified permissions and password authentication disabled
+2. Issues a JWT token pair for the identity
+3. Provides the token pair to the container through a read-only file, and the identity name and the REST base URL through environment variables
 4. Automatically cleans up the temporary identity when the container stops
 
-This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials. Container Identity Integration provisions password credentials, so password-based REST authentication requires **Basic Authentication Enabled** in the **RestService** configuration. Temporary identities can also be used with certificate-based REST authentication when certificate authentication is enabled and the certificate CN matches the identity name.
+This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials. The container authenticates with JWT bearer tokens, so **JWT Authentication Enabled** must be set in the **RestService** configuration. Temporary identities created through the API can also be used with password-based or certificate-based REST authentication, depending on the RestService configuration.
 
 ### Temporary Identity API
 

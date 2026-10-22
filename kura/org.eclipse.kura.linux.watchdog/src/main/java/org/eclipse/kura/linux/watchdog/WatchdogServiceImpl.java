@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,6 +36,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
+import org.eclipse.kura.watchdog.WatchdogState;
+import org.eclipse.kura.watchdog.WatchdogStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +70,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private ScheduledFuture<?> pollTask;
     private Writer watchdogFileWriter;
     private WatchdogServiceOptions options;
+
+    private final Object statusLock = new Object();
+    private WatchdogState state = WatchdogState.DISABLED;
+    private boolean deviceOpen;
+    private String devicePath;
+    private Instant lastRefreshTime;
+    private long refreshIntervalMs;
+    private String failureReason;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -128,6 +140,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private void doUpdate(WatchdogServiceOptions newOptions) {
+        resetStatus(newOptions);
+
         if (!newOptions.isEnabled()) {
             deleteWatchdogEnabledTemporaryFile(newOptions);
             return;
@@ -152,6 +166,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             return;
         }
 
+        setDeviceOpen(true);
+        setState(WatchdogState.SUPERVISING, null);
+
         try (PrintWriter wdWriter = new PrintWriter(newOptions.getWatchdogEnabledTemporaryFilePath())) {
             wdWriter.write(watchdogDevice);
         } catch (IOException e) {
@@ -168,9 +185,11 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void handleUnavailableDevice(final WatchdogServiceOptions newOptions, final String rebootCause) {
         if (!newOptions.isFailOnUnavailableDevice()) {
+            setState(WatchdogState.DEVICE_UNAVAILABLE, rebootCause);
             return;
         }
 
+        setState(WatchdogState.REBOOT_REQUESTED, rebootCause);
         logger.error("Watchdog device is unavailable and fail on unavailable device is enabled. System will reboot");
         if (!requestReboot(newOptions, rebootCause)) {
             logger.error(
@@ -246,6 +265,49 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     @Override
+    public WatchdogStatus getWatchdogStatus() {
+        synchronized (this.statusLock) {
+            return WatchdogStatus.builder() //
+                    .withState(this.state) //
+                    .withDeviceOpen(this.deviceOpen) //
+                    .withDevicePath(Optional.ofNullable(this.devicePath)) //
+                    .withLastRefreshTime(Optional.ofNullable(this.lastRefreshTime)) //
+                    .withRefreshIntervalMs(this.refreshIntervalMs) //
+                    .withFailureReason(Optional.ofNullable(this.failureReason)) //
+                    .build();
+        }
+    }
+
+    private void resetStatus(final WatchdogServiceOptions newOptions) {
+        synchronized (this.statusLock) {
+            this.state = WatchdogState.DISABLED;
+            this.devicePath = newOptions.getWatchdogDevice();
+            this.refreshIntervalMs = newOptions.getPingInterval();
+            this.lastRefreshTime = null;
+            this.failureReason = null;
+        }
+    }
+
+    private void setState(final WatchdogState newState, final String newFailureReason) {
+        synchronized (this.statusLock) {
+            this.state = newState;
+            this.failureReason = newFailureReason;
+        }
+    }
+
+    private void setDeviceOpen(final boolean isDeviceOpen) {
+        synchronized (this.statusLock) {
+            this.deviceOpen = isDeviceOpen;
+        }
+    }
+
+    private void setLastRefreshTime(final Instant refreshTime) {
+        synchronized (this.statusLock) {
+            this.lastRefreshTime = refreshTime;
+        }
+    }
+
+    @Override
     public void checkin(CriticalComponent criticalComponent) {
         for (CriticalComponentRegistration ccr : this.criticalComponentRegistrations) {
             if (ccr.getCriticalComponent() == criticalComponent) {
@@ -262,6 +324,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             if (ccr != null) {
                 this.timedOutOn = System.nanoTime();
                 logger.warn("Critical component '{}' timed out. System will reboot", ccr.getCriticalComponentName());
+                setState(WatchdogState.REBOOT_REQUESTED,
+                        "Critical component '" + ccr.getCriticalComponentName() + "' timed out");
 
                 if (!requestReboot(this.options, ccr.getCriticalComponentName())) {
                     logger.error("System reboot failed. Watchdog will not be refreshed");
@@ -336,6 +400,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void refreshWatchdog() {
         try {
             writeWatchdogDevice("w");
+            setLastRefreshTime(Instant.now());
         } catch (IOException e) {
             logger.error("Failed to refresh watchdog device '{}'", this.options.getWatchdogDevice(), e);
         }
@@ -355,6 +420,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         try {
             this.watchdogFileWriter.close();
             this.watchdogFileWriter = null;
+            setDeviceOpen(false);
         } catch (IOException e) {
             logger.error("Failed to close watchdog device '{}'", this.options.getWatchdogDevice(), e);
         }

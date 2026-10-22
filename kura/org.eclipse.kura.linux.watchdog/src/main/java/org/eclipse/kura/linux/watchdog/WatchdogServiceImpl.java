@@ -51,12 +51,14 @@ import org.osgi.service.metatype.annotations.Designate;
 @Designate(ocd = WatchdogServiceMetatype.class)
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
+    private static final String WATCHDOG_SERVICE_IMPL_NAME = "WatchdogServiceImpl";
     private static final String[] STOP_WATCHDOGD_COMMANDS = { "systemctl stop watchdog", "service watchdog stop",
             "/etc/init.d/watchdog stop", "/etc/init.d/watchdog.sh stop" };
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
     private static final long GRACE_PERIOD = Duration.ofMinutes(5).toNanos();
+    private static final long REBOOT_RETRY_INTERVAL = Duration.ofMinutes(1).toMillis();
 
     private Long timedOutOn;
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
@@ -88,7 +90,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 
         this.pollExecutor.submit(() -> {
-            Thread.currentThread().setName("WatchdogServiceImpl");
+            Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
             cancelPollTask();
             if (this.watchdogFileWriter != null) {
                 disableWatchdog();
@@ -103,7 +105,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 runCommand(stopCommand);
                 Thread.sleep(5000);
                 return;
-            } catch (Exception e) {
+            } catch (KuraException e) {
+                logger.debug("Command failed: {}", stopCommand, e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.debug("Command failed: {}", stopCommand, e);
             }
         }
@@ -156,7 +161,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         this.options = newOptions;
 
         this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
-            Thread.currentThread().setName("WatchdogServiceImpl");
+            Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
             checkCriticalComponents();
         }, 0, this.options.getPingInterval(), TimeUnit.MILLISECONDS);
     }
@@ -168,8 +173,29 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
         logger.error("Watchdog device is unavailable and fail on unavailable device is enabled. System will reboot");
         if (!requestReboot(newOptions, rebootCause)) {
-            logger.error("System reboot failed. The system is running without hardware watchdog supervision");
+            logger.error(
+                    "System reboot failed. The system is running without hardware watchdog supervision. Retrying every {} ms",
+                    getRebootRetryInterval());
+            scheduleRebootRetry();
         }
+    }
+
+    private void scheduleRebootRetry() {
+        final long retryInterval = getRebootRetryInterval();
+
+        this.pollTask = this.pollExecutor.scheduleWithFixedDelay(() -> {
+            Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
+            logger.warn("Retrying system reboot");
+            if (tryReboot()) {
+                cancelPollTask();
+            } else {
+                logger.error("System reboot failed. The system is running without hardware watchdog supervision");
+            }
+        }, retryInterval, retryInterval, TimeUnit.MILLISECONDS);
+    }
+
+    protected long getRebootRetryInterval() {
+        return REBOOT_RETRY_INTERVAL;
     }
 
     protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
@@ -267,6 +293,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         RebootCauseFileWriter rebootCauseWriter = new RebootCauseFileWriter(currentOptions.getRebootCauseFilePath());
         rebootCauseWriter.writeRebootCause(rebootCause);
 
+        return tryReboot();
+    }
+
+    private boolean tryReboot() {
         try {
             logger.debug("Requesting reboot.");
             rebootSystem();

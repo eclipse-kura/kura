@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -109,5 +109,14 @@ public interface WatchdogService {
      *            The criticalComponent to be updated.
      */
     public void checkin(CriticalComponent criticalComponent);
+
+    /**
+     * Returns a snapshot of the state of the hardware watchdog. It can be used to verify that the
+     * system is under hardware watchdog supervision.
+     *
+     * @return the current {@link WatchdogStatus}
+     * @since 2.9
+     */
+    public WatchdogStatus getWatchdogStatus();
 
 }

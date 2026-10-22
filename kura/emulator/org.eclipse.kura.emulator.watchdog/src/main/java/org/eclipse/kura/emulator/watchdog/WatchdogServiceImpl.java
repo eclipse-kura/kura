@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
+import org.eclipse.kura.watchdog.WatchdogState;
+import org.eclipse.kura.watchdog.WatchdogStatus;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,6 +212,20 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 }
             }
         }
+    }
+
+    @Override
+    public WatchdogStatus getWatchdogStatus() {
+        if (!this.configEnabled) {
+            return WatchdogStatus.builder().withState(WatchdogState.DISABLED).withRefreshIntervalMs(this.pingInterval)
+                    .build();
+        }
+
+        return WatchdogStatus.builder() //
+                .withState(WatchdogState.DEVICE_UNAVAILABLE) //
+                .withRefreshIntervalMs(this.pingInterval) //
+                .withFailureReason(Optional.of("The emulated watchdog does not supervise a hardware watchdog device")) //
+                .build();
     }
 
     private void doWatchdogLoop() {

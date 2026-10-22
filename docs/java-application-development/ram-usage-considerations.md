@@ -15,7 +15,7 @@ The heap should be:
   1. Large enough to satisfy the requirements of applications running inside Kura.
   2. Small enough so that the requirements of the system and applications running outside Kura are satisfied.
 
-The size of the heap is controlled by the `-Xms` and `-Xmx` Java command line arguments. These parameters are defined in the `/opt/eclipse/kura/bin/start_kura_debug.sh` (for development mode) and `/opt/eclipse/kura/bin/start_kura_background.sh` (for production mode).
+The size of the heap is controlled by the `-Xms` and `-Xmx` Java command line arguments. These parameters are defined in the `/opt/eclipse/kura/bin/start_kura.sh` script, and their values are set automatically by the installer based on the RAM available on the gateway, as described in [Java Heap Memory Assignment](../getting-started/install-kura.md#java-heap-memory-assignment).
 
 
 The `-Xms` parameter defines the initial size of Java heap and `-Xmx` defines the maximum size. The JVM will start using `Xms` as the size of the heap, and then it will grow the heap at runtime up to `Xmx` if needed, depending on application memory demand. 

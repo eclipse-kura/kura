@@ -147,12 +147,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Supervision State", getWatchdogStateLabel(status)));
         pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Watchdog Device",
                 status.getDevicePath().map(GwtSafeHtmlUtils::htmlEscape).orElse("N/A")));
-        pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Device Open", status.isDeviceOpen() ? "Yes" : "No"));
-        pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Last Refresh",
-                status.getLastRefreshTime().map(time -> new Date(time.toEpochMilli()).toString()).orElse("Never")));
-        pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Refresh Interval", status.getRefreshIntervalMs() + " ms"));
-        status.getFailureReason().ifPresent(reason -> pairs
-                .add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Failure Reason", GwtSafeHtmlUtils.htmlEscape(reason))));
     }
 
     private static String getWatchdogStateLabel(final WatchdogStatus status) {

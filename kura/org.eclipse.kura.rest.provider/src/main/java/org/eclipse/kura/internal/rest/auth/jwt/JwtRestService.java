@@ -119,7 +119,8 @@ public class JwtRestService {
         try {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
-            final TokenPairDTO result = issueTokenPair(identityName, issuer, this.families.start(), 0);
+            final TokenPairDTO result = issueTokenPair(identityName, issuer,
+                    this.families.start(familyTrackingDeadline(issuer)), 0);
             auditLogger.info("{} Rest - Success - JWT token pair issued", auditContext);
             return response(result);
         } catch (final KuraException e) {
@@ -154,7 +155,8 @@ public class JwtRestService {
 
             final Map<String, Object> claims = proof.getClaims();
             final String familyId = familyIdOf(claims);
-            final long generation = this.families.advance(familyId, generationOf(claims));
+            final long generation = this.families.advance(familyId, generationOf(claims),
+                    familyTrackingDeadline(issuer));
 
             final String id = createIdForReplayDetection(proof);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, generation);
@@ -261,6 +263,13 @@ public class JwtRestService {
                 .header(HttpHeaders.CACHE_CONTROL, "no-store") //
                 .header("Pragma", "no-cache") //
                 .build();
+    }
+
+    private Instant familyTrackingDeadline(final TokenIssuingService issuer) {
+        final RestServiceOptions currentOptions = this.options.get();
+        return Instant.now() //
+                .plus(cappedLifetime(currentOptions.getJwtRefreshTokenDuration(), issuer)) //
+                .plus(currentOptions.getJwtUsedRefreshTokenRetention());
     }
 
     private static Duration cappedLifetime(final Duration configured, final TokenIssuingService issuer) {

@@ -162,7 +162,7 @@ public class JwtRestServiceTest {
     private void givenARefreshTokenWith(final Optional<String> tokenId, final Optional<String> tokenIssuer) {
         final Map<String, Object> claims = new HashMap<>();
         tokenIssuer.ifPresent(iss -> claims.put("iss", iss));
-        claims.put(JwtRestServiceConstants.FAMILY_ID_CLAIM, this.families.start());
+        claims.put(JwtRestServiceConstants.FAMILY_ID_CLAIM, this.families.start(Instant.MAX));
         claims.put(JwtRestServiceConstants.GENERATION_CLAIM, 0);
 
         when(this.proof.getTokenID()).thenReturn(tokenId);

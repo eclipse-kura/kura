@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -146,7 +147,14 @@ public class JwtRestService {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
             final String id = createIdForReplayDetection(proof);
-            final TokenPairDTO result = issueTokenPair(identityName, issuer, UUID.randomUUID().toString(), 0);
+            final Map<String, Object> claims = proof.getClaims();
+            final TokenPairDTO result;
+            if (claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM) instanceof String familyId
+                    && claims.get(JwtRestServiceConstants.GENERATION_CLAIM) instanceof Number generation) {
+                result = issueTokenPair(identityName, issuer, familyId, generation.longValue() + 1);
+            } else {
+                result = issueTokenPair(identityName, issuer, UUID.randomUUID().toString(), 0);
+            }
 
             updateUsedRefreshTokens(id, proof.getExpiresAt());
 

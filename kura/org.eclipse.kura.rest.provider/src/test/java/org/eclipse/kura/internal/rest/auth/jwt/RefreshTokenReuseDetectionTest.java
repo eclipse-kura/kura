@@ -14,10 +14,8 @@
 package org.eclipse.kura.internal.rest.auth.jwt;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -25,70 +23,56 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class RefreshTokenReuseDetectionTest extends AbstractRefreshTokenFamilyScenario {
 
+    private static final int OK = Status.OK.getStatusCode();
     private static final int UNAUTHORIZED = Status.UNAUTHORIZED.getStatusCode();
 
-    private String loginRefreshToken;
+    private String ownerRefreshToken;
     private String attackerRefreshToken;
-    private String newLoginRefreshToken;
-    private Optional<String> newLoginExchange;
 
     @Test
     public void replayingAnExchangedRefreshTokenRevokesTheFamily() {
-        givenALogin();
-        givenTheAttackerExchangedTheLoginRefreshToken();
+        givenTheOwnerLoggedIn();
+        givenTheAttackerExchanged(this.ownerRefreshToken);
 
-        whenTheOwnerExchangesTheLoginRefreshToken();
-        whenTheAttackerExchangesTheirRefreshToken();
+        whenTheOwnerExchanges(this.ownerRefreshToken);
+        whenTheAttackerExchanges(this.attackerRefreshToken);
 
-        thenTheExchangesAreRefused(2);
+        thenTheExchangeStatusesAre(OK, UNAUTHORIZED, UNAUTHORIZED);
     }
 
     @Test
     public void aNewLoginIsUnaffectedByARevokedFamily() {
-        givenALogin();
-        givenTheAttackerExchangedTheLoginRefreshToken();
-        givenTheOwnerExchangedTheLoginRefreshToken();
-        givenANewLogin();
+        givenTheOwnerLoggedIn();
+        givenTheAttackerExchanged(this.ownerRefreshToken);
+        givenTheOwnerExchanged(this.ownerRefreshToken);
+        givenTheOwnerLoggedIn();
 
-        whenTheNewLoginRefreshTokenIsExchanged();
+        whenTheOwnerExchanges(this.ownerRefreshToken);
 
-        thenTheNewLoginRefreshTokenIsExchanged();
-        thenTheExchangesAreRefused(1);
+        thenTheExchangeStatusesAre(OK, UNAUTHORIZED, OK);
     }
 
-    private void givenALogin() {
-        this.loginRefreshToken = login();
+    private void givenTheOwnerLoggedIn() {
+        this.ownerRefreshToken = login().refreshToken();
     }
 
-    private void givenTheAttackerExchangedTheLoginRefreshToken() {
-        this.attackerRefreshToken = exchange(this.loginRefreshToken).orElseThrow();
+    private void givenTheAttackerExchanged(final String refreshToken) {
+        this.attackerRefreshToken = exchange(refreshToken).orElse(this.attackerRefreshToken);
     }
 
-    private void givenTheOwnerExchangedTheLoginRefreshToken() {
-        exchange(this.loginRefreshToken);
+    private void givenTheOwnerExchanged(final String refreshToken) {
+        this.ownerRefreshToken = exchange(refreshToken).orElse(this.ownerRefreshToken);
     }
 
-    private void givenANewLogin() {
-        this.newLoginRefreshToken = login();
+    private void whenTheOwnerExchanges(final String refreshToken) {
+        this.ownerRefreshToken = exchange(refreshToken).orElse(this.ownerRefreshToken);
     }
 
-    private void whenTheOwnerExchangesTheLoginRefreshToken() {
-        exchange(this.loginRefreshToken);
+    private void whenTheAttackerExchanges(final String refreshToken) {
+        this.attackerRefreshToken = exchange(refreshToken).orElse(this.attackerRefreshToken);
     }
 
-    private void whenTheAttackerExchangesTheirRefreshToken() {
-        exchange(this.attackerRefreshToken);
-    }
-
-    private void whenTheNewLoginRefreshTokenIsExchanged() {
-        this.newLoginExchange = exchange(this.newLoginRefreshToken);
-    }
-
-    private void thenTheNewLoginRefreshTokenIsExchanged() {
-        assertTrue(this.newLoginExchange.isPresent());
-    }
-
-    private void thenTheExchangesAreRefused(final int expectedRefusals) {
-        assertEquals(Collections.nCopies(expectedRefusals, UNAUTHORIZED), refusals());
+    private void thenTheExchangeStatusesAre(final Integer... statuses) {
+        assertEquals(List.of(statuses), exchangeStatuses());
     }
 }

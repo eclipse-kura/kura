@@ -67,10 +67,15 @@ public class JwtRestService {
     private final AtomicReference<RestServiceOptions> options = new AtomicReference<>();
 
     private final ConcurrentMap<String, Instant> usedRefreshTokens = new ConcurrentHashMap<>();
-    private final RefreshTokenFamilies families = new RefreshTokenFamilies();
+    private final RefreshTokenFamilies families;
 
     public JwtRestService(final RestIdentityHelper identityHelper) {
+        this(identityHelper, new RefreshTokenFamilies());
+    }
+
+    JwtRestService(final RestIdentityHelper identityHelper, final RefreshTokenFamilies families) {
         this.identityHelper = identityHelper;
+        this.families = families;
     }
 
     public void setOptions(final RestServiceOptions options) {
@@ -123,7 +128,8 @@ public class JwtRestService {
     }
 
     /**
-     * Accepts any refresh token the verification service trusts, issued by this service or by an external one.
+     * Accepts refresh tokens the verification service trusts that belong to a known, active token family. Exchanging a
+     * refresh token of an older generation revokes its whole family.
      * 
      * @param body
      * @return
@@ -147,16 +153,8 @@ public class JwtRestService {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
             final Map<String, Object> claims = proof.getClaims();
-            final String familyId;
-            final long generation;
-            if (claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM) instanceof String presentedFamilyId
-                    && claims.get(JwtRestServiceConstants.GENERATION_CLAIM) instanceof Number presentedGeneration) {
-                familyId = presentedFamilyId;
-                generation = this.families.advance(presentedFamilyId, presentedGeneration.longValue());
-            } else {
-                familyId = this.families.start();
-                generation = 0;
-            }
+            final String familyId = familyIdOf(claims);
+            final long generation = this.families.advance(familyId, generationOf(claims));
 
             final String id = createIdForReplayDetection(proof);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, generation);
@@ -275,6 +273,23 @@ public class JwtRestService {
                 .intendedConsumer(intendedConsumer) //
                 .notBefore(now) //
                 .expiresAt(now.plus(duration));
+    }
+
+    private static String familyIdOf(final Map<String, Object> claims) throws KuraAuthenticationFailedException {
+        if (claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM) instanceof String familyId) {
+            return familyId;
+        }
+
+        throw new KuraAuthenticationFailedException("Refresh token has no valid " + JwtRestServiceConstants.FAMILY_ID_CLAIM);
+    }
+
+    private static long generationOf(final Map<String, Object> claims) throws KuraAuthenticationFailedException {
+        return switch (claims.get(JwtRestServiceConstants.GENERATION_CLAIM)) {
+        case Integer generation -> generation;
+        case Long generation -> generation;
+        case null, default -> throw new KuraAuthenticationFailedException(
+                "Refresh token has no valid " + JwtRestServiceConstants.GENERATION_CLAIM);
+        };
     }
 
     private String createIdForReplayDetection(final VerificationProof proof) throws KuraAuthenticationFailedException {

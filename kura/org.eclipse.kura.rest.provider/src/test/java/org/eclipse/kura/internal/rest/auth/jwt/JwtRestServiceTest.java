@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +62,8 @@ public class JwtRestServiceTest {
     private final TokenVerificationService verifier = mock(TokenVerificationService.class);
     private final VerificationProof proof = mock(VerificationProof.class);
 
-    private final JwtRestService service = new JwtRestService(this.identityHelper);
+    private final RefreshTokenFamilies families = new RefreshTokenFamilies();
+    private final JwtRestService service = new JwtRestService(this.identityHelper, this.families);
     private final List<Integer> refusals = Collections.synchronizedList(new ArrayList<>());
     private int successfulExchanges;
 
@@ -104,7 +106,7 @@ public class JwtRestServiceTest {
     @Test
     public void concurrentExchangesOfTheSameRefreshTokenSucceedOnce() throws Exception {
         givenARefreshTokenWith(Optional.of("jti"), Optional.of("kura"));
-        givenTheIssuerWaitsForAllConcurrentExchanges();
+        givenTheVerifierWaitsForAllConcurrentExchanges();
 
         whenTheRefreshTokenIsExchangedConcurrently();
 
@@ -158,19 +160,23 @@ public class JwtRestServiceTest {
     }
 
     private void givenARefreshTokenWith(final Optional<String> tokenId, final Optional<String> tokenIssuer) {
+        final Map<String, Object> claims = new HashMap<>();
+        tokenIssuer.ifPresent(iss -> claims.put("iss", iss));
+        claims.put(JwtRestServiceConstants.FAMILY_ID_CLAIM, this.families.start());
+        claims.put(JwtRestServiceConstants.GENERATION_CLAIM, 0);
+
         when(this.proof.getTokenID()).thenReturn(tokenId);
-        when(this.proof.getClaims()).thenReturn(tokenIssuer.<Map<String, Object>> map(iss -> Map.of("iss", iss))
-                .orElse(Collections.emptyMap()));
+        when(this.proof.getClaims()).thenReturn(claims);
     }
 
-    private void givenTheIssuerWaitsForAllConcurrentExchanges() throws KuraException {
-        // every exchange passes the replay check before any of them records the token as used
+    private void givenTheVerifierWaitsForAllConcurrentExchanges() throws KuraException {
+        // every exchange is verified before any of them advances the token family
         final CountDownLatch allExchangesStarted = new CountDownLatch(CONCURRENT_EXCHANGES);
 
-        when(this.issuer.issue(any())).thenAnswer(invocation -> {
+        when(this.verifier.verify(any())).thenAnswer(invocation -> {
             allExchangesStarted.countDown();
             allExchangesStarted.await(10, TimeUnit.SECONDS);
-            return "token";
+            return this.proof;
         });
     }
 

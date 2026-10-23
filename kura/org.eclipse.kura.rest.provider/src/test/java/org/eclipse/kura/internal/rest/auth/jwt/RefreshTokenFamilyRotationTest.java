@@ -15,66 +15,13 @@ package org.eclipse.kura.internal.rest.auth.jwt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
-import org.eclipse.kura.internal.rest.auth.dto.TokenPairDTO;
-import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
-import org.eclipse.kura.security.token.TokenIssueRequest;
-import org.eclipse.kura.security.token.TokenIssuingService;
-import org.eclipse.kura.security.token.TokenVerificationService;
-import org.eclipse.kura.security.token.TokenVerifyRequest;
-import org.eclipse.kura.security.token.VerificationProof;
-import org.junit.Before;
 import org.junit.Test;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
+public class RefreshTokenFamilyRotationTest extends AbstractRefreshTokenFamilyScenario {
 
-public class RefreshTokenFamilyRotationTest {
-
-    private static final String IDENTITY = "alice";
-
-    private final RestIdentityHelper identityHelper = mock(RestIdentityHelper.class);
-    private final TokenIssuingService issuer = mock(TokenIssuingService.class);
-    private final TokenVerificationService verifier = mock(TokenVerificationService.class);
-    private final ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
-    private final SecurityContext securityContext = mock(SecurityContext.class);
-
-    private final JwtRestService service = new JwtRestService(this.identityHelper);
-    private final Map<String, TokenIssueRequest> issuedTokens = new LinkedHashMap<>();
     private String loginFamilyId;
     private String latestRefreshToken;
-
-    @Before
-    public void setUp() throws KuraException {
-        this.service.setOptions(new RestServiceOptions(Map.of("auth.jwt.enabled", true)));
-        this.service.setTokenIssuingService(this.issuer);
-        this.service.setTokenVerificationService(this.verifier);
-
-        when(this.identityHelper.identityExists(IDENTITY)).thenReturn(true);
-        when(this.requestContext.getSecurityContext()).thenReturn(this.securityContext);
-        when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
-
-        when(this.issuer.issue(any())).thenAnswer(invocation -> {
-            final String token = "token-" + this.issuedTokens.size();
-            this.issuedTokens.put(token, invocation.getArgument(0));
-            return token;
-        });
-        when(this.verifier.verify(any()))
-                .thenAnswer(invocation -> proofOf(invocation.<TokenVerifyRequest> getArgument(0).getToken()));
-    }
 
     @Test
     public void aRefreshKeepsTheFamilyAndAdvancesTheGeneration() {
@@ -98,7 +45,7 @@ public class RefreshTokenFamilyRotationTest {
     }
 
     private void givenALogin() {
-        this.latestRefreshToken = refreshTokenOf(this.service.issue(this.requestContext));
+        this.latestRefreshToken = login();
         this.loginFamilyId = (String) claimsOf(this.latestRefreshToken).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
 
         assertNotNull(this.loginFamilyId);
@@ -121,33 +68,6 @@ public class RefreshTokenFamilyRotationTest {
     }
 
     private void exchangeTheLatestRefreshToken() {
-        this.latestRefreshToken = refreshTokenOf(this.service
-                .refresh(new ByteArrayInputStream(this.latestRefreshToken.getBytes(StandardCharsets.UTF_8))));
-    }
-
-    private Map<String, Object> claimsOf(final String token) {
-        return this.issuedTokens.get(token).getClaims();
-    }
-
-    private static String refreshTokenOf(final Response response) {
-        return ((TokenPairDTO) response.getEntity()).refreshToken();
-    }
-
-    private VerificationProof proofOf(final String token) {
-        final TokenIssueRequest issued = this.issuedTokens.get(token);
-        final Map<String, Object> claims = new HashMap<>();
-        claims.put("iss", "kura");
-        issued.getClaims().forEach((name, value) -> claims.put(name, decodedLikeJackson(value)));
-
-        final VerificationProof proof = mock(VerificationProof.class);
-        when(proof.getIdentityName()).thenReturn(issued.getIdentityName());
-        when(proof.getTokenID()).thenReturn(Optional.of(token));
-        when(proof.getExpiresAt()).thenReturn(issued.getExpiresAt());
-        when(proof.getClaims()).thenReturn(claims);
-        return proof;
-    }
-
-    private static Object decodedLikeJackson(final Object value) {
-        return value instanceof Long number ? Math.toIntExact(number) : value;
+        this.latestRefreshToken = exchange(this.latestRefreshToken).orElseThrow();
     }
 }

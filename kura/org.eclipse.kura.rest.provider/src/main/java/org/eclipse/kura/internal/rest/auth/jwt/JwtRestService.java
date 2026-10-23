@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,6 +67,7 @@ public class JwtRestService {
     private final AtomicReference<RestServiceOptions> options = new AtomicReference<>();
 
     private final ConcurrentMap<String, Instant> usedRefreshTokens = new ConcurrentHashMap<>();
+    private final RefreshTokenFamilies families = new RefreshTokenFamilies();
 
     public JwtRestService(final RestIdentityHelper identityHelper) {
         this.identityHelper = identityHelper;
@@ -114,7 +114,7 @@ public class JwtRestService {
         try {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
-            final TokenPairDTO result = issueTokenPair(identityName, issuer, UUID.randomUUID().toString(), 0);
+            final TokenPairDTO result = issueTokenPair(identityName, issuer, this.families.start(), 0);
             auditLogger.info("{} Rest - Success - JWT token pair issued", auditContext);
             return response(result);
         } catch (final KuraException e) {
@@ -146,15 +146,20 @@ public class JwtRestService {
             auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), identityName);
             checkIdentityCanAuthenticate(identityName, auditContext);
 
-            final String id = createIdForReplayDetection(proof);
             final Map<String, Object> claims = proof.getClaims();
-            final TokenPairDTO result;
-            if (claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM) instanceof String familyId
-                    && claims.get(JwtRestServiceConstants.GENERATION_CLAIM) instanceof Number generation) {
-                result = issueTokenPair(identityName, issuer, familyId, generation.longValue() + 1);
+            final String familyId;
+            final long generation;
+            if (claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM) instanceof String presentedFamilyId
+                    && claims.get(JwtRestServiceConstants.GENERATION_CLAIM) instanceof Number presentedGeneration) {
+                familyId = presentedFamilyId;
+                generation = this.families.advance(presentedFamilyId, presentedGeneration.longValue());
             } else {
-                result = issueTokenPair(identityName, issuer, UUID.randomUUID().toString(), 0);
+                familyId = this.families.start();
+                generation = 0;
             }
+
+            final String id = createIdForReplayDetection(proof);
+            final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, generation);
 
             updateUsedRefreshTokens(id, proof.getExpiresAt());
 

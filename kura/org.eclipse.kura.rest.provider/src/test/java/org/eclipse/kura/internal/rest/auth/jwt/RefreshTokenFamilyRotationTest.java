@@ -16,6 +16,8 @@ package org.eclipse.kura.internal.rest.auth.jwt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Map;
+
 import org.junit.Test;
 
 public class RefreshTokenFamilyRotationTest extends AbstractRefreshTokenFamilyScenario {
@@ -27,47 +29,40 @@ public class RefreshTokenFamilyRotationTest extends AbstractRefreshTokenFamilySc
     public void aRefreshKeepsTheFamilyAndAdvancesTheGeneration() {
         givenALogin();
 
-        whenTheLatestRefreshTokenIsExchanged();
+        whenTheRefreshTokenIsExchanged(this.latestRefreshToken);
 
-        thenTheLatestRefreshTokenBelongsToTheLoginFamily();
-        thenTheLatestRefreshTokenHasTheGeneration(1);
+        thenTheRefreshTokenCarries(this.latestRefreshToken, this.loginFamilyId, 1);
     }
 
     @Test
     public void eachRefreshAdvancesTheGenerationByOne() {
         givenALogin();
-        givenTheLatestRefreshTokenWasExchanged();
+        givenTheRefreshTokenWasExchanged(this.latestRefreshToken);
 
-        whenTheLatestRefreshTokenIsExchanged();
+        whenTheRefreshTokenIsExchanged(this.latestRefreshToken);
 
-        thenTheLatestRefreshTokenBelongsToTheLoginFamily();
-        thenTheLatestRefreshTokenHasTheGeneration(2);
+        thenTheRefreshTokenCarries(this.latestRefreshToken, this.loginFamilyId, 2);
     }
 
     private void givenALogin() {
-        this.latestRefreshToken = login();
+        this.latestRefreshToken = login().refreshToken();
         this.loginFamilyId = (String) claimsOf(this.latestRefreshToken).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
 
         assertNotNull(this.loginFamilyId);
     }
 
-    private void givenTheLatestRefreshTokenWasExchanged() {
-        exchangeTheLatestRefreshToken();
+    private void givenTheRefreshTokenWasExchanged(final String refreshToken) {
+        this.latestRefreshToken = exchange(refreshToken).orElseThrow();
     }
 
-    private void whenTheLatestRefreshTokenIsExchanged() {
-        exchangeTheLatestRefreshToken();
+    private void whenTheRefreshTokenIsExchanged(final String refreshToken) {
+        this.latestRefreshToken = exchange(refreshToken).orElseThrow();
     }
 
-    private void thenTheLatestRefreshTokenBelongsToTheLoginFamily() {
-        assertEquals(this.loginFamilyId, claimsOf(this.latestRefreshToken).get(JwtRestServiceConstants.FAMILY_ID_CLAIM));
-    }
+    private void thenTheRefreshTokenCarries(final String refreshToken, final String familyId, final long generation) {
+        final Map<String, Object> claims = claimsOf(refreshToken);
 
-    private void thenTheLatestRefreshTokenHasTheGeneration(final long generation) {
-        assertEquals(generation, claimsOf(this.latestRefreshToken).get(JwtRestServiceConstants.GENERATION_CLAIM));
-    }
-
-    private void exchangeTheLatestRefreshToken() {
-        this.latestRefreshToken = exchange(this.latestRefreshToken).orElseThrow();
+        assertEquals(familyId, claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM));
+        assertEquals(generation, claims.get(JwtRestServiceConstants.GENERATION_CLAIM));
     }
 }

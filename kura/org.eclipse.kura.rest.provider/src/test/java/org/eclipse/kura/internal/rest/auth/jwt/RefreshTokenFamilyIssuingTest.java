@@ -17,124 +17,64 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
-import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
-import org.eclipse.kura.security.token.TokenIssueRequest;
-import org.eclipse.kura.security.token.TokenIssuingService;
-import org.junit.Before;
+import org.eclipse.kura.internal.rest.auth.dto.TokenPairDTO;
 import org.junit.Test;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.SecurityContext;
+public class RefreshTokenFamilyIssuingTest extends AbstractRefreshTokenFamilyScenario {
 
-public class RefreshTokenFamilyIssuingTest {
+    private final List<TokenPairDTO> logins = new ArrayList<>();
 
-    private static final String IDENTITY = "alice";
+    @Test
+    public void aLoginStartsAFamilyAtGenerationZero() {
+        whenTheIdentityLogsIn();
 
-    private final RestIdentityHelper identityHelper = mock(RestIdentityHelper.class);
-    private final TokenIssuingService issuer = mock(TokenIssuingService.class);
-    private final ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
-    private final SecurityContext securityContext = mock(SecurityContext.class);
-
-    private final JwtRestService service = new JwtRestService(this.identityHelper);
-    private final List<TokenIssueRequest> issueRequests = new ArrayList<>();
-
-    @Before
-    public void setUp() throws KuraException {
-        this.service.setOptions(new RestServiceOptions(Map.of("auth.jwt.enabled", true)));
-        this.service.setTokenIssuingService(this.issuer);
-
-        when(this.issuer.issue(any())).thenAnswer(invocation -> {
-            this.issueRequests.add(invocation.getArgument(0));
-            return "token";
-        });
+        thenTheTokenStartsAFamily(this.logins.get(0).refreshToken());
     }
 
     @Test
-    public void aLoginStartsAFamilyAtGenerationZero() throws KuraException {
-        givenAnAuthenticatedIdentity();
+    public void everyLoginStartsADifferentFamily() {
+        whenTheIdentityLogsIn();
+        whenTheIdentityLogsIn();
 
-        whenATokenPairIsIssued();
-
-        thenTheRefreshTokenCarriesAFamilyIdentifier();
-        thenTheRefreshTokenCarriesTheGeneration(0);
+        thenTheTokensBelongToDifferentFamilies(this.logins.get(0).refreshToken(), this.logins.get(1).refreshToken());
     }
 
     @Test
-    public void everyLoginStartsADifferentFamily() throws KuraException {
-        givenAnAuthenticatedIdentity();
+    public void theAccessTokenCarriesNoFamilyClaims() {
+        whenTheIdentityLogsIn();
 
-        whenATokenPairIsIssued();
-        whenATokenPairIsIssued();
-
-        thenTheRefreshTokensBelongToDifferentFamilies();
+        thenTheTokenCarriesNoFamilyClaims(this.logins.get(0).accessToken());
     }
 
-    @Test
-    public void theAccessTokenCarriesNoFamilyClaims() throws KuraException {
-        givenAnAuthenticatedIdentity();
-
-        whenATokenPairIsIssued();
-
-        thenTheAccessTokenCarriesNoFamilyClaims();
+    private void whenTheIdentityLogsIn() {
+        this.logins.add(login());
     }
 
-    private void givenAnAuthenticatedIdentity() throws KuraException {
-        when(this.identityHelper.identityExists(IDENTITY)).thenReturn(true);
-        when(this.requestContext.getSecurityContext()).thenReturn(this.securityContext);
-        when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
-    }
-
-    private void whenATokenPairIsIssued() {
-        this.service.issue(this.requestContext);
-    }
-
-    private void thenTheRefreshTokenCarriesAFamilyIdentifier() {
-        final String familyId = (String) refreshTokenClaims(0).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
+    private void thenTheTokenStartsAFamily(final String token) {
+        final String familyId = (String) claimsOf(token).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
 
         assertNotNull(familyId);
         assertEquals(familyId, UUID.fromString(familyId).toString());
+        assertEquals(0L, claimsOf(token).get(JwtRestServiceConstants.GENERATION_CLAIM));
     }
 
-    private void thenTheRefreshTokenCarriesTheGeneration(final long generation) {
-        assertEquals(generation, refreshTokenClaims(0).get(JwtRestServiceConstants.GENERATION_CLAIM));
+    private void thenTheTokensBelongToDifferentFamilies(final String token, final String otherToken) {
+        final Object familyId = claimsOf(token).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
+
+        assertNotNull(familyId);
+        assertNotEquals(familyId, claimsOf(otherToken).get(JwtRestServiceConstants.FAMILY_ID_CLAIM));
     }
 
-    private void thenTheRefreshTokensBelongToDifferentFamilies() {
-        final Object firstFamilyId = refreshTokenClaims(0).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
-        final Object secondFamilyId = refreshTokenClaims(1).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
-
-        assertNotNull(firstFamilyId);
-        assertNotEquals(firstFamilyId, secondFamilyId);
-    }
-
-    private void thenTheAccessTokenCarriesNoFamilyClaims() {
-        final Map<String, Object> claims = claimsOfIssued(JwtRestServiceConstants.INTENDED_ACCESS_CONSUMER, 0);
+    private void thenTheTokenCarriesNoFamilyClaims(final String token) {
+        final Map<String, Object> claims = claimsOf(token);
 
         assertFalse(claims.containsKey(JwtRestServiceConstants.FAMILY_ID_CLAIM));
         assertFalse(claims.containsKey(JwtRestServiceConstants.GENERATION_CLAIM));
-    }
-
-    private Map<String, Object> refreshTokenClaims(final int index) {
-        return claimsOfIssued(JwtRestServiceConstants.INTENDED_REFRESH_CONSUMER, index);
-    }
-
-    private Map<String, Object> claimsOfIssued(final String intendedConsumer, final int index) {
-        return this.issueRequests.stream() //
-                .filter(request -> request.getIntendedConsumers().contains(intendedConsumer)) //
-                .skip(index) //
-                .findFirst() //
-                .orElseThrow() //
-                .getClaims();
     }
 }

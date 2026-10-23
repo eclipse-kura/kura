@@ -54,7 +54,7 @@ public abstract class AbstractRefreshTokenFamilyScenario {
 
     private final JwtRestService service = new JwtRestService(this.identityHelper);
     private final Map<String, TokenIssueRequest> issuedTokens = new LinkedHashMap<>();
-    private final List<Integer> refusals = new ArrayList<>();
+    private final List<Integer> exchangeStatuses = new ArrayList<>();
 
     @Before
     public void setUpTokenServices() throws KuraException {
@@ -75,16 +75,18 @@ public abstract class AbstractRefreshTokenFamilyScenario {
                 .thenAnswer(invocation -> proofOf(invocation.<TokenVerifyRequest> getArgument(0).getToken()));
     }
 
-    protected String login() {
-        return refreshTokenOf(this.service.issue(this.requestContext));
+    protected TokenPairDTO login() {
+        return tokenPairOf(this.service.issue(this.requestContext));
     }
 
     protected Optional<String> exchange(final String refreshToken) {
         try {
-            return Optional.of(refreshTokenOf(
-                    this.service.refresh(new ByteArrayInputStream(refreshToken.getBytes(StandardCharsets.UTF_8)))));
+            final Response response = this.service
+                    .refresh(new ByteArrayInputStream(refreshToken.getBytes(StandardCharsets.UTF_8)));
+            this.exchangeStatuses.add(response.getStatus());
+            return Optional.of(tokenPairOf(response).refreshToken());
         } catch (final WebApplicationException e) {
-            this.refusals.add(e.getResponse().getStatus());
+            this.exchangeStatuses.add(e.getResponse().getStatus());
             return Optional.empty();
         }
     }
@@ -93,12 +95,12 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         return this.issuedTokens.get(token).getClaims();
     }
 
-    protected List<Integer> refusals() {
-        return this.refusals;
+    protected List<Integer> exchangeStatuses() {
+        return this.exchangeStatuses;
     }
 
-    private static String refreshTokenOf(final Response response) {
-        return ((TokenPairDTO) response.getEntity()).refreshToken();
+    private static TokenPairDTO tokenPairOf(final Response response) {
+        return (TokenPairDTO) response.getEntity();
     }
 
     private VerificationProof proofOf(final String token) {

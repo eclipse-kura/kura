@@ -91,6 +91,16 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         }
     }
 
+    protected String externalRefreshTokenWith(final Map<String, Object> claims) {
+        final TokenIssueRequest.Builder request = TokenIssueRequest.builder(IDENTITY)
+                .intendedConsumer(JwtRestServiceConstants.INTENDED_REFRESH_CONSUMER);
+        claims.forEach(request::claim);
+
+        final String token = "external-token-" + this.issuedTokens.size();
+        this.issuedTokens.put(token, request.build());
+        return token;
+    }
+
     protected Map<String, Object> claimsOf(final String token) {
         return this.issuedTokens.get(token).getClaims();
     }

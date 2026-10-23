@@ -23,7 +23,7 @@ Import-Package: \
     org.eclipse.kura;version="[1.6,2.0)",\
     org.eclipse.kura.configuration;version="[1.2,2.0)",\
     org.eclipse.kura.core.data.util;version="[1.0,2.0)",\
-    org.eclipse.kura.data;version="[1.1,2.0)",\
+    org.eclipse.kura.data;version="[2.0,3.0)",\
     org.eclipse.kura.data.transport.listener;version="[1.0,2.0)",\
     org.eclipse.kura.marshalling;version="[1.0,2.0)",\
     org.eclipse.kura.message;version="[1.4,2.0)",\
@@ -38,13 +38,13 @@ Import-Package: \
     javax.net.ssl,\
     *
 Export-Package: \
-    org.eclipse.kura.core.testutil;version="1.0.0";x-internal:=true,\
-    org.eclipse.kura.core.testutil.event;version="1.0.0";x-internal:=true,\
-    org.eclipse.kura.core.testutil.http;version="1.0.1";x-internal:=true,\
-    org.eclipse.kura.core.testutil.json;version="1.0.0";x-internal:=true,\
-    org.eclipse.kura.core.testutil.pki;version="1.2.0";x-internal:=true,\
-    org.eclipse.kura.core.testutil.requesthandler;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.core.testutil.service;version="1.0.0";x-internal:=true
+    org.eclipse.kura.core.testutil;version="1.0.0",\
+    org.eclipse.kura.core.testutil.event;version="1.0.0",\
+    org.eclipse.kura.core.testutil.http;version="1.0.1",\
+    org.eclipse.kura.core.testutil.json;version="1.0.0",\
+    org.eclipse.kura.core.testutil.pki;version="1.2.0",\
+    org.eclipse.kura.core.testutil.requesthandler;version="2.0.0",\
+    org.eclipse.kura.core.testutil.service;version="1.0.0"
 -includeresource: \
     about.html,\
     about_files=about_files/

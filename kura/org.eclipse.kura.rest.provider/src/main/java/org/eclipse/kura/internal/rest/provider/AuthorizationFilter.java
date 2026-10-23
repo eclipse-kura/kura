@@ -53,17 +53,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             final SecurityContext securityContext = context.getSecurityContext();
             final String rolesAllowedValue = Arrays.toString(rolesAllowed.value());
 
-            if (securityContext == null) {
+            if (securityContext == null || securityContext.getUserPrincipal() == null) {
                 logger.warn("Rest request rejected: missing authentication for {} {} (required roles: {})",
                         request.getMethod(), request.getRequestURI(), rolesAllowedValue);
-                context.abortWith(Response.status(Status.FORBIDDEN).build());
-                return;
-            }
-
-            if (securityContext.getUserPrincipal() == null) {
-                logger.warn("Rest request rejected: missing user principal for {} {} (required roles: {})",
-                        request.getMethod(), request.getRequestURI(), rolesAllowedValue);
-                context.abortWith(Response.status(Status.FORBIDDEN).build());
+                context.abortWith(Response.status(Status.UNAUTHORIZED).build());
                 return;
             }
 

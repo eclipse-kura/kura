@@ -211,6 +211,10 @@ public class RestTransport implements Transport {
         this.headers.put(key, value);
     }
 
+    public void removeHeader(final String key) {
+        this.headers.remove(key);
+    }
+
     @Override
     public Response runRequest(String relativeUri, MethodSpec method) {
         return runRequest(relativeUri, method, null);
@@ -250,7 +254,8 @@ public class RestTransport implements Transport {
 
             if (requestBody != null) {
                 connection.setChunkedStreamingMode(0);
-                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("Content-Type",
+                        this.headers.getOrDefault("Content-Type", "application/json"));
                 connection.setDoOutput(true);
                 uploadBody(requestBody, connection);
             }
@@ -260,9 +265,11 @@ public class RestTransport implements Transport {
             final Optional<String> body = getBody(connection);
             storeCookies(urlPrefix, relativeUri, connection);
 
+            final Map<String, List<String>> responseHeaders = connection.getHeaderFields();
+
             connection.disconnect();
 
-            return new Response(status, body.filter(b -> !b.isEmpty()));
+            return new Response(status, body.filter(b -> !b.isEmpty()), responseHeaders);
         } catch (final Exception e) {
             throw new IllegalStateException("request failed", e);
         }

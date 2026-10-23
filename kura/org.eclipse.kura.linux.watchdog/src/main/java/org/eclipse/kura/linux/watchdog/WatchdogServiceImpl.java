@@ -176,16 +176,6 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     @Override
-    @Deprecated
-    public void startWatchdog() {
-    }
-
-    @Override
-    @Deprecated
-    public void stopWatchdog() {
-    }
-
-    @Override
     public int getHardwareTimeout() {
         return 0;
     }
@@ -203,20 +193,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     @Override
-    @Deprecated
-    public void registerCriticalService(CriticalComponent criticalComponent) {
-        registerCriticalComponent(criticalComponent);
-    }
-
-    @Override
     public void unregisterCriticalComponent(CriticalComponent criticalComponent) {
         this.criticalComponentRegistrations.removeIf(ccr -> ccr.getCriticalComponent() == criticalComponent);
-    }
-
-    @Override
-    @Deprecated
-    public void unregisterCriticalService(CriticalComponent criticalComponent) {
-        unregisterCriticalComponent(criticalComponent);
     }
 
     @Override

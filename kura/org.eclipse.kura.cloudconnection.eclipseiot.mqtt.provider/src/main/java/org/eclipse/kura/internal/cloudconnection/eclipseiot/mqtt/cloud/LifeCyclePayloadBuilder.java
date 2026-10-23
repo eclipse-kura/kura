@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 public class LifeCyclePayloadBuilder {
 
     private static final String ERROR = "ERROR";
+    private static final String NOT_AVAILABLE = "NA";
 
     private static final Logger logger = LoggerFactory.getLogger(LifeCyclePayloadBuilder.class);
 
@@ -105,6 +106,11 @@ public class LifeCyclePayloadBuilder {
         if (this.cloudConnectionManagerImpl.imsi != null && this.cloudConnectionManagerImpl.imsi.length() > 0
                 && !this.cloudConnectionManagerImpl.imsi.equals(ERROR)) {
             birthPayloadBuilder.withModemImsi(this.cloudConnectionManagerImpl.imsi);
+        }
+
+        if (this.cloudConnectionManagerImpl.eid != null && !this.cloudConnectionManagerImpl.eid.trim().isEmpty()
+                && !this.cloudConnectionManagerImpl.eid.equals(ERROR) && !this.cloudConnectionManagerImpl.eid.equals(NOT_AVAILABLE)) {
+            birthPayloadBuilder.withModemEid(this.cloudConnectionManagerImpl.eid);
         }
 
         if (this.cloudConnectionManagerImpl.rssi != null && this.cloudConnectionManagerImpl.rssi.length() > 0) {

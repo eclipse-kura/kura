@@ -143,7 +143,7 @@ public class IdentityRestServiceV2 {
     @Operation(operationId = "post_identity_v2_identities", summary = "Create an identity",
             description = "Creates an identity with the supplied name.",
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = IdentityDTO.class))))
+                    schema = @Schema(ref = "#/components/schemas/IdentityCreationRequest"))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     @ApiResponse(responseCode = "409", description = "Identity or permission already exists.", content = @Content(
             mediaType = MediaType.APPLICATION_JSON, schema = @Schema(ref = "#/components/schemas/Error")))
@@ -206,9 +206,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
 
-            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationRequestDTO.getIdentity().getName());
-
-            String identityName = identityConfigurationRequestDTO.getIdentity().getName();
+            String identityName = getIdentityName(identityConfigurationRequestDTO.getIdentity());
 
             Optional<IdentityConfiguration> identityConfiguration = this.identityService.getIdentityConfiguration(
                     identityName, //
@@ -240,11 +238,9 @@ public class IdentityRestServiceV2 {
             final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
         logger.debug(DEBUG_MESSAGE, "getIdentityDefaultByName");
 
-        String identityName = identityConfigurationRequestDTO.getIdentity().getName();
-
         try {
 
-            StringUtils.validateField(NAME_REQUEST_FIELD, identityName);
+            String identityName = getIdentityName(identityConfigurationRequestDTO.getIdentity());
 
             IdentityConfiguration identityConfiguration = this.identityService.getIdentityDefaultConfiguration(
                     identityName, //
@@ -348,7 +344,7 @@ public class IdentityRestServiceV2 {
     @Operation(operationId = "post_identity_v2_permissions", summary = "Create a permission",
             description = "Creates the named permission.",
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = PermissionDTO.class))))
+                    schema = @Schema(ref = "#/components/schemas/PermissionCreationRequest"))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     @ApiResponse(responseCode = "409", description = "Identity or permission already exists.", content = @Content(
             mediaType = MediaType.APPLICATION_JSON, schema = @Schema(ref = "#/components/schemas/Error")))
@@ -420,6 +416,16 @@ public class IdentityRestServiceV2 {
         }
 
         return Response.ok().build();
+    }
+
+    private static String getIdentityName(final IdentityDTO identity) {
+        if (identity == null) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Missing 'identity' property");
+        }
+        final String identityName = identity.getName();
+        StringUtils.validateField(NAME_REQUEST_FIELD, identityName);
+        return identityName;
     }
 
     private static Set<Class<? extends IdentityConfigurationComponent>> allIdentitiesConfiguration() {

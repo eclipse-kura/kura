@@ -109,7 +109,7 @@ public class RequestSchemaTest {
 
     @Test
     public void identityNamesOutsideTheValidatedPatternAreRejected() throws Exception {
-        givenRequest("IdentityDTO", "{\"name\":\"oapi-v2\"}");
+        givenRequest("IdentityCreationRequest", "{\"name\":\"oapi-v2\"}");
 
         whenRequestIsValidated();
 
@@ -118,7 +118,7 @@ public class RequestSchemaTest {
 
     @Test
     public void identityNamesInsideTheValidatedPatternAreAccepted() throws Exception {
-        givenRequest("IdentityDTO", "{\"name\":\"oapi_v2\"}");
+        givenRequest("IdentityCreationRequest", "{\"name\":\"oapi_v2\"}");
 
         whenRequestIsValidated();
 
@@ -127,11 +127,29 @@ public class RequestSchemaTest {
 
     @Test
     public void tooShortIdentityNamesAreRejected() throws Exception {
-        givenRequest("IdentityDTO", "{\"name\":\"ab\"}");
+        givenRequest("IdentityCreationRequest", "{\"name\":\"ab\"}");
 
         whenRequestIsValidated();
 
         thenRequestIsRejected();
+    }
+
+    @Test
+    public void permissionNamesOutsideTheValidatedPatternAreRejected() throws Exception {
+        givenRequest("PermissionCreationRequest", "{\"name\":\"rest_system\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsRejected();
+    }
+
+    @Test
+    public void permissionNamesInsideTheValidatedPatternAreAccepted() throws Exception {
+        givenRequest("PermissionCreationRequest", "{\"name\":\"rest.system\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsAccepted();
     }
 
     @Test

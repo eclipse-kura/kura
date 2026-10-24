@@ -71,8 +71,8 @@ public class RequiredRequestFieldsTest {
     private void givenMinimalRequests() throws Exception {
         this.document = Json.mapper().readTree(Files.readString(
                 Path.of(System.getProperty("openapi.directory"), "openapi.json")));
-        this.requests.put("IdentityDTO", "{\"name\":\"alice\"}");
-        this.requests.put("PermissionDTO", "{\"name\":\"rest.system\"}");
+        this.requests.put("IdentityCreationRequest", "{\"name\":\"alice\"}");
+        this.requests.put("PermissionCreationRequest", "{\"name\":\"rest.system\"}");
         this.requests.put("IdentityConfigurationDTO", "{\"identity\":{\"name\":\"alice\"}}");
         this.requests.put("IdentityConfigurationRequestDTO", "{\"identity\":{\"name\":\"alice\"}}");
         this.requests.put("EntryRequest", "{\"keystoreServicePid\":\"keystore\",\"alias\":\"entry\"}");

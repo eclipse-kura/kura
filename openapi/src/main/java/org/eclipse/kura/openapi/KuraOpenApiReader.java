@@ -16,6 +16,7 @@ package org.eclipse.kura.openapi;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +36,7 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 
 public class KuraOpenApiReader extends Reader {
 
@@ -74,6 +76,7 @@ public class KuraOpenApiReader extends Reader {
                     .filter(operationId -> !operationId.isBlank())
                     .collect(Collectors.toSet());
             result.getPaths().forEach((path, item) -> item.readOperationsMap().forEach((method, operation) -> {
+                normalizeSessionSecurity(operation.getSecurity());
                 if (publicOperations.contains(operation.getOperationId())) {
                     operation.setSecurity(Collections.emptyList());
                 }
@@ -87,6 +90,23 @@ public class KuraOpenApiReader extends Reader {
         } finally {
             converters.removeConverter(resolver);
         }
+    }
+
+    private void normalizeSessionSecurity(final List<SecurityRequirement> security) {
+        if (security == null) {
+            return;
+        }
+        final boolean declaresXsrf = security.stream()
+                .anyMatch(requirement -> requirement.size() == 1 && requirement.containsKey("xsrfToken"));
+        if (!declaresXsrf) {
+            return;
+        }
+        security.removeIf(requirement -> requirement.size() == 1 && requirement.containsKey("xsrfToken"));
+        security.forEach(requirement -> {
+            if (requirement.containsKey("sessionCookie")) {
+                requirement.put("xsrfToken", Collections.emptyList());
+            }
+        });
     }
 
     private void normalizeSchema(Schema<?> schema) {

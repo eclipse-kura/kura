@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eclipse.kura.internal.rest.configuration.ConfigurationRestService;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
+import org.eclipse.kura.internal.rest.auth.jwt.JwtRestService;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2;
@@ -87,7 +88,7 @@ public class GenerateOpenApiTest {
 
     private void givenResourceClasses() {
         this.resources = Set.of(SystemRestService.class, ConfigurationRestService.class, SessionRestService.class,
-                IdentityRestServiceV1.class, IdentityRestServiceV2.class, SecurityRestServiceV1.class,
+                JwtRestService.class, IdentityRestServiceV1.class, IdentityRestServiceV2.class, SecurityRestServiceV1.class,
                 SecurityRestServiceV2.class, RestServiceListingProvider.class, CloudConnectionRestService.class,
                 KeystoreRestServiceV1.class, KeystoreRestServiceV2.class, TamperDetectionRestService.class,
                 InventoryRestService.class);

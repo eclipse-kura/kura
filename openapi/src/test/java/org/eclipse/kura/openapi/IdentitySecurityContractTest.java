@@ -60,6 +60,15 @@ public class IdentitySecurityContractTest {
         thenConflictsReferenceTheErrorSchema();
     }
 
+    @Test
+    public void creationRequestsUseDedicatedNewNameSchemas() throws Exception {
+        givenGeneratedDocument();
+
+        whenIdentityCreationRequestsAreRead();
+
+        thenCreationRequestsUseNewNameSchemas();
+    }
+
     private void givenGeneratedDocument() throws Exception {
         this.document = Json.mapper()
                 .readTree(Files.readString(Path.of(System.getProperty("openapi.directory"), "openapi.json")));
@@ -75,6 +84,19 @@ public class IdentitySecurityContractTest {
 
     private void whenIdentityConflictsAreRead() {
         this.paths = this.document.path("paths");
+    }
+
+    private void whenIdentityCreationRequestsAreRead() {
+        this.paths = this.document.path("paths");
+    }
+
+    private void thenCreationRequestsUseNewNameSchemas() {
+        assertEquals("#/components/schemas/IdentityCreationRequest", this.paths.path("/identity/v2/identities")
+                .path("post").path("requestBody").path("content").path("application/json").path("schema")
+                .path("$ref").asText());
+        assertEquals("#/components/schemas/PermissionCreationRequest", this.paths.path("/identity/v2/permissions")
+                .path("post").path("requestBody").path("content").path("application/json").path("schema")
+                .path("$ref").asText());
     }
 
     private void thenConflictsReferenceTheErrorSchema() {

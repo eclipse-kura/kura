@@ -19,10 +19,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2;
 import org.eclipse.kura.internal.rest.identity.provider.LegacyIdentityService;
@@ -91,12 +93,53 @@ public class IdentityHttpContractTest extends AbstractHttpContractTest {
         thenLastResponsesMatchContract(400, 400);
     }
 
+    @Test
+    public void missingIdentityIsRejectedAsBadRequest() throws Exception {
+        givenIdentityPermission();
+        givenServer();
+
+        whenRequest("POST", "/identity/v2/identities/byName", "{\"configurationComponents\":[]}");
+        whenRequest("POST", "/identity/v2/identities/default/byName", "{\"configurationComponents\":[]}");
+
+        thenLastResponsesMatchContract(400, 400);
+    }
+
+    @Test
+    public void legacyIdentityNamesDoNotInvalidateResponses() throws Exception {
+        givenIdentityPermission();
+        givenServer();
+        givenLegacyIdentityName();
+
+        whenRequest("GET", "/identity/v2/identities", null);
+
+        thenResponseMatchesContract(200);
+    }
+
+    @Test
+    public void legacyPermissionNamesDoNotInvalidateResponses() throws Exception {
+        givenServer();
+        givenLegacyPermissionName();
+
+        whenRequest("GET", "/identity/v2/definedPermissions", null);
+
+        thenResponseMatchesContract(200);
+    }
+
     private void givenIdentityPermission() {
         this.permissions = Set.of("rest.identity");
     }
 
     private void givenIdentityAlreadyExists() throws org.eclipse.kura.KuraException {
         when(this.identity.createIdentity(any(IdentityConfiguration.class))).thenReturn(false);
+    }
+
+    private void givenLegacyIdentityName() throws org.eclipse.kura.KuraException {
+        when(this.identity.getIdentitiesConfiguration(any()))
+                .thenReturn(List.of(new IdentityConfiguration("legacy-name", List.of())));
+    }
+
+    private void givenLegacyPermissionName() throws org.eclipse.kura.KuraException {
+        when(this.identity.getPermissions()).thenReturn(Set.of(new Permission("legacy_permission")));
     }
 
     @Override

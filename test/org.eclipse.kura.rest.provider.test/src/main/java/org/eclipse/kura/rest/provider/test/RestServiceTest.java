@@ -18,6 +18,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.KeyPair;
@@ -60,6 +63,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.Response;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.rest.body.annotation.MaxRequestBodySize;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.junit.After;
@@ -80,15 +84,22 @@ import com.eclipsesource.json.JsonObject;
 import jakarta.annotation.Priority;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 
 public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private static final String LOGIN_BANNER_SERVICE_PID = "org.eclipse.kura.identity.LoginBannerService";
     private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID = "org.eclipse.kura.identity.PasswordStrengthVerificationService";
+    private static final int LIMITED_BODY_SIZE_KIB = 1;
+    private static final int LIMITED_BODY_SIZE = LIMITED_BODY_SIZE_KIB * 1024;
+    // SessionRestService is annotated with @MaxRequestBodySize(kibibytes = 64)
+    private static final int SESSION_MAX_REQUEST_BODY_SIZE = 64 * 1024;
 
     public RestServiceTest() {
         super(new RestTransport("testservice"));
@@ -108,6 +119,67 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenNoBasicCredentials();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/noAuth");
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldAcceptBodyWithinMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE - 10));
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldAcceptBodyOfExactlyMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE));
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldAcceptChunkedBodyOfExactlyMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenChunkedRequestIsPerformed("/testservice/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE));
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldRejectBodyExceedingMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldRejectChunkedBodyExceedingMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenChunkedRequestIsPerformed("/testservice/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldNotLimitBodyOfResourcesWithoutMaxRequestBodySize() {
+        givenService(new UnlimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/unlimitedBody",
+                jsonBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
 
         thenResponseCodeIs(200);
     }
@@ -282,6 +354,40 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(200);
         thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false}");
         thenResponseHasCookie("JSESSIONID");
+    }
+
+    @Test
+    public void shouldRejectPasswordLoginBodyExceedingMaxRequestBodySize() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                loginBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+        thenResponseDoesNotHaveCookie("JSESSIONID");
+    }
+
+    @Test
+    public void shouldRejectChunkedPasswordLoginBodyExceedingMaxRequestBodySize() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenChunkedRequestIsPerformed("/session/v1/login/password",
+                loginBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldRejectPasswordChangeBodyExceedingMaxRequestBodySize() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                jsonBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
     }
 
     @Test
@@ -1531,6 +1637,56 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                 .of(restTransport.runRequest(proto + "://localhost:" + port + "/services", resource, method, body));
     }
 
+    // RestTransport always sends the body with Content-Length
+    private void whenChunkedRequestIsPerformed(final String resource, final String body) {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL(
+                    "http://localhost:8080/services" + resource).openConnection();
+
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+            connection.setChunkedStreamingMode(16);
+
+            try (final OutputStream out = connection.getOutputStream()) {
+                out.write(body.getBytes(StandardCharsets.UTF_8));
+            }
+
+            this.response = Optional.of(new Response(connection.getResponseCode(), Optional.empty()));
+
+            connection.disconnect();
+        } catch (final Exception e) {
+            throw new IllegalStateException("request failed", e);
+        }
+    }
+
+    private static String loginBodyOfSize(final int size) {
+        final String prefix = "{\"username\":\"foo\",\"password\":\"";
+        final String suffix = "\"}";
+
+        final StringBuilder builder = new StringBuilder(prefix);
+
+        for (int i = prefix.length() + suffix.length(); i < size; i++) {
+            builder.append('a');
+        }
+
+        return builder.append(suffix).toString();
+    }
+
+    private static String jsonBodyOfSize(final int size) {
+        final String prefix = "{\"value\":\"";
+        final String suffix = "\"}";
+
+        final StringBuilder builder = new StringBuilder(prefix);
+
+        for (int i = prefix.length() + suffix.length(); i < size; i++) {
+            builder.append('a');
+        }
+
+        return builder.append(suffix).toString();
+    }
+
     private void whenXsrfTokenIsObtained() {
         whenXsrfTokenIsObtained("http", 8080);
     }
@@ -1699,6 +1855,38 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         @Path("/noAuth")
         public String noAuth() throws Exception {
             throw new Exception("Some error");
+        }
+    }
+
+    public static class Body {
+
+        private String value;
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    @Path("testservice")
+    @MaxRequestBodySize(kibibytes = LIMITED_BODY_SIZE_KIB)
+    public static class LimitedRequestBodySize extends TestService {
+
+        @POST
+        @Path("/limitedBody")
+        @Consumes(MediaType.APPLICATION_JSON)
+        public String limitedBody(final Body body) {
+            return body.getValue();
+        }
+    }
+
+    @Path("testservice")
+    public static class UnlimitedRequestBodySize extends TestService {
+
+        @POST
+        @Path("/unlimitedBody")
+        @Consumes(MediaType.APPLICATION_JSON)
+        public String unlimitedBody(final Body body) {
+            return body.getValue();
         }
     }
 

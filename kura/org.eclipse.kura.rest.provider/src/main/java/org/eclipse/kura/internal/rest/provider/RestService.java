@@ -42,6 +42,7 @@ import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
 import org.eclipse.kura.internal.rest.auth.jwt.JwtAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.jwt.JwtRestService;
+import org.eclipse.kura.internal.rest.body.RequestBodySizeLimiter;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.eclipse.kura.security.token.TokenIssuingService;
 import org.eclipse.kura.security.token.TokenVerificationService;
@@ -69,6 +70,7 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
+import jakarta.ws.rs.ext.ReaderInterceptor;
 
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = RestServiceMetatype.class)
@@ -205,6 +207,8 @@ public class RestService implements ConfigurableComponent {
         this.registeredServices.add(bundleContext.registerService(
                 new String[] { MessageBodyReader.class.getName(), MessageBodyWriter.class.getName() },
                 new GsonSerializer<Object>(), serviceProperties));
+        this.registeredServices.add(bundleContext.registerService(ReaderInterceptor.class,
+                new RequestBodySizeLimiter(), serviceProperties));
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, identityHelper);
         this.certificateAuthProvider = new CertificateAuthenticationProvider(identityHelper);

@@ -11,6 +11,9 @@ Import-Package: \
     jakarta.ws.rs.container;version="3.1.0",\
     jakarta.ws.rs.core;version="3.1.0",\
     jakarta.ws.rs.ext;version="3.1.0",\
+    org.apache.commons.io.build;version="[2.18,3.0)",\
+    org.apache.commons.io.function;version="[2.18,3.0)",\
+    org.apache.commons.io.input;version="[2.18,3.0)",\
     org.eclipse.kura;version="[1.3,2.0)",\
     org.eclipse.kura.audit;version="[1.0,2.0)",\
     org.eclipse.kura.configuration;version="[1.2,2.0)",\
@@ -25,6 +28,7 @@ Import-Package: \
     javax.naming.ldap,\
     *
 Export-Package: \
+    org.eclipse.kura.internal.rest.body.annotation;version="1.0.0";x-internal:=true,\
     org.eclipse.kura.rest.auth;version="1.0.0",\
     org.eclipse.kura.rest.utils;version="1.0.0"
 -includeresource: \

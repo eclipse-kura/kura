@@ -34,6 +34,7 @@ import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UpdatePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UsernamePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.XsrfTokenDTO;
+import org.eclipse.kura.internal.rest.body.annotation.MaxRequestBodySize;
 import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.util.validation.PasswordStrengthValidators;
@@ -59,6 +60,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 @SuppressWarnings("restriction")
 @Path(SessionRestServiceConstants.BASE_PATH)
+@MaxRequestBodySize(kibibytes = 64)
 public class SessionRestService {
 
     private static final String AUDIT_FORMAT_STRING = "{} Rest - Failure - {}";

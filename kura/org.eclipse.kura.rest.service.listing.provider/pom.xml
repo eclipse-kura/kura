@@ -60,6 +60,10 @@
             <artifactId>org.eclipse.kura.rest.configuration.provider</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.rest.provider</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>

@@ -476,6 +476,10 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     public void shouldRejectPasswordChangeBodyExceedingMaxRequestBodySize() {
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
+        // the endpoint requires an authenticated user, which is checked before the body is read
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
 
         whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
                 jsonBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));

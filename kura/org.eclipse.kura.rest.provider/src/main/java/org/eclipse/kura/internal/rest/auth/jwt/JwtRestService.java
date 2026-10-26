@@ -155,12 +155,12 @@ public class JwtRestService {
 
             final Map<String, Object> claims = proof.getClaims();
             final String familyId = familyIdOf(claims);
-            final long generation = this.families.advance(familyId, generationOf(claims),
-                    familyTrackingDeadline(issuer));
+            final long presentedGeneration = generationOf(claims);
+
+            final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
+            this.families.advance(familyId, presentedGeneration, familyTrackingDeadline(issuer));
 
             final String id = createIdForReplayDetection(proof);
-            final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, generation);
-
             updateUsedRefreshTokens(id, proof.getExpiresAt());
 
             auditLogger.info("{} Rest - Success - JWT token pair refreshed", auditContext);

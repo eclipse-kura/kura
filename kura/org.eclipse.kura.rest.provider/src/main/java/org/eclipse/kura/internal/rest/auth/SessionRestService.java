@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.internal.rest.auth.annotation.RequireAuthenticatedUser;
+import org.eclipse.kura.internal.rest.body.annotation.MaxRequestBodySize;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
@@ -54,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 @Path(SessionRestServiceConstants.BASE_PATH)
+@MaxRequestBodySize(kibibytes = 64)
 public class SessionRestService {
 
     private static final String AUDIT_FORMAT_STRING = "{} Rest - Failure - {}";
@@ -179,6 +182,7 @@ public class SessionRestService {
 
     @POST
     @Path(SessionRestServiceConstants.CHANGE_PASSWORD_PATH)
+    @RequireAuthenticatedUser
     public void updateUserPassword(@Context final ContainerRequestContext requestContext,
             @Context final HttpServletRequest request, final UpdatePasswordDTO passwordUpdate) {
 

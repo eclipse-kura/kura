@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.service.listing.provider;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,14 +28,14 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.internal.rest.auth.annotation.RequireAuthenticatedUser;
+import org.eclipse.kura.internal.rest.body.annotation.MaxRequestBodySize;
 import org.eclipse.kura.internal.rest.service.listing.provider.dto.FilterDTO;
 import org.eclipse.kura.internal.rest.service.listing.provider.dto.InterfaceNamesDTO;
 import org.eclipse.kura.internal.rest.service.listing.provider.dto.RefDTO;
@@ -56,6 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("serviceListing/v1")
+@RequireAuthenticatedUser
+@MaxRequestBodySize(kibibytes = 64)
 public class RestServiceListingProvider {
 
     private static final String OBJECT_CLASS = "objectClass";
@@ -109,10 +110,8 @@ public class RestServiceListingProvider {
     @GET
     @Path("/servicePids")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getServicePids(@Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePids() {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             final List<ServiceReference<?>> servicesList = Arrays
                     .asList(bundleContext.getServiceReferences((String) null, (String) null));
@@ -137,11 +136,8 @@ public class RestServiceListingProvider {
     @Path("/servicePids/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PidSet getServicePidsByInterface(final InterfaceNamesDTO interfacesList,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePidsByInterface(final InterfaceNamesDTO interfacesList) {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             interfacesList.validate();
 
@@ -156,11 +152,8 @@ public class RestServiceListingProvider {
     @Path("/servicePids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PidSet getServicePidsByFilter(final FilterDTO filter,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePidsByFilter(final FilterDTO filter) {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             filter.validate();
 
@@ -175,11 +168,8 @@ public class RestServiceListingProvider {
     @Path("/servicePids/satisfyingReference")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PidSet getServicePidsSatisfyingReference(final RefDTO ref,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getServicePidsSatisfyingReference(final RefDTO ref) {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             ref.validate();
 
@@ -202,10 +192,8 @@ public class RestServiceListingProvider {
     @GET
     @Path("/factoryPids")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getFactoryPids(@Context final ContainerRequestContext requestContext) {
+    public PidSet getFactoryPids() {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             return new PidSet(configurationService.getFactoryComponentPids());
 
@@ -217,11 +205,8 @@ public class RestServiceListingProvider {
     @POST
     @Path("/factoryPids/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getFactoryPidsByInterface(final InterfaceNamesDTO interfacesList,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getFactoryPidsByInterface(final InterfaceNamesDTO interfacesList) {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             interfacesList.validate();
 
@@ -240,11 +225,8 @@ public class RestServiceListingProvider {
     @POST
     @Path("/factoryPids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getFactoryPidsByFilter(final FilterDTO filter,
-            @Context final ContainerRequestContext requestContext) {
+    public PidSet getFactoryPidsByFilter(final FilterDTO filter) {
         try {
-
-            expectAuthenticatedUser(requestContext);
 
             filter.validate();
 
@@ -269,17 +251,6 @@ public class RestServiceListingProvider {
     /*
      * Utils methods
      */
-
-    private void expectAuthenticatedUser(final ContainerRequestContext requestContext) {
-        if (requestContext != null && !getPrincipal(requestContext).isPresent()) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
-        }
-    }
-
-    private Optional<Principal> getPrincipal(final ContainerRequestContext containerRequestContext) {
-        return Optional.ofNullable(containerRequestContext.getSecurityContext())
-                .flatMap(entry -> Optional.ofNullable(entry.getUserPrincipal()));
-    }
 
     private Set<String> getServicesProvidingInterfaces(final Set<String> interfacesIds) throws InvalidSyntaxException {
 

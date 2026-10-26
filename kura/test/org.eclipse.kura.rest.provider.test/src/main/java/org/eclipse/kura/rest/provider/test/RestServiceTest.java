@@ -17,6 +17,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.KeyPair;
@@ -51,10 +54,13 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.audit.AuditContext;
@@ -67,6 +73,8 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.Response;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.rest.auth.annotation.RequireAuthenticatedUser;
+import org.eclipse.kura.internal.rest.body.annotation.MaxRequestBodySize;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.junit.After;
@@ -86,6 +94,11 @@ import com.eclipsesource.json.JsonObject;
 
 public class RestServiceTest extends AbstractRequestHandlerTest {
 
+    private static final int LIMITED_BODY_SIZE_KIB = 1;
+    private static final int LIMITED_BODY_SIZE = LIMITED_BODY_SIZE_KIB * 1024;
+    // SessionRestService is annotated with @MaxRequestBodySize(kibibytes = 64)
+    private static final int SESSION_MAX_REQUEST_BODY_SIZE = 64 * 1024;
+
     public RestServiceTest() {
         super(new RestTransport("testservice"));
     }
@@ -104,6 +117,67 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenNoBasicCredentials();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/noAuth");
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldAcceptBodyWithinMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE - 10));
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldAcceptBodyOfExactlyMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE));
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldAcceptChunkedBodyOfExactlyMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenChunkedRequestIsPerformed("/testservice/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE));
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldRejectBodyExceedingMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldRejectChunkedBodyExceedingMaxRequestBodySize() {
+        givenService(new LimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenChunkedRequestIsPerformed("/testservice/limitedBody", jsonBodyOfSize(LIMITED_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldNotLimitBodyOfResourcesWithoutMaxRequestBodySize() {
+        givenService(new UnlimitedRequestBodySize());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/unlimitedBody",
+                jsonBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
 
         thenResponseCodeIs(200);
     }
@@ -148,6 +222,102 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenNoBasicCredentials();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
+    public void shouldRejectUnauthenticatedRequestIfAuthenticatedUserIsRequired() {
+        givenService(new RequiresAuthenticatedUser());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/requireAuthenticated");
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
+    public void shouldRejectRequestWithWrongCredentialsIfAuthenticatedUserIsRequired() {
+        givenService(new RequiresAuthenticatedUser());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("foo:wrong"));
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/requireAuthenticated");
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
+    public void shouldAllowAuthenticatedUserWithoutRolesIfAuthenticatedUserIsRequired() {
+        givenService(new RequiresAuthenticatedUser());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("foo:bar"));
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/requireAuthenticated");
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldNotRequireAuthenticatedUserOnMethodsWithoutAnnotation() {
+        givenService(new RequiresAuthenticatedUser());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/notAnnotated");
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldReturn401BeforeDeserializingBodyIfAuthenticatedUserIsRequired() {
+        givenService(new RequiresAuthenticatedUser());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/testservice/requireAuthenticatedWithBody",
+                "{ this is not valid json");
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
+    public void shouldAcceptValidBodyIfAuthenticatedUserIsRequired() {
+        givenService(new RequiresAuthenticatedUser());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("foo:bar"));
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/testservice/requireAuthenticatedWithBody",
+                "{\"value\":\"hello\"}");
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldRejectPasswordChangeIfNotAuthenticated() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList(), true);
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
+    public void shouldReturn401BeforeValidatingBodyOnPasswordChangeIfNotAuthenticated() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 1, //
+                "new.password.require.digits", false, //
+                "new.password.require.special.characters", false, //
+                "new.password.require.both.cases", false //
+        );
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList(), true);
+        givenNoBasicCredentials();
+
+        // the same password would be rejected with 400 if the body were validated first
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"bar\"}");
 
         thenResponseCodeIs(401);
     }
@@ -277,6 +447,40 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(200);
         thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false}");
         thenResponseHasCookie("JSESSIONID");
+    }
+
+    @Test
+    public void shouldRejectPasswordLoginBodyExceedingMaxRequestBodySize() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                loginBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+        thenResponseDoesNotHaveCookie("JSESSIONID");
+    }
+
+    @Test
+    public void shouldRejectChunkedPasswordLoginBodyExceedingMaxRequestBodySize() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenChunkedRequestIsPerformed("/session/v1/login/password",
+                loginBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldRejectPasswordChangeBodyExceedingMaxRequestBodySize() {
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                jsonBodyOfSize(SESSION_MAX_REQUEST_BODY_SIZE + 1));
+
+        thenResponseCodeIs(413);
     }
 
     @Test
@@ -1418,6 +1622,56 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                 .of(restTransport.runRequest(proto + "://localhost:" + port + "/services", resource, method, body));
     }
 
+    // RestTransport always sends the body with Content-Length
+    private void whenChunkedRequestIsPerformed(final String resource, final String body) {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL(
+                    "http://localhost:8080/services" + resource).openConnection();
+
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+            connection.setChunkedStreamingMode(16);
+
+            try (final OutputStream out = connection.getOutputStream()) {
+                out.write(body.getBytes(StandardCharsets.UTF_8));
+            }
+
+            this.response = Optional.of(new Response(connection.getResponseCode(), Optional.empty()));
+
+            connection.disconnect();
+        } catch (final Exception e) {
+            throw new IllegalStateException("request failed", e);
+        }
+    }
+
+    private static String loginBodyOfSize(final int size) {
+        final String prefix = "{\"username\":\"foo\",\"password\":\"";
+        final String suffix = "\"}";
+
+        final StringBuilder builder = new StringBuilder(prefix);
+
+        for (int i = prefix.length() + suffix.length(); i < size; i++) {
+            builder.append('a');
+        }
+
+        return builder.append(suffix).toString();
+    }
+
+    private static String jsonBodyOfSize(final int size) {
+        final String prefix = "{\"value\":\"";
+        final String suffix = "\"}";
+
+        final StringBuilder builder = new StringBuilder(prefix);
+
+        for (int i = prefix.length() + suffix.length(); i < size; i++) {
+            builder.append('a');
+        }
+
+        return builder.append(suffix).toString();
+    }
+
     private void whenXsrfTokenIsObtained() {
         whenXsrfTokenIsObtained("http", 8080);
     }
@@ -1605,6 +1859,38 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         }
     }
 
+    public static class Body {
+
+        private String value;
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    @Path("testservice")
+    @MaxRequestBodySize(kibibytes = LIMITED_BODY_SIZE_KIB)
+    public static class LimitedRequestBodySize extends TestService {
+
+        @POST
+        @Path("/limitedBody")
+        @Consumes(MediaType.APPLICATION_JSON)
+        public String limitedBody(final Body body) {
+            return body.getValue();
+        }
+    }
+
+    @Path("testservice")
+    public static class UnlimitedRequestBodySize extends TestService {
+
+        @POST
+        @Path("/unlimitedBody")
+        @Consumes(MediaType.APPLICATION_JSON)
+        public String unlimitedBody(final Body body) {
+            return body.getValue();
+        }
+    }
+
     @Path("testservice")
     public static class RequiresAssetsRole extends TestService {
 
@@ -1612,6 +1898,40 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         @Path("requireAssets")
         @RolesAllowed("assets")
         public String requireAssets() {
+            return "Hello";
+        }
+    }
+
+    @Path("testservice")
+    public static class RequiresAuthenticatedUser extends TestService {
+
+        public static class Body {
+
+            private String value;
+
+            public String getValue() {
+                return value;
+            }
+        }
+
+        @GET
+        @Path("requireAuthenticated")
+        @RequireAuthenticatedUser
+        public String requireAuthenticated() {
+            return "Hello";
+        }
+
+        @POST
+        @Path("requireAuthenticatedWithBody")
+        @Consumes("application/json")
+        @RequireAuthenticatedUser
+        public String requireAuthenticatedWithBody(final Body body) {
+            return "Hello";
+        }
+
+        @GET
+        @Path("notAnnotated")
+        public String notAnnotated() {
             return "Hello";
         }
     }

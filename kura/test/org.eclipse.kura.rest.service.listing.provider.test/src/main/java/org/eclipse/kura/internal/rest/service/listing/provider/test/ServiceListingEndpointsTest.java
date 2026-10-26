@@ -62,6 +62,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     private static final String METHOD_SPEC_POST = "POST";
     // FilterDTO.MAX_NESTING_DEPTH, not exported by the provider bundle
     private static final int MAX_FILTER_NESTING_DEPTH = 32;
+    // the provider is annotated with @MaxRequestBodySize(kibibytes = 64)
+    private static final int MAX_REQUEST_BODY_SIZE = 64 * 1024;
 
     public ServiceListingEndpointsTest(final Transport transport) {
         super(transport);
@@ -86,6 +88,30 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenBasicCredentials(Optional.empty());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/servicePids");
+
+        thenRestResponseCodeIs(401);
+    }
+
+    @Test
+    public void restShouldReturnUnauthorizedStatusBeforeValidatingBodyWhenNotAuthenticated() {
+
+        givenIdentity("noAuthUser", Optional.of("pass1"), Collections.emptyList());
+        givenBasicCredentials(Optional.empty());
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+                ServiceListeningTestConstants.NULL_POST_BODY);
+
+        thenRestResponseCodeIs(401);
+    }
+
+    @Test
+    public void restShouldReturnUnauthorizedStatusForFactoryPidsWhenNotAuthenticated() {
+
+        givenIdentity("noAuthUser", Optional.of("pass1"), Collections.emptyList());
+        givenBasicCredentials(Optional.empty());
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+                ServiceListeningTestConstants.EMPTY_POST_BODY);
 
         thenRestResponseCodeIs(401);
     }
@@ -398,6 +424,49 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldAcceptFilterWithinRequestBodySizeLimit() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                wideOrFilter(MAX_REQUEST_BODY_SIZE - 100));
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("foo");
+    }
+
+    @Test
+    public void shouldRejectFilterExceedingRequestBodySizeLimit() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                wideOrFilter(MAX_REQUEST_BODY_SIZE + 1));
+
+        thenRestResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldRejectFactoryFilterExceedingRequestBodySizeLimit() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+                wideOrFilter(MAX_REQUEST_BODY_SIZE + 1));
+
+        thenRestResponseCodeIs(413);
+    }
+
+    @Test
+    public void shouldRejectInterfaceNamesExceedingRequestBodySizeLimit() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
+                wideInterfaceNames(MAX_REQUEST_BODY_SIZE + 1));
+
+        thenRestResponseCodeIs(413);
+    }
+
+    @Test
     public void shouldRejectReferenceWithoutPid() {
         givenBasicCredentials(Optional.of("admin:admin"));
 
@@ -554,5 +623,24 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
             builder.append("]}");
         }
         return builder.toString();
+    }
+
+    // returns a flat "or" filter whose JSON encoding is at least minSize bytes long
+    private static String wideOrFilter(final int minSize) {
+        return wideArray("{\"or\": [", "{\"name\":\"foo\",\"value\":\"bar\"}", "]}", minSize);
+    }
+
+    // returns an interface name list whose JSON encoding is at least minSize bytes long
+    private static String wideInterfaceNames(final int minSize) {
+        return wideArray("{\"interfaceNames\": [", "\"org.eclipse.kura.test.TestInterface\"", "]}", minSize);
+    }
+
+    private static String wideArray(final String prefix, final String element, final String suffix,
+            final int minSize) {
+        final StringBuilder builder = new StringBuilder(prefix).append(element);
+        while (builder.length() + suffix.length() < minSize) {
+            builder.append(",").append(element);
+        }
+        return builder.append(suffix).toString();
     }
 }

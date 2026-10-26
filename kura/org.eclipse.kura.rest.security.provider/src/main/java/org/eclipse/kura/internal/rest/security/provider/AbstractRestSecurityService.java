@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,17 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.internal.rest.auth.annotation.RequireAuthenticatedUser;
 import org.eclipse.kura.internal.rest.security.provider.dto.DebugEnabledDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
@@ -22,18 +31,6 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.Optional;
 
 public abstract class AbstractRestSecurityService {
 
@@ -73,7 +70,8 @@ public abstract class AbstractRestSecurityService {
     public abstract String getMqttAppId();
 
     /**
-     * POST method <br /> This method allows the reload of the security policy's fingerprint
+     * POST method <br />
+     * This method allows the reload of the security policy's fingerprint
      */
     @POST
     @RolesAllowed(REST_ROLE_NAME)
@@ -91,7 +89,8 @@ public abstract class AbstractRestSecurityService {
     }
 
     /**
-     * POST method <br /> This method allows the reload of the command line fingerprint
+     * POST method <br />
+     * This method allows the reload of the command line fingerprint
      */
     @POST
     @RolesAllowed(REST_ROLE_NAME)
@@ -116,14 +115,9 @@ public abstract class AbstractRestSecurityService {
     @GET
     @Path("/debug-enabled")
     @Produces(MediaType.APPLICATION_JSON)
-    public DebugEnabledDTO isDebugEnabled(final @Context ContainerRequestContext context) {
+    @RequireAuthenticatedUser
+    public DebugEnabledDTO isDebugEnabled() {
         try {
-
-            if (context != null && !Optional.ofNullable(context.getSecurityContext())
-                    .filter(c -> c.getUserPrincipal() != null).isPresent()) {
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-            }
-
             logger.debug(DEBUG_MESSAGE, "isDebugEnabled");
             return new DebugEnabledDTO(this.security.isDebugEnabled());
         } catch (Exception e) {

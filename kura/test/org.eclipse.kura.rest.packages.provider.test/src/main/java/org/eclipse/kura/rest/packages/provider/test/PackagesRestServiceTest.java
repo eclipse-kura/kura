@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,15 +37,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
@@ -53,7 +59,10 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
+import org.eclipse.kura.internal.rest.deployment.agent.ConcurrentUploadLimiter;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
+import org.eclipse.kura.internal.rest.deployment.agent.MultipartRequestBodySizeLimiter;
+import org.eclipse.kura.system.SystemService;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -64,6 +73,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -72,6 +82,7 @@ import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
+import org.osgi.service.event.Event;
 
 @RunWith(Parameterized.class)
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
@@ -81,6 +92,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "admin";
+    private static final String FILE_TRANSFER_SIZE_MAX_PROP_NAME = "file.transfer.size.max";
     private static final String REST_UPLOAD_ENDPOINT = "http://localhost:8080/services/deploy/v2/_upload";
 
     private final ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
@@ -88,6 +100,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private String responseBody;
     private int responseCode;
+    private Optional<String> uploadedFileUrl = Optional.empty();
 
     @Test
     public void getShouldWorkWithEmptyList() {
@@ -186,6 +199,43 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void installShouldWorkWithFileUploadBelowSizeLimit() throws Exception {
+        givenUploadSizeLimit("4096");
+        givenMockTemporaryFileWithSize(MOCK_FILE_PATH, 100);
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenInstallIsCalledWithLocalUri();
+        thenResposeStatusCodeIs(200);
+        thenResponseBodyEquals("\"REQUEST_RECEIVED\"");
+    }
+
+    @Test
+    public void installShouldFailWithFileUploadAboveSizeLimit() throws Exception {
+        givenUploadSizeLimit("4096");
+        givenMockTemporaryFileWithSize(MOCK_FILE_PATH, 64 * 1024);
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenInstallIsNeverCalled();
+        thenResposeStatusCodeIs(413);
+    }
+
+    @Test
+    public void installShouldWorkWithLargeFileUploadWhenSizeLimitIsDisabled() throws Exception {
+        givenUploadSizeLimit("-1");
+        givenMockTemporaryFileWithSize(MOCK_FILE_PATH, 64 * 1024);
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenInstallIsCalledWithLocalUri();
+        thenResposeStatusCodeIs(200);
+    }
+
+    @Test
     public void installShouldWorkWithFileUploadAndDeploymentAgentThrowing() throws Exception {
         givenMockTemporaryFileAt(MOCK_FILE_PATH);
         givenDeploymentAgentServiceThrowsExceptionOnInstall();
@@ -196,6 +246,98 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         thenInstallIsCalledWithLocalUri();
         thenResposeStatusCodeIs(500);
         thenResponseBodyEquals("Error installing deployment package: mock.dp");
+    }
+
+    @Test
+    public void uploadShouldFailWithBadRequestIfTheFileFormParameterIsMissing() {
+        whenUploadIsPerformedWithFormField("notTheFile", MOCK_FILE_PATH);
+
+        thenInstallIsNeverCalled();
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(400);
+        thenResponseBodyEquals("Bad request");
+    }
+
+    @Test
+    public void uploadShouldBeAcceptedAfterABadRequest() {
+        whenUploadIsPerformedWithFormField("notTheFile", MOCK_FILE_PATH);
+        thenResposeStatusCodeIs(400);
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(200);
+        thenInstallIsRequestedTimes(1);
+    }
+
+    @Test
+    public void uploadShouldBeRejectedWhileAnotherInstallIsInProgress() {
+        givenAnUploadedPackageIsBeingInstalled();
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(429);
+        thenInstallIsRequestedTimes(1);
+    }
+
+    @Test
+    public void uploadShouldBeAcceptedAfterTheInstallCompletes() {
+        givenAnUploadedPackageIsBeingInstalled();
+
+        whenTheInstallCompletes(this.uploadedFileUrl.get(), true);
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(200);
+        thenInstallIsRequestedTimes(2);
+    }
+
+    @Test
+    public void uploadedFileShouldBeDeletedWhenTheInstallFails() {
+        givenAnUploadedPackageIsBeingInstalled();
+
+        whenTheInstallCompletes(this.uploadedFileUrl.get(), false);
+
+        thenFirstUploadedFileExists(false);
+    }
+
+    @Test
+    public void uploadShouldBeRejectedWhenTheCompletedInstallIsNotTheUploadedOne() {
+        givenAnUploadedPackageIsBeingInstalled();
+
+        whenTheInstallCompletes("file:/tmp/unrelated.dp", true);
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(429);
+        thenInstallIsRequestedTimes(1);
+    }
+
+    @Test
+    public void uploadShouldBeAcceptedAfterTheInstallCouldNotBeQueued() throws Exception {
+        givenDeploymentAgentServiceThrowsExceptionOnInstall();
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+        thenResposeStatusCodeIs(500);
+
+        givenDeploymentAgentServiceAcceptsInstallRequests();
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(200);
+    }
+
+    @Test
+    public void uploadShouldBeAcceptedWhenTheCompletionEventWasLost() {
+        givenAnUploadedPackageIsBeingInstalled();
+        givenTheDeploymentAgentIsNotInstallingAnything();
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenResposeStatusCodeIs(200);
+        thenInstallIsRequestedTimes(2);
+        thenFirstUploadedFileExists(false);
     }
 
     @Test
@@ -243,6 +385,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private static DeploymentAgentService deploymentAgentService = Mockito.mock(DeploymentAgentService.class);
     private static DeploymentAdmin deploymentAdmin = Mockito.mock(DeploymentAdmin.class);
+    private static MultipartRequestBodySizeLimiter requestBodySizeLimiter;
+    private static ConcurrentUploadLimiter concurrentUploadLimiter;
 
     @Before
     public void createMockFile() {
@@ -253,6 +397,12 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
             fail();
         }
 
+    }
+
+    @After
+    public void restoreUploadSizeLimit() {
+        // the test environment does not limit the upload size
+        givenUploadSizeLimit("-1");
     }
 
     @After
@@ -295,6 +445,12 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         service.setDeploymentAdmin(deploymentAdmin);
 
+        requestBodySizeLimiter = (MultipartRequestBodySizeLimiter) ServiceUtil.trackService(ContainerRequestFilter.class,
+                Optional.of("(kura.service.pid=org.eclipse.kura.rest.deployment.agent.MultipartRequestBodySizeLimiter)"))
+                .get(30, TimeUnit.SECONDS);
+
+        concurrentUploadLimiter = ServiceUtil.trackService(ConcurrentUploadLimiter.class, Optional.empty()).get(30,
+                TimeUnit.SECONDS);
     }
 
     /*
@@ -325,8 +481,48 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         assertTrue(Files.exists(Paths.get(path)));
     }
 
+    private void givenMockTemporaryFileWithSize(String path, int size) throws IOException {
+        Files.write(Paths.get(path), new byte[size]);
+    }
+
+    private void givenUploadSizeLimit(String limit) {
+        final Properties properties = new Properties();
+        properties.setProperty(FILE_TRANSFER_SIZE_MAX_PROP_NAME, limit);
+
+        final SystemService systemService = Mockito.mock(SystemService.class);
+        when(systemService.getProperties()).thenReturn(properties);
+
+        requestBodySizeLimiter.setSystemService(systemService);
+    }
+
     private void givenDeploymentAgentServiceThrowsExceptionOnInstall() throws Exception {
         doThrow(new RuntimeException()).when(deploymentAgentService).installDeploymentPackageAsync(anyString());
+    }
+
+    private void givenAnUploadedPackageIsBeingInstalled() {
+        // a slot left over by a previous test is released as stale, the agent mock is reset for every test
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        assertEquals(200, this.responseCode);
+
+        when(deploymentAgentService.isInstallingDeploymentPackage(anyString())).thenReturn(true);
+
+        final ArgumentCaptor<String> url = ArgumentCaptor.forClass(String.class);
+        try {
+            verify(deploymentAgentService).installDeploymentPackageAsync(url.capture());
+        } catch (Exception e) {
+            fail();
+        }
+        this.uploadedFileUrl = Optional.of(url.getValue());
+    }
+
+    private void givenTheDeploymentAgentIsNotInstallingAnything() {
+        when(deploymentAgentService.isInstallingDeploymentPackage(anyString())).thenReturn(false);
+    }
+
+    private void givenDeploymentAgentServiceAcceptsInstallRequests() {
+        Mockito.reset(deploymentAgentService);
+        when(deploymentAgentService.isInstallingDeploymentPackage(anyString())).thenReturn(true);
     }
 
     private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(
@@ -342,12 +538,16 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
      * WHEN
      */
     private void whenUploadIsPerformedWith(String filePath) {
+        whenUploadIsPerformedWithFormField("file", filePath);
+    }
+
+    private void whenUploadIsPerformedWithFormField(String fieldName, String filePath) {
         HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials(USERNAME, PASSWORD)
                 .build();
         final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(feature).build();
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-        final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));
+        final FileDataBodyPart filePart = new FileDataBodyPart(fieldName, new File(filePath));
         final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.bodyPart(filePart);
 
         final WebTarget target = client.target(REST_UPLOAD_ENDPOINT);
@@ -364,9 +564,33 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         }
     }
 
+    private void whenTheInstallCompletes(String url, boolean successful) {
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put(DeploymentAgentService.EVENT_PACKAGE_URL, url);
+        properties.put(DeploymentAgentService.EVENT_SUCCESSFUL, successful);
+
+        concurrentUploadLimiter.handleEvent(new Event(DeploymentAgentService.EVENT_INSTALLED_TOPIC, properties));
+    }
+
     /*
      * THEN
      */
+    private void thenInstallIsRequestedTimes(int times) {
+        try {
+            verify(deploymentAgentService, times(times)).installDeploymentPackageAsync(anyString());
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void thenFirstUploadedFileExists(boolean expected) {
+        try {
+            assertEquals(expected, Files.exists(Paths.get(new URI(this.uploadedFileUrl.get()))));
+        } catch (URISyntaxException e) {
+            fail();
+        }
+    }
+
     private void thenInstallIsCalledWith(String url) {
         try {
             verify(deploymentAgentService).installDeploymentPackageAsync(url);

@@ -37,6 +37,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -46,6 +48,8 @@ import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.DescriptorRequest;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.BodyPartEntity;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -163,8 +167,8 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * Installs the deployment package specified in the {@link InstallRequest}. 
-     * If the request was already issued for the same {@link InstallRequest}, 
+     * Installs the deployment package specified in the {@link InstallRequest}.
+     * If the request was already issued for the same {@link InstallRequest},
      * it returns the status of the installation process.
      *
      * @param installRequest
@@ -207,53 +211,80 @@ public class DeploymentRestService {
     @POST
     @RolesAllowed("deploy")
     @Path("/_upload")
+    @LimitConcurrentUploads
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public DeploymentRequestStatus installUploadedDeploymentPackage(
-            @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetails) {
+    @LimitMultipartRequestEntitySize
+    public DeploymentRequestStatus installUploadedDeploymentPackage(@FormDataParam("file") FormDataBodyPart bodyPart,
+            @FormDataParam("file") FormDataContentDisposition fileDetails,
+            @Context ContainerRequestContext requestContext) {
 
-        final String uploadedFileName = fileDetails.getFileName();
-        final String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID()
-                + ".dp";
+        logger.info("received package upload");
 
-        try {
-            Files.deleteIfExists(Paths.get(uploadedFileLocation));
-        } catch (IOException e) {
-            logger.warn("Cannot delete file: {}", uploadedFileLocation);
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+        if (bodyPart == null || fileDetails == null) {
+            // the upload slot, if any, is released by the concurrent upload limiter when the response is sent
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
+                    .entity(BAD_REQUEST_MESSAGE).build());
         }
 
-        File file = new File(uploadedFileLocation);
+        final BodyPartEntity bodyPartEntity = (BodyPartEntity) bodyPart.getEntity();
+        File file = null;
+
+        final ConcurrentUploadLimiter.Guard guard = ConcurrentUploadLimiter.guardFromContext(requestContext)
+                .orElseThrow(() -> new IllegalStateException("concurrent upload guard has not been set"));
+
         try {
-            if (!file.createNewFile()) {
-                throw new IOException("File " + uploadedFileLocation + " was not created");
+            final String uploadedFileName = fileDetails.getFileName();
+            final String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID()
+                    + ".dp";
+
+            try {
+                Files.deleteIfExists(Paths.get(uploadedFileLocation));
+            } catch (IOException e) {
+                logger.warn("Cannot delete file: {}", uploadedFileLocation);
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
             }
-        } catch (IOException e) {
-            logger.warn("Cannot create file: {}, caused by", file, e);
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
-        }
 
-        try (FileOutputStream os = new FileOutputStream(file)) {
-            IOUtils.copy(uploadedInputStream, os);
-        } catch (IOException e) {
-            logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
-            deleteUploadedFile(file);
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
-        }
-        logger.info("Deployment package \"{}\" uploaded to: {}", uploadedFileName, file.getAbsolutePath());
+            file = new File(uploadedFileLocation);
+            try {
+                if (!file.createNewFile()) {
+                    throw new IOException("File " + uploadedFileLocation + " was not created");
+                }
+            } catch (IOException e) {
+                logger.warn("Cannot create file: {}, caused by", file, e);
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+            }
 
-        try {
-            String fileUrl = file.toURI().toURL().toString();
-            this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
-        } catch (Exception e) {
-            logger.warn("Cannot install deployment package : {}, caused by", uploadedFileName, e);
+            try (FileOutputStream os = new FileOutputStream(file);
+                    final InputStream in = bodyPartEntity.getInputStream()) {
+                IOUtils.copy(in, os);
+            } catch (IOException e) {
+                logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+            }
+            logger.info("Deployment package \"{}\" uploaded to: {}", uploadedFileName, file.getAbsolutePath());
+
+            try {
+                String fileUrl = file.toURI().toURL().toString();
+
+                guard.onInstallStarting(fileUrl);
+                this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
+                guard.onInstallStarted(fileUrl);
+
+            } catch (Exception e) {
+                guard.onFailure();
+                logger.warn("Cannot install deployment package : {}, caused by", uploadedFileName, e);
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+            }
+        } catch (final Exception e) {
             deleteUploadedFile(file);
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+            throw e;
+        } finally {
+            bodyPartEntity.cleanup();
         }
 
         file.deleteOnExit();
@@ -262,6 +293,10 @@ public class DeploymentRestService {
     }
 
     private static void deleteUploadedFile(File file) {
+        if (file == null) {
+            return;
+        }
+
         try {
             Files.deleteIfExists(file.toPath());
         } catch (IOException e) {

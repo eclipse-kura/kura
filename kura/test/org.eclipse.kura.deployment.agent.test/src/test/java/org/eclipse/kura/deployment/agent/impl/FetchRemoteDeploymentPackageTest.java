@@ -17,6 +17,10 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -24,13 +28,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.system.SystemService;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.deploymentadmin.DeploymentException;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.socket.PortFactory;
 
@@ -43,6 +55,17 @@ public class FetchRemoteDeploymentPackageTest {
     private final DeploymentAgent deploymentAgent = new DeploymentAgent();
     private File downloadedFile;
     private Throwable occurredException;
+    private File localPackage;
+    private Set<String> tempFilesBefore;
+
+    @Before
+    public void setup() {
+        final SystemService systemServiceMock = mock(SystemService.class);
+        final Properties properties = new Properties();
+        properties.put("file.transfer.size.max", "-1");
+        when(systemServiceMock.getProperties()).thenReturn(properties);
+        this.deploymentAgent.setSystemService(systemServiceMock);
+    }
 
     /*
      * Scenarios
@@ -92,6 +115,39 @@ public class FetchRemoteDeploymentPackageTest {
         thenRequestCountIs(1);
     }
 
+    @Test
+    public void removesTempFileWhenServerRespondsWithError() {
+        givenServerRespondingWithStatus(500);
+
+        whenRemotePackageIsFetched();
+
+        thenExceptionOccurred(IOException.class);
+        thenNoFileDownloaded();
+        thenNoTempFileLeft();
+    }
+
+    @Test
+    public void removesTempFileWhenInstallationOfDownloadedPackageFails() throws Exception {
+        givenServerRedirectingBeforeContent(0);
+        givenDeploymentAdminFailingInstallation();
+
+        whenPackageIsInstalledFrom(serverUrl("/0"));
+
+        thenExceptionOccurred(DeploymentException.class);
+        thenNoTempFileLeft();
+    }
+
+    @Test
+    public void keepsLocalPackageWhenInstallationFails() throws Exception {
+        givenLocalPackage();
+        givenDeploymentAdminFailingInstallation();
+
+        whenPackageIsInstalledFrom(this.localPackage.toURI().toString());
+
+        thenExceptionOccurred(DeploymentException.class);
+        assertTrue(this.localPackage.exists());
+    }
+
     @BeforeClass
     public static void startServer() {
         server = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
@@ -102,8 +158,16 @@ public class FetchRemoteDeploymentPackageTest {
         server.stop();
     }
 
+    @Before
+    public void recordTempFiles() {
+        this.tempFilesBefore = listTempFiles();
+    }
+
     @After
     public void tearDown() throws IOException {
+        if (this.localPackage != null) {
+            Files.deleteIfExists(this.localPackage.toPath());
+        }
         server.reset();
         if (this.downloadedFile != null) {
             Files.deleteIfExists(this.downloadedFile.toPath());
@@ -122,6 +186,22 @@ public class FetchRemoteDeploymentPackageTest {
                 .respond(response().withStatusCode(200).withBody(PACKAGE_CONTENT));
     }
 
+    private void givenServerRespondingWithStatus(int status) {
+        server.when(request().withMethod("GET").withPath("/0")).respond(response().withStatusCode(status));
+    }
+
+    private void givenDeploymentAdminFailingInstallation() throws Exception {
+        final DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        doThrow(new DeploymentException(DeploymentException.CODE_OTHER_ERROR)).when(deploymentAdmin)
+                .installDeploymentPackage(any());
+        this.deploymentAgent.setDeploymentAdmin(deploymentAdmin);
+    }
+
+    private void givenLocalPackage() throws IOException {
+        this.localPackage = File.createTempFile("localdp", ".dp");
+        Files.write(this.localPackage.toPath(), PACKAGE_CONTENT);
+    }
+
     private void givenServerRedirectingForever() {
         addRedirect("/0", "/0");
     }
@@ -138,6 +218,21 @@ public class FetchRemoteDeploymentPackageTest {
         } catch (Throwable e) {
             this.occurredException = e;
         }
+    }
+
+    private void whenPackageIsInstalledFrom(String url) {
+        try {
+            TestUtil.invokePrivate(this.deploymentAgent, "installDeploymentPackageInternal",
+                    new Class<?>[] { String.class }, url);
+        } catch (Throwable e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void thenNoTempFileLeft() {
+        final Set<String> leftovers = listTempFiles();
+        leftovers.removeAll(this.tempFilesBefore);
+        assertTrue("leftover temp files: " + leftovers, leftovers.isEmpty());
     }
 
     private void thenNoExceptionOccurred() {
@@ -163,6 +258,11 @@ public class FetchRemoteDeploymentPackageTest {
     /*
      * Utilities
      */
+
+    private static Set<String> listTempFiles() {
+        final String[] names = new File(System.getProperty("java.io.tmpdir")).list((dir, name) -> name.startsWith("dpa"));
+        return new HashSet<>(Arrays.asList(names == null ? new String[0] : names));
+    }
 
     private static void addRedirect(String path, String location) {
         server.when(request().withMethod("GET").withPath(path))

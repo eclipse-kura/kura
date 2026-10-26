@@ -9,6 +9,9 @@ Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.kura.deployment.agent; version="1.1.0"
 Import-Package: javax.net.ssl,
  org.apache.commons.io;version="1.4.9999",
+ org.apache.commons.io.build;version="2.18.0",
+ org.apache.commons.io.function;version="2.18.0",
+ org.apache.commons.io.input;version="2.18.0",
  org.apache.commons.lang3;version="[3.0,4.0)",
  org.eclipse.kura;version="[1.6,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",

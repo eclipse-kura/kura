@@ -1,18 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.core.deployment;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -26,15 +27,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -43,7 +52,9 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
+import org.eclipse.kura.core.deployment.download.DownloadOptions;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
+import org.eclipse.kura.core.deployment.download.impl.HttpDownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.impl.KuraNotifyPayload;
 import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
@@ -63,6 +74,7 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -82,6 +94,12 @@ public class CloudDeploymentHandlerV2Test {
 
     private static final String COMPONENT_OPTIONS_FIELD = "componentOptions";
     private static final String TEST_XML = "testXml";
+    private static final String DOWNLOADED_FILE_NAME = "limited_1.0.0.dp";
+
+    private Properties systemProperties = new Properties();
+    private byte[] servedPackage;
+    private boolean sendContentLength;
+    private Path downloadsDirectory;
 
     @Test(expected = NullPointerException.class)
     public void testActivateNoDeploymentHookManagerException() throws NoSuchFieldException, KuraException {
@@ -1319,6 +1337,8 @@ public class CloudDeploymentHandlerV2Test {
         SslManagerService sslManagerService = mock(SslManagerService.class);
         handler.setSslManagerService(sslManagerService);
 
+        handler.setSystemService(systemServiceWith(new Properties()));
+
         when(dlMock.isAlreadyDownloaded()).thenReturn(false);
         when(dtsMock.getClientId()).thenReturn("ClientId");
         TestUtil.setFieldValue(handler, "pendingPackageUrl", null);
@@ -1369,6 +1389,8 @@ public class CloudDeploymentHandlerV2Test {
 
         SslManagerService sslManagerService = mock(SslManagerService.class);
         handler.setSslManagerService(sslManagerService);
+
+        handler.setSystemService(systemServiceWith(new Properties()));
 
         when(dtsMock.getClientId()).thenReturn("ClientId");
 
@@ -1794,6 +1816,195 @@ public class CloudDeploymentHandlerV2Test {
         KuraMessage message = new KuraMessage(reqPayload, reqResources);
 
         handler.doExec(null, message);
+    }
+
+    /*
+     * Download size limit (file.transfer.size.max)
+     */
+
+    @Test
+    public void downloadShouldSucceedWhenSizeIsWithinLimit() throws Exception {
+        givenMaxDownloadSizeProperty("2000");
+        givenServedPackage(2000, true);
+
+        whenDownloadIsRequested();
+
+        thenPackageIsDownloaded();
+    }
+
+    @Test
+    public void downloadShouldBeRejectedWhenContentLengthExceedsLimit() throws Exception {
+        givenMaxDownloadSizeProperty("2000");
+        givenServedPackage(2001, true);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @Test
+    public void downloadShouldBeRejectedWhenStreamExceedsLimitWithoutContentLength() throws Exception {
+        givenMaxDownloadSizeProperty("2000");
+        givenServedPackage(2001, false);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @Test
+    public void downloadShouldUseDefaultLimitWhenPropertyIsMissing() throws Exception {
+        givenServedPackage((int) CloudDeploymentHandlerV2.MAX_DOWNLOAD_SIZE_DEFAULT + 1, true);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @Test
+    public void downloadShouldUseDefaultLimitWhenPropertyIsInvalid() throws Exception {
+        givenMaxDownloadSizeProperty("not-a-number");
+        givenServedPackage((int) CloudDeploymentHandlerV2.MAX_DOWNLOAD_SIZE_DEFAULT + 1, true);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @Test
+    public void downloadShouldNotBeLimitedWhenPropertyIsNegative() throws Exception {
+        givenMaxDownloadSizeProperty("-1");
+        givenServedPackage((int) CloudDeploymentHandlerV2.MAX_DOWNLOAD_SIZE_DEFAULT + 1, false);
+
+        whenDownloadIsRequested();
+
+        thenPackageIsDownloaded();
+    }
+
+    @Test
+    public void downloadShouldBeRejectedWhenPropertyIsZeroAndContentLengthIsSent() throws Exception {
+        givenMaxDownloadSizeProperty("0");
+        givenServedPackage(1, true);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @Test
+    public void downloadShouldBeRejectedWhenPropertyIsZeroWithoutContentLength() throws Exception {
+        givenMaxDownloadSizeProperty("0");
+        givenServedPackage(1, false);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @Test
+    public void emptyDownloadShouldBeRejectedWhenPropertyIsZero() throws Exception {
+        givenMaxDownloadSizeProperty("0");
+        givenServedPackage(0, true);
+
+        whenDownloadIsRequested();
+
+        thenNoFileIsLeft();
+    }
+
+    @After
+    public void deleteDownloadsDirectory() throws IOException {
+        if (this.downloadsDirectory != null) {
+            Files.deleteIfExists(this.downloadsDirectory.resolve(DOWNLOADED_FILE_NAME));
+            Files.deleteIfExists(this.downloadsDirectory);
+        }
+    }
+
+    private void givenMaxDownloadSizeProperty(String value) {
+        this.systemProperties.setProperty(CloudDeploymentHandlerV2.MAX_DOWNLOAD_SIZE_PROPNAME, value);
+    }
+
+    private void givenServedPackage(int size, boolean sendContentLength) {
+        this.servedPackage = new byte[size];
+        new Random(size).nextBytes(this.servedPackage);
+        this.sendContentLength = sendContentLength;
+    }
+
+    private void whenDownloadIsRequested() throws Exception {
+        this.downloadsDirectory = Files.createTempDirectory("downloads");
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected DownloadImpl createDownloadImpl(DeploymentPackageDownloadOptions options) {
+                return new DownloadImpl(options, this) {
+
+                    @Override
+                    protected DownloadCountingOutputStream getDownloadInstance(String protocol,
+                            DownloadOptions downloadOptions) {
+                        return new HttpDownloadCountingOutputStream(downloadOptions) {
+
+                            @Override
+                            protected HttpURLConnection openConnection(URL url) throws IOException {
+                                return mockServedConnection();
+                            }
+                        };
+                    }
+                };
+            }
+        };
+
+        Map<String, Object> componentProperties = new HashMap<>();
+        componentProperties.put("downloads.directory", this.downloadsDirectory.toString());
+        TestUtil.setFieldValue(handler, COMPONENT_OPTIONS_FIELD,
+                new CloudDeploymentHandlerV2Options(componentProperties));
+        TestUtil.setFieldValue(handler, "pendingPackageUrl", null);
+        handler.setDeploymentHookManager(mock(DeploymentHookManager.class));
+        DataTransportService dataTransportService = mock(DataTransportService.class);
+        when(dataTransportService.getClientId()).thenReturn("ClientId");
+        handler.setDataTransportService(dataTransportService);
+        handler.setSystemService(systemServiceWith(this.systemProperties));
+
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, "http://localhost/limited.dp");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "HTTP");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL, false);
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "limited");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), Collections.singletonList(CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD));
+
+        handler.doExec(new RequestHandlerContext(null, Collections.emptyMap()),
+                new KuraMessage(reqPayload, reqResources));
+
+        ((Future<?>) TestUtil.getFieldValue(handler, "downloaderFuture")).get(10, TimeUnit.SECONDS);
+    }
+
+    private void thenPackageIsDownloaded() throws IOException {
+        assertArrayEquals(this.servedPackage,
+                Files.readAllBytes(this.downloadsDirectory.resolve(DOWNLOADED_FILE_NAME)));
+    }
+
+    private void thenNoFileIsLeft() {
+        assertFalse(Files.exists(this.downloadsDirectory.resolve(DOWNLOADED_FILE_NAME)));
+    }
+
+    private HttpURLConnection mockServedConnection() throws IOException {
+        HttpURLConnection connection = mock(HttpURLConnection.class);
+        when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        when(connection.getInputStream()).thenReturn(new ByteArrayInputStream(this.servedPackage));
+        if (this.sendContentLength) {
+            when(connection.getHeaderField("Content-Length")).thenReturn(String.valueOf(this.servedPackage.length));
+        }
+        return connection;
+    }
+
+    private static SystemService systemServiceWith(Properties properties) {
+        SystemService systemService = mock(SystemService.class);
+        when(systemService.getProperties()).thenReturn(properties);
+        return systemService;
     }
 
     public void testPublishMessage() {

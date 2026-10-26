@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,10 @@
        cardinality="1..1"
        interface="org.osgi.service.deploymentadmin.DeploymentAdmin"
        bind="setDeploymentAdmin"
+       policy="static"/>
+   <reference name="ConcurrentUploadLimiter"
+       cardinality="1..1"
+       interface="org.eclipse.kura.internal.rest.deployment.agent.ConcurrentUploadLimiter"
        policy="static"/>
    <reference name="UserAdmin"
        cardinality="1..1"

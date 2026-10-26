@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.deployment.download.impl.test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -167,7 +168,7 @@ public class DownloadImplITTest {
         whenDownload();
 
         thenNoExceptionOccured();
-        thenFileIsEmpty(TEST_FILENAME + "_" + DP_VERSION + "." + DP_EXTENSION);
+        thenFileDoesNotExist(TEST_FILENAME + "_" + DP_VERSION + "." + DP_EXTENSION);
     }
 
     private void givenDeploymentPackageDownloadOptions(String deployUri, String dpName, String dpVersion) {
@@ -206,13 +207,8 @@ public class DownloadImplITTest {
         assertNull(this.occurredException);
     }
 
-    private void thenFileIsEmpty(String filename) {
-        Path tempFile = Paths.get(this.tempDir, filename);
-        try {
-            assertTrue(Files.readAllBytes(tempFile).length == 0);
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
+    private void thenFileDoesNotExist(String filename) {
+        assertFalse(Files.exists(Paths.get(this.tempDir, filename)));
     }
 
     private void thenDownloadedFileIs(String filename) {

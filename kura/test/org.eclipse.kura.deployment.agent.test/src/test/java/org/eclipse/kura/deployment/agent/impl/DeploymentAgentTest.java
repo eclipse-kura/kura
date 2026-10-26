@@ -1,18 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  3 PORT d.o.o.
  ******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,10 +26,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockserver.model.ConnectionOptions.connectionOptions;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -39,10 +42,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,6 +86,9 @@ public class DeploymentAgentTest {
     private SystemService systemServiceMock = mock(SystemService.class);
     private SslManagerService sslManagerServiceMock = mock(SslManagerService.class);
     private Exception occurredException;
+    private byte[] servedContent;
+    private File downloadedFile;
+    private RecordingDeploymentAgent recordingDeploymentAgent;
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
     private static ClientAndServer mockServer;
@@ -656,8 +667,230 @@ public class DeploymentAgentTest {
     }
 
     /*
+     * Download size limit (file.transfer.size.max)
+     */
+
+    @Test
+    public void shouldDownloadPackageBelowLimit() throws Exception {
+        givenTransferSizeLimit("100000");
+        givenServedPackage("/dp.dp", 8192 * 3 + 17);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadSucceeded();
+    }
+
+    @Test
+    public void shouldDownloadPackageExactlyAtLimit() throws Exception {
+        givenTransferSizeLimit("2000");
+        givenServedPackage("/dp.dp", 2000);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadSucceeded();
+    }
+
+    @Test
+    public void shouldRejectPackageOverLimit() {
+        givenTransferSizeLimit("2000");
+        givenServedPackage("/dp.dp", 2001);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldRejectPackageOverLimitBeforeDownloadWhenContentLengthIsSent() {
+        givenDownloadFileIsRecorded();
+        givenTransferSizeLimit("2000");
+        givenServedPackage("/dp.dp", 2001);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+        thenDownloadFileIsNotCreated();
+    }
+
+    @Test
+    public void shouldRejectPackageOverLimitWithoutContentLength() {
+        givenTransferSizeLimit("2000");
+        givenServedPackageWithoutContentLength("/dp.dp", 2001);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldDownloadPackageExactlyAtLimitWithoutContentLength() throws Exception {
+        givenTransferSizeLimit("2000");
+        givenServedPackageWithoutContentLength("/dp.dp", 2000);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadSucceeded();
+    }
+
+    @Test
+    public void shouldNotEnforceLimitWhenPropertyIsNegative() throws Exception {
+        givenTransferSizeLimit("-1");
+        givenServedPackage("/dp.dp", (int) DeploymentAgent.MAX_DOWNLOAD_SIZE_DEFAULT + 1);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadSucceeded();
+    }
+
+    @Test
+    public void shouldRejectAnyPackageWhenPropertyIsZero() {
+        givenTransferSizeLimit("0");
+        givenServedPackage("/dp.dp", 1);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldRejectEmptyPackageWhenPropertyIsZero() {
+        givenTransferSizeLimit("0");
+        givenServedPackage("/dp.dp", 0);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldApplyDefaultLimitWhenPropertyIsMissing() {
+        givenTransferSizeLimit(null);
+        givenServedPackage("/dp.dp", (int) DeploymentAgent.MAX_DOWNLOAD_SIZE_DEFAULT + 1);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldApplyDefaultLimitWhenPropertyIsInvalid() {
+        givenTransferSizeLimit("not-a-number");
+        givenServedPackage("/dp.dp", (int) DeploymentAgent.MAX_DOWNLOAD_SIZE_DEFAULT + 1);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldApplyLimitAfterRedirect() {
+        givenTransferSizeLimit("2000");
+        givenServedPackage("/dp.dp", 2001);
+        givenRedirect("/redirect", "/dp.dp");
+
+        whenDownloading("/redirect");
+
+        thenDownloadRejected();
+    }
+
+    @Test
+    public void shouldNotInstallPackageOverLimit() throws Exception {
+        givenTransferSizeLimit("2000");
+        givenServedPackage("/dp.dp", 2001);
+        final DeploymentAdmin deploymentAdminMock = mock(DeploymentAdmin.class);
+        this.deploymentAgent.setDeploymentAdmin(deploymentAdminMock);
+
+        whenInstalling("/dp.dp");
+
+        thenExceptionOccurred(IOException.class);
+        verify(deploymentAdminMock, never()).installDeploymentPackage(any());
+    }
+
+    @Test
+    public void shouldDeleteDownloadFileWhenPackageIsOverLimit() {
+        givenDownloadFileIsRecorded();
+        givenTransferSizeLimit("2000");
+        givenServedPackageWithoutContentLength("/dp.dp", 2001);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+        thenDownloadFileIsDeleted();
+    }
+
+    @Test
+    public void shouldDeleteDownloadFileWhenPropertyIsZero() {
+        givenDownloadFileIsRecorded();
+        givenTransferSizeLimit("0");
+        givenServedPackageWithoutContentLength("/dp.dp", 1);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadRejected();
+        thenDownloadFileIsDeleted();
+    }
+
+    @Test
+    public void shouldKeepDownloadFileWhenDownloadSucceeds() throws Exception {
+        givenDownloadFileIsRecorded();
+        givenTransferSizeLimit("2000");
+        givenServedPackage("/dp.dp", 2000);
+
+        whenDownloading("/dp.dp");
+
+        thenDownloadSucceeded();
+        thenDownloadFileIsKept();
+    }
+
+    @After
+    public void deleteDownloadedFile() {
+        if (this.downloadedFile != null) {
+            this.downloadedFile.delete();
+        }
+    }
+
+    /*
      * GIVEN
      */
+
+    // must be the first given step, as it replaces the agent under test
+    private void givenDownloadFileIsRecorded() {
+        this.recordingDeploymentAgent = new RecordingDeploymentAgent();
+        this.deploymentAgent = this.recordingDeploymentAgent;
+    }
+
+    private void givenTransferSizeLimit(final String limit) {
+        final Properties properties = new Properties();
+        properties.put("kura.packages", "fake-packages-path");
+        if (limit != null) {
+            properties.put(DeploymentAgent.MAX_DOWNLOAD_SIZE_PROPNAME, limit);
+        }
+        when(this.systemServiceMock.getProperties()).thenReturn(properties);
+        this.deploymentAgent.setSystemService(this.systemServiceMock);
+    }
+
+    private void givenServedPackage(final String path, final int size) {
+        mockServer.when(request().withMethod("GET").withPath(path))
+                .respond(response().withBody(generateServedContent(size)));
+    }
+
+    private void givenServedPackageWithoutContentLength(final String path, final int size) {
+        // without Content-Length the end of the body is signaled by closing the socket
+        mockServer.when(request().withMethod("GET").withPath(path))
+                .respond(response().withBody(generateServedContent(size)).withConnectionOptions(
+                        connectionOptions().withSuppressContentLengthHeader(true).withCloseSocket(true)));
+    }
+
+    private byte[] generateServedContent(final int size) {
+        this.servedContent = new byte[size];
+        new Random(size).nextBytes(this.servedContent);
+        return this.servedContent;
+    }
+
+    private void givenRedirect(final String from, final String to) {
+        mockServer.when(request().withMethod("GET").withPath(from))
+                .respond(response().withStatusCode(302).withHeader("Location", localUrl(to)));
+    }
 
     private void givenSystemServiceReturnsCurrentKuraVersion(String returnedVersion) {
         when(this.systemServiceMock.getKuraMarketplaceCompatibilityVersion()).thenReturn(returnedVersion);
@@ -704,6 +937,22 @@ public class DeploymentAgentTest {
      * WHEN
      */
 
+    private void whenDownloading(final String path) {
+        try {
+            this.downloadedFile = (File) invokeAgentMethod("getFileFromRemote", URL.class, new URL(localUrl(path)));
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenInstalling(final String path) {
+        try {
+            invokeAgentMethod("installDeploymentPackageInternal", String.class, localUrl(path));
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
     private void whenActivate() {
         this.deploymentAgent.activate();
     }
@@ -744,6 +993,59 @@ public class DeploymentAgentTest {
     private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
         assertNotNull(this.occurredException);
         assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+    }
+
+    private void thenDownloadSucceeded() throws IOException {
+        thenNoExceptionOccurred();
+        assertArrayEquals(this.servedContent, Files.readAllBytes(this.downloadedFile.toPath()));
+    }
+
+    private void thenDownloadRejected() {
+        thenExceptionOccurred(IOException.class);
+        assertNull(this.downloadedFile);
+    }
+
+    private void thenDownloadFileIsNotCreated() {
+        assertNull(this.recordingDeploymentAgent.downloadFile);
+    }
+
+    private void thenDownloadFileIsDeleted() {
+        assertNotNull(this.recordingDeploymentAgent.downloadFile);
+        assertFalse(this.recordingDeploymentAgent.downloadFile.exists());
+    }
+
+    private void thenDownloadFileIsKept() {
+        assertEquals(this.recordingDeploymentAgent.downloadFile, this.downloadedFile);
+        assertTrue(this.downloadedFile.exists());
+    }
+
+    /*
+     * UTILITIES
+     */
+
+    private static String localUrl(final String path) {
+        return "http://localhost:" + mockServer.getLocalPort() + path;
+    }
+
+    private Object invokeAgentMethod(final String name, final Class<?> paramType, final Object arg) throws Exception {
+        final Method method = DeploymentAgent.class.getDeclaredMethod(name, paramType);
+        method.setAccessible(true);
+        try {
+            return method.invoke(this.deploymentAgent, arg);
+        } catch (InvocationTargetException e) {
+            throw e.getCause() instanceof Exception ? (Exception) e.getCause() : e;
+        }
+    }
+
+    private static class RecordingDeploymentAgent extends DeploymentAgent {
+
+        private File downloadFile;
+
+        @Override
+        protected File createDownloadFile() throws IOException {
+            this.downloadFile = super.createDownloadFile();
+            return this.downloadFile;
+        }
     }
 
 }

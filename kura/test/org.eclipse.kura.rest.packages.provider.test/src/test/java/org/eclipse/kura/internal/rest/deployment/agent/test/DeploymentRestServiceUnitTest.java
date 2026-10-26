@@ -18,7 +18,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -36,23 +38,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
+import org.eclipse.kura.internal.rest.deployment.agent.ConcurrentUploadLimiter;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.DescriptorRequest;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.BodyPartEntity;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Test;
 import org.osgi.framework.Version;
@@ -77,6 +85,9 @@ public class DeploymentRestServiceUnitTest {
     private UserAdmin mockUserAdmin = mock(UserAdmin.class);
     private InputStream mockInputStream = mock(InputStream.class);
     private FormDataContentDisposition mockFormDataContent = mock(FormDataContentDisposition.class);
+    private ContainerRequestContext mockRequestContext = mock(ContainerRequestContext.class);
+    private final Map<String, Object> requestProperties = new HashMap<>();
+    private final ConcurrentUploadLimiter concurrentUploadLimiter = new ConcurrentUploadLimiter();
 
     private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
 
@@ -197,6 +208,7 @@ public class DeploymentRestServiceUnitTest {
     @Test
     public void installUploadedDeploymentPackageWorks() throws Exception {
         givenDeploymentRestService();
+        givenTheRequestPassedTheConcurrentUploadLimiter();
         givenAMockInputStream();
         givenAMockFormDataContentWithFileName("mock.dp");
 
@@ -208,8 +220,21 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
+    public void installUploadedDeploymentPackageFailsWithBadRequestIfFormParametersAreMissing() throws Exception {
+        givenDeploymentRestService();
+        givenTheRequestPassedTheConcurrentUploadLimiter();
+
+        whenInstallUploadedDeploymentPackageIsCalledWithoutFormParameters();
+
+        thenExceptionOccurred(WebApplicationException.class);
+        thenTheResponseStatusOfTheOccurredExceptionIs(400);
+        thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage();
+    }
+
+    @Test
     public void installUploadedDeploymentPackageThrowsOnInputStreamReadFailure() throws Exception {
         givenDeploymentRestService();
+        givenTheRequestPassedTheConcurrentUploadLimiter();
         givenAMockInputStreamThrowingOnRead();
         givenAMockFormDataContentWithFileName("mock.dp");
 
@@ -304,6 +329,7 @@ public class DeploymentRestServiceUnitTest {
     @Test
     public void installUploadedDeploymentPackageDeletesFileOnInputStreamReadFailure() throws Exception {
         givenDeploymentRestService();
+        givenTheRequestPassedTheConcurrentUploadLimiter();
         givenAMockInputStreamThrowingOnRead();
         givenAMockFormDataContentWithFileName("mock.dp");
         givenTheUploadedFilesInTmpDir();
@@ -317,6 +343,7 @@ public class DeploymentRestServiceUnitTest {
     @Test
     public void installUploadedDeploymentPackageDeletesFileOnInstallFailure() throws Exception {
         givenDeploymentRestService();
+        givenTheRequestPassedTheConcurrentUploadLimiter();
         givenAMockInputStream();
         givenAMockFormDataContentWithFileName("mock.dp");
         givenDeploymentAgentServiceThrowsExceptionOnInstall();
@@ -334,6 +361,20 @@ public class DeploymentRestServiceUnitTest {
         deploymentRestService.setDeploymentAgentService(this.mockDeploymentAgentService);
         deploymentRestService.setDeploymentAdmin(this.mockDeploymentAdmin);
         deploymentRestService.setUserAdmin(this.mockUserAdmin);
+        this.concurrentUploadLimiter.setDeploymentAgentService(this.mockDeploymentAgentService);
+
+        doAnswer(i -> this.requestProperties.put(i.getArgument(0), i.getArgument(1))).when(this.mockRequestContext)
+                .setProperty(anyString(), any());
+        when(this.mockRequestContext.getProperty(anyString()))
+                .thenAnswer(i -> this.requestProperties.get(i.getArgument(0)));
+    }
+
+    private void givenTheRequestPassedTheConcurrentUploadLimiter() {
+        try {
+            this.concurrentUploadLimiter.filter(this.mockRequestContext);
+        } catch (Exception e) {
+            fail("the request should have been admitted by the concurrent upload limiter");
+        }
     }
 
     private void givenInstalledDeploymentPackageWith(String name, String version) {
@@ -423,8 +464,23 @@ public class DeploymentRestServiceUnitTest {
     private void whenInstallUploadedDeploymentPackageIsCalledWith(InputStream mockInputStream,
             FormDataContentDisposition mockFormDataContent) {
         try {
+            final BodyPartEntity bodyPartEntity = mock(BodyPartEntity.class);
+            when(bodyPartEntity.getInputStream()).thenReturn(mockInputStream);
+
+            final FormDataBodyPart bodyPart = mock(FormDataBodyPart.class);
+            when(bodyPart.getEntity()).thenReturn(bodyPartEntity);
+
             this.resultingDeploymentRequestStatus = this.deploymentRestService
-                    .installUploadedDeploymentPackage(mockInputStream, mockFormDataContent);
+                    .installUploadedDeploymentPackage(bodyPart, mockFormDataContent, this.mockRequestContext);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenInstallUploadedDeploymentPackageIsCalledWithoutFormParameters() {
+        try {
+            this.resultingDeploymentRequestStatus = this.deploymentRestService
+                    .installUploadedDeploymentPackage(null, null, this.mockRequestContext);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -501,6 +557,10 @@ public class DeploymentRestServiceUnitTest {
 
         verify(this.mockDeploymentAgentService, times(1))
                 .installDeploymentPackageAsync(startsWith(localPath.toUri().toURL().toString()));
+    }
+
+    private void thenTheResponseStatusOfTheOccurredExceptionIs(int expectedStatus) {
+        assertEquals(expectedStatus, ((WebApplicationException) this.occurredException).getResponse().getStatus());
     }
 
     private void thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage() throws Exception {

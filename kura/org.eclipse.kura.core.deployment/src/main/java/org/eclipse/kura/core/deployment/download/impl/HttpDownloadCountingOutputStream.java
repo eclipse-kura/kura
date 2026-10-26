@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
@@ -49,6 +50,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
     private ExecutorService executor;
     private Future<Void> future;
+    private final long maxDownloadSizeBytes;
 
     public HttpDownloadCountingOutputStream(DownloadOptions downloadOptions) {
         super(downloadOptions);
@@ -56,6 +58,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         setResolution(this.options.getNotifyBlockSize());
         setBlockDelay(this.options.getBlockDelay());
         setConnectTimeout(this.options.getTimeout());
+        this.maxDownloadSizeBytes = downloadOptions.getMaxDownloadSizeBytes();
     }
 
     @Override
@@ -108,12 +111,19 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
             HttpURLConnection.setFollowRedirects(false);
             URLConnection urlConnection = openAndConnect(HttpDownloadCountingOutputStream.this.downloadURL);
 
-            HttpDownloadCountingOutputStream.this.is = urlConnection.getInputStream();
+            HttpDownloadCountingOutputStream.this.is = BoundedInputStream.builder()
+                    .setInputStream(urlConnection.getInputStream())
+                    // negative means unlimited and 0 rejects any download; otherwise allow one extra byte so that a
+                    // package of exactly maxDownloadSizeBytes is accepted
+                    .setMaxCount(this.maxDownloadSizeBytes > 0 ? this.maxDownloadSizeBytes + 1
+                            : this.maxDownloadSizeBytes)
+                    .setOnMaxCount((max, count) -> throwDownloadSizeExceeded()).get();
 
             String s = urlConnection.getHeaderField("Content-Length");
             logger.info("Content-lenght: {}", s);
 
-            setTotalBytes(s != null ? Integer.parseInt(s) : -1);
+            setTotalBytes(s != null ? Long.parseLong(s) : -1);
+            checkDownloadSize(getTotalBytes());
             postProgressEvent(HttpDownloadCountingOutputStream.this.options.getClientId(), 0,
                     HttpDownloadCountingOutputStream.this.totalBytes, DownloadStatus.IN_PROGRESS, null);
 
@@ -157,6 +167,16 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         }
 
         return null;
+    }
+
+    private void checkDownloadSize(long size) throws IOException {
+        if (this.maxDownloadSizeBytes >= 0 && size > this.maxDownloadSizeBytes) {
+            throwDownloadSizeExceeded();
+        }
+    }
+
+    private void throwDownloadSizeExceeded() throws IOException {
+        throw new IOException("Download size exceeds maximum limit of " + this.maxDownloadSizeBytes + " bytes");
     }
 
     private HttpURLConnection openAndConnect(String downloadUrlString) throws IOException, KuraConnectException {

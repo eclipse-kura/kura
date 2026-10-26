@@ -34,6 +34,7 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +46,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
@@ -102,6 +104,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
+    static final String MAX_DOWNLOAD_SIZE_PROPNAME = "file.transfer.size.max";
+    static final long MAX_DOWNLOAD_SIZE_DEFAULT = 1_048_576 * 25; // 25MB
     // same as the JDK default for http.maxRedirects
     static final int MAX_REDIRECTS = 20;
 
@@ -126,6 +130,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private int connTimeout;
     private int readTimeout;
+    private Long maxDownloadSizeBytes;
 
     private SslManagerService sslManagerService;
 
@@ -521,7 +526,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             throws DeploymentException, IOException, GeneralSecurityException {
         URL url = new URL(urlSpec);
         File dpFile = null;
-        if (!"file".equals(url.getProtocol())) {
+        final boolean download = !"file".equals(url.getProtocol());
+        if (download) {
             dpFile = getFileFromRemote(url);
         } else {
             dpFile = getFileFromFilesystem(url);
@@ -547,10 +553,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
             addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
         } finally {
-            // The file from which we have installed the deployment package will be deleted
-            // unless it's a persistent deployment package file.
-            if (dpPersistentFile != null && dpPersistentFile.exists() && dpFile.exists()
-                    && !dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+            if (download && dpFile.exists() && (dpPersistentFile == null
+                    || !Objects.equals(dpPersistentFile.getCanonicalPath(), dpFile.getCanonicalPath()))) {
                 Files.delete(dpFile.toPath());
                 logger.debug("Deleted file: {}", dpFile.getName());
             }
@@ -580,14 +584,44 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             urlConnection = openRemoteConnection(new URL(newLocation));
         }
 
-        File dpFile = File.createTempFile("dpa", null);
-        dpFile.deleteOnExit();
+        final long maxBytes = getFileDownloadSizeMaxBytes();
 
-        try (InputStream is = urlConnection.getInputStream();) {
-            FileUtils.copyInputStreamToFile(is, dpFile);
-            return dpFile;
+        // reject early if the declared size is already over the limit, -1 means that the length is unknown
+        if (maxBytes >= 0 && urlConnection.getContentLengthLong() > maxBytes) {
+            urlConnection.disconnect();
+            throw downloadSizeExceeded(maxBytes);
         }
 
+        File dpFile = createDownloadFile();
+
+        boolean downloaded = false;
+        try {
+            try (InputStream is = BoundedInputStream.builder().setInputStream(urlConnection.getInputStream())
+                    // negative means unlimited and 0 rejects any download; otherwise allow one extra byte so that a
+                    // package of exactly maxBytes is accepted
+                    .setMaxCount(maxBytes > 0 ? maxBytes + 1 : maxBytes).setOnMaxCount((max, count) -> {
+                        throw downloadSizeExceeded(maxBytes);
+                    }).get()) {
+                FileUtils.copyInputStreamToFile(is, dpFile);
+            }
+            downloaded = true;
+            return dpFile;
+        } finally {
+            if (!downloaded) {
+                FileUtils.deleteQuietly(dpFile);
+            }
+        }
+
+    }
+
+    protected File createDownloadFile() throws IOException {
+        File dpFile = File.createTempFile("dpa", null);
+        dpFile.deleteOnExit();
+        return dpFile;
+    }
+
+    private static IOException downloadSizeExceeded(long maxBytes) {
+        return new IOException("Download size exceeds maximum limit of " + maxBytes + " bytes");
     }
 
     private HttpURLConnection openRemoteConnection(URL url) throws GeneralSecurityException, IOException {
@@ -641,5 +675,22 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         } catch (IOException e) {
             logger.error("Error writing package configuration file", e);
         }
+    }
+
+    private long getFileDownloadSizeMaxBytes() {
+        if (this.maxDownloadSizeBytes != null) {
+            return maxDownloadSizeBytes.longValue();
+        }
+        this.maxDownloadSizeBytes = MAX_DOWNLOAD_SIZE_DEFAULT;
+
+        try {
+            this.maxDownloadSizeBytes = Long.parseLong(this.systemService.getProperties()
+                    .getProperty(MAX_DOWNLOAD_SIZE_PROPNAME, this.maxDownloadSizeBytes.toString()));
+        } catch (final NumberFormatException e) {
+            logger.warn("Error parsing {}, using default of {}", MAX_DOWNLOAD_SIZE_PROPNAME, MAX_DOWNLOAD_SIZE_DEFAULT,
+                    e);
+        }
+
+        return this.maxDownloadSizeBytes;
     }
 }

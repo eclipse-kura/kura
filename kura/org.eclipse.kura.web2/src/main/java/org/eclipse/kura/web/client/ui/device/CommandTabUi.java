@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
@@ -179,6 +180,8 @@ public class CommandTabUi extends Composite {
 
             if (result == null || result.trim().isEmpty()) {
                 callback.onSuccess(null);
+            } else if (FailureHandler.handleUploadRejected(result)) {
+                callback.onFailure(new IllegalStateException(MSGS.fileUploadFailure()));
             } else if (result.contains("HTTP ERROR")) {
                 callback.onFailure(new IllegalStateException(MSGS.fileUploadFailure()));
             } else {

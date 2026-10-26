@@ -41,6 +41,7 @@ import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordStrenghtR
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -59,6 +60,8 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -84,6 +87,14 @@ public class IdentityRestServiceV2 {
 
     private IdentityService identityService;
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
+    private final IdentityAccessGuard accessGuard = new IdentityAccessGuard(() -> this.identityService,
+            () -> this.legacyIdentityManagement);
+    private volatile boolean legacyIdentityManagement;
+
+    @Reference
+    public void bindEnvironmentInfo(final EnvironmentInfo environmentInfo) {
+        this.legacyIdentityManagement = IdentityAccessGuard.isLegacyIdentityManagementEnabled(environmentInfo);
+    }
 
     @Reference
     public void bindUserAdmin(UserAdmin userAdmin) {
@@ -145,11 +156,22 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateIdentity(final IdentityConfigurationDTO identityConfigurationDTO) {
+    public Response updateIdentity(final IdentityConfigurationDTO identityConfigurationDTO,
+            @Context final ContainerRequestContext requestContext) {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
             StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
+
+            this.accessGuard.requireCanManageIdentity(requestContext,
+                    identityConfigurationDTO.getIdentity().getName());
+
+            if (identityConfigurationDTO.getPermissionConfiguration() != null) {
+                this.accessGuard.requireCanAssignPermissions(requestContext,
+                        Optional.ofNullable(identityConfigurationDTO.getPermissionConfiguration().getPermissions())
+                                .orElseGet(HashSet::new).stream().map(PermissionDTO::getName)
+                                .collect(Collectors.toSet()));
+            }
 
             this.identityService
                     .updateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
@@ -166,7 +188,8 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public IdentityConfigurationDTO getIdentityByName(
-            final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
+            final IdentityConfigurationRequestDTO identityConfigurationRequestDTO,
+            @Context final ContainerRequestContext requestContext) {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
 
@@ -182,7 +205,8 @@ public class IdentityRestServiceV2 {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
             }
 
-            return IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration.get());
+            return hideAdditionalConfigurationsIfNotManageable(
+                    IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration.get()), requestContext);
         } catch (Exception e) {
             throw toWebApplicationException(e);
         }
@@ -220,11 +244,13 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteIdentity(final IdentityDTO identity) {
+    public Response deleteIdentity(final IdentityDTO identity, @Context final ContainerRequestContext requestContext) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
 
             StringUtils.validateField(NAME_REQUEST_FIELD, identity.getName());
+
+            this.accessGuard.requireCanManageIdentity(requestContext, identity.getName());
 
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
@@ -254,11 +280,13 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<IdentityConfigurationDTO> getIdentities() {
+    public List<IdentityConfigurationDTO> getIdentities(@Context final ContainerRequestContext requestContext) {
         logger.debug(DEBUG_MESSAGE, "getIdentities");
         try {
             return this.identityService.getIdentitiesConfiguration(allIdentitiesConfiguration()).stream()
-                    .map(IdentityDTOUtils::fromIdentityConfiguration).collect(Collectors.toList());
+                    .map(IdentityDTOUtils::fromIdentityConfiguration)
+                    .map(identity -> hideAdditionalConfigurationsIfNotManageable(identity, requestContext))
+                    .collect(Collectors.toList());
 
         } catch (Exception e) {
             throw toWebApplicationException(e);
@@ -282,12 +310,15 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/permissions")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createPermission(final PermissionDTO permissionDTO) {
+    public Response createPermission(final PermissionDTO permissionDTO,
+            @Context final ContainerRequestContext requestContext) {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
         try {
 
             StringUtils.validateField(NAME_REQUEST_FIELD, permissionDTO.getName());
+
+            this.accessGuard.requireAdmin(requestContext, "create permission " + permissionDTO.getName());
 
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
@@ -305,10 +336,13 @@ public class IdentityRestServiceV2 {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/permissions")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deletePermission(final PermissionDTO permissionDTO) {
+    public Response deletePermission(final PermissionDTO permissionDTO,
+            @Context final ContainerRequestContext requestContext) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
 
         StringUtils.validateField(NAME_REQUEST_FIELD, permissionDTO.getName());
+
+        this.accessGuard.requireAdmin(requestContext, "delete permission " + permissionDTO.getName());
 
         boolean deleted = false;
         try {
@@ -340,6 +374,19 @@ public class IdentityRestServiceV2 {
         }
 
         return Response.ok().build();
+    }
+
+    /*
+     * The additional configurations are provided by IdentityConfigurationExtensions and may contain sensitive data,
+     * they are returned to a caller without kura.admin only for the identities that the caller can manage.
+     */
+    private IdentityConfigurationDTO hideAdditionalConfigurationsIfNotManageable(
+            final IdentityConfigurationDTO identity, final ContainerRequestContext requestContext) {
+        if (!this.accessGuard.canManageIdentity(requestContext, identity.getIdentity().getName())) {
+            identity.setAdditionalConfigurations(null);
+        }
+
+        return identity;
     }
 
     private static Set<Class<? extends IdentityConfigurationComponent>> allIdentitiesConfiguration() {

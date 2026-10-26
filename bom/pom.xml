@@ -28,7 +28,7 @@
         <byte-buddy.version>1.17.7</byte-buddy.version>
         <commons-fileupload.version>2.0.0-M4</commons-fileupload.version>
         <hk2.version>3.1.1</hk2.version>
-        <io.netty.version>4.1.137.Final</io.netty.version>
+        <io.netty.version>4.1.139.Final</io.netty.version>
         <jackson.core.version>2.19.2</jackson.core.version>
         <jackson3.core.version>3.1.7</jackson3.core.version>
         <jersey.version>3.1.11</jersey.version>

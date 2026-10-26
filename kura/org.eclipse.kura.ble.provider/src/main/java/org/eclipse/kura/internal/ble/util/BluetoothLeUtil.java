@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,12 @@ public class BluetoothLeUtil {
 
     public static final String COMMAND_ERROR = "Error executing command: {}";
     public static final String COMMAND_EXEC = "Command executed : {}";
+
+    // eventType(1) + addressType(1) + address(6) + dataLength(1)
+    private static final int NON_EXTENDED_HEADER_LENGTH = 9;
+    // eventType(2) + addressType(1) + address(6) + primaryPhy(1) + secondaryPhy(1) + sid(1) + txPower(1)
+    // + rssi(1) + periodicAdvertisingInterval(2) + directAddressType(1) + directAddress(6) + dataLength(1)
+    private static final int EXTENDED_HEADER_LENGTH = 24;
 
     private BluetoothLeUtil() {
         // Empty constructor
@@ -163,82 +169,107 @@ public class BluetoothLeUtil {
         }
 
         // Number of reports in this advertisement
-        int reportRecordsNumber = b[3];
+        int reportRecordsNumber = b[3] & 0xFF;
 
-        // Parse each report
-        int ptr = 4;
+        // Parse each report; ptrHolder[0] carries the cursor position across calls
+        int[] ptrHolder = { 4 };
         for (int nr = 0; nr < reportRecordsNumber; nr++) {
-
-            AdvertisingReportRecord arr = new AdvertisingReportRecord();
-            arr.setExtendedReport(extendedAdvertisingReport);
-
-            if (extendedAdvertisingReport) {
-                arr.setEventType(((b[ptr++] & 0xFF) | (b[ptr++] & 0xFF) << 8));
-            } else {
-                arr.setEventType(b[ptr++]);
+            AdvertisingReportRecord arr = parseReportRecord(b, ptrHolder, extendedAdvertisingReport);
+            if (arr == null) {
+                break;
             }
-
-            arr.setAddressType(b[ptr++]);
-
-            // Extract remote address
-            String address = String.format("%02X:%02X:%02X:%02X:%02X:%02X", b[ptr + 5], b[ptr + 4], b[ptr + 3],
-                    b[ptr + 2], b[ptr + 1], b[ptr + 0]);
-
-            arr.setAddress(address);
-
-            // Skip past address bytes
-            ptr += 6;
-
-            // Additional Extended Advertising Report attributes
-            if (extendedAdvertisingReport) {
-                // Primary & Secondary Phy
-                arr.setPrimaryPhy(b[ptr++]);
-                arr.setSecondaryPhy(b[ptr++]);
-
-                // SID
-                arr.setSid(b[ptr++]);
-
-                // Tx Power
-                arr.setTxPower(b[ptr++]);
-
-                // RSSI
-                arr.setRssi(b[ptr++]);
-
-                // Periodic Advertising Interval
-                arr.setPeriodicAdvertisingInterval(((b[ptr++] & 0xFF) | (b[ptr++] & 0xFF) << 8));
-
-                // Direct Address
-                arr.setDirectAddressType(b[ptr++]);
-
-                String directAddress = String.format("%02X:%02X:%02X:%02X:%02X:%02X", b[ptr + 5], b[ptr + 4],
-                        b[ptr + 3], b[ptr + 2], b[ptr + 1], b[ptr + 0]);
-
-                arr.setDirectAddress(directAddress);
-
-                // Skip past direct address bytes
-                ptr += 6;
-            }
-
-            int arrDataLength = b[ptr++];
-
-            if (arrDataLength > 0) {
-                arr.setLength(arrDataLength);
-            }
-            byte[] arrData = new byte[arrDataLength];
-            System.arraycopy(b, ptr, arrData, 0, arrDataLength);
-            arr.setReportData(arrData);
-
-            // RSSI
-            if (!extendedAdvertisingReport) {
-                arr.setRssi(b[ptr + arrDataLength]);
-            }
-
             reportRecords.add(arr);
-
-            ptr += arrDataLength;
         }
 
         return reportRecords;
+    }
+
+    private static AdvertisingReportRecord parseReportRecord(byte[] b, int[] ptrHolder,
+            boolean extendedAdvertisingReport) {
+
+        int ptr = ptrHolder[0];
+
+        // Return if there isn't even enough buffer left for this report's fixed-size fields
+        int minHeaderLength = extendedAdvertisingReport ? EXTENDED_HEADER_LENGTH : NON_EXTENDED_HEADER_LENGTH;
+        if (ptr + minHeaderLength > b.length) {
+            return null;
+        }
+
+        AdvertisingReportRecord arr = new AdvertisingReportRecord();
+        arr.setExtendedReport(extendedAdvertisingReport);
+
+        if (extendedAdvertisingReport) {
+            arr.setEventType(((b[ptr++] & 0xFF) | (b[ptr++] & 0xFF) << 8));
+        } else {
+            arr.setEventType(b[ptr++]);
+        }
+
+        arr.setAddressType(b[ptr++]);
+
+        // Extract remote address
+        String address = String.format("%02X:%02X:%02X:%02X:%02X:%02X", b[ptr + 5], b[ptr + 4], b[ptr + 3],
+                b[ptr + 2], b[ptr + 1], b[ptr + 0]);
+
+        arr.setAddress(address);
+
+        // Skip past address bytes
+        ptr += 6;
+
+        // Additional Extended Advertising Report attributes
+        if (extendedAdvertisingReport) {
+            // Primary & Secondary Phy
+            arr.setPrimaryPhy(b[ptr++]);
+            arr.setSecondaryPhy(b[ptr++]);
+
+            // SID
+            arr.setSid(b[ptr++]);
+
+            // Tx Power
+            arr.setTxPower(b[ptr++]);
+
+            // RSSI
+            arr.setRssi(b[ptr++]);
+
+            // Periodic Advertising Interval
+            arr.setPeriodicAdvertisingInterval(((b[ptr++] & 0xFF) | (b[ptr++] & 0xFF) << 8));
+
+            // Direct Address
+            arr.setDirectAddressType(b[ptr++]);
+
+            String directAddress = String.format("%02X:%02X:%02X:%02X:%02X:%02X", b[ptr + 5], b[ptr + 4],
+                    b[ptr + 3], b[ptr + 2], b[ptr + 1], b[ptr + 0]);
+
+            arr.setDirectAddress(directAddress);
+
+            // Skip past direct address bytes
+            ptr += 6;
+        }
+
+        int arrDataLength = b[ptr++] & 0xFF;
+
+        // Bail out if the declared length runs past the buffer: a legitimate report always
+        // has its data (and, for non-extended reports, a trailing RSSI byte) present.
+        int trailingBytesNeeded = extendedAdvertisingReport ? 0 : 1;
+        if (ptr + arrDataLength + trailingBytesNeeded > b.length) {
+            return null;
+        }
+
+        if (arrDataLength > 0) {
+            arr.setLength(arrDataLength);
+        }
+        byte[] arrData = new byte[arrDataLength];
+        System.arraycopy(b, ptr, arrData, 0, arrDataLength);
+        arr.setReportData(arrData);
+
+        // RSSI
+        if (!extendedAdvertisingReport) {
+            arr.setRssi(b[ptr + arrDataLength]);
+        }
+
+        ptr += arrDataLength;
+        ptrHolder[0] = ptr;
+
+        return arr;
     }
 
     public static boolean stopHcitool(String interfaceName, CommandExecutorService executorService, String... params) {
@@ -246,7 +277,7 @@ public class BluetoothLeUtil {
         killCommand.add(HCITOOL);
         killCommand.add("-i");
         killCommand.add(interfaceName);
-        Arrays.asList(params).stream().forEach(s -> killCommand.add(s));
+        Arrays.asList(params).forEach(killCommand::add);
         return executorService.kill(killCommand.toArray(new String[0]), LinuxSignal.SIGINT);
     }
 

@@ -110,4 +110,19 @@ public final class TypeUtil {
         return -1;
     }
 
+    /**
+     * Convert a byte array to a lowercase hex string.
+     * 
+     * @param byte[]
+     * @return the hex string
+     */
+    public static String toHexString(byte[] value) {
+        StringBuilder sb = new StringBuilder(value.length * 2);
+        for (byte b : value) {
+            sb.append(Character.forDigit((b >> 4) & 0xF, 16));
+            sb.append(Character.forDigit(b & 0xF, 16));
+        }
+        return sb.toString();
+    }
+
 }

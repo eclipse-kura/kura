@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,9 @@ import org.apache.commons.io.IOUtils;
  * Parses a btsnoop stream into btsnoop records
  */
 public class BTSnoopParser {
+
+    // HCI packet type (1) + ACL header (4) + max ACL payload (0xFFFF)
+    private static final int MAX_RECORD_LENGTH = 65540;
 
     private InputStream is;
     private boolean gotHeader = false;
@@ -49,22 +52,21 @@ public class BTSnoopParser {
         readInt();
         readInt();
 
-        // Packet Data
-        if (includedLength > 0) {
-            byte[] packetData = new byte[includedLength];
-            IOUtils.readFully(this.is, packetData);
-            return packetData;
+        if (includedLength < 0 || includedLength > MAX_RECORD_LENGTH) {
+            throw new IOException("Invalid BTSnoop record length: " + includedLength);
         }
 
-        return new byte[0];
+        // Packet Data
+        byte[] packetData = new byte[includedLength];
+        IOUtils.readFully(this.is, packetData);
+
+        return packetData;
     }
 
     private int readInt() throws IOException {
-
         byte[] intBytes = new byte[4];
-
         IOUtils.readFully(this.is, intBytes);
-
-        return intBytes[0] << 24 | intBytes[1] << 16 | intBytes[2] << 8 | intBytes[3];
+        return (intBytes[0] & 0xFF) << 24 | (intBytes[1] & 0xFF) << 16 | (intBytes[2] & 0xFF) << 8
+                | intBytes[3] & 0xFF;
     }
 }

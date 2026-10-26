@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -92,13 +92,21 @@ public class BluetoothProcess {
         // process the input stream
         this.futureInputGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess Input Stream Gobbler");
-            readInputStreamFully(this.readOutputStream, listener);
+            try {
+                readInputStreamFully(this.readOutputStream, listener);
+            } catch (RuntimeException e) {
+                logger.error("Process input stream failed", e);
+            }
         });
 
         // process the error stream
         this.futureErrorGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess ErrorStream Gobbler");
-            readErrorStreamFully(this.readErrorStream, listener);
+            try {
+                readErrorStreamFully(this.readErrorStream, listener);
+            } catch (RuntimeException e) {
+                logger.error("Process error stream failed", e);
+            }
         });
     }
 
@@ -120,13 +128,21 @@ public class BluetoothProcess {
 
         this.futureInputGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess BTSnoop Gobbler");
-            readBTSnoopStreamFully(this.readOutputStream, listener);
+            try {
+                readBTSnoopStreamFully(this.readOutputStream, listener);
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error in BTSnoop input stream gobbler", e);
+            }
         });
 
         // process the error stream
         this.futureErrorGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess BTSnoop ErrorStream Gobbler");
-            readBTErrorStreamFully(this.readErrorStream, listener);
+            try {
+                readBTErrorStreamFully(this.readErrorStream, listener);
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error in BTSnoop error stream gobbler", e);
+            }
         });
 
     }
@@ -176,7 +192,9 @@ public class BluetoothProcess {
             while (this.btSnoopReady) {
                 if (is != null) {
                     byte[] packet = this.parser.readRecord();
-                    listener.processBTSnoopRecord(packet);
+                    if (packet.length > 0) {
+                        processRecord(listener, packet);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -184,6 +202,14 @@ public class BluetoothProcess {
         }
 
         logger.debug(END_OF_STREAM_MESSAGE);
+    }
+
+    private void processRecord(BTSnoopListener listener, byte[] packet) {
+        try {
+            listener.processBTSnoopRecord(packet);
+        } catch (RuntimeException e) {
+            logger.warn("Failed to process BTSnoop record, skipping", e);
+        }
     }
 
     private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener) {

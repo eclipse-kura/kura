@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -384,6 +384,72 @@ public class BluetoothLeEddystoneEncoderDecoderImplTest {
     public void testDecodeStopAt0() {
         byte[] encoded = { 1, 0x1F, 26, 1, 76, 0, 2, 21, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 18,
                 0, 5, 0, 2, 50, 0, 0 };
+
+        BluetoothLeEddystoneDecoderImpl decoder = new BluetoothLeEddystoneDecoderImpl();
+        BluetoothLeEddystone decoded = decoder.decode(encoded);
+
+        assertNull(decoded);
+    }
+
+    // An AD length byte of 0xFF is sign-extended to -1 when widened to int,
+    // so ptr += structSize + 1
+    // must not become a no-op, or the parser loops forever without ever exiting the
+    // array bounds.
+    @Test(timeout = 2000)
+    public void testDecodeDoesNotHangOnLengthByte0xFF() {
+        byte[] encoded = { (byte) 0xFF, 0x00 };
+
+        BluetoothLeEddystoneDecoderImpl decoder = new BluetoothLeEddystoneDecoderImpl();
+        BluetoothLeEddystone decoded = decoder.decode(encoded);
+
+        assertNull(decoded);
+    }
+
+    @Test(timeout = 2000)
+    public void testDecodeDoesNotHangOnLengthByte0xFFMidStream() {
+        byte[] encoded = { 2, 1, 6, (byte) 0xFF, 0x00 };
+
+        BluetoothLeEddystoneDecoderImpl decoder = new BluetoothLeEddystoneDecoderImpl();
+        BluetoothLeEddystone decoded = decoder.decode(encoded);
+
+        assertNull(decoded);
+    }
+
+    // A truncated Eddystone UUID signature (length + service-UUID bytes only, no
+    // frame-type or txPower bytes) passes the signature check, but the
+    // frameType/txPower reads that
+    // follow are raw array indexing and must not run past the array bounds.
+    @Test
+    public void testDecodeDoesNotThrowOnTruncatedEddystoneHeader() {
+        byte[] encoded = { 0x03, 0x03, (byte) 0xAA, (byte) 0xFE };
+
+        BluetoothLeEddystoneDecoderImpl decoder = new BluetoothLeEddystoneDecoderImpl();
+        BluetoothLeEddystone decoded = decoder.decode(encoded);
+
+        assertNull(decoded);
+    }
+
+    // The header (signature + frame-type + txPower) is present, but the UID frame's
+    // namespace/instance bytes are truncated. Arrays.copyOfRange tolerates the
+    // namespace read (zero-pads), but the instance range starts past the end of the
+    // array and must not throw. An incomplete record is treated as no match, same as
+    // a truncated header.
+    @Test
+    public void testDecodeDoesNotThrowOnTruncatedEddystoneUidBody() {
+        byte[] encoded = { 0x0B, 0x03, (byte) 0xAA, (byte) 0xFE, 0, 0, 0, 0, 0x00, 10, 1, 2 };
+
+        BluetoothLeEddystoneDecoderImpl decoder = new BluetoothLeEddystoneDecoderImpl();
+        BluetoothLeEddystone decoded = decoder.decode(encoded);
+
+        assertNull(decoded);
+    }
+
+    // EddystoneFrameType.valueOf() returns null for a frame-type byte outside
+    // {0x00,0x10,0x20,0x30,0x40}. Comparing that against the known frame types must
+    // not NPE, and an unsupported frame type is treated as no match.
+    @Test
+    public void testDecodeDoesNotThrowOnUnknownFrameType() {
+        byte[] encoded = { 0x09, 0x03, (byte) 0xAA, (byte) 0xFE, 0, 0, 0, 0, 0x50, 50 };
 
         BluetoothLeEddystoneDecoderImpl decoder = new BluetoothLeEddystoneDecoderImpl();
         BluetoothLeEddystone decoded = decoder.decode(encoded);

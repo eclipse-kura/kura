@@ -11,7 +11,19 @@ def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
     return changedFiles && changedFiles.every { it.endsWith(".md") || it.endsWith(".txt") }
 }
 
-node {
+podTemplate(inheritFrom: 'basic', yaml: '''
+spec:
+  containers:
+  - name: "jnlp"
+    resources:
+      limits:
+        cpu: "2000m"
+        memory: "5Gi"
+      requests:
+        cpu: "1000m"
+        memory: "3Gi"
+''') {
+node(POD_LABEL) {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '3')),

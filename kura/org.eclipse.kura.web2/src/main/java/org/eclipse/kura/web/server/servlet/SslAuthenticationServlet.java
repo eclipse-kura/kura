@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -89,7 +89,7 @@ public class SslAuthenticationServlet extends HttpServlet {
 
             auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), commonName);
 
-            final HttpSession session = console.createNewSession(req);
+            final HttpSession session = console.createNewSessionUnbounded(req);
 
             console.setAuthenticated(session, commonName, auditContext);
             auditContext.getProperties().put("session.id", GwtServerUtil.getSessionIdHash(session));

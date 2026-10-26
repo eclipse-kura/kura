@@ -17,6 +17,7 @@ import static java.util.Objects.isNull;
 import static org.eclipse.kura.web.session.SecurityHandler.chain;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -86,6 +87,8 @@ import org.eclipse.kura.web.session.SecurityHandler;
 import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
 import org.eclipse.kura.web.session.SessionExpirationSecurityHandler;
 import org.eclipse.kura.web.session.SessionLockedSecurityHandler;
+import org.eclipse.kura.web.session.UnauthenticatedSessionTracker;
+import org.eclipse.kura.web.session.UnauthenticatedSessionTracker.TrackingToken;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -117,6 +120,24 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private static final String PASSWORD_AUTH_PATH = LOGIN_MODULE_PATH + "/password";
     private static final String CERT_AUTH_PATH = LOGIN_MODULE_PATH + "/cert";
 
+    /**
+     * The paths of the built-in servlets and resources that can be accessed without an authenticated session. These
+     * paths do not need a session to be created in advance: the built-in authentication servlets create their own
+     * session only once the authentication flow is actually entered.
+     */
+    static final Set<String> BUILTIN_AUTHENTICATION_PATHS = Collections
+            .unmodifiableSet(new LinkedHashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH, CERT_AUTH_PATH)));
+
+    /**
+     * kura.properties key for the maximum number of HTTP sessions that can be allocated at the same time for
+     * requests that did not complete an authentication flow yet. Not part of the Console metatype: it is a low
+     * level tunable read directly from {@link SystemService#getProperties()}, not meant to be exposed in the Web
+     * UI configuration screen.
+     */
+    static final String MAX_UNAUTHENTICATED_SESSIONS_PROPERTY = "kura.web.console.session.max.unauthenticated.count";
+
+    private static final int DEFAULT_MAX_UNAUTHENTICATED_SESSIONS = 128;
+
     private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
     private String appRoot;
@@ -142,6 +163,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private final Set<ServletRegistration> loginServlets = new CopyOnWriteArraySet<>();
     private final Set<ClientExtensionBundle> consoleExtensions = new CopyOnWriteArraySet<>();
     private final Set<ClientExtensionBundle> loginExtensions = new CopyOnWriteArraySet<>();
+
+    private final UnauthenticatedSessionTracker unauthenticatedSessions = new UnauthenticatedSessionTracker();
 
     private static Console instance;
 
@@ -348,7 +371,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         return instance;
     }
 
-    private static void setInstance(final Console instance) {
+    static void setInstance(final Console instance) {
         Console.instance = instance;
     }
 
@@ -356,7 +379,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         return consoleOptions;
     }
 
-    private static void setConsoleOptions(final ConsoleOptions options) {
+    static void setConsoleOptions(final ConsoleOptions options) {
         Console.consoleOptions = options;
     }
 
@@ -372,14 +395,15 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         return this.eventAdmin;
     }
 
-    public HttpSession createNewSession(final HttpServletRequest request) {
+    public HttpSession createNewSessionUnbounded(final HttpServletRequest request) {
         final HttpSession existingSession = request.getSession(false);
 
         if (existingSession != null) {
             existingSession.invalidate();
         }
 
-        final HttpSession newSession = createSession(request);
+        final HttpSession newSession = getOrCreateSessionInternal(request, Integer.MAX_VALUE)
+                .orElseThrow(() -> new IllegalStateException("unexpected error creating session"));
         request.changeSessionId();
 
         updateAuditContext(newSession);
@@ -387,15 +411,59 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         return newSession;
     }
 
-    public HttpSession createSession(final HttpServletRequest request) {
-        final HttpSession session = request.getSession();
+    public Optional<HttpSession> getOrCreateSessionBounded(final HttpServletRequest request) {
 
+        return getOrCreateSessionInternal(request, getMaxUnauthenticatedSessions());
+    }
+
+    private Optional<HttpSession> getOrCreateSessionInternal(final HttpServletRequest request, final int maxSessionCount) {
+
+        Optional<HttpSession> result = Optional.ofNullable(request.getSession(false));
+
+        if (!result.isPresent() || !this.unauthenticatedSessions.isTrackedOrAuthenticated(result.get())) {
+            try (final TrackingToken token = this.unauthenticatedSessions.reserveToken(maxSessionCount)) {
+                final HttpSession session = request.getSession();
+
+                result = Optional.of(session);
+
+                if (!this.unauthenticatedSessions.isTrackedOrAuthenticated(session)) {
+                    token.attach(session);
+                }
+
+            } catch (final Exception e) {
+
+                if (result.isPresent()) {
+                    result.get().invalidate();
+                }
+
+                return Optional.empty();
+            }
+        }
+
+        result.ifPresent(this::initSession);
+
+        return result;
+    }
+
+    private int getMaxUnauthenticatedSessions() {
+        final String configured = this.systemService.getProperties().getProperty(MAX_UNAUTHENTICATED_SESSIONS_PROPERTY);
+
+        if (configured != null && !configured.trim().isEmpty()) {
+            try {
+                return Integer.parseInt(configured.trim());
+            } catch (final NumberFormatException e) {
+                logger.warn("Invalid {} setting, using default", MAX_UNAUTHENTICATED_SESSIONS_PROPERTY, e);
+            }
+        }
+
+        return DEFAULT_MAX_UNAUTHENTICATED_SESSIONS;
+    }
+
+    private void initSession(final HttpSession session) {
         session.setMaxInactiveInterval(this.sessionMaxInactiveInterval * 60);
         session.setAttribute(Attributes.LAST_ACTIVITY.getValue(), System.currentTimeMillis());
 
         updateAuditContext(session);
-
-        return session;
     }
 
     private void updateAuditContext(final HttpSession session) {
@@ -411,9 +479,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     }
 
-    final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH, CERT_AUTH_PATH));
-
-    private HttpContext initSessionContext(final HttpContext defaultContext) {
+    HttpContext initSessionContext(final HttpContext defaultContext) {
 
         final Set<String> eventPaths = new HashSet<>(Arrays.asList(DENALI_MODULE_PATH + EVENT_PATH, "/sse"));
 
@@ -431,11 +497,17 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         final RoutingSecurityHandler routingHandler = new RoutingSecurityHandler(
                 defaultHandler.sendErrorOnFailure(401));
 
-        // exception on authentication paths, allow access without authenticaton but
-        // create a session
-        routingHandler.addRouteHandler(
-                p -> this.authenticationPaths.contains(p)
-                        || this.loginServlets.stream().anyMatch(r -> r.path.contentEquals(p)),
+        // exception on built-in authentication paths, allow access without
+        // authentication. No session is created here: the built-in authentication
+        // servlets allocate one only once the authentication flow is actually entered,
+        // so that requests that never enter it cannot allocate server side state
+        routingHandler.addRouteHandler(BUILTIN_AUTHENTICATION_PATHS::contains, baseHandler);
+
+        // exception on login servlets registered by console extensions, allow access
+        // without authentication and create a session, since such servlets expect it to
+        // be already available. The number of sessions that can be allocated this way is
+        // bounded
+        routingHandler.addRouteHandler(p -> this.loginServlets.stream().anyMatch(r -> r.path.contentEquals(p)),
                 chain(baseHandler, new CreateSessionSecurityHandler()));
 
         // exception on event paths, activity on these paths does not count towards
@@ -672,7 +744,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
             throws NamespaceException, ServletException {
         this.loginServlets.add(new ServletRegistration(path, servlet));
         this.httpService.registerServlet(path, servlet, null, this.sessionContext);
-        this.authenticationPaths.add(path);
     }
 
     @Override
@@ -680,11 +751,12 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.securedServlets.removeIf(r -> r.path.contentEquals(path));
         this.loginServlets.removeIf(r -> r.path.contentEquals(path));
         this.httpService.unregister(path);
-        this.authenticationPaths.remove(path);
     }
 
     @Override
     public String setAuthenticated(final HttpSession session, final String user, final AuditContext context) {
+        this.unauthenticatedSessions.release(session);
+
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
 
         context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), user);

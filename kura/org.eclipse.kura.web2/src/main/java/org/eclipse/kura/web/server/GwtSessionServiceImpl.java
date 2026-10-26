@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -151,7 +151,7 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
 
-        final HttpSession newSession = Console.instance().createNewSession(request);
+        final HttpSession newSession = Console.instance().createNewSessionUnbounded(request);
         setAuthenticated(newSession, username);
     }
 

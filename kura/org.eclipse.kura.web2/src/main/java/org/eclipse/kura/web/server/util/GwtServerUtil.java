@@ -18,6 +18,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -511,6 +512,32 @@ public final class GwtServerUtil {
         }
 
         return GwtServerUtil.toGwtConfigComponent(new ComponentConfigurationImpl(pid, ocd, null));
+    }
+
+    /**
+     * The factory pid of a received configuration is provided by the client. If the component already exists, it
+     * must be an instance of the declared factory.
+     */
+    public static void requireMatchingFactoryPids(final Collection<GwtConfigComponent> receivedConfigs,
+            final Map<String, ComponentConfiguration> existingConfigs) throws GwtKuraException {
+        for (final GwtConfigComponent receivedConfig : receivedConfigs) {
+            final ComponentConfiguration existingConfig = existingConfigs.get(receivedConfig.getComponentId());
+
+            if (existingConfig == null) {
+                continue;
+            }
+
+            final Map<String, Object> existingProperties = existingConfig.getConfigurationProperties();
+            final Object actualFactoryPid = existingProperties != null
+                    ? existingProperties.get(ConfigurationAdmin.SERVICE_FACTORYPID)
+                    : null;
+
+            if (receivedConfig.getFactoryId() == null || !receivedConfig.getFactoryId().equals(actualFactoryPid)) {
+                logger.warn("Rejecting configuration for {}: it is not an instance of {}",
+                        receivedConfig.getComponentId(), receivedConfig.getFactoryId());
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            }
+        }
     }
 
     public static ComponentConfiguration fromGwtConfigComponent(GwtConfigComponent gwtCompConfig,

@@ -134,6 +134,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * f02fdba956 - chore: automated uptick to 5.6.3 (#6515) (eclipse-kura-bot)
+  * bef36c66ed - chore: add Kura 5.6.3 release notes (#6509) (eclipse-kura-bot)
   * 9417fcbaea - build(deps): bump io.netty from 4.1.135.Final to 4.1.139.Final [backport release-5.6.0] (#6511) (Matteo Maiero)
   * 5757f16332 - test: fix `shouldRejectPasswordChangeBodyExceedingMaxRequestBodySize` and `DeploymentAgent` tests (#6514) (Mattia Dal Ben)
   * a9fc8d6f71 - chore: Uptick core.configuration version (#6505) (nicolatimeus)

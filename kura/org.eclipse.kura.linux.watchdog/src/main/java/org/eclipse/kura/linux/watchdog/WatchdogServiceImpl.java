@@ -103,15 +103,40 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             return;
         }
 
+        final boolean toggleRequired = isWatchdogToggleRequired(newOptions);
+        final boolean pingIntervalChanged = isPingIntervalChanged(newOptions);
         this.options = newOptions;
         this.pollExecutor.submit(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
+            if (!toggleRequired && this.watchdogFileWriter != null) {
+                logger.debug(
+                        "Watchdog device and enablement unchanged. Updating configuration without toggling the watchdog");
+                if (pingIntervalChanged) {
+                    updateSupervision(newOptions);
+                }
+                return;
+            }
             cancelPollTask();
             if (this.watchdogFileWriter != null) {
                 disableWatchdog();
             }
             doUpdate(newOptions);
         });
+    }
+
+    private boolean isWatchdogToggleRequired(final WatchdogServiceOptions newOptions) {
+        return this.options == null || this.options.isEnabled() != newOptions.isEnabled()
+                || !this.options.getWatchdogDevice().equals(newOptions.getWatchdogDevice());
+    }
+
+    private boolean isPingIntervalChanged(final WatchdogServiceOptions newOptions) {
+        return this.options == null || !this.options.getPingInterval().equals(newOptions.getPingInterval());
+    }
+
+    private void updateSupervision(final WatchdogServiceOptions newOptions) {
+        setRefreshInterval(newOptions.getPingInterval());
+        cancelPollTask();
+        scheduleCriticalComponentsCheck(newOptions);
     }
 
     protected void stopWatchdogd() {
@@ -196,6 +221,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             logger.warn("Unable to write watchdog enabled temporary file. Continuing anyway", e);
         }
 
+        scheduleCriticalComponentsCheck(newOptions);
+    }
+
+    private void scheduleCriticalComponentsCheck(final WatchdogServiceOptions newOptions) {
         this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
             checkCriticalComponents();
@@ -350,6 +379,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         synchronized (this.statusLock) {
             this.state = newState;
             this.failureReason = newFailureReason;
+        }
+    }
+
+    private void setRefreshInterval(final long newRefreshIntervalMs) {
+        synchronized (this.statusLock) {
+            this.refreshIntervalMs = newRefreshIntervalMs;
         }
     }
 

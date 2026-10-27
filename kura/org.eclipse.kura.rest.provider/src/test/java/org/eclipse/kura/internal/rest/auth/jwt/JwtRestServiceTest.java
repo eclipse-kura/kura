@@ -24,14 +24,11 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,7 +72,6 @@ public class JwtRestServiceTest {
 
         when(this.verifier.verify(any())).thenReturn(this.proof);
         when(this.proof.getIdentityName()).thenReturn(IDENTITY);
-        when(this.proof.getExpiresAt()).thenReturn(Optional.of(Instant.now().plus(Duration.ofMinutes(1))));
         when(this.identityHelper.identityExists(IDENTITY)).thenReturn(true);
         when(this.issuer.issue(any())).thenReturn("token");
         when(this.replacementIssuer.issue(any())).thenReturn("token");
@@ -86,26 +82,8 @@ public class JwtRestServiceTest {
      */
 
     @Test
-    public void aRefreshTokenWithoutTokenIdentifierIsRefused() {
-        givenARefreshTokenWith(Optional.empty(), Optional.of("kura"));
-
-        whenTheRefreshTokenIsExchanged();
-
-        thenTheExchangesAreRefusedWith(Status.UNAUTHORIZED, 1);
-    }
-
-    @Test
-    public void aRefreshTokenWithoutIssuerIsRefused() {
-        givenARefreshTokenWith(Optional.of("jti"), Optional.empty());
-
-        whenTheRefreshTokenIsExchanged();
-
-        thenTheExchangesAreRefusedWith(Status.UNAUTHORIZED, 1);
-    }
-
-    @Test
     public void concurrentExchangesOfTheSameRefreshTokenSucceedOnce() throws Exception {
-        givenARefreshTokenWith(Optional.of("jti"), Optional.of("kura"));
+        givenARefreshTokenOfAKnownFamily();
         givenTheVerifierWaitsForAllConcurrentExchanges();
 
         whenTheRefreshTokenIsExchangedConcurrently();
@@ -116,7 +94,7 @@ public class JwtRestServiceTest {
 
     @Test
     public void aReplacementIssuingServiceSurvivesTheOldOneBeingUnset() throws KuraException {
-        givenARefreshTokenWith(Optional.of("jti"), Optional.of("kura"));
+        givenARefreshTokenOfAKnownFamily();
         givenAReplacementIssuingService();
 
         whenThePreviousIssuingServiceIsUnset();
@@ -126,47 +104,14 @@ public class JwtRestServiceTest {
         thenTheTokensAreIssuedByTheReplacementService();
     }
 
-    @Test
-    public void aUsedRefreshTokenIsTrackedForTheRetentionAfterItsExpiry() {
-        givenTheUsedRefreshTokenRetention(Duration.ofMinutes(1));
-        givenARefreshTokenExpiringAt("used", Instant.now().minusSeconds(10));
-        givenTheRefreshTokenWasExchanged();
-        givenARefreshTokenExpiringAt("other", Instant.now().plusSeconds(60));
-        givenTheRefreshTokenWasExchanged();
-        givenARefreshTokenExpiringAt("used", Instant.now().minusSeconds(10));
-
-        whenTheRefreshTokenIsExchanged();
-
-        thenTheExchangesAreRefusedWith(Status.UNAUTHORIZED, 1);
-    }
-
     /*
      * Steps
      */
 
-    private void givenTheUsedRefreshTokenRetention(final Duration retention) {
-        this.service.setOptions(new RestServiceOptions(Map.of("auth.jwt.enabled", true,
-                "auth.jwt.used.refresh.token.retention", (int) retention.toSeconds())));
-    }
-
-    // the verifier mock accepts the token even if it is expired, as a verifier does within its clock skew tolerance
-    private void givenARefreshTokenExpiringAt(final String tokenId, final Instant expiresAt) {
-        givenARefreshTokenWith(Optional.of(tokenId), Optional.of("kura"));
-        when(this.proof.getExpiresAt()).thenReturn(Optional.of(expiresAt));
-    }
-
-    private void givenTheRefreshTokenWasExchanged() {
-        exchangeTheRefreshToken();
-    }
-
-    private void givenARefreshTokenWith(final Optional<String> tokenId, final Optional<String> tokenIssuer) {
-        final Map<String, Object> claims = new HashMap<>();
-        tokenIssuer.ifPresent(iss -> claims.put("iss", iss));
-        claims.put(JwtRestServiceConstants.FAMILY_ID_CLAIM, this.families.start(Instant.MAX));
-        claims.put(JwtRestServiceConstants.GENERATION_CLAIM, 0);
-
-        when(this.proof.getTokenID()).thenReturn(tokenId);
-        when(this.proof.getClaims()).thenReturn(claims);
+    private void givenARefreshTokenOfAKnownFamily() {
+        when(this.proof.getClaims()).thenReturn(Map.of( //
+                JwtRestServiceConstants.FAMILY_ID_CLAIM, this.families.start(Instant.MAX), //
+                JwtRestServiceConstants.GENERATION_CLAIM, 0));
     }
 
     private void givenTheVerifierWaitsForAllConcurrentExchanges() throws KuraException {

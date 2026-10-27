@@ -20,9 +20,6 @@ import java.security.Principal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraAuthenticationFailedException;
@@ -66,7 +63,6 @@ public class JwtRestService {
     private final AtomicReference<TokenVerificationService> tokenVerifier = new AtomicReference<>();
     private final AtomicReference<RestServiceOptions> options = new AtomicReference<>();
 
-    private final ConcurrentMap<String, Instant> usedRefreshTokens = new ConcurrentHashMap<>();
     private final RefreshTokenFamilies families;
 
     public JwtRestService(final RestIdentityHelper identityHelper) {
@@ -119,8 +115,8 @@ public class JwtRestService {
         try {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
-            final TokenPairDTO result = issueTokenPair(identityName, issuer,
-                    this.families.start(familyTrackingDeadline(issuer)), 0);
+            final String familyId = this.families.start(familyTrackingDeadline(issuer));
+            final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, 0);
             auditLogger.info("{} Rest - Success - JWT token pair issued", auditContext);
             return response(result);
         } catch (final KuraException e) {
@@ -159,9 +155,6 @@ public class JwtRestService {
 
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
             this.families.advance(familyId, presentedGeneration, familyTrackingDeadline(issuer));
-
-            final String id = createIdForReplayDetection(proof);
-            updateUsedRefreshTokens(id, proof.getExpiresAt());
 
             auditLogger.info("{} Rest - Success - JWT token pair refreshed", auditContext);
             return response(result);
@@ -299,37 +292,6 @@ public class JwtRestService {
         case null, default -> throw new KuraAuthenticationFailedException(
                 "Refresh token has no valid " + JwtRestServiceConstants.GENERATION_CLAIM);
         };
-    }
-
-    private String createIdForReplayDetection(final VerificationProof proof) throws KuraAuthenticationFailedException {
-        // jti and iss are always set in the {@link org.eclipse.kura.core.token.jwt.issuer.JwtIssuingService}
-        final String jti = proof.getTokenID()
-                .orElseThrow(() -> new KuraAuthenticationFailedException("Refresh token has no jti"));
-        final Object iss = proof.getClaims().get("iss");
-        if (!(iss instanceof String issuer)) {
-            throw new KuraAuthenticationFailedException("Refresh token has no iss");
-        }
-
-        final String id = issuer + "#" + jti;
-
-        if (this.usedRefreshTokens.containsKey(id)) {
-            throw new KuraAuthenticationFailedException("Refresh token already used");
-        }
-
-        return id;
-    }
-
-    private void updateUsedRefreshTokens(final String id, final Optional<Instant> expiresAt)
-            throws KuraAuthenticationFailedException {
-        final Duration retention = this.options.get().getJwtUsedRefreshTokenRetention();
-        final Instant trackedUntil = expiresAt.map(expiration -> expiration.plus(retention)).orElse(Instant.MAX);
-
-        final Instant now = Instant.now();
-        this.usedRefreshTokens.values().removeIf(until -> until.isBefore(now));
-
-        if (this.usedRefreshTokens.putIfAbsent(id, trackedUntil) != null) {
-            throw new KuraAuthenticationFailedException("Refresh token already used");
-        }
     }
 
     private static WebApplicationException toWebApplicationException(final KuraException e) {

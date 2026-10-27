@@ -63,6 +63,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.logging.MockServerLogger;
 import org.mockserver.socket.PortFactory;
@@ -92,15 +93,21 @@ public class DeploymentAgentTest {
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
     private static ClientAndServer mockServer;
+    private static String previousMockServerLogLevel;
 
     @BeforeClass
     public static void startMockServer() {
+        // MockServer logs every expectation and match at INFO level, including the full base64 encoded response
+        // body. The download size limit tests serve packages larger than 25MB, which would flood the build log.
+        previousMockServerLogLevel = ConfigurationProperties.logLevel().name();
+        ConfigurationProperties.logLevel("WARN");
         mockServer = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
     }
 
     @AfterClass
     public static void stopMockServer() {
         mockServer.stop();
+        ConfigurationProperties.logLevel(previousMockServerLogLevel);
     }
 
     @After

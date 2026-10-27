@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraAuthenticationFailedException;
@@ -49,10 +49,19 @@ final class RefreshTokenFamilies {
         }
     }
 
-    private static final long SWEEP_INTERVAL_NANOS = Duration.ofSeconds(30).toNanos();
+    private static final Duration SWEEP_INTERVAL = Duration.ofSeconds(30);
 
     private final ConcurrentMap<String, Family> families = new ConcurrentHashMap<>();
-    private final AtomicReference<Long> nextSweepNanos = new AtomicReference<>(System.nanoTime());
+    private final long sweepIntervalNanos;
+    private final AtomicLong nextSweepNanos = new AtomicLong(System.nanoTime());
+
+    RefreshTokenFamilies() {
+        this(SWEEP_INTERVAL);
+    }
+
+    RefreshTokenFamilies(final Duration sweepInterval) {
+        this.sweepIntervalNanos = sweepInterval.toNanos();
+    }
 
     String start(final Instant trackedUntil) {
         sweepExpiredFamilies(Instant.now());
@@ -69,6 +78,10 @@ final class RefreshTokenFamilies {
     void advance(final String familyId, final long presentedGeneration, final Instant trackedUntil)
             throws KuraAuthenticationFailedException {
         update(familyId, family -> family.afterPresenting(presentedGeneration, trackedUntil));
+    }
+
+    boolean isTracked(final String familyId) {
+        return this.families.containsKey(familyId);
     }
 
     private void update(final String familyId, final UnaryOperator<Family> transition)
@@ -94,7 +107,7 @@ final class RefreshTokenFamilies {
     private void sweepExpiredFamilies(final Instant limit) {
         final long nanos = System.nanoTime();
         final long scheduled = this.nextSweepNanos.get();
-        if (nanos - scheduled < 0 || !this.nextSweepNanos.compareAndSet(scheduled, nanos + SWEEP_INTERVAL_NANOS)) {
+        if (nanos - scheduled < 0 || !this.nextSweepNanos.compareAndSet(scheduled, nanos + this.sweepIntervalNanos)) {
             return;
         }
         this.families.values().removeIf(family -> family.trackedUntil().isBefore(limit));

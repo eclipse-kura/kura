@@ -48,7 +48,7 @@ public class RefreshTokenReplayTest extends AbstractJwtRestScenario {
      */
     @Test
     public void theLatestRefreshTokenStaysUsableForTheRetentionAfterItsExpiry() throws Exception {
-        givenTheRestServiceProperties(Map.of(REFRESH_TOKEN_DURATION, 1, USED_REFRESH_TOKEN_RETENTION, 60));
+        givenTheRestServiceProperties(Map.of(REFRESH_TOKEN_DURATION, 1, REFRESH_TOKEN_FAMILY_RETENTION, 60));
         givenAnIdentityWithPermissions(ASSETS_PERMISSION);
         givenATokenPairIssuedToTheIdentity();
         givenTheRefreshTokenWasExchangedWithStatus(200);

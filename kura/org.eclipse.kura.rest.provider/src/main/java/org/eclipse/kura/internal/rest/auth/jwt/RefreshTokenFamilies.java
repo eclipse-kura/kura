@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraAuthenticationFailedException;
 
@@ -29,11 +30,19 @@ final class RefreshTokenFamilies {
 
     private record Family(Status status, long currentGeneration, Instant trackedUntil) {
 
-        Family afterPresenting(final long generation, final Instant newTrackedUntil) {
-            if (this.status == Status.ACTIVE && this.currentGeneration == generation) {
-                return new Family(Status.ACTIVE, generation + 1, newTrackedUntil);
-            }
+        Family afterChecking(final long generation) {
+            return isCurrent(generation) ? this : revoked();
+        }
 
+        Family afterPresenting(final long generation, final Instant newTrackedUntil) {
+            return isCurrent(generation) ? new Family(Status.ACTIVE, generation + 1, newTrackedUntil) : revoked();
+        }
+
+        private boolean isCurrent(final long generation) {
+            return this.status == Status.ACTIVE && this.currentGeneration == generation;
+        }
+
+        private Family revoked() {
             return new Family(Status.REVOKED, this.currentGeneration, this.trackedUntil);
         }
     }
@@ -48,12 +57,20 @@ final class RefreshTokenFamilies {
         return familyId;
     }
 
-    long advance(final String familyId, final long presentedGeneration, final Instant trackedUntil)
+    void check(final String familyId, final long presentedGeneration) throws KuraAuthenticationFailedException {
+        update(familyId, family -> family.afterChecking(presentedGeneration));
+    }
+
+    void advance(final String familyId, final long presentedGeneration, final Instant trackedUntil)
+            throws KuraAuthenticationFailedException {
+        update(familyId, family -> family.afterPresenting(presentedGeneration, trackedUntil));
+    }
+
+    private void update(final String familyId, final UnaryOperator<Family> transition)
             throws KuraAuthenticationFailedException {
         forgetExpiredFamilies();
 
-        final Family family = this.families.computeIfPresent(familyId,
-                (id, current) -> current.afterPresenting(presentedGeneration, trackedUntil));
+        final Family family = this.families.computeIfPresent(familyId, (id, current) -> transition.apply(current));
 
         if (family == null) {
             throw new KuraAuthenticationFailedException("Unknown refresh token family");
@@ -62,8 +79,6 @@ final class RefreshTokenFamilies {
         if (family.status() == Status.REVOKED) {
             throw new KuraAuthenticationFailedException("Refresh token family revoked");
         }
-
-        return family.currentGeneration();
     }
 
     private void forgetExpiredFamilies() {

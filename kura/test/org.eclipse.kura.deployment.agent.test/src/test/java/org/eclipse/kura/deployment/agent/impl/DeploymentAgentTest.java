@@ -111,8 +111,11 @@ public class DeploymentAgentTest {
     }
 
     @After
-    public void resetMockServer() {
+    public void tearDown() {
         mockServer.reset();
+        if (this.downloadedFile != null) {
+            this.downloadedFile.delete();
+        }
     }
 
     @Test
@@ -847,13 +850,6 @@ public class DeploymentAgentTest {
 
         thenDownloadSucceeded();
         thenDownloadFileIsKept();
-    }
-
-    @After
-    public void deleteDownloadedFile() {
-        if (this.downloadedFile != null) {
-            this.downloadedFile.delete();
-        }
     }
 
     /*

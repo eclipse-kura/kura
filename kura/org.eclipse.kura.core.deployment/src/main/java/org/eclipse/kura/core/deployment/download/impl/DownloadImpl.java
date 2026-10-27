@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.concurrent.CancellationException;
 
@@ -207,7 +208,11 @@ public class DownloadImpl implements ProgressListener {
                 }
             }
             if (!completed) {
-                dpFile.delete();
+                try {
+                    Files.deleteIfExists(dpFile.toPath());
+                } catch (IOException e1) {
+                    s_logger.warn("Unable to delete the partially downloaded file {}", dpFile, e1);
+                }
             }
         }
 

@@ -105,7 +105,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
     static final String MAX_DOWNLOAD_SIZE_PROPNAME = "file.transfer.size.max";
-    static final long MAX_DOWNLOAD_SIZE_DEFAULT = 1_048_576 * 25; // 25MB
+    static final long MAX_DOWNLOAD_SIZE_DEFAULT = 1_048_576L * 25; // 25MB
     // same as the JDK default for http.maxRedirects
     static final int MAX_REDIRECTS = 20;
 

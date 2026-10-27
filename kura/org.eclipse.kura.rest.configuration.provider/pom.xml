@@ -30,5 +30,5 @@
 
 	<artifactId>org.eclipse.kura.rest.configuration.provider</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>1.5.1</version>
 </project>

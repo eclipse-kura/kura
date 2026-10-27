@@ -109,7 +109,9 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 # whiteboard provider-constraint WARNINGs (see log4j/jul-logging.properties).
 -runvm: \
     ${argLine}, \
-    -Djava.util.logging.config.file=${kura.workdir}/log4j/jul-logging.properties
+    -Djava.util.logging.config.file=${kura.workdir}/log4j/jul-logging.properties, \
+    -Djersey.config.allowSystemPropertiesProvider=true, \
+    -Djersey.config.server.wadl.disableWadl=true
 
 # Used by Objenesis/Mockito and not actually optional
 -runsystempackages: sun.reflect, sun.security.pkcs11, sun.misc

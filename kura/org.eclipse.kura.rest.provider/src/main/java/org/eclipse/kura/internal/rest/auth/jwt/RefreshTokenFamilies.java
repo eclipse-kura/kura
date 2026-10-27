@@ -49,9 +49,10 @@ final class RefreshTokenFamilies {
         }
     }
 
+    private static final long SWEEP_INTERVAL_NANOS = Duration.ofSeconds(30).toNanos();
+
     private final ConcurrentMap<String, Family> families = new ConcurrentHashMap<>();
-    private static final Duration SWEEP_INTERVAL = Duration.ofSeconds(30);
-    private final AtomicReference<Instant> nextSweep = new AtomicReference<>(Instant.MIN);
+    private final AtomicReference<Long> nextSweepNanos = new AtomicReference<>(System.nanoTime());
 
     String start(final Instant trackedUntil) {
         sweepExpiredFamilies(Instant.now());
@@ -91,8 +92,9 @@ final class RefreshTokenFamilies {
     }
 
     private void sweepExpiredFamilies(final Instant limit) {
-        final Instant scheduled = this.nextSweep.get();
-        if (limit.isBefore(scheduled) || !this.nextSweep.compareAndSet(scheduled, limit.plus(SWEEP_INTERVAL))) {
+        final long nanos = System.nanoTime();
+        final long scheduled = this.nextSweepNanos.get();
+        if (nanos - scheduled < 0 || !this.nextSweepNanos.compareAndSet(scheduled, nanos + SWEEP_INTERVAL_NANOS)) {
             return;
         }
         this.families.values().removeIf(family -> family.trackedUntil().isBefore(limit));

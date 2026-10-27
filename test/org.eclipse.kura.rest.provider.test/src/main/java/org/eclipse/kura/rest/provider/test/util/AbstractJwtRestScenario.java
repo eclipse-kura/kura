@@ -63,7 +63,7 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
     protected static final String JWT_ENABLED = "auth.jwt.enabled";
     protected static final String ACCESS_TOKEN_DURATION = "auth.jwt.access.token.duration";
     protected static final String REFRESH_TOKEN_DURATION = "auth.jwt.refresh.token.duration";
-    protected static final String REFRESH_TOKEN_FAMILY_RETENTION = "auth.jwt.used.refresh.token.retention";
+    protected static final String REFRESH_TOKEN_FAMILY_RETENTION = "auth.jwt.refresh.token.family.retention";
     protected static final String ISSUING_SERVICE_TARGET = "TokenIssuingService.target";
     protected static final String VERIFICATION_SERVICE_TARGET = "TokenVerificationService.target";
     protected static final String DEFAULT_VERIFICATION_SERVICE_TARGET = //

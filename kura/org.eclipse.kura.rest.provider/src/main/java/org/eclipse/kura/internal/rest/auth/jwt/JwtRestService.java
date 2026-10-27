@@ -258,7 +258,7 @@ public class JwtRestService {
         final RestServiceOptions currentOptions = this.options.get();
         return Instant.now() //
                 .plus(cappedLifetime(currentOptions.getJwtRefreshTokenDuration(), issuer)) //
-                .plus(currentOptions.getJwtUsedRefreshTokenRetention());
+                .plus(currentOptions.getJwtRefreshTokenFamilyRetention());
     }
 
     private static Duration cappedLifetime(final Duration configured, final TokenIssuingService issuer) {

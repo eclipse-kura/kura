@@ -56,6 +56,6 @@ public @interface RestServiceMetatype {
     int auth_jwt_refresh_token_duration() default 900;
 
     @AttributeDefinition(name = "JWT Refresh Token Family Retention (Seconds)", min = "0", description = "How long a refresh token family is still tracked after its latest refresh token expires. Refresh tokens of a family that is no longer tracked are refused, so this must be greater than or equal to the clock skew tolerance of the Token Verification Service, which still accepts tokens that expired within that tolerance.")
-    int auth_jwt_used_refresh_token_retention() default 300;
+    int auth_jwt_refresh_token_family_retention() default 300;
 
 }

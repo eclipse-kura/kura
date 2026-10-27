@@ -60,7 +60,8 @@ public abstract class AbstractRefreshTokenFamilyScenario {
 
     private final JwtRestService service = new JwtRestService(this.identityHelper);
     private final Map<String, TokenIssueRequest> issuedTokens = new ConcurrentHashMap<>();
-    private final AtomicInteger tokenCount = new AtomicInteger();
+    private final AtomicInteger issuedTokenCount = new AtomicInteger();
+    private final AtomicInteger externalTokenCount = new AtomicInteger();
     private final List<Integer> exchangeStatuses = Collections.synchronizedList(new ArrayList<>());
     private CountDownLatch heldVerifications = new CountDownLatch(0);
 
@@ -75,7 +76,7 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
 
         when(this.issuer.issue(any())).thenAnswer(invocation -> {
-            final String token = "token-" + this.tokenCount.getAndIncrement();
+            final String token = "token-" + this.issuedTokenCount.getAndIncrement();
             this.issuedTokens.put(token, invocation.getArgument(0));
             return token;
         });
@@ -111,9 +112,13 @@ public abstract class AbstractRefreshTokenFamilyScenario {
                 .intendedConsumer(JwtRestServiceConstants.INTENDED_REFRESH_CONSUMER);
         claims.forEach(request::claim);
 
-        final String token = "external-token-" + this.tokenCount.getAndIncrement();
+        final String token = "external-token-" + this.externalTokenCount.getAndIncrement();
         this.issuedTokens.put(token, request.build());
         return token;
+    }
+
+    protected int issuedTokenCount() {
+        return this.issuedTokenCount.get();
     }
 
     protected Map<String, Object> claimsOf(final String token) {

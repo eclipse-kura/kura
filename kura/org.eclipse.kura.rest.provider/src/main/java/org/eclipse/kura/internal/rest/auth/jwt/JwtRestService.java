@@ -148,6 +148,7 @@ public class JwtRestService {
             final String familyId = familyIdOf(claims);
             final long presentedGeneration = generationOf(claims);
 
+            this.families.check(familyId, presentedGeneration);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
             this.families.advance(familyId, presentedGeneration, familyTrackingDeadline(issuer));
 

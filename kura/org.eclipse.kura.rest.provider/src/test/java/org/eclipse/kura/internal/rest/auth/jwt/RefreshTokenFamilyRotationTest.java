@@ -14,55 +14,69 @@
 package org.eclipse.kura.internal.rest.auth.jwt;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.internal.rest.auth.dto.TokenPairDTO;
 import org.junit.Test;
 
 public class RefreshTokenFamilyRotationTest extends AbstractRefreshTokenFamilyScenario {
 
-    private String loginFamilyId;
-    private String latestRefreshToken;
+    private final List<String> refreshTokens = new ArrayList<>();
+    private String accessToken;
 
     @Test
-    public void aRefreshKeepsTheFamilyAndAdvancesTheGeneration() {
-        givenALogin();
+    public void aChainOfRefreshesKeepsTheFamilyAndAdvancesTheGeneration() {
+        givenTheIdentityLoggedIn();
 
-        whenTheRefreshTokenIsExchanged(this.latestRefreshToken);
+        whenTheLatestRefreshTokenIsExchanged();
+        whenTheLatestRefreshTokenIsExchanged();
 
-        thenTheRefreshTokenCarries(this.latestRefreshToken, this.loginFamilyId, 1);
+        thenTheRefreshTokensBelongToOneFamilyAtGenerations(0L, 1L, 2L);
     }
 
     @Test
-    public void eachRefreshAdvancesTheGenerationByOne() {
-        givenALogin();
-        givenTheRefreshTokenWasExchanged(this.latestRefreshToken);
+    public void theAccessTokenCarriesNoFamilyClaims() {
+        whenTheIdentityLogsIn();
 
-        whenTheRefreshTokenIsExchanged(this.latestRefreshToken);
-
-        thenTheRefreshTokenCarries(this.latestRefreshToken, this.loginFamilyId, 2);
+        thenTheAccessTokenCarriesNoFamilyClaims();
     }
 
-    private void givenALogin() {
-        this.latestRefreshToken = login().refreshToken();
-        this.loginFamilyId = (String) claimsOf(this.latestRefreshToken).get(JwtRestServiceConstants.FAMILY_ID_CLAIM);
-
-        assertNotNull(this.loginFamilyId);
+    private void givenTheIdentityLoggedIn() {
+        logIn();
     }
 
-    private void givenTheRefreshTokenWasExchanged(final String refreshToken) {
-        this.latestRefreshToken = exchange(refreshToken).orElseThrow();
+    private void whenTheIdentityLogsIn() {
+        logIn();
     }
 
-    private void whenTheRefreshTokenIsExchanged(final String refreshToken) {
-        this.latestRefreshToken = exchange(refreshToken).orElseThrow();
+    private void whenTheLatestRefreshTokenIsExchanged() {
+        this.refreshTokens.add(exchange(this.refreshTokens.get(this.refreshTokens.size() - 1)).orElseThrow());
     }
 
-    private void thenTheRefreshTokenCarries(final String refreshToken, final String familyId, final long generation) {
-        final Map<String, Object> claims = claimsOf(refreshToken);
+    private void thenTheRefreshTokensBelongToOneFamilyAtGenerations(final Long... generations) {
+        final List<Map<String, Object>> claims = this.refreshTokens.stream().map(this::claimsOf).toList();
 
-        assertEquals(familyId, claims.get(JwtRestServiceConstants.FAMILY_ID_CLAIM));
-        assertEquals(generation, claims.get(JwtRestServiceConstants.GENERATION_CLAIM));
+        assertNotNull(claims.get(0).get(JwtRestServiceConstants.FAMILY_ID_CLAIM));
+        assertEquals(1, claims.stream().map(c -> c.get(JwtRestServiceConstants.FAMILY_ID_CLAIM)).distinct().count());
+        assertEquals(List.of(generations), claims.stream().map(c -> c.get(JwtRestServiceConstants.GENERATION_CLAIM)).toList());
+    }
+
+    private void thenTheAccessTokenCarriesNoFamilyClaims() {
+        final Map<String, Object> claims = claimsOf(this.accessToken);
+
+        assertFalse(claims.containsKey(JwtRestServiceConstants.FAMILY_ID_CLAIM));
+        assertFalse(claims.containsKey(JwtRestServiceConstants.GENERATION_CLAIM));
+    }
+
+    private void logIn() {
+        final TokenPairDTO tokenPair = login();
+
+        this.accessToken = tokenPair.accessToken();
+        this.refreshTokens.add(tokenPair.refreshToken());
     }
 }

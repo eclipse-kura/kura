@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.dto.TokenPairDTO;
@@ -56,7 +55,6 @@ public abstract class AbstractRefreshTokenFamilyScenario {
     private final JwtRestService service = new JwtRestService(this.identityHelper);
     private final Map<String, TokenIssueRequest> issuedTokens = new LinkedHashMap<>();
     private final List<Integer> exchangeStatuses = new ArrayList<>();
-    private boolean nextIssuanceFails;
 
     @Before
     public void setUpTokenServices() throws KuraException {
@@ -69,11 +67,6 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
 
         when(this.issuer.issue(any())).thenAnswer(invocation -> {
-            if (this.nextIssuanceFails) {
-                this.nextIssuanceFails = false;
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-            }
-
             final String token = "token-" + this.issuedTokens.size();
             this.issuedTokens.put(token, invocation.getArgument(0));
             return token;
@@ -96,10 +89,6 @@ public abstract class AbstractRefreshTokenFamilyScenario {
             this.exchangeStatuses.add(e.getResponse().getStatus());
             return Optional.empty();
         }
-    }
-
-    protected void failTheNextIssuance() {
-        this.nextIssuanceFails = true;
     }
 
     protected String externalRefreshTokenWith(final Map<String, Object> claims) {

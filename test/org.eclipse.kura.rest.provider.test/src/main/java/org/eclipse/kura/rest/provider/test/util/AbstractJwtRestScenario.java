@@ -259,10 +259,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         return this.refreshToken;
     }
 
-    protected String theFirstExchangedRefreshToken() {
-        return this.exchangedRefreshTokens.get(0);
-    }
-
     protected String theAccessTokenForgedFor(final String identityName) {
         final String forgedToken = Jwt.withSubject(this.accessToken, identityName);
         assertNotEquals("the token was not altered", this.accessToken, forgedToken);

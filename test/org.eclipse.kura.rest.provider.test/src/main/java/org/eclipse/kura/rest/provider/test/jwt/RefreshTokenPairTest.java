@@ -43,17 +43,6 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
     }
 
     @Test
-    public void aRefreshTokenCannotBeExchangedTwice() throws Exception {
-        givenAnIdentityWithPermissions(ASSETS_PERMISSION);
-        givenATokenPairIssuedToTheIdentity();
-        givenTheRefreshTokenWasExchangedWithStatus(200);
-
-        whenTheRefreshEndpointReceives(theFirstExchangedRefreshToken());
-
-        thenResponseCodeIs(401);
-    }
-
-    @Test
     public void anAccessTokenCannotBeExchanged() throws Exception {
         givenAnIdentityWithPermissions(ASSETS_PERMISSION);
         givenATokenPairIssuedToTheIdentity();

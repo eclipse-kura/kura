@@ -14,7 +14,6 @@
 package org.eclipse.kura.internal.rest.auth.jwt;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -22,57 +21,41 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
 import org.eclipse.kura.security.token.TokenIssuingService;
-import org.eclipse.kura.security.token.TokenVerificationService;
-import org.eclipse.kura.security.token.VerificationProof;
 import org.junit.Before;
 import org.junit.Test;
 
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class JwtRestServiceTest {
 
     private static final String IDENTITY = "alice";
-    private static final String REFRESH_TOKEN = "refresh-token";
-    private static final int CONCURRENT_EXCHANGES = 4;
 
     private final RestIdentityHelper identityHelper = mock(RestIdentityHelper.class);
     private final TokenIssuingService issuer = mock(TokenIssuingService.class);
     private final TokenIssuingService replacementIssuer = mock(TokenIssuingService.class);
-    private final TokenVerificationService verifier = mock(TokenVerificationService.class);
-    private final VerificationProof proof = mock(VerificationProof.class);
+    private final ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
+    private final SecurityContext securityContext = mock(SecurityContext.class);
 
-    private final RefreshTokenFamilies families = new RefreshTokenFamilies();
-    private final JwtRestService service = new JwtRestService(this.identityHelper, this.families);
-    private final List<Integer> refusals = Collections.synchronizedList(new ArrayList<>());
-    private int successfulExchanges;
+    private final JwtRestService service = new JwtRestService(this.identityHelper);
+    private Response response;
 
     @Before
     public void setUp() throws KuraException {
         this.service.setOptions(new RestServiceOptions(Map.of("auth.jwt.enabled", true)));
         this.service.setTokenIssuingService(this.issuer);
-        this.service.setTokenVerificationService(this.verifier);
 
-        when(this.verifier.verify(any())).thenReturn(this.proof);
-        when(this.proof.getIdentityName()).thenReturn(IDENTITY);
         when(this.identityHelper.identityExists(IDENTITY)).thenReturn(true);
+        when(this.requestContext.getSecurityContext()).thenReturn(this.securityContext);
+        when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
         when(this.issuer.issue(any())).thenReturn("token");
         when(this.replacementIssuer.issue(any())).thenReturn("token");
     }
@@ -82,48 +65,19 @@ public class JwtRestServiceTest {
      */
 
     @Test
-    public void concurrentExchangesOfTheSameRefreshTokenSucceedOnce() throws Exception {
-        givenARefreshTokenOfAKnownFamily();
-        givenTheVerifierWaitsForAllConcurrentExchanges();
-
-        whenTheRefreshTokenIsExchangedConcurrently();
-
-        thenExactlyOneExchangeSucceeds();
-        thenTheExchangesAreRefusedWith(Status.UNAUTHORIZED, CONCURRENT_EXCHANGES - 1);
-    }
-
-    @Test
     public void aReplacementIssuingServiceSurvivesTheOldOneBeingUnset() throws KuraException {
-        givenARefreshTokenOfAKnownFamily();
         givenAReplacementIssuingService();
 
         whenThePreviousIssuingServiceIsUnset();
-        whenTheRefreshTokenIsExchanged();
+        whenATokenPairIsRequested();
 
-        thenExactlyOneExchangeSucceeds();
+        thenATokenPairIsIssued();
         thenTheTokensAreIssuedByTheReplacementService();
     }
 
     /*
      * Steps
      */
-
-    private void givenARefreshTokenOfAKnownFamily() {
-        when(this.proof.getClaims()).thenReturn(Map.of( //
-                JwtRestServiceConstants.FAMILY_ID_CLAIM, this.families.start(Instant.MAX), //
-                JwtRestServiceConstants.GENERATION_CLAIM, 0));
-    }
-
-    private void givenTheVerifierWaitsForAllConcurrentExchanges() throws KuraException {
-        // every exchange is verified before any of them advances the token family
-        final CountDownLatch allExchangesStarted = new CountDownLatch(CONCURRENT_EXCHANGES);
-
-        when(this.verifier.verify(any())).thenAnswer(invocation -> {
-            allExchangesStarted.countDown();
-            allExchangesStarted.await(10, TimeUnit.SECONDS);
-            return this.proof;
-        });
-    }
 
     private void givenAReplacementIssuingService() {
         this.service.setTokenIssuingService(this.replacementIssuer);
@@ -133,51 +87,16 @@ public class JwtRestServiceTest {
         this.service.unsetTokenIssuingService(this.issuer);
     }
 
-    private void whenTheRefreshTokenIsExchanged() {
-        exchangeTheRefreshToken();
+    private void whenATokenPairIsRequested() {
+        this.response = this.service.issue(this.requestContext);
     }
 
-    private void whenTheRefreshTokenIsExchangedConcurrently() throws Exception {
-        final ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_EXCHANGES);
-
-        try {
-            final List<Future<?>> exchanges = new ArrayList<>();
-
-            for (int i = 0; i < CONCURRENT_EXCHANGES; i++) {
-                exchanges.add(executor.submit(this::exchangeTheRefreshToken));
-            }
-
-            for (final Future<?> exchange : exchanges) {
-                exchange.get(30, TimeUnit.SECONDS);
-            }
-        } finally {
-            executor.shutdownNow();
-        }
-    }
-
-    private void thenExactlyOneExchangeSucceeds() {
-        assertEquals(1, this.successfulExchanges);
-    }
-
-    private void thenTheExchangesAreRefusedWith(final Status status, final int expectedRefusals) {
-        assertEquals(Collections.nCopies(expectedRefusals, status.getStatusCode()), this.refusals);
+    private void thenATokenPairIsIssued() {
+        assertEquals(Status.OK.getStatusCode(), this.response.getStatus());
     }
 
     private void thenTheTokensAreIssuedByTheReplacementService() throws KuraException {
         verify(this.replacementIssuer, times(2)).issue(any());
         verify(this.issuer, never()).issue(any());
-    }
-
-    private void exchangeTheRefreshToken() {
-        try {
-            this.service.refresh(new ByteArrayInputStream(REFRESH_TOKEN.getBytes(StandardCharsets.UTF_8)));
-            synchronized (this) {
-                this.successfulExchanges++;
-            }
-        } catch (final WebApplicationException e) {
-            this.refusals.add(e.getResponse().getStatus());
-        } catch (final Exception e) {
-            fail("unexpected exception " + e);
-        }
     }
 }

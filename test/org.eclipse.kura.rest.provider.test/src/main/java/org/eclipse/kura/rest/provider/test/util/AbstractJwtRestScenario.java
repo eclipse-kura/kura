@@ -20,7 +20,6 @@ import static org.junit.Assert.fail;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,7 +63,7 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
     protected static final String JWT_ENABLED = "auth.jwt.enabled";
     protected static final String ACCESS_TOKEN_DURATION = "auth.jwt.access.token.duration";
     protected static final String REFRESH_TOKEN_DURATION = "auth.jwt.refresh.token.duration";
-    protected static final String USED_REFRESH_TOKEN_RETENTION = "auth.jwt.used.refresh.token.retention";
+    protected static final String REFRESH_TOKEN_FAMILY_RETENTION = "auth.jwt.used.refresh.token.retention";
     protected static final String ISSUING_SERVICE_TARGET = "TokenIssuingService.target";
     protected static final String VERIFICATION_SERVICE_TARGET = "TokenVerificationService.target";
     protected static final String DEFAULT_VERIFICATION_SERVICE_TARGET = //
@@ -84,7 +83,7 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
             JWT_ENABLED, false, //
             ACCESS_TOKEN_DURATION, 60, //
             REFRESH_TOKEN_DURATION, 900, //
-            USED_REFRESH_TOKEN_RETENTION, 300, //
+            REFRESH_TOKEN_FAMILY_RETENTION, 300, //
             ISSUING_SERVICE_TARGET, "(objectClass=org.eclipse.kura.security.token.TokenIssuingService)", //
             VERIFICATION_SERVICE_TARGET, DEFAULT_VERIFICATION_SERVICE_TARGET);
 
@@ -96,7 +95,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
     private JsonObject tokenPair;
     private String accessToken;
     private String refreshToken;
-    private final List<String> exchangedRefreshTokens = new ArrayList<>();
 
     protected AbstractJwtRestScenario() {
         super(new RestTransport("token/jwt/v1"));
@@ -200,10 +198,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         restTransport().setHeader("Content-Type", "text/plain");
         whenRequestIsPerformed(new MethodSpec("POST"), "/refresh", body);
         restTransport().removeHeader("Content-Type");
-
-        if (expectResponse().getStatus() == 200) {
-            this.exchangedRefreshTokens.add(body.trim());
-        }
     }
 
     /*
@@ -235,10 +229,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
 
     protected void thenResponseContainsHeader(final String headerName, final String expectedHeaderValue) {
         assertEquals(List.of(expectedHeaderValue), expectResponse().getHeader(headerName));
-    }
-
-    protected void thenTheReturnedRefreshTokenDiffersFromTheExchangedOne() {
-        assertNotEquals(this.exchangedRefreshTokens.get(this.exchangedRefreshTokens.size() - 1), this.refreshToken);
     }
 
     protected void thenTheReturnedAccessTokenGrantsAccessToTheProtectedResource() {

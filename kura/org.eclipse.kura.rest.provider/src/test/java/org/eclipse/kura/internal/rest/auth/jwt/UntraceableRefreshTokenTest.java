@@ -15,9 +15,7 @@ package org.eclipse.kura.internal.rest.auth.jwt;
 
 import static org.eclipse.kura.internal.rest.auth.jwt.JwtRestServiceConstants.FAMILY_ID_CLAIM;
 import static org.eclipse.kura.internal.rest.auth.jwt.JwtRestServiceConstants.GENERATION_CLAIM;
-import static org.junit.Assert.assertEquals;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -70,9 +68,5 @@ public class UntraceableRefreshTokenTest extends AbstractRefreshTokenFamilyScena
 
     private void whenTheRefreshTokenIsExchanged(final String token) {
         exchange(token);
-    }
-
-    private void thenTheExchangeStatusesAre(final Integer... statuses) {
-        assertEquals(List.of(statuses), exchangeStatuses());
     }
 }

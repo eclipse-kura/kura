@@ -63,15 +63,10 @@ public class JwtRestService {
     private final AtomicReference<TokenVerificationService> tokenVerifier = new AtomicReference<>();
     private final AtomicReference<RestServiceOptions> options = new AtomicReference<>();
 
-    private final RefreshTokenFamilies families;
+    private final RefreshTokenFamilies families = new RefreshTokenFamilies();
 
     public JwtRestService(final RestIdentityHelper identityHelper) {
-        this(identityHelper, new RefreshTokenFamilies());
-    }
-
-    JwtRestService(final RestIdentityHelper identityHelper, final RefreshTokenFamilies families) {
         this.identityHelper = identityHelper;
-        this.families = families;
     }
 
     public void setOptions(final RestServiceOptions options) {

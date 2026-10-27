@@ -15,8 +15,10 @@ package org.eclipse.kura.linux.watchdog;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -61,6 +63,7 @@ public class WatchdogServiceImplTest {
     private TestWatchdogServiceImpl statusSvc;
     private WatchdogStatus status;
     private WatchdogStatus previousStatus;
+    private Future<?> pollTaskBeforeUpdate;
 
     @After
     public void cleanupScenarioService() {
@@ -602,11 +605,27 @@ public class WatchdogServiceImplTest {
         givenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
 
         toggleSvc.setDeviceAvailable(true);
-        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 20000));
 
         thenStatusStateIs(WatchdogState.SUPERVISING);
         thenStatusDeviceOpenIs(true);
         thenStatusFailureReasonIsEmpty();
+    }
+
+    @Test
+    public void statusRemainsDeviceUnavailableWhenUnchangedConfigurationIsReappliedAfterDeviceAppears()
+            throws Throwable {
+        ToggleDeviceWatchdogServiceImpl toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(),
+                false);
+        givenStatusWatchdogServiceActivated(toggleSvc, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
+
+        toggleSvc.setDeviceAvailable(true);
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+
+        thenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
+        thenStatusDeviceOpenIs(false);
+        thenStatusFailureReasonIs("Watchdog device '" + WATCHDOG_TEST_DEVICE + "' does not exist");
     }
 
     @Test
@@ -617,12 +636,29 @@ public class WatchdogServiceImplTest {
         givenStatusStateIs(WatchdogState.SUPERVISING);
 
         toggleSvc.setDeviceAvailable(false);
-        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 20000));
 
         thenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
         thenStatusDeviceOpenIs(false);
         thenStatusLastRefreshTimeIsEmpty();
         thenStatusFailureReasonIs("Watchdog device '" + WATCHDOG_TEST_DEVICE + "' does not exist");
+    }
+
+    @Test
+    public void statusRemainsSupervisingWhenUnchangedConfigurationIsReappliedAfterDeviceDisappears()
+            throws Throwable {
+        ToggleDeviceWatchdogServiceImpl toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(),
+                true);
+        givenStatusWatchdogServiceActivated(toggleSvc, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenStatusStateIs(WatchdogState.SUPERVISING);
+        givenCurrentPollTaskIsRecorded();
+
+        toggleSvc.setDeviceAvailable(false);
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+
+        thenWatchdogIsNotReinitialized();
+        thenStatusStateIs(WatchdogState.SUPERVISING);
+        thenStatusDeviceOpenIs(true);
     }
 
     @Test
@@ -634,6 +670,102 @@ public class WatchdogServiceImplTest {
 
         thenStatusDevicePathIs(WATCHDOG_TEST_DEVICE);
         thenStatusRefreshIntervalIs(10000);
+    }
+
+    @Test
+    public void updateSkippedWhenConfigurationIsUnchanged() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+
+        thenWatchdogIsNotReinitialized();
+        thenStatusStateIs(WatchdogState.SUPERVISING);
+    }
+
+    @Test
+    public void updateSkippedWhenOnlyUnrelatedPropertiesChange() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusPropertiesWith("kura.service.pid", "org.eclipse.kura.watchdog.WatchdogService"));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusPropertiesWith("kura.service.pid", "anotherPid"));
+
+        thenWatchdogIsNotReinitialized();
+        thenStatusStateIs(WatchdogState.SUPERVISING);
+    }
+
+    @Test
+    public void updateSkippedWhenMissingPropertiesAreSetToTheirDefaults() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusPropertiesWithout("pingInterval"));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusPropertiesWith("failOnUnavailableDevice", false));
+
+        thenWatchdogIsNotReinitialized();
+        thenStatusRefreshIntervalIs(10000);
+    }
+
+    @Test
+    public void updateSkippedWhenPropertyHasWrongTypeAndFallsBackToDefault() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusPropertiesWith("pingInterval", "10000"));
+
+        thenWatchdogIsNotReinitialized();
+    }
+
+    @Test
+    public void updateAppliedWhenPingIntervalChanges() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 20000));
+
+        thenWatchdogIsReinitialized();
+        thenStatusRefreshIntervalIs(20000);
+    }
+
+    @Test
+    public void updateAppliedWhenRebootCauseFilePathChanges() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusPropertiesWith("rebootCauseFilePath", "target/otherRebootCause"));
+
+        thenWatchdogIsReinitialized();
+        thenStatusStateIs(WatchdogState.SUPERVISING);
+    }
+
+    @Test
+    public void updateAppliedWhenFailOnUnavailableDeviceChanges() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenCurrentPollTaskIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusPropertiesWith("failOnUnavailableDevice", true));
+
+        thenWatchdogIsReinitialized();
+        thenStatusStateIs(WatchdogState.SUPERVISING);
+    }
+
+    @Test
+    public void watchdogSupervisesAgainWhenPreviousConfigurationIsRestoredAfterDisable() throws Throwable {
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenStatusWatchdogServiceUpdated(getStatusProperties(false, WATCHDOG_TEST_DEVICE, 10000));
+        givenStatusStateIs(WatchdogState.DISABLED);
+
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+
+        thenStatusStateIs(WatchdogState.SUPERVISING);
+        thenStatusDeviceOpenIs(true);
     }
 
     @Test
@@ -706,11 +838,6 @@ public class WatchdogServiceImplTest {
         final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
 
         WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
-
-        Map<String, Object> properties = getProperties(false);
-
-        WatchdogServiceOptions options = new WatchdogServiceOptions(properties);
-        TestUtil.setFieldValue(svc, "options", options);
 
         TestUtil.setFieldValue(svc, "watchdogFileWriter", watchdogWriter);
 
@@ -1011,6 +1138,40 @@ public class WatchdogServiceImplTest {
         properties.put("pingInterval", pingInterval);
         properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
         return properties;
+    }
+
+    private Map<String, Object> getStatusPropertiesWith(String key, Object value) {
+        Map<String, Object> properties = getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000);
+        properties.put(key, value);
+        return properties;
+    }
+
+    private Map<String, Object> getStatusPropertiesWithout(String key) {
+        Map<String, Object> properties = getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000);
+        properties.remove(key);
+        return properties;
+    }
+
+    private void givenCurrentPollTaskIsRecorded() throws NoSuchFieldException {
+        this.pollTaskBeforeUpdate = (Future<?>) TestUtil.getFieldValue(this.statusSvc, "pollTask");
+        assertNotNull(this.pollTaskBeforeUpdate);
+    }
+
+    private void givenStatusWatchdogServiceUpdated(Map<String, Object> properties) throws Throwable {
+        this.statusSvc.updated(properties);
+        awaitPendingUpdate(this.statusSvc);
+    }
+
+    private void thenWatchdogIsNotReinitialized() throws NoSuchFieldException {
+        assertSame(this.pollTaskBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "pollTask"));
+        assertFalse(this.pollTaskBeforeUpdate.isCancelled());
+    }
+
+    private void thenWatchdogIsReinitialized() throws NoSuchFieldException {
+        final Object currentPollTask = TestUtil.getFieldValue(this.statusSvc, "pollTask");
+        assertNotNull(currentPollTask);
+        assertNotSame(this.pollTaskBeforeUpdate, currentPollTask);
+        assertTrue(this.pollTaskBeforeUpdate.isCancelled());
     }
 
     private void givenStatusWatchdogServiceUpdated(boolean enabled) throws Throwable {

@@ -38,20 +38,17 @@ import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
 import org.eclipse.kura.watchdog.WatchdogState;
 import org.eclipse.kura.watchdog.WatchdogStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
-@Component(
-    name = "org.eclipse.kura.watchdog.WatchdogService",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component(name = "org.eclipse.kura.watchdog.WatchdogService", immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = {
+        org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
 @Designate(ocd = WatchdogServiceMetatype.class)
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
@@ -69,7 +66,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private ScheduledExecutorService pollExecutor;
     private ScheduledFuture<?> pollTask;
     private Writer watchdogFileWriter;
-    private WatchdogServiceOptions options;
+    private volatile WatchdogServiceOptions options;
 
     private final Object statusLock = new Object();
     private WatchdogState state = WatchdogState.DISABLED;
@@ -101,6 +98,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     public void updated(Map<String, Object> properties) {
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 
+        if (newOptions.equals(this.options)) {
+            logger.info("Watchdog configuration unchanged. Skipping update");
+            return;
+        }
+
+        this.options = newOptions;
         this.pollExecutor.submit(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
             cancelPollTask();
@@ -193,12 +196,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             logger.warn("Unable to write watchdog enabled temporary file. Continuing anyway", e);
         }
 
-        this.options = newOptions;
-
         this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
             checkCriticalComponents();
-        }, 0, this.options.getPingInterval(), TimeUnit.MILLISECONDS);
+        }, 0, newOptions.getPingInterval(), TimeUnit.MILLISECONDS);
     }
 
     private void handleUnavailableDevice(final WatchdogServiceOptions newOptions, final String unavailableReason) {
@@ -459,7 +460,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             writeWatchdogDevice("w");
             setLastRefreshTime(Instant.now());
         } catch (IOException e) {
-            logger.error("Failed to refresh watchdog device '{}'", this.options.getWatchdogDevice(), e);
+            logger.error("Failed to refresh watchdog device", e);
         }
     }
 
@@ -467,8 +468,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         try {
             writeWatchdogDevice("V");
         } catch (IOException e) {
-            logger.error("Failed to write magic character to watchdog device '{}'", this.options.getWatchdogDevice(),
-                    e);
+            logger.error("Failed to write magic character to watchdog device", e);
         }
         closeWatchdogFileWriter();
     }
@@ -479,7 +479,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             this.watchdogFileWriter = null;
             setDeviceOpen(false);
         } catch (IOException e) {
-            logger.error("Failed to close watchdog device '{}'", this.options.getWatchdogDevice(), e);
+            logger.error("Failed to close watchdog device", e);
         }
     }
 

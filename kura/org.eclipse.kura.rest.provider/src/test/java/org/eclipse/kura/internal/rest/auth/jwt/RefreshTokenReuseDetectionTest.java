@@ -28,6 +28,7 @@ public class RefreshTokenReuseDetectionTest extends AbstractRefreshTokenFamilySc
 
     private String ownerRefreshToken;
     private String attackerRefreshToken;
+    private String secondSessionRefreshToken;
 
     @Test
     public void replayingAnExchangedRefreshTokenRevokesTheFamily() {
@@ -41,19 +42,23 @@ public class RefreshTokenReuseDetectionTest extends AbstractRefreshTokenFamilySc
     }
 
     @Test
-    public void aNewLoginIsUnaffectedByARevokedFamily() {
+    public void revokingAFamilyLeavesOtherSessionsWorking() {
         givenTheOwnerLoggedIn();
+        givenTheOwnerLoggedInASecondSession();
         givenTheAttackerExchanged(this.ownerRefreshToken);
         givenTheOwnerExchanged(this.ownerRefreshToken);
-        givenTheOwnerLoggedIn();
 
-        whenTheOwnerExchanges(this.ownerRefreshToken);
+        whenTheSecondSessionExchanges(this.secondSessionRefreshToken);
 
         thenTheExchangeStatusesAre(OK, UNAUTHORIZED, OK);
     }
 
     private void givenTheOwnerLoggedIn() {
         this.ownerRefreshToken = login().refreshToken();
+    }
+
+    private void givenTheOwnerLoggedInASecondSession() {
+        this.secondSessionRefreshToken = login().refreshToken();
     }
 
     private void givenTheAttackerExchanged(final String refreshToken) {
@@ -66,6 +71,10 @@ public class RefreshTokenReuseDetectionTest extends AbstractRefreshTokenFamilySc
 
     private void whenTheOwnerExchanges(final String refreshToken) {
         this.ownerRefreshToken = exchange(refreshToken).orElse(this.ownerRefreshToken);
+    }
+
+    private void whenTheSecondSessionExchanges(final String refreshToken) {
+        this.secondSessionRefreshToken = exchange(refreshToken).orElse(this.secondSessionRefreshToken);
     }
 
     private void whenTheAttackerExchanges(final String refreshToken) {

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -28,6 +28,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,17 @@ public class WatchdogServiceImplTest {
     private WatchdogStatus previousStatus;
     private Future<?> pollTaskBeforeUpdate;
     private WatchdogTestWriter statusWriter;
+    private RebootRecordingWatchdogServiceImpl rebootRecordingSvc;
+    private Long timedOutOnBeforeUpdate;
+    private long activationNanos;
+    private FailingWatchdogTestWriter failingWriter;
+    private ToggleDeviceWatchdogServiceImpl toggleSvc;
+    private WatchdogServiceImpl registrySvc;
+    private List<CriticalComponentRegistration> registrations;
+
+    private final CriticalComponent firstComponent = new TestCC("1", 0);
+    private final CriticalComponent sameNameComponent = new TestCC("1", 0);
+    private final CriticalComponent otherComponent = new TestCC("3", 1);
 
     @After
     public void cleanupScenarioService() {
@@ -86,216 +98,9 @@ public class WatchdogServiceImplTest {
         new File(UPDATED_REBOOT_CAUSE_FILE).delete();
     }
 
-    private class WatchdogTestWriter extends StringWriter {
-
-        private int lastLength = 0;
-
-        @Override
-        public synchronized void write(String str) {
-            super.write(str);
-            notify();
-        }
-
-        public synchronized boolean waitForData(int delayMs) { // waits for some data to be written since the last call
-                                                               // to this method
-            if (toString().length() == this.lastLength) {
-                try {
-                    this.wait(delayMs);
-                } catch (InterruptedException e) {
-                }
-            }
-            final int currentLength = toString().length();
-            final boolean result = currentLength != this.lastLength;
-            this.lastLength = currentLength;
-            return result;
-        }
-    }
-
-    public class TestWatchdogServiceImpl extends WatchdogServiceImpl {
-
-        private final Writer testWriter;
-        private volatile boolean hasCheckedCriticalComponents;
-
-        public TestWatchdogServiceImpl(Writer fileWriter) {
-            this.testWriter = fileWriter;
-        }
-
-        protected Writer getWatchdogFileWriter() throws IOException {
-            return this.testWriter;
-        }
-
-        @Override
-        protected synchronized void checkCriticalComponents() {
-            super.checkCriticalComponents();
-            this.hasCheckedCriticalComponents = true;
-            notify();
-        }
-
-        @Override
-        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
-            return testWriter;
-        }
-
-        @Override
-        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
-            return true;
-        }
-
-        public synchronized boolean waitForCriticalComponentCheck(int delayMs) {
-            if (!this.hasCheckedCriticalComponents) {
-                try {
-                    this.wait(delayMs);
-                } catch (InterruptedException e) {
-                }
-            }
-            return this.hasCheckedCriticalComponents;
-        }
-    }
-
-    private class FailingWatchdogTestWriter extends Writer {
-
-        private volatile boolean failing;
-
-        public void startFailing() {
-            this.failing = true;
-        }
-
-        @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
-            if (this.failing) {
-                throw new IOException("Write failed");
-            }
-        }
-
-        @Override
-        public void flush() throws IOException {
-            // nothing to flush
-        }
-
-        @Override
-        public void close() throws IOException {
-            // nothing to close
-        }
-    }
-
-    public class ToggleDeviceWatchdogServiceImpl extends TestWatchdogServiceImpl {
-
-        private volatile boolean deviceAvailable;
-
-        public ToggleDeviceWatchdogServiceImpl(Writer fileWriter, boolean deviceAvailable) {
-            super(fileWriter);
-            this.deviceAvailable = deviceAvailable;
-        }
-
-        public void setDeviceAvailable(boolean deviceAvailable) {
-            this.deviceAvailable = deviceAvailable;
-        }
-
-        @Override
-        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
-            return this.deviceAvailable;
-        }
-    }
-
-    public class RebootRecordingWatchdogServiceImpl extends TestWatchdogServiceImpl {
-
-        public RebootRecordingWatchdogServiceImpl(Writer fileWriter) {
-            super(fileWriter);
-        }
-
-        @Override
-        protected synchronized void rebootSystem() throws KuraException {
-            // do not reboot the system in tests
-        }
-    }
-
-    public class UnavailableDeviceWatchdogServiceImpl extends WatchdogServiceImpl {
-
-        private volatile boolean deviceExists;
-        private volatile Writer deviceWriter;
-        private final int failingReboots;
-        private final long gracePeriodMs;
-        private int rebootRequests;
-        private long firstRebootRequestNanos;
-
-        public UnavailableDeviceWatchdogServiceImpl(boolean deviceExists, int failingReboots) {
-            this(deviceExists, failingReboots, TEST_GRACE_PERIOD_MS);
-        }
-
-        public UnavailableDeviceWatchdogServiceImpl(boolean deviceExists, int failingReboots, long gracePeriodMs) {
-            this.deviceExists = deviceExists;
-            this.failingReboots = failingReboots;
-            this.gracePeriodMs = gracePeriodMs;
-        }
-
-        public void setDeviceExists(boolean deviceExists) {
-            this.deviceExists = deviceExists;
-        }
-
-        public void setDeviceWriter(Writer deviceWriter) {
-            this.deviceWriter = deviceWriter;
-        }
-
-        @Override
-        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
-            return this.deviceExists;
-        }
-
-        @Override
-        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
-            final Writer writer = this.deviceWriter;
-            if (writer == null) {
-                throw new IOException("Device or resource busy");
-            }
-            return writer;
-        }
-
-        @Override
-        protected long getUnavailableDeviceGracePeriod() {
-            return this.gracePeriodMs;
-        }
-
-        @Override
-        protected void stopWatchdogd() {
-            // do not run system commands in tests
-        }
-
-        @Override
-        protected long getRebootRetryInterval() {
-            return TEST_REBOOT_RETRY_INTERVAL_MS;
-        }
-
-        @Override
-        protected synchronized void rebootSystem() throws KuraException {
-            if (this.rebootRequests == 0) {
-                this.firstRebootRequestNanos = System.nanoTime();
-            }
-            this.rebootRequests++;
-            notifyAll();
-            if (this.rebootRequests <= this.failingReboots) {
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "reboot", 1);
-            }
-        }
-
-        public synchronized int getRebootRequests() {
-            return this.rebootRequests;
-        }
-
-        public synchronized long getFirstRebootRequestNanos() {
-            return this.firstRebootRequestNanos;
-        }
-
-        public synchronized boolean waitForRebootRequests(int expectedRebootRequests, long timeoutMs)
-                throws InterruptedException {
-            final long deadline = System.currentTimeMillis() + timeoutMs;
-            long remaining = timeoutMs;
-            while (this.rebootRequests < expectedRebootRequests && remaining > 0) {
-                wait(remaining);
-                remaining = deadline - System.currentTimeMillis();
-            }
-            return this.rebootRequests >= expectedRebootRequests;
-        }
-    }
+    /*
+     * Scenarios
+     */
 
     @Test
     public void rebootRequestedWhenDeviceDoesNotExistAndFailOnUnavailableDeviceEnabled() throws Throwable {
@@ -403,11 +208,10 @@ public class WatchdogServiceImplTest {
     public void rebootRequestedOnlyAfterGracePeriod() throws Throwable {
         givenUnavailableDeviceWatchdogService(false, 0, 300);
 
-        final long activationNanos = System.nanoTime();
         whenUnavailableDeviceWatchdogServiceIsActivated(getUnavailableDeviceProperties(true, 50));
 
         thenRebootIsRequestedOnce();
-        thenFirstRebootRequestedNotBefore(activationNanos, 300);
+        thenFirstRebootRequestedNotBefore(300);
     }
 
     @Test
@@ -543,7 +347,7 @@ public class WatchdogServiceImplTest {
     public void statusIsRebootRequestedWhenDeviceIsUnavailableAndFailOnUnavailableDeviceEnabled() throws Throwable {
         givenUnavailableDeviceWatchdogService(false, 0);
         givenUnavailableDeviceWatchdogServiceActivated(true);
-        thenRebootIsRequestedOnce();
+        givenRebootIsRequestedOnce();
 
         whenWatchdogStatusIsRequested(this.unavailableDeviceSvc);
 
@@ -577,12 +381,10 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusLastRefreshTimeNotUpdatedWhenRefreshFails() throws Throwable {
-        FailingWatchdogTestWriter failingWriter = new FailingWatchdogTestWriter();
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(failingWriter),
-                getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
+        givenStatusWatchdogServiceWithFailingWriterActivated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
         givenStatusLastRefreshTimeIsPresent();
 
-        whenWatchdogDeviceWritesFail(failingWriter);
+        whenWatchdogDeviceWritesFail();
 
         thenLastRefreshTimeIsUnchanged();
         thenStatusStateIs(WatchdogState.SUPERVISING);
@@ -594,21 +396,19 @@ public class WatchdogServiceImplTest {
         givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
 
-        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, "target/otherWatchdogTestDevice", 20000));
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, OTHER_WATCHDOG_TEST_DEVICE, 20000));
 
         thenStatusStateIs(WatchdogState.SUPERVISING);
-        thenStatusDevicePathIs("target/otherWatchdogTestDevice");
+        thenStatusDevicePathIs(OTHER_WATCHDOG_TEST_DEVICE);
         thenStatusRefreshIntervalIs(20000);
     }
 
     @Test
     public void statusRecoversToSupervisingWhenDeviceBecomesAvailable() throws Throwable {
-        ToggleDeviceWatchdogServiceImpl toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(),
-                false);
-        givenStatusWatchdogServiceActivated(toggleSvc, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenToggleDeviceWatchdogServiceActivated(false, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
+        givenWatchdogDeviceAvailabilityIs(true);
 
-        toggleSvc.setDeviceAvailable(true);
         whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 20000));
 
         thenStatusStateIs(WatchdogState.SUPERVISING);
@@ -619,12 +419,10 @@ public class WatchdogServiceImplTest {
     @Test
     public void statusRemainsDeviceUnavailableWhenUnchangedConfigurationIsReappliedAfterDeviceAppears()
             throws Throwable {
-        ToggleDeviceWatchdogServiceImpl toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(),
-                false);
-        givenStatusWatchdogServiceActivated(toggleSvc, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenToggleDeviceWatchdogServiceActivated(false, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
+        givenWatchdogDeviceAvailabilityIs(true);
 
-        toggleSvc.setDeviceAvailable(true);
         whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
 
         thenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
@@ -634,12 +432,10 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusBecomesDeviceUnavailableWhenDeviceDisappearsOnUpdate() throws Throwable {
-        ToggleDeviceWatchdogServiceImpl toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(),
-                true);
-        givenStatusWatchdogServiceActivated(toggleSvc, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenToggleDeviceWatchdogServiceActivated(true, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenStatusStateIs(WatchdogState.SUPERVISING);
+        givenWatchdogDeviceAvailabilityIs(false);
 
-        toggleSvc.setDeviceAvailable(false);
         whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, OTHER_WATCHDOG_TEST_DEVICE, 10000));
 
         thenStatusStateIs(WatchdogState.DEVICE_UNAVAILABLE);
@@ -651,13 +447,11 @@ public class WatchdogServiceImplTest {
     @Test
     public void statusRemainsSupervisingWhenUnchangedConfigurationIsReappliedAfterDeviceDisappears()
             throws Throwable {
-        ToggleDeviceWatchdogServiceImpl toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(),
-                true);
-        givenStatusWatchdogServiceActivated(toggleSvc, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
+        givenToggleDeviceWatchdogServiceActivated(true, getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenStatusStateIs(WatchdogState.SUPERVISING);
         givenCurrentPollTaskIsRecorded();
+        givenWatchdogDeviceAvailabilityIs(false);
 
-        toggleSvc.setDeviceAvailable(false);
         whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
 
         thenPollTaskIsUnchanged();
@@ -808,6 +602,47 @@ public class WatchdogServiceImplTest {
     }
 
     @Test
+    public void pendingRebootNotCancelledWhenPingIntervalChanges() throws Throwable {
+        givenSupervisingWatchdogService(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
+        givenCriticalComponentTimedOut("testComponent");
+        givenTimedOutOnIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 100));
+
+        thenWatchdogIsNotToggled();
+        thenStatusStateIs(WatchdogState.REBOOT_REQUESTED);
+        thenTimedOutOnIsUnchanged();
+        thenRebootIsRequestedOnlyOnce();
+    }
+
+    @Test
+    public void pendingRebootNotCancelledWhenRebootCauseFilePathChanges() throws Throwable {
+        givenSupervisingWatchdogService(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
+        givenCriticalComponentTimedOut("testComponent");
+        givenTimedOutOnIsRecorded();
+
+        whenStatusWatchdogServiceIsUpdated(
+                getStatusPropertiesWith(50, "rebootCauseFilePath", UPDATED_REBOOT_CAUSE_FILE));
+
+        thenWatchdogIsNotToggled();
+        thenStatusStateIs(WatchdogState.REBOOT_REQUESTED);
+        thenTimedOutOnIsUnchanged();
+        thenRebootIsRequestedOnlyOnce();
+        thenRebootCauseFileDoesNotExist(UPDATED_REBOOT_CAUSE_FILE);
+    }
+
+    @Test
+    public void rebootRequestedAgainWhenWatchdogIsToggledAfterCriticalComponentTimeout() throws Throwable {
+        givenSupervisingWatchdogService(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
+        givenCriticalComponentTimedOut("testComponent");
+
+        whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, OTHER_WATCHDOG_TEST_DEVICE, 50));
+
+        thenWatchdogIsToggled();
+        thenRebootIsRequestedAgain();
+    }
+
+    @Test
     public void watchdogSupervisesAgainWhenPreviousConfigurationIsRestoredAfterDisable() throws Throwable {
         givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
@@ -821,84 +656,57 @@ public class WatchdogServiceImplTest {
     }
 
     @Test
-    public void testActivateDeactivate() throws NoSuchFieldException {
-        // activate and deactivate
+    public void watchdogRefreshedWhenEnabledServiceIsActivated() throws Throwable {
+        givenWatchdogService();
 
-        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
-        TestWatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
+        whenWatchdogServiceIsActivated(true);
 
-        Map<String, Object> properties = getProperties(true);
-        svc.activate(properties);
-
-        assertTrue(svc.waitForCriticalComponentCheck(10000));
-        assertTrue(watchdogWriter.toString().startsWith("w")); // check that the watchdog has been kicked at least once
-
-        assertNotNull(TestUtil.getFieldValue(svc, "pollExecutor"));
-
-        Future task = (Future) TestUtil.getFieldValue(svc, "pollTask");
-        assertNotNull(task);
-
-        assertFalse(task.isCancelled());
-
-        svc.deactivate();
-
-        assertNull(TestUtil.getFieldValue(svc, "pollTask"));
-        assertTrue(task.isCancelled());
-        assertNull(TestUtil.getFieldValue(svc, "pollExecutor"));
-
-        assertTrue(watchdogWriter.waitForData(10000));
-        assertTrue(watchdogWriter.toString().endsWith("ww")); // check that the watchdog has been kicked at least twice
-                                                              // and it has not been disabled
-    }
-
-    private Map<String, Object> getProperties(boolean enabled) {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("watchdogDevice", WATCHDOG_TEST_DEVICE);
-        properties.put("rebootCauseFilePath", "target/watchdogTestCauses");
-        properties.put("enabled", enabled);
-
-        return properties;
+        thenCriticalComponentsAreChecked();
+        thenWatchdogIsRefreshed();
+        thenPollTaskIsScheduled();
     }
 
     @Test
-    public void testUpdatedDisabled() throws NoSuchFieldException {
-        // run activate/update
+    public void watchdogRefreshedAndNotDisabledWhenEnabledServiceIsDeactivated() throws Throwable {
+        givenWatchdogService();
+        givenWatchdogServiceActivated(true);
+        givenCurrentPollTaskIsRecorded();
 
-        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
+        whenStatusWatchdogServiceIsDeactivated();
 
-        WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
-
-        Map<String, Object> properties = getProperties(false);
-
-        svc.activate(properties);
-
-        assertFalse(watchdogWriter.waitForData(1000));
-
-        assertNull(TestUtil.getFieldValue(svc, "watchdogFileWriter"));
-        assertNull(TestUtil.getFieldValue(svc, "timedOutOn"));
-
-        svc.deactivate();
-
-        assertFalse(watchdogWriter.waitForData(1000));
-        assertTrue(watchdogWriter.toString().isEmpty());
+        thenPollTaskIsCancelled();
+        thenPollExecutorIsShutDown();
+        thenWatchdogIsRefreshedWithoutBeingDisabled();
     }
 
     @Test
-    public void testDisable() throws Throwable {
-        // disable the service and check that watchdog device is properly updated
+    public void watchdogDeviceNotOpenedWhenDisabledServiceIsActivated() throws Throwable {
+        givenWatchdogService();
 
-        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
+        whenWatchdogServiceIsActivated(false);
 
-        WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
+        thenNothingIsWrittenToWatchdogDevice();
+        thenWatchdogDeviceWriterIsNotCreated();
+    }
 
-        TestUtil.setFieldValue(svc, "watchdogFileWriter", watchdogWriter);
+    @Test
+    public void nothingWrittenWhenDisabledServiceIsDeactivated() throws Throwable {
+        givenWatchdogService();
+        givenWatchdogServiceActivated(false);
 
-        TestUtil.invokePrivate(svc, "disableWatchdog");
+        whenStatusWatchdogServiceIsDeactivated();
 
-        assertTrue(watchdogWriter.waitForData(10000));
-        assertEquals("V", watchdogWriter.toString());
+        thenNothingIsWrittenToWatchdogDevice();
+    }
 
-        svc.deactivate();
+    @Test
+    public void magicCharacterWrittenWhenWatchdogDeviceIsDisabled() throws Throwable {
+        givenWatchdogService();
+        givenWatchdogDeviceIsOpen();
+
+        whenWatchdogDeviceIsDisabled();
+
+        thenOnlyMagicCharacterIsWritten();
     }
 
     @Test
@@ -920,137 +728,132 @@ public class WatchdogServiceImplTest {
     }
 
     @Test
-    public void testRegisterUnregisterGetCriticalComponent() throws NoSuchFieldException {
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+    public void criticalComponentListedWhenRegistered() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
 
-        List<CriticalComponentRegistration> criticalComponentRegistrations = new CopyOnWriteArrayList<>();
-        TestUtil.setFieldValue(svc, "criticalComponentRegistrations", criticalComponentRegistrations);
+        whenCriticalComponentIsRegistered(this.firstComponent);
 
-        CriticalComponent cc1 = new TestCC("1", 0);
-        svc.registerCriticalComponent(cc1);
-
-        List<CriticalComponent> components = svc.getCriticalComponents();
-        assertEquals(1, components.size());
-
-        assertEquals("1", components.get(0).getCriticalComponentName());
-        assertEquals(0, components.get(0).getCriticalComponentTimeout());
-
-        // add the same component
-        svc.registerCriticalComponent(cc1);
-
-        components = svc.getCriticalComponents();
-        assertEquals(1, components.size());
-
-        // add a new component with the same name and timeout
-        CriticalComponent cc2 = new TestCC("1", 0);
-        svc.registerCriticalComponent(cc2);
-
-        components = svc.getCriticalComponents();
-        assertEquals(2, components.size());
-
-        assertEquals(criticalComponentRegistrations.size(), components.size());
-
-        // the deprecated method also does the same
-        CriticalComponent cc3 = new TestCC("3", 1);
-        svc.registerCriticalService(cc3);
-
-        components = svc.getCriticalComponents();
-        assertEquals(3, components.size());
-
-        assertEquals(criticalComponentRegistrations.size(), components.size());
-
-        assertEquals("1", components.get(0).getCriticalComponentName());
-        assertEquals(0, components.get(0).getCriticalComponentTimeout());
-
-        assertEquals("1", components.get(1).getCriticalComponentName());
-        assertEquals(0, components.get(1).getCriticalComponentTimeout());
-
-        assertEquals("3", components.get(2).getCriticalComponentName());
-        assertEquals(1, components.get(2).getCriticalComponentTimeout());
-
-        // add the first component, again - won't work
-        svc.registerCriticalComponent(cc1);
-
-        components = svc.getCriticalComponents();
-        assertEquals(3, components.size());
-
-        // unregister first one
-        svc.unregisterCriticalComponent(cc1);
-
-        components = svc.getCriticalComponents();
-        assertEquals(2, components.size());
-
-        // re-register first one
-        svc.registerCriticalComponent(cc1);
-
-        components = svc.getCriticalComponents();
-        assertEquals(3, components.size());
-
-        // unregister the now second one
-        svc.unregisterCriticalComponent(cc1);
-
-        components = svc.getCriticalComponents();
-        assertEquals(2, components.size());
-
-        // the deprecated method also works
-        svc.unregisterCriticalService(cc3);
-
-        components = svc.getCriticalComponents();
-        assertEquals(1, components.size());
-
-        assertEquals("1", components.get(0).getCriticalComponentName());
-        assertEquals(0, components.get(0).getCriticalComponentTimeout());
+        thenCriticalComponentsAre(this.firstComponent);
     }
 
     @Test
-    public void testCheckin() throws NoSuchFieldException {
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+    public void criticalComponentNotDuplicatedWhenRegisteredTwice() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent);
 
-        List<CriticalComponentRegistration> criticalComponentRegistrations = new CopyOnWriteArrayList<>();
-        TestUtil.setFieldValue(svc, "criticalComponentRegistrations", criticalComponentRegistrations);
+        whenCriticalComponentIsRegistered(this.firstComponent);
 
-        CriticalComponent cc1 = new TestCC("1", 1);
-        svc.registerCriticalComponent(cc1);
-
-        CriticalComponent cc2 = new TestCC("2", 2);
-        svc.registerCriticalComponent(cc2);
-
-        CriticalComponentRegistration cci2 = criticalComponentRegistrations.get(1);
-        TestUtil.setFieldValue(cci2, "updated", 12345);
-
-        svc.checkin(cc2);
-
-        assertTrue((long) TestUtil.getFieldValue(cci2, "updated") > 12345);
-        assertTrue((long) TestUtil.getFieldValue(cci2, "updated") <= System.nanoTime());
+        thenCriticalComponentsAre(this.firstComponent);
     }
 
     @Test
-    public void testWatchdogFileDoesNotExist() throws Throwable {
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+    public void criticalComponentsWithSameNameAndTimeoutRegisteredSeparately() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent);
 
-        Map<String, Object> properties = getProperties(true);
+        whenCriticalComponentIsRegistered(this.sameNameComponent);
 
-        svc.activate(properties);
-
-        assertNull(TestUtil.getFieldValue(svc, "pollTask"));
+        thenCriticalComponentsAre(this.firstComponent, this.sameNameComponent);
     }
 
     @Test
-    public void testShouldNotCreateWatchdogFile() throws InterruptedException {
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+    public void criticalComponentsListedInRegistrationOrder() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent, this.sameNameComponent);
 
-        Map<String, Object> properties = getProperties(true);
+        whenCriticalComponentIsRegistered(this.otherComponent);
 
-        svc.activate(properties);
-
-        Thread.sleep(2000);
-
-        assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
-
-        svc.deactivate();
-
-        assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
+        thenCriticalComponentsAre(this.firstComponent, this.sameNameComponent, this.otherComponent);
     }
+
+    @Test
+    public void alreadyRegisteredCriticalComponentNotAddedAgain() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent, this.sameNameComponent, this.otherComponent);
+
+        whenCriticalComponentIsRegistered(this.firstComponent);
+
+        thenCriticalComponentsAre(this.firstComponent, this.sameNameComponent, this.otherComponent);
+    }
+
+    @Test
+    public void criticalComponentRemovedWhenUnregistered() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent, this.sameNameComponent, this.otherComponent);
+
+        whenCriticalComponentsAreUnregistered(this.firstComponent);
+
+        thenCriticalComponentsAre(this.sameNameComponent, this.otherComponent);
+    }
+
+    @Test
+    public void reregisteredCriticalComponentAppendedAtTheEnd() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent, this.sameNameComponent, this.otherComponent);
+        givenUnregisteredCriticalComponents(this.firstComponent);
+
+        whenCriticalComponentIsRegistered(this.firstComponent);
+
+        thenCriticalComponentsAre(this.sameNameComponent, this.otherComponent, this.firstComponent);
+    }
+
+    @Test
+    public void remainingCriticalComponentKeptWhenOthersAreUnregistered() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.sameNameComponent, this.otherComponent, this.firstComponent);
+
+        whenCriticalComponentsAreUnregistered(this.firstComponent, this.otherComponent);
+
+        thenCriticalComponentsAre(this.sameNameComponent);
+    }
+
+    @Test
+    public void checkinRefreshesOnlyTheCheckedInCriticalComponent() throws Throwable {
+        givenWatchdogServiceWithoutCriticalComponents();
+        givenRegisteredCriticalComponents(this.firstComponent, this.otherComponent);
+        givenLastCheckinsAt(12345L);
+
+        whenCriticalComponentChecksIn(this.otherComponent);
+
+        thenLastCheckinIsRefreshed(this.otherComponent, 12345L);
+        thenLastCheckinIs(this.firstComponent, 12345L);
+    }
+
+    @Test
+    public void supervisionNotStartedWhenWatchdogDeviceDoesNotExist() throws Throwable {
+        givenWatchdogServiceWithMissingDevice();
+
+        whenWatchdogServiceWithMissingDeviceIsActivated();
+
+        thenPollTaskIsNotScheduled();
+    }
+
+    @Test
+    public void watchdogDeviceFileNotCreatedWhenServiceIsActivated() throws Throwable {
+        givenWatchdogServiceWithMissingDevice();
+
+        whenWatchdogServiceWithMissingDeviceIsActivated();
+
+        thenWatchdogDeviceFileDoesNotExist();
+    }
+
+    @Test
+    public void watchdogDeviceFileNotCreatedWhenServiceIsDeactivated() throws Throwable {
+        givenWatchdogServiceWithMissingDevice();
+        givenWatchdogServiceWithMissingDeviceActivated();
+
+        whenWatchdogServiceIsDeactivated();
+
+        thenWatchdogDeviceFileDoesNotExist();
+    }
+
+    /*
+     * Steps
+     */
+
+    /*
+     * Given
+     */
 
     private void givenUnavailableDeviceWatchdogService(boolean deviceExists, int failingReboots,
             long gracePeriodMs) {
@@ -1063,57 +866,8 @@ public class WatchdogServiceImplTest {
         whenUnavailableDeviceWatchdogServiceIsActivated(properties);
     }
 
-    private void whenUnavailableDeviceWatchdogServiceIsActivated(Map<String, Object> properties)
-            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
-        this.unavailableDeviceSvc.activate(properties);
-        awaitPendingUpdate(this.unavailableDeviceSvc);
-    }
-
-    private void whenWatchdogDeviceBecomesAvailable(Writer deviceWriter) {
-        this.unavailableDeviceSvc.setDeviceWriter(deviceWriter);
-        this.unavailableDeviceSvc.setDeviceExists(true);
-    }
-
-    private void whenWatchdogDeviceExistsButCannotBeOpened() {
-        this.unavailableDeviceSvc.setDeviceExists(true);
-    }
-
-    private Map<String, Object> getUnavailableDeviceProperties(boolean failOnUnavailableDevice, int pingInterval) {
-        Map<String, Object> properties = getUnavailableDeviceProperties(failOnUnavailableDevice);
-        properties.put("pingInterval", pingInterval);
-        return properties;
-    }
-
-    private void thenRebootIsRequestedOnce() throws InterruptedException {
-        thenRebootIsRetried(1);
-        thenRebootRequests(1);
-    }
-
-    private void thenNoRebootRequestedAfterGracePeriod() throws InterruptedException {
-        Thread.sleep(this.unavailableDeviceSvc.getUnavailableDeviceGracePeriod() * 2);
-        thenRebootRequests(0);
-    }
-
-    private void thenFirstRebootRequestedNotBefore(long startNanos, long gracePeriodMs) {
-        final long elapsedMs = TimeUnit.NANOSECONDS
-                .toMillis(this.unavailableDeviceSvc.getFirstRebootRequestNanos() - startNanos);
-        assertTrue("reboot requested after " + elapsedMs + " ms", elapsedMs >= gracePeriodMs);
-    }
-
-    private void thenUnavailableDeviceServiceStateBecomes(WatchdogState expectedState) throws InterruptedException {
-        awaitWatchdogState(this.unavailableDeviceSvc, expectedState);
-    }
-
-    private void thenUnavailableDeviceStatusIs(WatchdogState expectedState, String expectedFailureReason) {
-        final WatchdogStatus currentStatus = this.unavailableDeviceSvc.getWatchdogStatus();
-        assertEquals(expectedState, currentStatus.getState());
-        assertEquals(Optional.ofNullable(expectedFailureReason), currentStatus.getFailureReason());
-    }
-
-    private void thenWatchdogDeviceIsOpen() throws NoSuchFieldException {
-        assertTrue(this.unavailableDeviceSvc.getWatchdogStatus().isDeviceOpen());
-        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
-        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollTask"));
+    private void givenRebootIsRequestedOnce() throws InterruptedException {
+        thenRebootIsRequestedOnce();
     }
 
     private void givenUnavailableDeviceWatchdogService(boolean deviceExists, int failingReboots) {
@@ -1155,95 +909,36 @@ public class WatchdogServiceImplTest {
         assertEquals(expectedState, this.statusSvc.getWatchdogStatus().getState());
     }
 
-    private void whenLastRefreshTimeChanges() throws InterruptedException {
-        final Optional<Instant> previousRefreshTime = this.status.getLastRefreshTime();
-        final long deadline = System.currentTimeMillis() + 10000;
-        while (previousRefreshTime.equals(this.statusSvc.getWatchdogStatus().getLastRefreshTime())
-                && System.currentTimeMillis() < deadline) {
-            Thread.sleep(10);
-        }
-        this.previousStatus = this.status;
-        this.status = this.statusSvc.getWatchdogStatus();
+    private void givenStatusWatchdogServiceWithFailingWriterActivated(Map<String, Object> properties)
+            throws Throwable {
+        this.failingWriter = new FailingWatchdogTestWriter();
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(this.failingWriter), properties);
     }
 
-    private void whenWatchdogDeviceWritesFail(FailingWatchdogTestWriter failingWriter) throws Throwable {
-        failingWriter.startFailing();
-        awaitPendingUpdate(this.statusSvc);
-        this.previousStatus = this.statusSvc.getWatchdogStatus();
-        Thread.sleep(250); // let several refreshes fail
-        this.status = this.statusSvc.getWatchdogStatus();
+    private void givenToggleDeviceWatchdogServiceActivated(boolean deviceAvailable, Map<String, Object> properties)
+            throws Throwable {
+        this.toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(), deviceAvailable);
+        givenStatusWatchdogServiceActivated(this.toggleSvc, properties);
     }
 
-    private void whenStatusWatchdogServiceIsUpdated(Map<String, Object> properties) throws Throwable {
-        this.statusSvc.updated(properties);
-        awaitPendingUpdate(this.statusSvc);
-        this.status = this.statusSvc.getWatchdogStatus();
-    }
-
-    private void thenLastRefreshTimeIsAfterPreviousOne() {
-        assertTrue(this.status.getLastRefreshTime().get().isAfter(this.previousStatus.getLastRefreshTime().get()));
-    }
-
-    private void thenLastRefreshTimeIsUnchanged() {
-        assertEquals(this.previousStatus.getLastRefreshTime(), this.status.getLastRefreshTime());
-    }
-
-    private Map<String, Object> getStatusProperties(boolean enabled, String watchdogDevice, int pingInterval) {
-        Map<String, Object> properties = getProperties(enabled);
-        properties.put("watchdogDevice", watchdogDevice);
-        properties.put("pingInterval", pingInterval);
-        properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
-        return properties;
-    }
-
-    private Map<String, Object> getStatusPropertiesWith(String key, Object value) {
-        return getStatusPropertiesWith(10000, key, value);
-    }
-
-    private Map<String, Object> getStatusPropertiesWith(int pingInterval, String key, Object value) {
-        Map<String, Object> properties = getStatusProperties(true, WATCHDOG_TEST_DEVICE, pingInterval);
-        properties.put(key, value);
-        return properties;
+    private void givenWatchdogDeviceAvailabilityIs(boolean deviceAvailable) {
+        this.toggleSvc.setDeviceAvailable(deviceAvailable);
     }
 
     private void givenSupervisingWatchdogService(Map<String, Object> properties) throws Throwable {
         this.statusWriter = new WatchdogTestWriter();
-        givenStatusWatchdogServiceActivated(new RebootRecordingWatchdogServiceImpl(this.statusWriter), properties);
+        this.rebootRecordingSvc = new RebootRecordingWatchdogServiceImpl(this.statusWriter);
+        givenStatusWatchdogServiceActivated(this.rebootRecordingSvc, properties);
         givenStatusStateIs(WatchdogState.SUPERVISING);
     }
 
-    private void whenCriticalComponentTimesOut(String componentName) throws InterruptedException {
-        this.statusSvc.registerCriticalComponent(new TestCC(componentName, 0));
-        awaitWatchdogState(this.statusSvc, WatchdogState.REBOOT_REQUESTED);
+    private void givenCriticalComponentTimedOut(String componentName) throws InterruptedException {
+        whenCriticalComponentTimesOut(componentName);
     }
 
-    private void thenWatchdogIsNotToggled() {
-        assertFalse(this.statusWriter.toString().contains("V"));
-        assertTrue(this.statusSvc.getWatchdogStatus().isDeviceOpen());
-    }
-
-    private void thenWatchdogIsToggled() throws InterruptedException {
-        final long deadline = System.currentTimeMillis() + 10000;
-        while (!isRefreshedAfterDisable(this.statusWriter.toString()) && System.currentTimeMillis() < deadline) {
-            Thread.sleep(10);
-        }
-        assertTrue(isRefreshedAfterDisable(this.statusWriter.toString()));
-        assertTrue(this.statusSvc.getWatchdogStatus().isDeviceOpen());
-    }
-
-    private boolean isRefreshedAfterDisable(String written) {
-        return written.contains("V") && written.lastIndexOf('w') > written.indexOf('V');
-    }
-
-    private void thenWatchdogIsClosed() {
-        assertTrue(this.statusWriter.toString().endsWith("V"));
-        assertFalse(this.statusSvc.getWatchdogStatus().isDeviceOpen());
-    }
-
-    private Map<String, Object> getStatusPropertiesWithout(String key) {
-        Map<String, Object> properties = getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000);
-        properties.remove(key);
-        return properties;
+    private void givenTimedOutOnIsRecorded() throws NoSuchFieldException {
+        this.timedOutOnBeforeUpdate = (Long) TestUtil.getFieldValue(this.statusSvc, "timedOutOn");
+        assertNotNull(this.timedOutOnBeforeUpdate);
     }
 
     private void givenCurrentPollTaskIsRecorded() throws NoSuchFieldException {
@@ -1254,18 +949,6 @@ public class WatchdogServiceImplTest {
     private void givenStatusWatchdogServiceUpdated(Map<String, Object> properties) throws Throwable {
         this.statusSvc.updated(properties);
         awaitPendingUpdate(this.statusSvc);
-    }
-
-    private void thenPollTaskIsUnchanged() throws NoSuchFieldException {
-        assertSame(this.pollTaskBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "pollTask"));
-        assertFalse(this.pollTaskBeforeUpdate.isCancelled());
-    }
-
-    private void thenPollTaskIsRescheduled() throws NoSuchFieldException {
-        final Object currentPollTask = TestUtil.getFieldValue(this.statusSvc, "pollTask");
-        assertNotNull(currentPollTask);
-        assertNotSame(this.pollTaskBeforeUpdate, currentPollTask);
-        assertTrue(this.pollTaskBeforeUpdate.isCancelled());
     }
 
     private void givenStatusWatchdogServiceUpdated(boolean enabled) throws Throwable {
@@ -1286,21 +969,275 @@ public class WatchdogServiceImplTest {
         awaitWatchdogState(this.statusSvc, WatchdogState.REBOOT_REQUESTED);
     }
 
-    private void awaitWatchdogState(WatchdogServiceImpl svc, WatchdogState expectedState)
-            throws InterruptedException {
-        final long deadline = System.currentTimeMillis() + 10000;
-        while (svc.getWatchdogStatus().getState() != expectedState && System.currentTimeMillis() < deadline) {
-            Thread.sleep(10);
-        }
-        assertEquals(expectedState, svc.getWatchdogStatus().getState());
-    }
-
     private void givenUnavailableDeviceWatchdogServiceActivated(boolean failOnUnavailableDevice) throws Throwable {
         whenUnavailableDeviceWatchdogServiceIsActivated(failOnUnavailableDevice);
     }
 
+    private void givenUnavailableDeviceWatchdogServiceActivatedAndRetryingReboot() throws Throwable {
+        whenUnavailableDeviceWatchdogServiceIsActivated(true);
+        thenRebootIsRetried(2);
+    }
+
+    private void givenWatchdogServiceEnabled() throws Throwable {
+        this.scenarioSvc = new TestWatchdogServiceImpl(new WatchdogTestWriter());
+
+        this.scenarioSvc.activate(getProperties(true));
+        awaitPendingUpdate();
+
+        this.scenarioWatchdogEnabledFile = new File(
+                new WatchdogServiceOptions(getProperties(true)).getWatchdogEnabledTemporaryFilePath());
+        assertTrue(this.scenarioWatchdogEnabledFile.exists());
+    }
+
+    private void givenWatchdogService() {
+        this.statusWriter = new WatchdogTestWriter();
+        this.statusSvc = new TestWatchdogServiceImpl(this.statusWriter);
+    }
+
+    private void givenWatchdogServiceActivated(boolean enabled) throws Throwable {
+        whenWatchdogServiceIsActivated(enabled);
+        if (enabled) {
+            thenCriticalComponentsAreChecked();
+        }
+    }
+
+    private void givenWatchdogDeviceIsOpen() throws NoSuchFieldException {
+        TestUtil.setFieldValue(this.statusSvc, "watchdogFileWriter", this.statusWriter);
+    }
+
+    private void givenWatchdogServiceWithoutCriticalComponents() throws NoSuchFieldException {
+        this.registrySvc = new WatchdogServiceImpl();
+        this.registrations = new CopyOnWriteArrayList<>();
+        TestUtil.setFieldValue(this.registrySvc, "criticalComponentRegistrations", this.registrations);
+    }
+
+    private void givenRegisteredCriticalComponents(CriticalComponent... criticalComponents) {
+        for (CriticalComponent criticalComponent : criticalComponents) {
+            this.registrySvc.registerCriticalComponent(criticalComponent);
+        }
+    }
+
+    private void givenUnregisteredCriticalComponents(CriticalComponent... criticalComponents) {
+        whenCriticalComponentsAreUnregistered(criticalComponents);
+    }
+
+    private void givenLastCheckinsAt(long updated) throws NoSuchFieldException {
+        for (CriticalComponentRegistration registration : this.registrations) {
+            TestUtil.setFieldValue(registration, "updated", updated);
+        }
+    }
+
+    private void givenWatchdogServiceWithMissingDevice() {
+        this.scenarioSvc = new WatchdogServiceImpl();
+        thenWatchdogDeviceFileDoesNotExist();
+    }
+
+    private void givenWatchdogServiceWithMissingDeviceActivated() throws Throwable {
+        whenWatchdogServiceWithMissingDeviceIsActivated();
+    }
+
+    /*
+     * When
+     */
+
+    private void whenUnavailableDeviceWatchdogServiceIsActivated(Map<String, Object> properties)
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        this.activationNanos = System.nanoTime();
+        this.unavailableDeviceSvc.activate(properties);
+        awaitPendingUpdate(this.unavailableDeviceSvc);
+    }
+
+    private void whenWatchdogDeviceBecomesAvailable(Writer deviceWriter) {
+        this.unavailableDeviceSvc.setDeviceWriter(deviceWriter);
+        this.unavailableDeviceSvc.setDeviceExists(true);
+    }
+
+    private void whenWatchdogDeviceExistsButCannotBeOpened() {
+        this.unavailableDeviceSvc.setDeviceExists(true);
+    }
+
+    private void whenLastRefreshTimeChanges() throws InterruptedException {
+        final Optional<Instant> previousRefreshTime = this.status.getLastRefreshTime();
+        final long deadline = System.currentTimeMillis() + 10000;
+        while (previousRefreshTime.equals(this.statusSvc.getWatchdogStatus().getLastRefreshTime())
+                && System.currentTimeMillis() < deadline) {
+            Thread.sleep(10);
+        }
+        this.previousStatus = this.status;
+        this.status = this.statusSvc.getWatchdogStatus();
+    }
+
+    private void whenWatchdogDeviceWritesFail() throws Throwable {
+        this.failingWriter.startFailing();
+        awaitPendingUpdate(this.statusSvc);
+        this.previousStatus = this.statusSvc.getWatchdogStatus();
+        Thread.sleep(250); // let several refreshes fail
+        this.status = this.statusSvc.getWatchdogStatus();
+    }
+
+    private void whenStatusWatchdogServiceIsUpdated(Map<String, Object> properties) throws Throwable {
+        this.statusSvc.updated(properties);
+        awaitPendingUpdate(this.statusSvc);
+        this.status = this.statusSvc.getWatchdogStatus();
+    }
+
+    private void whenCriticalComponentTimesOut(String componentName) throws InterruptedException {
+        this.statusSvc.registerCriticalComponent(new TestCC(componentName, 0));
+        awaitWatchdogState(this.statusSvc, WatchdogState.REBOOT_REQUESTED);
+        assertTrue(this.rebootRecordingSvc.waitForRebootRequests(1, 10000));
+    }
+
     private void whenWatchdogStatusIsRequested(WatchdogServiceImpl svc) {
         this.status = svc.getWatchdogStatus();
+    }
+
+    private void whenUnavailableDeviceWatchdogServiceIsActivated(boolean failOnUnavailableDevice)
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        this.unavailableDeviceSvc.activate(getUnavailableDeviceProperties(failOnUnavailableDevice));
+        awaitPendingUpdate(this.unavailableDeviceSvc);
+    }
+
+    private void whenUnavailableDeviceWatchdogServiceIsUpdated(boolean failOnUnavailableDevice)
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        this.unavailableDeviceSvc.updated(getUnavailableDeviceProperties(failOnUnavailableDevice));
+        awaitPendingUpdate(this.unavailableDeviceSvc);
+    }
+
+    private void whenUnavailableDeviceWatchdogServiceIsDeactivated() {
+        this.unavailableDeviceSvc.deactivate();
+    }
+
+    private void whenWatchdogIsDisabled() throws Throwable {
+        this.scenarioSvc.updated(getProperties(false));
+        awaitPendingUpdate();
+    }
+
+    private void whenWatchdogServiceIsDeactivated() {
+        this.scenarioSvc.deactivate();
+    }
+
+    private void whenWatchdogServiceIsActivated(boolean enabled) throws Throwable {
+        this.statusSvc.activate(getProperties(enabled));
+        awaitPendingUpdate(this.statusSvc);
+    }
+
+    private void whenStatusWatchdogServiceIsDeactivated() {
+        this.statusSvc.deactivate();
+    }
+
+    private void whenWatchdogDeviceIsDisabled() throws Throwable {
+        TestUtil.invokePrivate(this.statusSvc, "disableWatchdog");
+    }
+
+    private void whenCriticalComponentIsRegistered(CriticalComponent criticalComponent) {
+        this.registrySvc.registerCriticalComponent(criticalComponent);
+    }
+
+    private void whenCriticalComponentsAreUnregistered(CriticalComponent... criticalComponents) {
+        for (CriticalComponent criticalComponent : criticalComponents) {
+            this.registrySvc.unregisterCriticalComponent(criticalComponent);
+        }
+    }
+
+    private void whenCriticalComponentChecksIn(CriticalComponent criticalComponent) {
+        this.registrySvc.checkin(criticalComponent);
+    }
+
+    private void whenWatchdogServiceWithMissingDeviceIsActivated() throws Throwable {
+        this.scenarioSvc.activate(getProperties(true));
+        awaitPendingUpdate();
+    }
+
+    /*
+     * Then
+     */
+
+    private void thenRebootIsRequestedOnce() throws InterruptedException {
+        thenRebootIsRetried(1);
+        thenRebootRequests(1);
+    }
+
+    private void thenNoRebootRequestedAfterGracePeriod() throws InterruptedException {
+        Thread.sleep(this.unavailableDeviceSvc.getUnavailableDeviceGracePeriod() * 2);
+        thenRebootRequests(0);
+    }
+
+    private void thenFirstRebootRequestedNotBefore(long gracePeriodMs) {
+        final long elapsedMs = TimeUnit.NANOSECONDS
+                .toMillis(this.unavailableDeviceSvc.getFirstRebootRequestNanos() - this.activationNanos);
+        assertTrue("reboot requested after " + elapsedMs + " ms", elapsedMs >= gracePeriodMs);
+    }
+
+    private void thenUnavailableDeviceServiceStateBecomes(WatchdogState expectedState) throws InterruptedException {
+        awaitWatchdogState(this.unavailableDeviceSvc, expectedState);
+    }
+
+    private void thenUnavailableDeviceStatusIs(WatchdogState expectedState, String expectedFailureReason) {
+        final WatchdogStatus currentStatus = this.unavailableDeviceSvc.getWatchdogStatus();
+        assertEquals(expectedState, currentStatus.getState());
+        assertEquals(Optional.ofNullable(expectedFailureReason), currentStatus.getFailureReason());
+    }
+
+    private void thenWatchdogDeviceIsOpen() throws NoSuchFieldException {
+        assertTrue(this.unavailableDeviceSvc.getWatchdogStatus().isDeviceOpen());
+        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
+        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollTask"));
+    }
+
+    private void thenLastRefreshTimeIsAfterPreviousOne() {
+        assertTrue(this.status.getLastRefreshTime().get().isAfter(this.previousStatus.getLastRefreshTime().get()));
+    }
+
+    private void thenLastRefreshTimeIsUnchanged() {
+        assertEquals(this.previousStatus.getLastRefreshTime(), this.status.getLastRefreshTime());
+    }
+
+    private void thenTimedOutOnIsUnchanged() throws NoSuchFieldException {
+        assertEquals(this.timedOutOnBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "timedOutOn"));
+    }
+
+    private void thenRebootIsRequestedOnlyOnce() throws InterruptedException {
+        Thread.sleep(500);
+        assertEquals(1, this.rebootRecordingSvc.getRebootRequests());
+    }
+
+    private void thenRebootIsRequestedAgain() throws InterruptedException {
+        assertTrue(this.rebootRecordingSvc.waitForRebootRequests(2, 10000));
+    }
+
+    private void thenRebootCauseFileDoesNotExist(String rebootCauseFilePath) {
+        assertFalse(new File(rebootCauseFilePath).exists());
+    }
+
+    private void thenWatchdogIsNotToggled() {
+        assertFalse(this.statusWriter.toString().contains("V"));
+        assertTrue(this.statusSvc.getWatchdogStatus().isDeviceOpen());
+    }
+
+    private void thenWatchdogIsToggled() throws InterruptedException {
+        final long deadline = System.currentTimeMillis() + 10000;
+        while (!isRefreshedAfterDisable(this.statusWriter.toString()) && System.currentTimeMillis() < deadline) {
+            Thread.sleep(10);
+        }
+        assertTrue(isRefreshedAfterDisable(this.statusWriter.toString()));
+        assertTrue(this.statusSvc.getWatchdogStatus().isDeviceOpen());
+    }
+
+    private void thenWatchdogIsClosed() {
+        assertTrue(this.statusWriter.toString().endsWith("V"));
+        assertFalse(this.statusSvc.getWatchdogStatus().isDeviceOpen());
+    }
+
+    private void thenPollTaskIsUnchanged() throws NoSuchFieldException {
+        assertSame(this.pollTaskBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "pollTask"));
+        assertFalse(this.pollTaskBeforeUpdate.isCancelled());
+    }
+
+    private void thenPollTaskIsRescheduled() throws NoSuchFieldException {
+        final Object currentPollTask = TestUtil.getFieldValue(this.statusSvc, "pollTask");
+        assertNotNull(currentPollTask);
+        assertNotSame(this.pollTaskBeforeUpdate, currentPollTask);
+        assertTrue(this.pollTaskBeforeUpdate.isCancelled());
     }
 
     private void thenStatusStateIs(WatchdogState expectedState) {
@@ -1334,34 +1271,6 @@ public class WatchdogServiceImplTest {
 
     private void thenStatusFailureReasonIsEmpty() {
         assertFalse(this.status.getFailureReason().isPresent());
-    }
-
-    private void givenUnavailableDeviceWatchdogServiceActivatedAndRetryingReboot() throws Throwable {
-        whenUnavailableDeviceWatchdogServiceIsActivated(true);
-        thenRebootIsRetried(2);
-    }
-
-    private void whenUnavailableDeviceWatchdogServiceIsActivated(boolean failOnUnavailableDevice)
-            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
-        this.unavailableDeviceSvc.activate(getUnavailableDeviceProperties(failOnUnavailableDevice));
-        awaitPendingUpdate(this.unavailableDeviceSvc);
-    }
-
-    private void whenUnavailableDeviceWatchdogServiceIsUpdated(boolean failOnUnavailableDevice)
-            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
-        this.unavailableDeviceSvc.updated(getUnavailableDeviceProperties(failOnUnavailableDevice));
-        awaitPendingUpdate(this.unavailableDeviceSvc);
-    }
-
-    private void whenUnavailableDeviceWatchdogServiceIsDeactivated() {
-        this.unavailableDeviceSvc.deactivate();
-    }
-
-    private Map<String, Object> getUnavailableDeviceProperties(boolean failOnUnavailableDevice) {
-        Map<String, Object> properties = getProperties(true);
-        properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
-        properties.put("failOnUnavailableDevice", failOnUnavailableDevice);
-        return properties;
     }
 
     private void thenRebootIsRetried(int expectedRebootRequests) throws InterruptedException {
@@ -1405,32 +1314,153 @@ public class WatchdogServiceImplTest {
         assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
     }
 
-    private void givenWatchdogServiceEnabled() throws Throwable {
-        this.scenarioSvc = new TestWatchdogServiceImpl(new WatchdogTestWriter());
-
-        this.scenarioSvc.activate(getProperties(true));
-        awaitPendingUpdate();
-
-        this.scenarioWatchdogEnabledFile = new File(
-                new WatchdogServiceOptions(getProperties(true)).getWatchdogEnabledTemporaryFilePath());
-        assertTrue(this.scenarioWatchdogEnabledFile.exists());
-    }
-
-    private void whenWatchdogIsDisabled() throws Throwable {
-        this.scenarioSvc.updated(getProperties(false));
-        awaitPendingUpdate();
-    }
-
-    private void whenWatchdogServiceIsDeactivated() {
-        this.scenarioSvc.deactivate();
-    }
-
     private void thenWatchdogEnabledTemporaryFileDoesNotExist() {
         assertFalse(this.scenarioWatchdogEnabledFile.exists());
     }
 
     private void thenWatchdogEnabledTemporaryFileExists() {
         assertTrue(this.scenarioWatchdogEnabledFile.exists());
+    }
+
+    private void thenCriticalComponentsAreChecked() {
+        assertTrue(this.statusSvc.waitForCriticalComponentCheck(10000));
+    }
+
+    private void thenWatchdogIsRefreshed() {
+        assertTrue(this.statusWriter.toString().startsWith("w"));
+    }
+
+    private void thenPollTaskIsScheduled() throws NoSuchFieldException {
+        assertNotNull(TestUtil.getFieldValue(this.statusSvc, "pollExecutor"));
+        final Future<?> pollTask = (Future<?>) TestUtil.getFieldValue(this.statusSvc, "pollTask");
+        assertNotNull(pollTask);
+        assertFalse(pollTask.isCancelled());
+    }
+
+    private void thenPollTaskIsCancelled() throws NoSuchFieldException {
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "pollTask"));
+        assertTrue(this.pollTaskBeforeUpdate.isCancelled());
+    }
+
+    private void thenPollExecutorIsShutDown() throws NoSuchFieldException {
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "pollExecutor"));
+    }
+
+    private void thenWatchdogIsRefreshedWithoutBeingDisabled() {
+        final String written = this.statusWriter.toString();
+        assertTrue(written.endsWith("ww"));
+        assertFalse(written.contains("V"));
+    }
+
+    private void thenNothingIsWrittenToWatchdogDevice() {
+        assertTrue(this.statusWriter.toString().isEmpty());
+    }
+
+    private void thenWatchdogDeviceWriterIsNotCreated() throws NoSuchFieldException {
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "watchdogFileWriter"));
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "timedOutOn"));
+    }
+
+    private void thenOnlyMagicCharacterIsWritten() {
+        assertEquals("V", this.statusWriter.toString());
+    }
+
+    private void thenCriticalComponentsAre(CriticalComponent... expectedCriticalComponents) {
+        assertEquals(Arrays.asList(expectedCriticalComponents), this.registrySvc.getCriticalComponents());
+        assertEquals(expectedCriticalComponents.length, this.registrations.size());
+    }
+
+    private void thenLastCheckinIsRefreshed(CriticalComponent criticalComponent, long previousCheckin)
+            throws NoSuchFieldException {
+        final long updated = getLastCheckin(criticalComponent);
+        assertTrue(updated > previousCheckin);
+        assertTrue(updated <= System.nanoTime());
+    }
+
+    private void thenLastCheckinIs(CriticalComponent criticalComponent, long expectedCheckin)
+            throws NoSuchFieldException {
+        assertEquals(expectedCheckin, getLastCheckin(criticalComponent));
+    }
+
+    private void thenPollTaskIsNotScheduled() throws NoSuchFieldException {
+        assertNull(TestUtil.getFieldValue(this.scenarioSvc, "pollTask"));
+        assertNull(TestUtil.getFieldValue(this.scenarioSvc, "watchdogFileWriter"));
+    }
+
+    private void thenWatchdogDeviceFileDoesNotExist() {
+        assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
+    }
+
+    /*
+     * Utilities
+     */
+
+    private Map<String, Object> getUnavailableDeviceProperties(boolean failOnUnavailableDevice, int pingInterval) {
+        Map<String, Object> properties = getUnavailableDeviceProperties(failOnUnavailableDevice);
+        properties.put("pingInterval", pingInterval);
+        return properties;
+    }
+
+    private Map<String, Object> getProperties(boolean enabled) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("watchdogDevice", WATCHDOG_TEST_DEVICE);
+        properties.put("rebootCauseFilePath", "target/watchdogTestCauses");
+        properties.put("enabled", enabled);
+
+        return properties;
+    }
+
+    private Map<String, Object> getStatusProperties(boolean enabled, String watchdogDevice, int pingInterval) {
+        Map<String, Object> properties = getProperties(enabled);
+        properties.put("watchdogDevice", watchdogDevice);
+        properties.put("pingInterval", pingInterval);
+        properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
+        return properties;
+    }
+
+    private Map<String, Object> getStatusPropertiesWith(String key, Object value) {
+        return getStatusPropertiesWith(10000, key, value);
+    }
+
+    private Map<String, Object> getStatusPropertiesWith(int pingInterval, String key, Object value) {
+        Map<String, Object> properties = getStatusProperties(true, WATCHDOG_TEST_DEVICE, pingInterval);
+        properties.put(key, value);
+        return properties;
+    }
+
+    private boolean isRefreshedAfterDisable(String written) {
+        return written.contains("V") && written.lastIndexOf('w') > written.indexOf('V');
+    }
+
+    private Map<String, Object> getStatusPropertiesWithout(String key) {
+        Map<String, Object> properties = getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000);
+        properties.remove(key);
+        return properties;
+    }
+
+    private void awaitWatchdogState(WatchdogServiceImpl svc, WatchdogState expectedState)
+            throws InterruptedException {
+        final long deadline = System.currentTimeMillis() + 10000;
+        while (svc.getWatchdogStatus().getState() != expectedState && System.currentTimeMillis() < deadline) {
+            Thread.sleep(10);
+        }
+        assertEquals(expectedState, svc.getWatchdogStatus().getState());
+    }
+
+    private Map<String, Object> getUnavailableDeviceProperties(boolean failOnUnavailableDevice) {
+        Map<String, Object> properties = getProperties(true);
+        properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
+        properties.put("failOnUnavailableDevice", failOnUnavailableDevice);
+        return properties;
+    }
+
+    private long getLastCheckin(CriticalComponent criticalComponent) throws NoSuchFieldException {
+        for (CriticalComponentRegistration registration : this.registrations) {
+            if (registration.getCriticalComponent() == criticalComponent) {
+                return (long) TestUtil.getFieldValue(registration, "updated");
+            }
+        }
+        throw new AssertionError("Critical component not registered: " + criticalComponent.getCriticalComponentName());
     }
 
     private void awaitPendingUpdate()
@@ -1446,6 +1476,218 @@ public class WatchdogServiceImplTest {
         }).get(10, TimeUnit.SECONDS);
     }
 
+    private class WatchdogTestWriter extends StringWriter {
+
+        @Override
+        public synchronized void write(String str) {
+            super.write(str);
+            notify();
+        }
+    }
+
+    public class TestWatchdogServiceImpl extends WatchdogServiceImpl {
+
+        private final Writer testWriter;
+        private volatile boolean hasCheckedCriticalComponents;
+
+        public TestWatchdogServiceImpl(Writer fileWriter) {
+            this.testWriter = fileWriter;
+        }
+
+        protected Writer getWatchdogFileWriter() throws IOException {
+            return this.testWriter;
+        }
+
+        @Override
+        protected synchronized void checkCriticalComponents() {
+            super.checkCriticalComponents();
+            this.hasCheckedCriticalComponents = true;
+            notify();
+        }
+
+        @Override
+        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
+            return testWriter;
+        }
+
+        @Override
+        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
+            return true;
+        }
+
+        public synchronized boolean waitForCriticalComponentCheck(int delayMs) {
+            if (!this.hasCheckedCriticalComponents) {
+                try {
+                    this.wait(delayMs);
+                } catch (InterruptedException e) {
+                }
+            }
+            return this.hasCheckedCriticalComponents;
+        }
+    }
+
+    private class FailingWatchdogTestWriter extends Writer {
+
+        private volatile boolean failing;
+
+        public void startFailing() {
+            this.failing = true;
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            if (this.failing) {
+                throw new IOException("Write failed");
+            }
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // nothing to flush
+        }
+
+        @Override
+        public void close() throws IOException {
+            // nothing to close
+        }
+    }
+
+    public class ToggleDeviceWatchdogServiceImpl extends TestWatchdogServiceImpl {
+
+        private volatile boolean deviceAvailable;
+
+        public ToggleDeviceWatchdogServiceImpl(Writer fileWriter, boolean deviceAvailable) {
+            super(fileWriter);
+            this.deviceAvailable = deviceAvailable;
+        }
+
+        public void setDeviceAvailable(boolean deviceAvailable) {
+            this.deviceAvailable = deviceAvailable;
+        }
+
+        @Override
+        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
+            return this.deviceAvailable;
+        }
+    }
+
+    public class RebootRecordingWatchdogServiceImpl extends TestWatchdogServiceImpl {
+
+        public RebootRecordingWatchdogServiceImpl(Writer fileWriter) {
+            super(fileWriter);
+        }
+
+        private int rebootRequests;
+
+        @Override
+        protected synchronized void rebootSystem() throws KuraException {
+            this.rebootRequests++;
+            notifyAll();
+        }
+
+        public synchronized int getRebootRequests() {
+            return this.rebootRequests;
+        }
+
+        public synchronized boolean waitForRebootRequests(int expectedRebootRequests, long timeoutMs)
+                throws InterruptedException {
+            final long deadline = System.currentTimeMillis() + timeoutMs;
+            long remaining = timeoutMs;
+            while (this.rebootRequests < expectedRebootRequests && remaining > 0) {
+                wait(remaining);
+                remaining = deadline - System.currentTimeMillis();
+            }
+            return this.rebootRequests >= expectedRebootRequests;
+        }
+    }
+
+    public class UnavailableDeviceWatchdogServiceImpl extends WatchdogServiceImpl {
+
+        private volatile boolean deviceExists;
+        private volatile Writer deviceWriter;
+        private final int failingReboots;
+        private final long gracePeriodMs;
+        private int rebootRequests;
+        private long firstRebootRequestNanos;
+
+        public UnavailableDeviceWatchdogServiceImpl(boolean deviceExists, int failingReboots) {
+            this(deviceExists, failingReboots, TEST_GRACE_PERIOD_MS);
+        }
+
+        public UnavailableDeviceWatchdogServiceImpl(boolean deviceExists, int failingReboots, long gracePeriodMs) {
+            this.deviceExists = deviceExists;
+            this.failingReboots = failingReboots;
+            this.gracePeriodMs = gracePeriodMs;
+        }
+
+        public void setDeviceExists(boolean deviceExists) {
+            this.deviceExists = deviceExists;
+        }
+
+        public void setDeviceWriter(Writer deviceWriter) {
+            this.deviceWriter = deviceWriter;
+        }
+
+        @Override
+        protected boolean isWatchdogDeviceAvailable(String watchdogDevice) {
+            return this.deviceExists;
+        }
+
+        @Override
+        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
+            final Writer writer = this.deviceWriter;
+            if (writer == null) {
+                throw new IOException("Device or resource busy");
+            }
+            return writer;
+        }
+
+        @Override
+        protected long getUnavailableDeviceGracePeriod() {
+            return this.gracePeriodMs;
+        }
+
+        @Override
+        protected void stopWatchdogd() {
+            // do not run system commands in tests
+        }
+
+        @Override
+        protected long getRebootRetryInterval() {
+            return TEST_REBOOT_RETRY_INTERVAL_MS;
+        }
+
+        @Override
+        protected synchronized void rebootSystem() throws KuraException {
+            if (this.rebootRequests == 0) {
+                this.firstRebootRequestNanos = System.nanoTime();
+            }
+            this.rebootRequests++;
+            notifyAll();
+            if (this.rebootRequests <= this.failingReboots) {
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "reboot", 1);
+            }
+        }
+
+        public synchronized int getRebootRequests() {
+            return this.rebootRequests;
+        }
+
+        public synchronized long getFirstRebootRequestNanos() {
+            return this.firstRebootRequestNanos;
+        }
+
+        public synchronized boolean waitForRebootRequests(int expectedRebootRequests, long timeoutMs)
+                throws InterruptedException {
+            final long deadline = System.currentTimeMillis() + timeoutMs;
+            long remaining = timeoutMs;
+            while (this.rebootRequests < expectedRebootRequests && remaining > 0) {
+                wait(remaining);
+                remaining = deadline - System.currentTimeMillis();
+            }
+            return this.rebootRequests >= expectedRebootRequests;
+        }
+    }
 }
 
 class TestCC implements CriticalComponent {

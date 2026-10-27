@@ -52,10 +52,10 @@ public @interface RestServiceMetatype {
     @AttributeDefinition(name = "JWT Access Token Duration (Seconds)", min = "1", description = "Lifetime of access tokens. They cannot be revoked, so short values limit the use of a leaked token. Capped by the maximum token lifetime of the Token Issuing Service.")
     int auth_jwt_access_token_duration() default 60;
 
-    @AttributeDefinition(name = "JWT Refresh Token Duration (Seconds)", min = "1", description = "Lifetime of refresh tokens. Each one can be exchanged once for a new token pair, so this is the inactivity timeout of a client. Used tokens are tracked in memory: after a restart they are accepted again until they expire. Should be greater than the access token duration. Capped by the maximum token lifetime of the Token Issuing Service.")
+    @AttributeDefinition(name = "JWT Refresh Token Duration (Seconds)", min = "1", description = "Lifetime of refresh tokens. Each one can be exchanged once for a new token pair, so this is the inactivity timeout of a client. Exchanging an already exchanged refresh token revokes all the refresh tokens issued since the same login. Token families are tracked in memory: after a restart every refresh token is refused and clients must log in again. Should be greater than the access token duration. Capped by the maximum token lifetime of the Token Issuing Service.")
     int auth_jwt_refresh_token_duration() default 900;
 
-    @AttributeDefinition(name = "JWT Refresh Token Family Retention (Seconds)", min = "0", description = "How long a refresh token family is still tracked after its latest refresh token expires, so that a replayed refresh token of the family is still detected. Must be greater than or equal to the clock skew tolerance of the Token Verification Service, which still accepts tokens that expired within that tolerance.")
+    @AttributeDefinition(name = "JWT Refresh Token Family Retention (Seconds)", min = "0", description = "How long a refresh token family is still tracked after its latest refresh token expires. Refresh tokens of a family that is no longer tracked are refused, so this must be greater than or equal to the clock skew tolerance of the Token Verification Service, which still accepts tokens that expired within that tolerance.")
     int auth_jwt_used_refresh_token_retention() default 300;
 
 }

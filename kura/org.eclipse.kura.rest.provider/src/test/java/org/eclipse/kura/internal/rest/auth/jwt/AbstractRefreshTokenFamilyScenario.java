@@ -63,7 +63,7 @@ public abstract class AbstractRefreshTokenFamilyScenario {
     private final AtomicInteger issuedTokenCount = new AtomicInteger();
     private final AtomicInteger externalTokenCount = new AtomicInteger();
     private final List<Integer> exchangeStatuses = Collections.synchronizedList(new ArrayList<>());
-    private CountDownLatch heldVerifications = new CountDownLatch(0);
+    private CountDownLatch heldIssuances = new CountDownLatch(0);
 
     @Before
     public void setUpTokenServices() throws KuraException {
@@ -76,15 +76,14 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
 
         when(this.issuer.issue(any())).thenAnswer(invocation -> {
+            this.heldIssuances.countDown();
+            this.heldIssuances.await(10, TimeUnit.SECONDS);
             final String token = "token-" + this.issuedTokenCount.getAndIncrement();
             this.issuedTokens.put(token, invocation.getArgument(0));
             return token;
         });
-        when(this.verifier.verify(any())).thenAnswer(invocation -> {
-            this.heldVerifications.countDown();
-            this.heldVerifications.await(10, TimeUnit.SECONDS);
-            return proofOf(invocation.<TokenVerifyRequest> getArgument(0).getToken());
-        });
+        when(this.verifier.verify(any()))
+                .thenAnswer(invocation -> proofOf(invocation.<TokenVerifyRequest> getArgument(0).getToken()));
     }
 
     protected TokenPairDTO login() {
@@ -103,8 +102,8 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         }
     }
 
-    protected void holdVerificationsUntilAllStart(final int exchanges) {
-        this.heldVerifications = new CountDownLatch(exchanges);
+    protected void holdIssuancesUntilAllStart(final int exchanges) {
+        this.heldIssuances = new CountDownLatch(exchanges);
     }
 
     protected String externalRefreshTokenWith(final Map<String, Object> claims) {

@@ -74,7 +74,7 @@ public class RefreshTokenReuseDetectionTest extends AbstractRefreshTokenFamilySc
     @Test
     public void concurrentExchangesOfTheSameRefreshTokenSucceedOnce() throws Exception {
         givenTheOwnerLoggedIn();
-        givenTheVerifierWaitsForAllConcurrentExchanges();
+        givenTheIssuerWaitsForAllConcurrentExchanges();
 
         whenTheRefreshTokenIsExchangedConcurrently(this.ownerRefreshToken);
 
@@ -97,9 +97,9 @@ public class RefreshTokenReuseDetectionTest extends AbstractRefreshTokenFamilySc
         this.ownerRefreshToken = exchange(refreshToken).orElse(this.ownerRefreshToken);
     }
 
-    private void givenTheVerifierWaitsForAllConcurrentExchanges() {
-        // every exchange is verified before any of them advances the token family
-        holdVerificationsUntilAllStart(CONCURRENT_EXCHANGES);
+    private void givenTheIssuerWaitsForAllConcurrentExchanges() {
+        // every exchange passes the family check before any of them advances the token family
+        holdIssuancesUntilAllStart(CONCURRENT_EXCHANGES);
     }
 
     private void whenTheOwnerExchanges(final String refreshToken) {

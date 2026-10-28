@@ -11,7 +11,7 @@ This quickstart has been tested using the latest Raspberry Pi OS 32 and 64 bits 
 
 !!! warning
     Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of `uname -m` to decide which native libraries to load (see <https://github.com/raspberrypi/firmware/issues/1795>). This currently affects for example the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting `arm_64bit=0` in `/boot/config.txt` and restarting the device.
-
+    
     On Raspberry Pi 5 the `arm_64bit=0` setting is not available, since the device only supports a 64 bit kernel. In this case, install Kura through the `linux32` utility so that the installer runs as if on a 32 bit kernel:
     ```bash
     sudo linux32 apt install ./kura-<kura-version>_generic-arm32_installer.deb
@@ -42,7 +42,7 @@ following steps:
     ```bash
     sudo apt update
     ```
-
+    
     ```bash
     sudo apt upgrade
     ```

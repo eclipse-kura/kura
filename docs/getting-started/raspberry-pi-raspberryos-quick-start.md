@@ -10,7 +10,12 @@ This section provides Eclipse Kura&trade; quick installation procedures for the 
 This quickstart has been tested using the latest Raspberry Pi OS 32 and 64 bits images which are available for download through [the official Raspberry Pi foundation site](https://www.raspberrypi.com/software/operating-systems/) and the Raspberry Pi Imager.
 
 !!! warning
-    Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of `uname -m` to decide which native libraries to load (see https://github.com/raspberrypi/firmware/issues/1795). This currently affects for example the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting `arm_64bit=0` in `/boot/config.txt` and restarting the device.
+    Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of `uname -m` to decide which native libraries to load (see <https://github.com/raspberrypi/firmware/issues/1795>). This currently affects for example the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting `arm_64bit=0` in `/boot/config.txt` and restarting the device.
+
+    On Raspberry Pi 5 the `arm_64bit=0` setting is not available, since the device only supports a 64 bit kernel. In this case, install Kura through the `linux32` utility so that the installer runs as if on a 32 bit kernel:
+    ```bash
+    sudo linux32 apt install ./kura-<kura-version>_generic-arm32_installer.deb
+    ```
 
 For additional details on OS compatibility refer to the [Kura&trade; release notes](https://github.com/eclipse-kura/kura/releases).
 
@@ -33,10 +38,11 @@ following steps:
 2. Make sure your device is connected to the internet. The best installation experience can be obtained when the device is cabled to the local network and the Internet. By default, the Raspberry Pi OS configures the ethernet interface `eth0` in DHCP mode.
 
 3. Upgrade the system:
-   
+
     ```bash
     sudo apt update
     ```
+
     ```bash
     sudo apt upgrade
     ```
@@ -66,9 +72,9 @@ following steps:
     wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_generic-<arch>_installer.deb
     ```
 
-    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture 
+    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture
 
-5. Install Kura with: 
+5. Install Kura with:
 
     ```
     sudo apt-get install ./kura-<kura-version>_generic-<arch>_installer.deb
@@ -88,17 +94,17 @@ following steps:
 
     Then modify the **Locale** and **WLAN Country** with with the proper settings for your location. For example, an user located in Italy could set the values as the ones in the table:
 
-    | Setting         	| Value             	|
-    |-----------------	|-------------------	|
-    | L1 Locale       	| it_IT.UTF-8 UTF-8 	|
-    | L4 WLAN Country 	| IT Italy          	|
+    | Setting          | Value              |
+    |----------------- |------------------- |
+    | L1 Locale        | it_IT.UTF-8 UTF-8  |
+    | L4 WLAN Country  | IT Italy           |
 
 7. (Optional) To correctly use the GPIO pins, the user is asked to update the `jdk.dio.properties` file with the proper configuration, based on its own device.
 
     This is required since the `sysfs` interface has been deprecated, and some OS distribution may have already suppressed it. Moreover, the kernel complains if a static base number is assigned to a GPIO controller: indeed, when it assigns the numbers automatically, it usually starts from 511. More information can be found [here](https://forums.raspberrypi.com/viewtopic.php?t=359302).
-    
+
     In order to set the correct configuration the user can perform the following steps:
-    
+
     - Execute on the device the command `cat /sys/kernel/debug/gpio`, looking for entries similar to `gpio-ABC (GPIxx)`: from this information it is possible to retrieve which number the GPIO controller was assigned to by the OS (in this case the GPIO controller number `xx` is assigned with the number `ABC`). The image below represent an example of this file
 
     ![Kernel Debug GPIO](./images/kernel-debug-gpio.png)
@@ -138,8 +144,6 @@ following steps:
     ```
 
     You can also check your GPIO device configuration executing the command `pinout`
-
-
 
 8. Reboot the Raspberry Pi with:
 

@@ -2962,50 +2962,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../kura-wires/script-components/nashorn-script-filter/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Nashorn Script Filter
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../kura-wires/script-components/nashorn-conditional-component/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Nashorn Conditional Component
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../kura-wires/script-components/graalvm-filter-component/" class="md-nav__link">
         
   
@@ -3033,6 +2989,50 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   <span class="md-ellipsis">
     GraalVM&trade; Conditional Component
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/nashorn-script-filter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nashorn Script Filter (Deprecated)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/nashorn-conditional-component/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nashorn Conditional Component (Deprecated)
     
   </span>
   
@@ -4145,7 +4145,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>This quickstart has been tested using the latest Raspberry Pi OS 32 and 64 bits images which are available for download through <a href="https://www.raspberrypi.com/software/operating-systems/">the official Raspberry Pi foundation site</a> and the Raspberry Pi Imager.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of <code>uname -m</code> to decide which native libraries to load (see https://github.com/raspberrypi/firmware/issues/1795). This currently affects for example the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting <code>arm_64bit=0</code> in <code>/boot/config.txt</code> and restarting the device.</p>
+<p>Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of <code>uname -m</code> to decide which native libraries to load (see <a href="https://github.com/raspberrypi/firmware/issues/1795">https://github.com/raspberrypi/firmware/issues/1795</a>). This currently affects for example the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting <code>arm_64bit=0</code> in <code>/boot/config.txt</code> and restarting the device.</p>
+<p>On Raspberry Pi 5 the <code>arm_64bit=0</code> setting is not available, since the device only supports a 64 bit kernel. In this case, install Kura through the <code>linux32</code> utility so that the installer runs as if on a 32 bit kernel:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>linux32<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./kura-&lt;kura-version&gt;_generic-arm32_installer.deb
+</code></pre></div></p>
 </div>
 <p>For additional details on OS compatibility refer to the <a href="https://github.com/eclipse-kura/kura/releases">Kura&trade; release notes</a>.</p>
 <h2 id="enable-ssh-access">Enable SSH Access</h2>
@@ -4165,42 +4168,42 @@ following steps:</p>
 </li>
 <li>
 <p>Upgrade the system:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade
 </code></pre></div></p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p><strong>Optional</strong>: Since version 5.3.0 Kura also supports <a href="https://adoptium.net/en-GB/">Eclipse Temurin&trade;</a> as an alternative JVM. To install it you need to perform these additional steps:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gnupg
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gnupg
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>wget<span class="w"> </span>-O<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>apt-key<span class="w"> </span>add<span class="w"> </span>-
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>wget<span class="w"> </span>-O<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>apt-key<span class="w"> </span>add<span class="w"> </span>-
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-8-jdk
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-8-jdk
 </code></pre></div></p>
 </div>
 </li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi_installer.deb
 </code></pre></div>
 <p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.1.0).</p>
 </li>
 <li>
 <p>Install Kura with: </p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt-get install ./kura_&lt;version&gt;_raspberry-pi_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo apt-get install ./kura_&lt;version&gt;_raspberry-pi_installer.deb
 </code></pre></div>
 </li>
 <li>
 <p>It could happen that <code>wlan</code> interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>rfkill list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>rfkill list
 </code></pre></div>
 <p>and unblock it with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo rfkill unblock wlan
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo rfkill unblock wlan
 </code></pre></div>
 </li>
 <li>
@@ -4208,21 +4211,21 @@ following steps:</p>
 </li>
 <li>
 <p>Reboot the Raspberry Pi with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
 <p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
 <p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>admin
 </code></pre></div>
 <p>and the default <strong>password</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>admin
 </code></pre></div>
 </li>
 </ol>

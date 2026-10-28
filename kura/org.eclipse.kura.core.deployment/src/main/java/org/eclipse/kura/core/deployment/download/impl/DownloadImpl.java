@@ -208,11 +208,7 @@ public class DownloadImpl implements ProgressListener {
                 }
             }
             if (!completed) {
-                try {
-                    Files.deleteIfExists(dpFile.toPath());
-                } catch (IOException e1) {
-                    s_logger.warn("Unable to delete the partially downloaded file {}", dpFile, e1);
-                }
+                deletePartiallyDownloadedFile(dpFile);
             }
         }
 
@@ -300,5 +296,13 @@ public class DownloadImpl implements ProgressListener {
                 .append(shName).toString();
 
         return new File(packageFilename);
+    }
+
+    private static void deletePartiallyDownloadedFile(File dpFile) {
+        try {
+            Files.deleteIfExists(dpFile.toPath());
+        } catch (IOException e) {
+            s_logger.warn("Unable to delete the partially downloaded file {}", dpFile, e);
+        }
     }
 }

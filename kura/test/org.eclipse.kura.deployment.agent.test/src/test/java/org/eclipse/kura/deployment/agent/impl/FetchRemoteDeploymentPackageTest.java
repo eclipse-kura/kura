@@ -60,6 +60,7 @@ public class FetchRemoteDeploymentPackageTest {
 
     @Before
     public void setup() {
+        this.tempFilesBefore = listTempFiles();
         final SystemService systemServiceMock = mock(SystemService.class);
         final Properties properties = new Properties();
         properties.put("file.transfer.size.max", "-1");
@@ -156,11 +157,6 @@ public class FetchRemoteDeploymentPackageTest {
     @AfterClass
     public static void stopServer() {
         server.stop();
-    }
-
-    @Before
-    public void recordTempFiles() {
-        this.tempFilesBefore = listTempFiles();
     }
 
     @After

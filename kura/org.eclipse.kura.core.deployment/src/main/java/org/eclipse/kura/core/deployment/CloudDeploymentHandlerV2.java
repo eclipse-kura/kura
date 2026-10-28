@@ -166,7 +166,7 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     private Long maxDownloadSizeBytes;
 
     static final String MAX_DOWNLOAD_SIZE_PROPNAME = "file.transfer.size.max";
-    public static final long MAX_DOWNLOAD_SIZE_DEFAULT = 1_048_576 * 25; // 25MB
+    public static final long MAX_DOWNLOAD_SIZE_DEFAULT = 1_048_576L * 25; // 25MB
 
     private CloudNotificationPublisher cloudNotificationPublisher;
 

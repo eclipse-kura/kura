@@ -39,7 +39,7 @@ public class MultipartRequestBodySizeLimiter implements ContainerRequestFilter, 
             + ".entityTooLarge";
     private static final Logger logger = LoggerFactory.getLogger(MultipartRequestBodySizeLimiter.class);
 
-    private long limit = 25 * 1024 * 1024;
+    private long limit = 25L * 1024 * 1024;
 
     public void setSystemService(final SystemService systemService) {
         final String limitString = systemService.getProperties().getProperty(FILE_TRANSFER_SIZE_MAX_PROP_NAME);

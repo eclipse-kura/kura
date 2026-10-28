@@ -38,11 +38,10 @@ following steps:
 2. Make sure your device is connected to the internet. The best installation experience can be obtained when the device is cabled to the local network and the Internet. By default, the Raspberry Pi OS configures the ethernet interface `eth0` in DHCP mode.
 
 3. Upgrade the system:
-
+   
     ```bash
     sudo apt update
     ```
-    
     ```bash
     sudo apt upgrade
     ```
@@ -72,9 +71,9 @@ following steps:
     wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_generic-<arch>_installer.deb
     ```
 
-    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture
+    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture 
 
-5. Install Kura with:
+5. Install Kura with: 
 
     ```
     sudo apt-get install ./kura-<kura-version>_generic-<arch>_installer.deb
@@ -94,17 +93,17 @@ following steps:
 
     Then modify the **Locale** and **WLAN Country** with with the proper settings for your location. For example, an user located in Italy could set the values as the ones in the table:
 
-    | Setting          | Value              |
-    |----------------- |------------------- |
-    | L1 Locale        | it_IT.UTF-8 UTF-8  |
-    | L4 WLAN Country  | IT Italy           |
+    | Setting         	| Value             	|
+    |-----------------	|-------------------	|
+    | L1 Locale       	| it_IT.UTF-8 UTF-8 	|
+    | L4 WLAN Country 	| IT Italy          	|
 
 7. (Optional) To correctly use the GPIO pins, the user is asked to update the `jdk.dio.properties` file with the proper configuration, based on its own device.
 
     This is required since the `sysfs` interface has been deprecated, and some OS distribution may have already suppressed it. Moreover, the kernel complains if a static base number is assigned to a GPIO controller: indeed, when it assigns the numbers automatically, it usually starts from 511. More information can be found [here](https://forums.raspberrypi.com/viewtopic.php?t=359302).
-
+    
     In order to set the correct configuration the user can perform the following steps:
-
+    
     - Execute on the device the command `cat /sys/kernel/debug/gpio`, looking for entries similar to `gpio-ABC (GPIxx)`: from this information it is possible to retrieve which number the GPIO controller was assigned to by the OS (in this case the GPIO controller number `xx` is assigned with the number `ABC`). The image below represent an example of this file
 
     ![Kernel Debug GPIO](./images/kernel-debug-gpio.png)
@@ -144,6 +143,8 @@ following steps:
     ```
 
     You can also check your GPIO device configuration executing the command `pinout`
+
+
 
 8. Reboot the Raspberry Pi with:
 

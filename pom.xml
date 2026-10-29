@@ -44,6 +44,7 @@
         <module>checkstyle-resources</module>
         <module>bom</module>
         <module>kura</module>
+        <module>openapi</module>
         <module>distrib</module>
     </modules>
 

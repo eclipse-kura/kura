@@ -29,7 +29,8 @@
         <commons-fileupload.version>2.0.0-M4</commons-fileupload.version>
         <hk2.version>3.1.1</hk2.version>
         <io.netty.version>4.1.139.Final</io.netty.version>
-        <jackson.core.version>2.19.2</jackson.core.version>
+        <jackson2.core.version>2.21.8</jackson2.core.version>
+        <jackson2.annotations.version>2.21</jackson2.annotations.version>
         <jackson3.core.version>3.1.7</jackson3.core.version>
         <jersey.version>3.1.11</jersey.version>
         <log4j.version>2.25.3</log4j.version>
@@ -608,17 +609,17 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.core.version}</version>
+                <version>${jackson2.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.core.version}</version>
+                <version>${jackson2.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>${jackson.core.version}</version>
+                <version>${jackson2.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>tools.jackson.core</groupId>

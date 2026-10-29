@@ -184,9 +184,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.osgi/org.osgi.util.promise/1.3.0, Apache-2.0, approved, #5266
 * maven/mavencentral/org.osgi/org.osgi.util.pushstream/1.1.0, Apache-2.0, approved, #6026
 * maven/mavencentral/org.osgi/org.osgi.util.xml/1.0.2, Apache-2.0, approved, #15377
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.2, Apache-2.0, approved, #21909
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.2, Apache-2.0, approved, #21911
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.2, Apache-2.0 AND MIT, approved, #21916
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.8, Apache-2.0, approved, #25591
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.21, Apache-2.0, approved, #25587
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.8, Apache-2.0 AND MIT, approved, #25590
 * maven/mavencentral/tools.jackson.core/jackson-core/3.1.7, Apache-2.0 AND MIT, approved, #26415
 * maven/mavencentral/com.auth0/java-jwt/4.6.0, MIT, approved, #29896
 

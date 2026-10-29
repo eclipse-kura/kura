@@ -34,7 +34,8 @@
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.container.orchestration.provider.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <docker-java.version>3.5.3</docker-java.version>
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>2.21.8</jackson.version>
+        <jackson.annotations.version>2.21</jackson.annotations.version>
     </properties>
 
     <build>
@@ -108,7 +109,7 @@
                                 <artifactItem>
                                     <groupId>com.fasterxml.jackson.core</groupId>
                                     <artifactId>jackson-annotations</artifactId>
-                                    <version>${jackson.version}</version>
+                                    <version>${jackson.annotations.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.github.docker-java</groupId>

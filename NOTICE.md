@@ -40,9 +40,9 @@ This project leverages the following third party content.
 * maven/mavencentral/com.eclipsesource.jaxrs/provider-security/2.2, EPL-1.0, approved, #3093
 * maven/mavencentral/com.eclipsesource.jaxrs/publisher/5.3.1, EPL-1.0, approved, #3085
 * maven/mavencentral/com.eclipsesource.minimal-json/minimal-json/0.9.5, MIT, approved, CQ10061
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.1, Apache-2.0, approved, #21911
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.1, Apache-2.0 AND MIT, approved, #21916
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.1, Apache-2.0, approved, #21909
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.21, Apache-2.0, approved, #25587
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.8, Apache-2.0 AND MIT, approved, #25590
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.8, Apache-2.0, approved, #25591
 * maven/mavencentral/com.github.docker-java/docker-java-api/3.5.3, Apache-2.0, approved, #22668
 * maven/mavencentral/com.github.docker-java/docker-java-core/3.5.3, Apache-2.0, approved, #22665
 * maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.5.3, Apache-2.0, approved, #22669

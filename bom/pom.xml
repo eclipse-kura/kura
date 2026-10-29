@@ -1011,6 +1011,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.api.compat.weaving</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.api.driver.compat</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>

@@ -1,0 +1,14 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.api.compat.weaving
+Bundle-Vendor: Eclipse Kura
+Bundle-Activator: org.eclipse.kura.internal.api.compat.weaving.Activator
+Import-Package: \
+    org.objectweb.asm;version="[9.0,10.0)",\
+    org.osgi.framework;version="[1.8,2.0)",\
+    org.osgi.framework.hooks.weaving;version="[1.1,2.0)",\
+    org.osgi.framework.wiring;version="[1.2,2.0)",\
+    org.slf4j;version="1.6.4"
+Private-Package: org.eclipse.kura.internal.api.compat.weaving
+-includeresource: \
+    about.html,\
+    about_files=about_files/

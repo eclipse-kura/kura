@@ -50,6 +50,8 @@
 
         <module>emulator</module>
         <module>org.eclipse.kura.api</module>
+        <module>org.eclipse.kura.api.compat.weaving</module>
+        <module>org.eclipse.kura.api.driver.compat</module>
         <module>org.eclipse.kura.cloud.base.provider</module>
         <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>

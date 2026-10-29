@@ -80,6 +80,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.api.compat.weaving</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.api.driver.compat</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
         </dependency>
         <dependency>

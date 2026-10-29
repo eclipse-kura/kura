@@ -164,6 +164,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.api.compat.weaving</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.api.driver.compat</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
         </dependency>
         <dependency>
@@ -1363,7 +1371,8 @@
                                     jcl-over-slf4j, log4j-api, log4j-core,
                                     org.eclipse.equinox.metatype, org.eclipse.equinox.util,
                                     org.eclipse.equinox.registry, slf4j-api, org.eclipse.equinox.io,
-                                    jul-to-slf4j, org.apache.felix.scr, org.eclipse.kura.jul.to.slf4j.configuration
+                                    jul-to-slf4j, org.apache.felix.scr, org.eclipse.kura.jul.to.slf4j.configuration,
+                                    org.eclipse.kura.api.compat.weaving
                                 </includeArtifactIds>
                             </configuration>
                         </execution>
@@ -1438,6 +1447,7 @@
                                     netty-handler-proxy,
                                     <!-- api-plugins -->
                                     failureaccess, guava,
+                                    org.eclipse.kura.api.driver.compat,
                                     <!-- Jackson core -->
                                     jackson-databind, jackson-annotations, jackson-core
                                 </includeArtifactIds>

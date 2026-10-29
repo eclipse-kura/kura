@@ -62,10 +62,10 @@ public class LifeCyclePayloadBuilder {
 
     private static final String UNKNOWN = "UNKNOWN";
 
-    private final CloudServiceImpl cloudServiceImpl;
+    private final KapuaCloudConnectionManager cloudConnectionManager;
 
-    LifeCyclePayloadBuilder(CloudServiceImpl cloudServiceImpl) {
-        this.cloudServiceImpl = cloudServiceImpl;
+    LifeCyclePayloadBuilder(KapuaCloudConnectionManager cloudConnectionManager) {
+        this.cloudConnectionManager = cloudConnectionManager;
     }
 
     public KuraBirthPayload buildBirthPayload() {
@@ -79,13 +79,13 @@ public class LifeCyclePayloadBuilder {
         String acceptEncoding = buildAcceptEncoding();
 
         // build device name
-        CloudServiceOptions cso = this.cloudServiceImpl.getCloudServiceOptions();
+        KapuaCloudConnectionManagerOptions cso = this.cloudConnectionManager.getCloudConnectionManagerOptions();
         String deviceName = cso.getDeviceDisplayName();
         if (deviceName == null) {
-            deviceName = this.cloudServiceImpl.getSystemService().getDeviceName();
+            deviceName = this.cloudConnectionManager.getSystemService().getDeviceName();
         }
 
-        String payloadEncoding = this.cloudServiceImpl.getCloudServiceOptions().getPayloadEncoding().name();
+        String payloadEncoding = this.cloudConnectionManager.getCloudConnectionManagerOptions().getPayloadEncoding().name();
 
         // build birth certificate
         KuraBirthPayloadBuilder birthPayloadBuilder = new KuraBirthPayloadBuilder();
@@ -133,7 +133,7 @@ public class LifeCyclePayloadBuilder {
     }
 
     private void tryAddTamperStatus(KuraBirthPayloadBuilder birthPayloadBuilder) {
-        this.cloudServiceImpl.withTamperDetectionServices(t -> {
+        this.cloudConnectionManager.withTamperDetectionServices(t -> {
             if (t.isEmpty()) {
                 return;
             }
@@ -157,39 +157,39 @@ public class LifeCyclePayloadBuilder {
     }
 
     private void addModemInfo(KuraBirthPayloadBuilder birthPayloadBuilder) {
-        if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
-                && !this.cloudServiceImpl.imei.equals(ERROR)) {
-            birthPayloadBuilder.withModemImei(this.cloudServiceImpl.imei);
+        if (this.cloudConnectionManager.imei != null && this.cloudConnectionManager.imei.length() > 0
+                && !this.cloudConnectionManager.imei.equals(ERROR)) {
+            birthPayloadBuilder.withModemImei(this.cloudConnectionManager.imei);
         }
-        if (this.cloudServiceImpl.iccid != null && this.cloudServiceImpl.iccid.length() > 0
-                && !this.cloudServiceImpl.iccid.equals(ERROR)) {
-            birthPayloadBuilder.withModemIccid(this.cloudServiceImpl.iccid);
-        }
-
-        if (this.cloudServiceImpl.imsi != null && this.cloudServiceImpl.imsi.length() > 0
-                && !this.cloudServiceImpl.imsi.equals(ERROR)) {
-            birthPayloadBuilder.withModemImsi(this.cloudServiceImpl.imsi);
+        if (this.cloudConnectionManager.iccid != null && this.cloudConnectionManager.iccid.length() > 0
+                && !this.cloudConnectionManager.iccid.equals(ERROR)) {
+            birthPayloadBuilder.withModemIccid(this.cloudConnectionManager.iccid);
         }
 
-        if (this.cloudServiceImpl.eid != null && !this.cloudServiceImpl.eid.trim().isEmpty()
-                && !this.cloudServiceImpl.eid.equals(ERROR) && !this.cloudServiceImpl.eid.equals(NOT_AVAILABLE)) {
-            birthPayloadBuilder.withModemEid(this.cloudServiceImpl.eid);
+        if (this.cloudConnectionManager.imsi != null && this.cloudConnectionManager.imsi.length() > 0
+                && !this.cloudConnectionManager.imsi.equals(ERROR)) {
+            birthPayloadBuilder.withModemImsi(this.cloudConnectionManager.imsi);
         }
 
-        if (this.cloudServiceImpl.rssi != null && this.cloudServiceImpl.rssi.length() > 0) {
-            birthPayloadBuilder.withModemRssi(this.cloudServiceImpl.rssi);
+        if (this.cloudConnectionManager.eid != null && !this.cloudConnectionManager.eid.trim().isEmpty()
+                && !this.cloudConnectionManager.eid.equals(ERROR) && !this.cloudConnectionManager.eid.equals(NOT_AVAILABLE)) {
+            birthPayloadBuilder.withModemEid(this.cloudConnectionManager.eid);
         }
 
-        if (this.cloudServiceImpl.modemFwVer != null && this.cloudServiceImpl.modemFwVer.length() > 0
-                && !this.cloudServiceImpl.modemFwVer.equals(ERROR)) {
-            birthPayloadBuilder.withModemFirmwareVersion(this.cloudServiceImpl.modemFwVer);
+        if (this.cloudConnectionManager.rssi != null && this.cloudConnectionManager.rssi.length() > 0) {
+            birthPayloadBuilder.withModemRssi(this.cloudConnectionManager.rssi);
+        }
+
+        if (this.cloudConnectionManager.modemFwVer != null && this.cloudConnectionManager.modemFwVer.length() > 0
+                && !this.cloudConnectionManager.modemFwVer.equals(ERROR)) {
+            birthPayloadBuilder.withModemFirmwareVersion(this.cloudConnectionManager.modemFwVer);
         }
     }
 
     public KuraDisconnectPayload buildDisconnectPayload() {
-        SystemService systemService = this.cloudServiceImpl.getSystemService();
-        SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
-        CloudServiceOptions cloudOptions = this.cloudServiceImpl.getCloudServiceOptions();
+        SystemService systemService = this.cloudConnectionManager.getSystemService();
+        SystemAdminService sysAdminService = this.cloudConnectionManager.getSystemAdminService();
+        KapuaCloudConnectionManagerOptions cloudOptions = this.cloudConnectionManager.getCloudConnectionManagerOptions();
 
         // build device name
         String deviceName = cloudOptions.getDeviceDisplayName();
@@ -201,9 +201,9 @@ public class LifeCyclePayloadBuilder {
     }
 
     public KuraDeviceProfile buildDeviceProfile() {
-        SystemService systemService = this.cloudServiceImpl.getSystemService();
-        SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
-        Optional<PositionService> positionService = this.cloudServiceImpl.getPositionService();
+        SystemService systemService = this.cloudConnectionManager.getSystemService();
+        SystemAdminService sysAdminService = this.cloudConnectionManager.getSystemAdminService();
+        Optional<PositionService> positionService = this.cloudConnectionManager.getPositionService();
 
         //
         // get the network information if available
@@ -291,7 +291,7 @@ public class LifeCyclePayloadBuilder {
 
     private void appendActiveNetworkInterfaces(StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp,
             Set<String> reportedInterfaceNames) {
-        this.cloudServiceImpl.getNetworkService().ifPresent(ns -> {
+        this.cloudConnectionManager.getNetworkService().ifPresent(ns -> {
             try {
                 for (NetInterface<? extends NetInterfaceAddress> ni : ns.getActiveNetworkInterfaces()) {
                     List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
@@ -325,7 +325,7 @@ public class LifeCyclePayloadBuilder {
     private List<ModemInterfaceStatus> getConnectedModemsWithIp(Set<String> reportedInterfaceNames) {
         final List<ModemInterfaceStatus> result = new ArrayList<>();
 
-        this.cloudServiceImpl.getNetworkStatusService().ifPresent(networkStatusService -> {
+        this.cloudConnectionManager.getNetworkStatusService().ifPresent(networkStatusService -> {
             try {
                 for (final String interfaceId : networkStatusService.getInterfaceIds()) {
                     networkStatusService.getNetworkStatus(interfaceId).ifPresent(status -> {
@@ -369,7 +369,7 @@ public class LifeCyclePayloadBuilder {
     }
 
     private String buildApplicationIDs() {
-        String[] appIdArray = this.cloudServiceImpl.getCloudApplicationIdentifiers();
+        String[] appIdArray = this.cloudConnectionManager.getCloudApplicationIdentifiers();
         StringBuilder sbAppIDs = new StringBuilder();
         for (int i = 0; i < appIdArray.length; i++) {
             if (i != 0) {
@@ -382,7 +382,7 @@ public class LifeCyclePayloadBuilder {
 
     private String buildAcceptEncoding() {
         String acceptEncoding = "";
-        CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
+        KapuaCloudConnectionManagerOptions options = this.cloudConnectionManager.getCloudConnectionManagerOptions();
         if (options.getEncodeGzip()) {
             acceptEncoding = "gzip";
         }
@@ -390,7 +390,7 @@ public class LifeCyclePayloadBuilder {
     }
 
     private Optional<String> serializeExtendedProperties() {
-        final Optional<ExtendedProperties> extendedProperties = this.cloudServiceImpl.getSystemService()
+        final Optional<ExtendedProperties> extendedProperties = this.cloudConnectionManager.getSystemService()
                 .getExtendedProperties();
 
         if (!extendedProperties.isPresent()) {

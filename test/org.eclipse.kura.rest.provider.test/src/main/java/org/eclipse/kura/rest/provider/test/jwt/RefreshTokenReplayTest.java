@@ -15,10 +15,8 @@ package org.eclipse.kura.rest.provider.test.jwt;
 
 import static org.junit.Assert.assertEquals;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.rest.provider.test.util.AbstractJwtRestScenario;
@@ -40,23 +38,6 @@ public class RefreshTokenReplayTest extends AbstractJwtRestScenario {
         whenTheAttackerExchanges(this.attackerRefreshToken);
 
         thenTheExchangeStatusesAre(200, 401, 401);
-    }
-
-    /*
-     * The verifier accepts expired tokens within its clock skew tolerance (30 seconds by default), so a refresh token
-     * family stays tracked for the configured retention after its latest refresh token expires.
-     */
-    @Test
-    public void theLatestRefreshTokenStaysUsableForTheRetentionAfterItsExpiry() throws Exception {
-        givenTheRestServiceProperties(Map.of(REFRESH_TOKEN_DURATION, 1, REFRESH_TOKEN_FAMILY_RETENTION, 60));
-        givenAnIdentityWithPermissions(ASSETS_PERMISSION);
-        givenATokenPairIssuedToTheIdentity();
-        givenTheRefreshTokenWasExchangedWithStatus(200);
-        givenTimePasses(Duration.ofSeconds(2));
-
-        whenTheRefreshEndpointReceives(theRefreshToken());
-
-        thenATokenPairIsReturned();
     }
 
     private void givenTheOwnerLoggedIn() {

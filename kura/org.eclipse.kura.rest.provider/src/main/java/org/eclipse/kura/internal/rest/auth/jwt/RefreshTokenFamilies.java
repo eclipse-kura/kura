@@ -96,11 +96,12 @@ final class RefreshTokenFamilies {
                 (id, current) -> current.trackedUntil().isBefore(now) ? null : transition.apply(current));
 
         if (family == null) {
-            throw new KuraAuthenticationFailedException("Unknown refresh token family");
+            throw new KuraAuthenticationFailedException("unknown refresh token family");
         }
 
         if (family.status() == Status.REVOKED) {
-            throw new KuraAuthenticationFailedException("Refresh token family revoked");
+            throw new KuraAuthenticationFailedException(
+                    "refresh token reuse detected: family '" + familyId + "' is revoked");
         }
     }
 

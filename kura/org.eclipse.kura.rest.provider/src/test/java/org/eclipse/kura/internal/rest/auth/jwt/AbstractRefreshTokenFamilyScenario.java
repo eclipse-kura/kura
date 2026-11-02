@@ -14,6 +14,7 @@
 package org.eclipse.kura.internal.rest.auth.jwt;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -87,7 +88,7 @@ public abstract class AbstractRefreshTokenFamilyScenario {
             }
 
             this.heldIssuances.countDown();
-            this.heldIssuances.await(10, TimeUnit.SECONDS);
+            assertTrue("held issuances did not all start", this.heldIssuances.await(10, TimeUnit.SECONDS));
             final String token = "token-" + this.issuedTokenCount.getAndIncrement();
             this.issuedTokens.put(token, request);
             return token;

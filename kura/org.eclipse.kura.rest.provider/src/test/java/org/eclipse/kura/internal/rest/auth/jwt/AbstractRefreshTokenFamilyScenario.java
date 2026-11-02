@@ -95,6 +95,15 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         }
     }
 
+    protected void removeIdentity(final String identityName) {
+        try {
+            when(this.identityHelper.identityExists(identityName)).thenReturn(false);
+            when(this.identityHelper.getPasswordHash(identityName)).thenReturn(Optional.empty());
+        } catch (final KuraException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     protected void setPassword(final String identityName, final String password) {
         try {
             when(this.identityHelper.getPasswordHash(identityName)).thenReturn(Optional.of(new FakePasswordHash(password)));

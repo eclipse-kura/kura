@@ -125,8 +125,8 @@ public class JwtRestService {
 
     /**
      * Accepts refresh tokens the verification service trusts that belong to a known, active token family of the same
-     * identity. Exchanging a refresh token of an older generation, of another identity, or after the identity password
-     * changed, revokes its whole family.
+     * identity. Exchanging a refresh token of an older generation, of another identity, after the identity password
+     * changed, or while the identity does not exist, revokes its whole family.
      * 
      * @param body
      * @return
@@ -148,13 +148,16 @@ public class JwtRestService {
             final String identityName = proof.getIdentityName();
             auditIdentityName(auditContext, identityName);
 
-            checkIdentityCanAuthenticate(identityName, auditContext);
-
             final Map<String, Object> claims = proof.getClaims();
             final String familyId = familyIdOf(claims);
             final long presentedGeneration = generationOf(claims);
             auditFamilyId(auditContext, familyId);
 
+            if (!this.identityHelper.identityExists(identityName)) {
+                this.families.revokeForRemovedIdentity(familyId);
+            }
+
+            checkIdentityCanAuthenticate(identityName, auditContext);
             this.families.check(familyId, identityName, passwordHashOf(identityName), presentedGeneration);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
             this.families.advance(familyId, presentedGeneration, familyTrackingDeadline(issuer));

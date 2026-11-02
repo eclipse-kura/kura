@@ -74,6 +74,7 @@ final class RefreshTokenFamilies {
     private static final String REUSE_DETECTED = "refresh token reuse detected";
     private static final String OWNER_MISMATCH = "refresh token identity does not match the family owner";
     private static final String PASSWORD_CHANGED = "identity password changed";
+    private static final String IDENTITY_REMOVED = "identity removed";
     private static final Duration SWEEP_INTERVAL = Duration.ofSeconds(30);
 
     private final ConcurrentMap<String, Family> families = new ConcurrentHashMap<>();
@@ -104,6 +105,10 @@ final class RefreshTokenFamilies {
     void advance(final String familyId, final long presentedGeneration, final Instant trackedUntil)
             throws KuraAuthenticationFailedException {
         update(familyId, family -> family.afterPresenting(presentedGeneration, trackedUntil));
+    }
+
+    void revokeForRemovedIdentity(final String familyId) {
+        this.families.computeIfPresent(familyId, (id, family) -> family.revoked(IDENTITY_REMOVED));
     }
 
     boolean isTracked(final String familyId) {

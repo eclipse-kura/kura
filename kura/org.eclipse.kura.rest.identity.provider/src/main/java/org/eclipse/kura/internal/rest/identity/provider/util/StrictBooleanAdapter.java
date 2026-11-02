@@ -31,11 +31,6 @@ public class StrictBooleanAdapter extends TypeAdapter<Boolean> {
     public Boolean read(JsonReader in) throws IOException {
         JsonToken token = in.peek();
 
-        if (token == JsonToken.NULL) {
-            in.nextNull();
-            return null;
-        }
-
         if (token != JsonToken.BOOLEAN) {
             throw new JsonParseException("Expected a boolean but was " + token + " at " + in.getPath());
         }

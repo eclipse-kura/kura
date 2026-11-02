@@ -30,7 +30,6 @@ JAVA_INT_OPTS="$JAVA_INT_OPTS -Dtarget.device=intel-up2-nn"
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.device.name=\"${KURA_DEVICE_NAME:-Kura Container Instance}\""
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Declipse.ignoreApp=true"
-JAVA_INT_OPTS="$JAVA_INT_OPTS -Dosgi.console=9000"
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Declipse.consoleLog=true"
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.home=\"${KURA_DIR}/kura\""

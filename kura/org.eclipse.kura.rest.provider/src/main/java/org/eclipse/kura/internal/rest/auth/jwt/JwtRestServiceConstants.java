@@ -25,7 +25,7 @@ public class JwtRestServiceConstants {
     public static final String INTENDED_REFRESH_CONSUMER = SERVICE_PATH + REFRESH_PATH;
     public static final String INTENDED_ACCESS_CONSUMER = SERVICE_PATH + "/access";
     public static final String TOKEN_TYPE = "Bearer";
-    public static final String FAMILY_ID_CLAIM = "family.id";
+    public static final String FAMILY_ID_CLAIM = "family_id";
     public static final String GENERATION_CLAIM = "generation";
-    public static final String AUDIT_KEY_FAMILY_ID = "jwt." + FAMILY_ID_CLAIM;
+    public static final String AUDIT_KEY_FAMILY_ID = "jwt_" + FAMILY_ID_CLAIM;
 }

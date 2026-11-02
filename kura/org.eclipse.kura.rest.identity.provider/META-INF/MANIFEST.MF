@@ -7,7 +7,10 @@ Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Import-Package: javax.annotation.security;version="1.2.0",
+Import-Package: com.google.gson;version="2.7.0",
+ com.google.gson.annotations;version="2.7.0",
+ com.google.gson.stream;version="2.7.0",
+ javax.annotation.security;version="1.2.0",
  javax.ws.rs;version="2.0.1",
  javax.ws.rs.container;version="2.0.1",
  javax.ws.rs.core;version="2.0.1",

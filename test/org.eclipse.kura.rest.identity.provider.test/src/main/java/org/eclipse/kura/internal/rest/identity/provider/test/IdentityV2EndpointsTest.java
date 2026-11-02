@@ -101,6 +101,7 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     private String testPermissionName;
 
     private IdentityConfigurationDTO identityConfiguration;
+    private String identityConfigurationJson;
     private PasswordConfigurationDTO passwordConfiguration;
     private AdditionalConfigurationsDTO additionalConfigurations;
     private PermissionConfigurationDTO permissionConfiguration;
@@ -157,6 +158,48 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
+    }
+
+    @Test
+    public void shouldRejectUpdateWithStringPasswordChangeNeeded() throws KuraException {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenPasswordConfigurationJson("\"passwordChangeNeeded\":\"asd\",\"passwordAuthEnabled\":true");
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/identities", this.identityConfigurationJson);
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectUpdateWithStringPasswordAuthEnabled() throws KuraException {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenPasswordConfigurationJson("\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":\"true\"");
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/identities", this.identityConfigurationJson);
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectUpdateWithNullPasswordChangeNeeded() throws KuraException {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenPasswordConfigurationJson("\"passwordChangeNeeded\":null,\"passwordAuthEnabled\":false");
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/identities", this.identityConfigurationJson);
+
+        thenResponseCodeIs(400);
+        thenResponseBodyEqualsJson("{\"message\":\"Missing 'passwordChangeNeeded' property\"}");
+    }
+
+    @Test
+    public void shouldRejectUpdateWithoutPasswordAuthEnabled() throws KuraException {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenPasswordConfigurationJson("\"passwordChangeNeeded\":false");
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/identities", this.identityConfigurationJson);
+
+        thenResponseCodeIs(400);
+        thenResponseBodyEqualsJson("{\"message\":\"Missing 'passwordAuthEnabled' property\"}");
     }
 
     @Test
@@ -409,6 +452,11 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
     private void givenMockIdentityConfigurationExtension(final String pid) {
         this.extensions.put(pid, new MockExtensionHolder(pid));
+    }
+
+    private void givenPasswordConfigurationJson(String passwordConfigurationFields) {
+        this.identityConfigurationJson = "{\"identity\":{\"name\":\"" + this.testUsername
+                + "\"},\"passwordConfiguration\":{" + passwordConfigurationFields + "}}";
     }
 
     private void givenIdentityConfigurationRequestDTO() {

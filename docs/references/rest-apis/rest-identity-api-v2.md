@@ -168,6 +168,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ##### Responses
 
 - 200 OK status
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 400 Bad Request (Permission name not valid)
 - 409 Conflict (Permission already exists)
 - 500 Internal Server Error

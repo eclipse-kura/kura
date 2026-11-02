@@ -45,12 +45,10 @@ public class IpAddrShow {
         this.executorService = executoService;
     }
 
-    // ifconfig sucks. ip sucks too but at least the output is consistent.
-    // Unfortunately 'ip' does not have the equivalent of 'ifconfig -a':
-    // 'ip addr show' does not show interfaces that are DOWN (meaning 'ifdown')
-    // 'ip link show' or 'ip -0 addr show' does not show inet addresses
-    // this means that we need to call 'ip' twice to get all the information:
-    // 'ip link show' followed by 'ip -4 addr show' and merge the two outputs.
+    /**
+     * Runs {@code ip -o link show} (all the interfaces, also without an address, with flags, MTU and MAC address) and
+     * {@code ip -o -4 addr show} (IPv4 addresses) and merges their output by interface name.
+     */
     public LinuxIfconfig[] exec() throws KuraException {
         execLink();
         execInet();

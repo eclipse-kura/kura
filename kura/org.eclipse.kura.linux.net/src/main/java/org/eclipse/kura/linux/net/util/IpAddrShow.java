@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,12 +45,10 @@ public class IpAddrShow {
         this.executorService = executoService;
     }
 
-    // ifconfig sucks. ip sucks too but at least the output is consistent.
-    // Unfortunately 'ip' does not have the equivalent of 'ifconfig -a':
-    // 'ip addr show' does not show interfaces that are DOWN (meaning 'ifdown')
-    // 'ip link show' or 'ip -0 addr show' does not show inet addresses
-    // this means that we need to call 'ip' twice to get all the information:
-    // 'ip link show' followed by 'ip -4 addr show' and merge the two outputs.
+    /**
+     * Runs {@code ip -o link show} (all the interfaces, also without an address, with flags, MTU and MAC address) and
+     * {@code ip -o -4 addr show} (IPv4 addresses) and merges their output by interface name.
+     */
     public LinuxIfconfig[] exec() throws KuraException {
         execLink();
         execInet();
@@ -231,6 +229,11 @@ public class IpAddrShow {
         }
         if (input.charAt(end - 1) == ':') {
             end--;
+        }
+        // 'ip link' appends the parent link to the name, e.g. eth0@if65 in a container or eth0.100@eth0 for a VLAN
+        int parent = input.indexOf('@', start + 2);
+        if (parent > start + 2 && parent < end) {
+            end = parent;
         }
         return input.substring(start + 2, end);
     }

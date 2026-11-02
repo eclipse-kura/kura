@@ -33,6 +33,7 @@ RUN true && \
         openssl \
         net-tools \
         hostname \
+        iproute \
         which \
         findutils \
     && \

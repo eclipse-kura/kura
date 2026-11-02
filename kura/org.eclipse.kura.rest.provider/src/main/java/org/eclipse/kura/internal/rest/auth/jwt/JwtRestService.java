@@ -111,6 +111,8 @@ public class JwtRestService {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
             final String familyId = this.families.start(familyTrackingDeadline(issuer));
+            auditFamilyId(auditContext, familyId);
+
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, 0);
             auditLogger.info("{} Rest - Success - JWT token pair issued", auditContext);
             return response(result);
@@ -141,12 +143,14 @@ public class JwtRestService {
             final VerificationProof proof = verifier.verify(TokenVerifyRequest.builder(refreshToken)
                     .intendedConsumer(JwtRestServiceConstants.INTENDED_REFRESH_CONSUMER).build());
             final String identityName = proof.getIdentityName();
-            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), identityName);
+            auditIdentityName(auditContext, identityName);
+
             checkIdentityCanAuthenticate(identityName, auditContext);
 
             final Map<String, Object> claims = proof.getClaims();
             final String familyId = familyIdOf(claims);
             final long presentedGeneration = generationOf(claims);
+            auditFamilyId(auditContext, familyId);
 
             this.families.check(familyId, presentedGeneration);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
@@ -296,5 +300,13 @@ public class JwtRestService {
         }
 
         return new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    private static void auditIdentityName(AuditContext context, final String identityName) {
+        context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), identityName);
+    }
+
+    private static void auditFamilyId(AuditContext context, final String familyId) {
+        context.getProperties().put(JwtRestServiceConstants.AUDIT_KEY_FAMILY_ID, familyId);
     }
 }

@@ -27,4 +27,5 @@ public class JwtRestServiceConstants {
     public static final String TOKEN_TYPE = "Bearer";
     public static final String FAMILY_ID_CLAIM = "family.id";
     public static final String GENERATION_CLAIM = "generation";
+    public static final String AUDIT_KEY_FAMILY_ID = "jwt." + FAMILY_ID_CLAIM;
 }

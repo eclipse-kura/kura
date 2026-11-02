@@ -101,7 +101,7 @@ final class RefreshTokenFamilies {
 
         if (family.status() == Status.REVOKED) {
             throw new KuraAuthenticationFailedException(
-                    "refresh token reuse detected: family '" + familyId + "' is revoked");
+                    "refresh token reuse detected, family revoked");
         }
     }
 

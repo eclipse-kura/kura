@@ -107,6 +107,10 @@ final class RefreshTokenFamilies {
         update(familyId, family -> family.afterPresenting(presentedGeneration, trackedUntil));
     }
 
+    void discard(final String familyId) {
+        this.families.remove(familyId);
+    }
+
     void revokeForRemovedIdentity(final String familyId) {
         this.families.computeIfPresent(familyId, (id, family) -> family.revoked(IDENTITY_REMOVED));
     }

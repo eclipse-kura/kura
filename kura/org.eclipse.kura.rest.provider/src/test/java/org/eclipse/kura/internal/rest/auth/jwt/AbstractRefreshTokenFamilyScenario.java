@@ -65,6 +65,8 @@ public abstract class AbstractRefreshTokenFamilyScenario {
     private final AtomicInteger externalTokenCount = new AtomicInteger();
     private final List<Integer> exchangeStatuses = Collections.synchronizedList(new ArrayList<>());
     private CountDownLatch heldIssuances = new CountDownLatch(0);
+    private Exception refreshTokenIssuingFailure;
+    private Map<String, Object> refusedRefreshTokenClaims;
 
     @Before
     public void setUpTokenServices() throws KuraException {
@@ -77,10 +79,17 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
 
         when(this.issuer.issue(any())).thenAnswer(invocation -> {
+            final TokenIssueRequest request = invocation.getArgument(0);
+            if (this.refreshTokenIssuingFailure != null
+                    && request.getClaims().containsKey(JwtRestServiceConstants.FAMILY_ID_CLAIM)) {
+                this.refusedRefreshTokenClaims = request.getClaims();
+                throw this.refreshTokenIssuingFailure;
+            }
+
             this.heldIssuances.countDown();
             this.heldIssuances.await(10, TimeUnit.SECONDS);
             final String token = "token-" + this.issuedTokenCount.getAndIncrement();
-            this.issuedTokens.put(token, invocation.getArgument(0));
+            this.issuedTokens.put(token, request);
             return token;
         });
         when(this.verifier.verify(any()))
@@ -130,6 +139,18 @@ public abstract class AbstractRefreshTokenFamilyScenario {
 
     protected void holdIssuancesUntilAllStart(final int exchanges) {
         this.heldIssuances = new CountDownLatch(exchanges);
+    }
+
+    protected void failIssuingRefreshTokensWith(final Exception failure) {
+        this.refreshTokenIssuingFailure = failure;
+    }
+
+    protected void stopFailingIssuing() {
+        this.refreshTokenIssuingFailure = null;
+    }
+
+    protected Map<String, Object> refusedRefreshTokenClaims() {
+        return this.refusedRefreshTokenClaims;
     }
 
     protected String externalRefreshTokenWith(final String identityName, final Map<String, Object> claims) {

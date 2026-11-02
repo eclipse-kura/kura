@@ -115,7 +115,7 @@ public class JwtRestService {
                     familyTrackingDeadline(issuer));
             auditFamilyId(auditContext, familyId);
 
-            final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, 0);
+            final TokenPairDTO result = issueFirstTokenPair(identityName, issuer, familyId);
             auditLogger.info("{} Rest - Success - JWT token pair issued", auditContext);
             return response(result);
         } catch (final KuraException e) {
@@ -239,6 +239,16 @@ public class JwtRestService {
         }
 
         return refreshToken;
+    }
+
+    private TokenPairDTO issueFirstTokenPair(final String identityName, final TokenIssuingService issuer,
+            final String familyId) throws KuraException {
+        try {
+            return issueTokenPair(identityName, issuer, familyId, 0);
+        } catch (final KuraException | RuntimeException e) {
+            this.families.discard(familyId);
+            throw e;
+        }
     }
 
     private TokenPairDTO issueTokenPair(final String identityName, final TokenIssuingService issuer,

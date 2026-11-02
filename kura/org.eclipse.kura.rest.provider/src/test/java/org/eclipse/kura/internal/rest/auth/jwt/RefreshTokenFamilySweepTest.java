@@ -68,19 +68,19 @@ public class RefreshTokenFamilySweepTest {
     }
 
     private void givenAnActiveFamily() {
-        this.activeFamilyId = this.families.start(OWNER, FUTURE);
+        this.activeFamilyId = this.families.start(OWNER, null, FUTURE);
     }
 
     private void givenAnExpiredFamily() {
-        this.expiredFamilyId = this.families.start(OWNER, PAST);
+        this.expiredFamilyId = this.families.start(OWNER, null, PAST);
     }
 
     private void whenAFamilyStarts() {
-        this.families.start(OWNER, FUTURE);
+        this.families.start(OWNER, null, FUTURE);
     }
 
     private void whenTheActiveFamilyIsChecked() throws KuraAuthenticationFailedException {
-        this.families.check(this.activeFamilyId, OWNER, 0);
+        this.families.check(this.activeFamilyId, OWNER, null, 0);
     }
 
     private void thenTheExpiredFamilyIsNoLongerTracked() {

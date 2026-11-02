@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.rest.auth.jwt;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraAuthenticationFailedException;
+import org.eclipse.kura.identity.PasswordHash;
 
 final class RefreshTokenFamilies {
 
@@ -30,23 +32,29 @@ final class RefreshTokenFamilies {
         REVOKED
     }
 
-    private record Family(String owner, Status status, String revocationCause, long currentGeneration,
-            Instant trackedUntil) {
+    private record Family(String owner, PasswordHash passwordHash, Status status, String revocationCause,
+            long currentGeneration, Instant trackedUntil) {
 
-        static Family active(final String owner, final long generation, final Instant trackedUntil) {
-            return new Family(owner, Status.ACTIVE, null, generation, trackedUntil);
+        static Family active(final String owner, final PasswordHash passwordHash, final long generation,
+                final Instant trackedUntil) {
+            return new Family(owner, passwordHash, Status.ACTIVE, null, generation, trackedUntil);
         }
 
-        Family afterChecking(final String presenter, final long generation) {
+        Family afterChecking(final String presenter, final PasswordHash presenterPasswordHash, final long generation) {
             if (!this.owner.equals(presenter)) {
                 return revoked(OWNER_MISMATCH);
             }
 
-            return isCurrent(generation) ? this : revoked(REUSE_DETECTED);
+            if (!isCurrent(generation)) {
+                return revoked(REUSE_DETECTED);
+            }
+
+            return Objects.equals(this.passwordHash, presenterPasswordHash) ? this : revoked(PASSWORD_CHANGED);
         }
 
         Family afterPresenting(final long generation, final Instant newTrackedUntil) {
-            return isCurrent(generation) ? active(this.owner, generation + 1, newTrackedUntil) : revoked(REUSE_DETECTED);
+            return isCurrent(generation) ? active(this.owner, this.passwordHash, generation + 1, newTrackedUntil)
+                    : revoked(REUSE_DETECTED);
         }
 
         private boolean isCurrent(final long generation) {
@@ -58,12 +66,14 @@ final class RefreshTokenFamilies {
                 return this;
             }
 
-            return new Family(this.owner, Status.REVOKED, cause, this.currentGeneration, this.trackedUntil);
+            return new Family(this.owner, this.passwordHash, Status.REVOKED, cause, this.currentGeneration,
+                    this.trackedUntil);
         }
     }
 
     private static final String REUSE_DETECTED = "refresh token reuse detected";
     private static final String OWNER_MISMATCH = "refresh token identity does not match the family owner";
+    private static final String PASSWORD_CHANGED = "identity password changed";
     private static final Duration SWEEP_INTERVAL = Duration.ofSeconds(30);
 
     private final ConcurrentMap<String, Family> families = new ConcurrentHashMap<>();
@@ -78,17 +88,17 @@ final class RefreshTokenFamilies {
         this.sweepIntervalNanos = sweepInterval.toNanos();
     }
 
-    String start(final String owner, final Instant trackedUntil) {
+    String start(final String owner, final PasswordHash passwordHash, final Instant trackedUntil) {
         sweepExpiredFamilies(Instant.now());
 
         final String familyId = UUID.randomUUID().toString();
-        this.families.put(familyId, Family.active(owner, 0, trackedUntil));
+        this.families.put(familyId, Family.active(owner, passwordHash, 0, trackedUntil));
         return familyId;
     }
 
-    void check(final String familyId, final String presenter, final long presentedGeneration)
-            throws KuraAuthenticationFailedException {
-        update(familyId, family -> family.afterChecking(presenter, presentedGeneration));
+    void check(final String familyId, final String presenter, final PasswordHash presenterPasswordHash,
+            final long presentedGeneration) throws KuraAuthenticationFailedException {
+        update(familyId, family -> family.afterChecking(presenter, presenterPasswordHash, presentedGeneration));
     }
 
     void advance(final String familyId, final long presentedGeneration, final Instant trackedUntil)

@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.dto.TokenPairDTO;
 import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
@@ -94,6 +95,14 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         }
     }
 
+    protected void setPassword(final String identityName, final String password) {
+        try {
+            when(this.identityHelper.getPasswordHash(identityName)).thenReturn(Optional.of(new FakePasswordHash(password)));
+        } catch (final KuraException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     protected TokenPairDTO login() {
         return tokenPairOf(this.service.issue(this.requestContext));
     }
@@ -138,6 +147,9 @@ public abstract class AbstractRefreshTokenFamilyScenario {
 
     protected void thenTheExchangeStatusesAreInAnyOrder(final Integer... statuses) {
         assertEquals(Stream.of(statuses).sorted().toList(), List.copyOf(this.exchangeStatuses).stream().sorted().toList());
+    }
+
+    private record FakePasswordHash(String password) implements PasswordHash {
     }
 
     private static TokenPairDTO tokenPairOf(final Response response) {

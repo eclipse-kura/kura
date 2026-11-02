@@ -27,6 +27,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.dto.TokenPairDTO;
 import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
@@ -110,7 +111,8 @@ public class JwtRestService {
         try {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
-            final String familyId = this.families.start(identityName, familyTrackingDeadline(issuer));
+            final String familyId = this.families.start(identityName, passwordHashOf(identityName),
+                    familyTrackingDeadline(issuer));
             auditFamilyId(auditContext, familyId);
 
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, 0);
@@ -123,7 +125,8 @@ public class JwtRestService {
 
     /**
      * Accepts refresh tokens the verification service trusts that belong to a known, active token family of the same
-     * identity. Exchanging a refresh token of an older generation, or of another identity, revokes its whole family.
+     * identity. Exchanging a refresh token of an older generation, of another identity, or after the identity password
+     * changed, revokes its whole family.
      * 
      * @param body
      * @return
@@ -152,7 +155,7 @@ public class JwtRestService {
             final long presentedGeneration = generationOf(claims);
             auditFamilyId(auditContext, familyId);
 
-            this.families.check(familyId, identityName, presentedGeneration);
+            this.families.check(familyId, identityName, passwordHashOf(identityName), presentedGeneration);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
             this.families.advance(familyId, presentedGeneration, familyTrackingDeadline(issuer));
 
@@ -206,6 +209,10 @@ public class JwtRestService {
                     "Password change required");
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
+    }
+
+    private PasswordHash passwordHashOf(final String identityName) throws KuraException {
+        return this.identityHelper.getPasswordHash(identityName).orElse(null);
     }
 
     // the endpoint is public: read a bounded prefix instead of buffering whatever the caller sends

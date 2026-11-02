@@ -52,7 +52,7 @@ public class RefreshTokenFamilyEvictionTest {
     }
 
     private void givenAFamilyTrackedUntil(final Instant trackedUntil) {
-        this.familyId = this.families.start(OWNER, trackedUntil);
+        this.familyId = this.families.start(OWNER, null, trackedUntil);
     }
 
     private void givenTheFamilyWasAdvancedFrom(final long generation, final Instant trackedUntil) {

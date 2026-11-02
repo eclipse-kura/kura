@@ -33,4 +33,16 @@ public class RefreshTokenFamilyRetentionTest extends AbstractJwtRestScenario {
 
         thenATokenPairIsReturned();
     }
+
+    @Test
+    public void theLatestRefreshTokenStaysUsableAfterTheRetentionBeforeItsExpiry() throws Exception {
+        givenTheRestServiceProperties(Map.of(REFRESH_TOKEN_DURATION, 5, REFRESH_TOKEN_FAMILY_RETENTION, 1));
+        givenAnIdentityWithPermissions(ASSETS_PERMISSION);
+        givenATokenPairIssuedToTheIdentity();
+        givenTimePasses(Duration.ofSeconds(3));
+
+        whenTheRefreshEndpointReceives(theRefreshToken());
+
+        thenATokenPairIsReturned();
+    }
 }

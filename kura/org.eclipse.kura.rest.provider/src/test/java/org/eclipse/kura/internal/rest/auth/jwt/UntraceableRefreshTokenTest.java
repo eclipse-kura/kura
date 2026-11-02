@@ -63,7 +63,7 @@ public class UntraceableRefreshTokenTest extends AbstractRefreshTokenFamilyScena
     }
 
     private void givenAnExternalRefreshTokenWith(final Map<String, Object> claims) {
-        this.refreshToken = externalRefreshTokenWith(claims);
+        this.refreshToken = externalRefreshTokenWith(IDENTITY, claims);
     }
 
     private void whenTheRefreshTokenIsExchanged(final String token) {

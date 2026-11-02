@@ -71,7 +71,7 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         this.service.setTokenIssuingService(this.issuer);
         this.service.setTokenVerificationService(this.verifier);
 
-        when(this.identityHelper.identityExists(IDENTITY)).thenReturn(true);
+        createIdentity(IDENTITY);
         when(this.requestContext.getSecurityContext()).thenReturn(this.securityContext);
         when(this.securityContext.getUserPrincipal()).thenReturn(() -> IDENTITY);
 
@@ -84,6 +84,14 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         });
         when(this.verifier.verify(any()))
                 .thenAnswer(invocation -> proofOf(invocation.<TokenVerifyRequest> getArgument(0).getToken()));
+    }
+
+    protected void createIdentity(final String identityName) {
+        try {
+            when(this.identityHelper.identityExists(identityName)).thenReturn(true);
+        } catch (final KuraException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     protected TokenPairDTO login() {
@@ -106,8 +114,8 @@ public abstract class AbstractRefreshTokenFamilyScenario {
         this.heldIssuances = new CountDownLatch(exchanges);
     }
 
-    protected String externalRefreshTokenWith(final Map<String, Object> claims) {
-        final TokenIssueRequest.Builder request = TokenIssueRequest.builder(IDENTITY)
+    protected String externalRefreshTokenWith(final String identityName, final Map<String, Object> claims) {
+        final TokenIssueRequest.Builder request = TokenIssueRequest.builder(identityName)
                 .intendedConsumer(JwtRestServiceConstants.INTENDED_REFRESH_CONSUMER);
         claims.forEach(request::claim);
 

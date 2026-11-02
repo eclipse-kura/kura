@@ -25,6 +25,7 @@ import org.junit.Test;
 public class RefreshTokenFamilyEvictionTest {
 
     private static final Instant PAST = Instant.now().minus(Duration.ofSeconds(1));
+    private static final String OWNER = "alice";
     private static final Instant FUTURE = Instant.now().plus(Duration.ofMinutes(1));
 
     private final RefreshTokenFamilies families = new RefreshTokenFamilies();
@@ -51,7 +52,7 @@ public class RefreshTokenFamilyEvictionTest {
     }
 
     private void givenAFamilyTrackedUntil(final Instant trackedUntil) {
-        this.familyId = this.families.start(trackedUntil);
+        this.familyId = this.families.start(OWNER, trackedUntil);
     }
 
     private void givenTheFamilyWasAdvancedFrom(final long generation, final Instant trackedUntil) {

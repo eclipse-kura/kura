@@ -110,7 +110,7 @@ public class JwtRestService {
         try {
             checkIdentityCanAuthenticate(identityName, auditContext);
 
-            final String familyId = this.families.start(familyTrackingDeadline(issuer));
+            final String familyId = this.families.start(identityName, familyTrackingDeadline(issuer));
             auditFamilyId(auditContext, familyId);
 
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, 0);
@@ -122,8 +122,8 @@ public class JwtRestService {
     }
 
     /**
-     * Accepts refresh tokens the verification service trusts that belong to a known, active token family. Exchanging a
-     * refresh token of an older generation revokes its whole family.
+     * Accepts refresh tokens the verification service trusts that belong to a known, active token family of the same
+     * identity. Exchanging a refresh token of an older generation, or of another identity, revokes its whole family.
      * 
      * @param body
      * @return
@@ -152,7 +152,7 @@ public class JwtRestService {
             final long presentedGeneration = generationOf(claims);
             auditFamilyId(auditContext, familyId);
 
-            this.families.check(familyId, presentedGeneration);
+            this.families.check(familyId, identityName, presentedGeneration);
             final TokenPairDTO result = issueTokenPair(identityName, issuer, familyId, presentedGeneration + 1);
             this.families.advance(familyId, presentedGeneration, familyTrackingDeadline(issuer));
 

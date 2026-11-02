@@ -25,6 +25,7 @@ import org.junit.Test;
 public class RefreshTokenFamilySweepTest {
 
     private static final Instant PAST = Instant.now().minus(Duration.ofSeconds(1));
+    private static final String OWNER = "alice";
     private static final Instant FUTURE = Instant.now().plus(Duration.ofMinutes(1));
 
     private RefreshTokenFamilies families;
@@ -67,19 +68,19 @@ public class RefreshTokenFamilySweepTest {
     }
 
     private void givenAnActiveFamily() {
-        this.activeFamilyId = this.families.start(FUTURE);
+        this.activeFamilyId = this.families.start(OWNER, FUTURE);
     }
 
     private void givenAnExpiredFamily() {
-        this.expiredFamilyId = this.families.start(PAST);
+        this.expiredFamilyId = this.families.start(OWNER, PAST);
     }
 
     private void whenAFamilyStarts() {
-        this.families.start(FUTURE);
+        this.families.start(OWNER, FUTURE);
     }
 
     private void whenTheActiveFamilyIsChecked() throws KuraAuthenticationFailedException {
-        this.families.check(this.activeFamilyId, 0);
+        this.families.check(this.activeFamilyId, OWNER, 0);
     }
 
     private void thenTheExpiredFamilyIsNoLongerTracked() {

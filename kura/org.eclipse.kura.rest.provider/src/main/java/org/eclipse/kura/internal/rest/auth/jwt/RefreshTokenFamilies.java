@@ -30,25 +30,40 @@ final class RefreshTokenFamilies {
         REVOKED
     }
 
-    private record Family(Status status, long currentGeneration, Instant trackedUntil) {
+    private record Family(String owner, Status status, String revocationCause, long currentGeneration,
+            Instant trackedUntil) {
 
-        Family afterChecking(final long generation) {
-            return isCurrent(generation) ? this : revoked();
+        static Family active(final String owner, final long generation, final Instant trackedUntil) {
+            return new Family(owner, Status.ACTIVE, null, generation, trackedUntil);
+        }
+
+        Family afterChecking(final String presenter, final long generation) {
+            if (!this.owner.equals(presenter)) {
+                return revoked(OWNER_MISMATCH);
+            }
+
+            return isCurrent(generation) ? this : revoked(REUSE_DETECTED);
         }
 
         Family afterPresenting(final long generation, final Instant newTrackedUntil) {
-            return isCurrent(generation) ? new Family(Status.ACTIVE, generation + 1, newTrackedUntil) : revoked();
+            return isCurrent(generation) ? active(this.owner, generation + 1, newTrackedUntil) : revoked(REUSE_DETECTED);
         }
 
         private boolean isCurrent(final long generation) {
             return this.status == Status.ACTIVE && this.currentGeneration == generation;
         }
 
-        private Family revoked() {
-            return new Family(Status.REVOKED, this.currentGeneration, this.trackedUntil);
+        private Family revoked(final String cause) {
+            if (this.status == Status.REVOKED) {
+                return this;
+            }
+
+            return new Family(this.owner, Status.REVOKED, cause, this.currentGeneration, this.trackedUntil);
         }
     }
 
+    private static final String REUSE_DETECTED = "refresh token reuse detected";
+    private static final String OWNER_MISMATCH = "refresh token identity does not match the family owner";
     private static final Duration SWEEP_INTERVAL = Duration.ofSeconds(30);
 
     private final ConcurrentMap<String, Family> families = new ConcurrentHashMap<>();
@@ -63,16 +78,17 @@ final class RefreshTokenFamilies {
         this.sweepIntervalNanos = sweepInterval.toNanos();
     }
 
-    String start(final Instant trackedUntil) {
+    String start(final String owner, final Instant trackedUntil) {
         sweepExpiredFamilies(Instant.now());
 
         final String familyId = UUID.randomUUID().toString();
-        this.families.put(familyId, new Family(Status.ACTIVE, 0, trackedUntil));
+        this.families.put(familyId, Family.active(owner, 0, trackedUntil));
         return familyId;
     }
 
-    void check(final String familyId, final long presentedGeneration) throws KuraAuthenticationFailedException {
-        update(familyId, family -> family.afterChecking(presentedGeneration));
+    void check(final String familyId, final String presenter, final long presentedGeneration)
+            throws KuraAuthenticationFailedException {
+        update(familyId, family -> family.afterChecking(presenter, presentedGeneration));
     }
 
     void advance(final String familyId, final long presentedGeneration, final Instant trackedUntil)
@@ -100,8 +116,7 @@ final class RefreshTokenFamilies {
         }
 
         if (family.status() == Status.REVOKED) {
-            throw new KuraAuthenticationFailedException(
-                    "refresh token reuse detected, family revoked");
+            throw new KuraAuthenticationFailedException(family.revocationCause() + ", family revoked");
         }
     }
 

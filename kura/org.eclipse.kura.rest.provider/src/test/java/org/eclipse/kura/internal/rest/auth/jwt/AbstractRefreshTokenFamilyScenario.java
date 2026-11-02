@@ -198,6 +198,6 @@ public abstract class AbstractRefreshTokenFamilyScenario {
     }
 
     private static Object decodedLikeJackson(final Object value) {
-        return value instanceof Long number ? Math.toIntExact(number) : value;
+        return value instanceof Long number && number.intValue() == number.longValue() ? number.intValue() : value;
     }
 }

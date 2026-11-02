@@ -18,8 +18,8 @@ While JWT authentication is disabled, both endpoints return 404 and bearer token
 
 1. Call [POST/issue](#postissue) authenticating with any other enabled method: BASIC credentials, a session (with the `X-XSRF-Token` header, see [Session V1 REST APIs](rest-session-api.md)) or a client certificate. A caller authenticated with a JWT access token is refused, so a leaked access token cannot be used to obtain new tokens.
 2. Access the REST APIs with the header `Authorization: Bearer <accessToken>`.
-3. Before the access token expires, or when a request fails with 401, call [POST/refresh](#postrefresh) with the refresh token. Replace both stored tokens with the returned ones: the used refresh token can no longer be exchanged.
-4. If the refresh fails with 401, the refresh token is expired, already used or no longer valid: go back to step 1.
+3. Before the access token expires, or when a request fails with 401, call [POST/refresh](#postrefresh) with the refresh token. Replace both stored tokens with the returned ones and discard the used refresh token: exchanging it again revokes all the refresh tokens obtained since step 1.
+4. If the refresh fails with 401, the refresh token is expired, revoked or no longer valid: go back to step 1.
 
 ### Example with `curl`
 
@@ -51,11 +51,12 @@ curl -k -X POST -H 'Content-Type: text/plain' --data "$REFRESH_TOKEN" \
 
 - **Authorization**: tokens carry only the identity name. Permissions are read from the identity on every request, so permission changes apply immediately and a token never grants more than the identity currently has. No permission is needed to call the token endpoints.
 - **Identity checks**: issuing, refreshing and every bearer request fail if the identity no longer exists or must [change its password](../../gateway-configuration/gateway-administration-console-authentication.md#forced-password-change-on-login).
-- **Revocation**: a single token cannot be revoked. To cut off a client, delete the identity, force a password change, disable JWT authentication, or replace the signing key / trusted certificates.
+- **Revocation**: access tokens cannot be revoked. Refresh tokens are revoked only on reuse, see *Refresh token rotation and reuse detection*. To cut off a client, delete the identity, force a password change, disable JWT authentication, or replace the signing key / trusted certificates.
 - **Lifetimes**: set by *JWT Access Token Duration* and *JWT Refresh Token Duration*, silently capped by the *Maximum Token Lifetime* of the issuing service. The `...ExpiresInSeconds` fields report the effective values. Since each refresh token works once, the refresh token duration is the maximum inactivity time of a client.
-- **Refresh token rotation and replay**: every successful refresh consumes the refresh token. Used tokens are tracked in memory until they expire plus *JWT Used Refresh Token Retention*, which must be greater than or equal to the *Clock Skew Tolerance* of the verification service. After a Kura restart, the tracking is lost and already used refresh tokens are accepted again until they expire. Serialize refreshes in the client: two concurrent refreshes with the same token make one of them fail with 401.
+- **Refresh token rotation and reuse detection**: each [POST/issue](#postissue) starts a new *token family*, and every successful refresh consumes the presented refresh token and returns the next one of the same family. Presenting a refresh token that was already exchanged revokes its whole family: that refresh and every later refresh with any token of the family fail with 401, and the client must call [POST/issue](#postissue) again. Other families of the same identity are not affected, and access tokens already issued stay valid until they expire. Serialize refreshes in the client: two concurrent refreshes with the same token revoke the family.
+- **Restarts**: token families are tracked in memory until their latest refresh token expires plus *JWT Refresh Token Family Retention*, which must be greater than or equal to the *Clock Skew Tolerance* of the verification service. After a Kura restart all refresh tokens are refused, and clients must call [POST/issue](#postissue) again.
 - **Failed issuing**: if a new pair cannot be issued during a refresh (500 or 503), the refresh token is not consumed and can be retried.
-- **External refresh tokens**: [POST/refresh](#postrefresh) accepts any refresh token trusted by the verification service, including tokens issued outside Kura, provided `sub` is an existing Kura identity, `aud` contains `/token/jwt/v1/refresh`, and `iss` and `jti` are present. Access tokens are verified with the audience `/token/jwt/v1/access`.
+- **External tokens**: access tokens trusted by the verification service are accepted even if issued outside Kura, provided `sub` is an existing Kura identity and `aud` contains `/token/jwt/v1/access`. [POST/refresh](#postrefresh) only accepts refresh tokens issued by this Kura instance.
 - **Caching**: token responses carry `Cache-Control: no-store` and `Pragma: no-cache`. Store tokens as credentials: never log them or put them in URLs.
 - **Provider order**: bearer authentication is attempted after the certificate, BASIC and session providers. The **Allowed Ports** restriction applies as for any other REST API.
 
@@ -99,13 +100,13 @@ curl -k -X POST -H 'Content-Type: text/plain' --data "$REFRESH_TOKEN" \
   * **description** : Exchanges a refresh token for a new token pair. No other authentication is needed. The request body must be the refresh token as `text/plain`; surrounding whitespace is ignored and the body is limited to 8 KiB.
   * **responses** :
       * **200**
-          * **description** : Request succeeded, the exchanged refresh token can no longer be used.
+          * **description** : Request succeeded, the exchanged refresh token can no longer be used: exchanging it again revokes its token family.
           * **response body** :
               * [TokenPair](#tokenpair)
       * **400**
           * **description** : The request body is empty.
       * **401**
-          * **description** : The refresh token is invalid, expired, already used or not a refresh token, or its identity does not exist.
+          * **description** : The refresh token is invalid, expired, already used, revoked, not issued by this Kura instance since its last restart, or not a refresh token, or its identity does not exist. An already used refresh token also revokes its token family.
       * **403**
           * **description** : The identity must change its password.
       * **404**

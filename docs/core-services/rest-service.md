@@ -39,7 +39,7 @@ The available configuration parameters are the following:
 
 * **Enable Certificate Authentication Without Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: false)
 
-* **JWT Authentication Enabled**: Enables JWT bearer authentication and the `/services/token/jwt/v1` endpoints that issue and refresh tokens. Requires a configured [JWT Issuing Service and JWT Verification Service](jwt-services.md). See [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api.md). (Default: false)
+* **JWT Authentication Enabled**: Enables JWT bearer authentication and the `/services/token/jwt/v1` endpoints that issue and refresh tokens. Requires a configured [JWT Issuing Service and JWT Verification Service](jwt-services.md). See [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api-v1.md). (Default: false)
 
 * **Token Issuing Service Target**: OSGi filter selecting the `TokenIssuingService` that signs access and refresh tokens. Without a match, tokens cannot be issued or refreshed. (Default: `(objectClass=org.eclipse.kura.security.token.TokenIssuingService)`)
 
@@ -49,7 +49,7 @@ The available configuration parameters are the following:
 
 * **JWT Refresh Token Duration (Seconds)**: Lifetime of refresh tokens. Each one can be exchanged only once, so this is the inactivity timeout of a client. Should be greater than the access token duration. Capped by the *Maximum Token Lifetime* of the issuing service. (Default: 900)
 
-* **JWT Used Refresh Token Retention (Seconds)**: How long a used refresh token is still tracked after it expires, so that it cannot be exchanged again. Must be greater than or equal to the *Clock Skew Tolerance* of the verification service. Used tokens are tracked in memory: after a restart they are accepted again until they expire. (Default: 300)
+* **JWT Refresh Token Family Retention (Seconds)**: How long a refresh token family is still tracked after its latest refresh token expires, so that a reused refresh token of the family is still detected. Must be greater than or equal to the *Clock Skew Tolerance* of the verification service. Families are tracked in memory: after a restart all refresh tokens are refused and clients must request a new token pair. See [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api-v1.md#behavior). (Default: 300)
 
 ## Custom authentication methods
 

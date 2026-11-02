@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
+import java.net.CookieManager;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -43,6 +44,7 @@ import org.junit.BeforeClass;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
+import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
 /**
@@ -156,6 +158,22 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         case DELETED -> this.identities.delete(IDENTITY);
         case REQUIRED_TO_CHANGE_PASSWORD -> this.identities.requirePasswordChange(IDENTITY);
         }
+    }
+
+    protected void givenTheIdentityChangedItsPasswordTo(final String newPassword) {
+        authorizeWith(NO_AUTHORIZATION);
+        sessionRequest("POST", "login/password",
+                Json.object().add("username", IDENTITY).add("password", PASSWORD).toString(), 200);
+
+        final Response xsrfTokenResponse = sessionRequest("GET", "xsrfToken", null, 200);
+        restTransport().setHeader("X-XSRF-Token",
+                Json.parse(xsrfTokenResponse.getBody().orElseThrow()).asObject().get("xsrfToken").asString());
+
+        sessionRequest("POST", "changePassword",
+                Json.object().add("currentPassword", PASSWORD).add("newPassword", newPassword).toString(), 204);
+
+        restTransport().removeHeader("X-XSRF-Token");
+        restTransport().setCookieManager(new CookieManager());
     }
 
     protected void givenATokenPairIssuedToTheIdentity() {
@@ -276,6 +294,14 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         restTransport().setBasicCredentials(Optional.empty());
         authorization.ifPresentOrElse(value -> restTransport().setHeader("Authorization", value),
                 () -> restTransport().removeHeader("Authorization"));
+    }
+
+    private Response sessionRequest(final String method, final String path, final String body,
+            final int expectedStatus) {
+        final Response response = restTransport().runRequest(SERVICES_URL, "session/v1/" + path,
+                new MethodSpec(method), body);
+        assertEquals(path, expectedStatus, response.getStatus());
+        return response;
     }
 
     private static Duration lifetime(final String token) {

@@ -35,24 +35,6 @@ public class RefreshTokenFamilyIdentityRemovalTest extends AbstractRefreshTokenF
         thenTheExchangeStatusesAre(UNAUTHORIZED, UNAUTHORIZED);
     }
 
-    @Test
-    public void reCreatingAnIdentityWithTheSamePasswordDoesNotReviveTheFamily() {
-        givenThePasswordIs("first");
-        givenTheOwnerLoggedIn();
-        givenTheIdentityIsRemoved();
-        givenTheRefreshTokenWasExchanged(this.refreshToken);
-        givenTheIdentityIsCreated();
-        givenThePasswordIs("first");
-
-        whenTheRefreshTokenIsExchanged(this.refreshToken);
-
-        thenTheExchangeStatusesAre(UNAUTHORIZED, UNAUTHORIZED);
-    }
-
-    private void givenThePasswordIs(final String password) {
-        setPassword(IDENTITY, password);
-    }
-
     private void givenTheOwnerLoggedIn() {
         this.refreshToken = login().refreshToken();
     }

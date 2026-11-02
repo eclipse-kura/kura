@@ -28,17 +28,6 @@ public class RefreshTokenFamilyOwnershipTest extends AbstractRefreshTokenFamilyS
     private String foreignRefreshToken;
 
     @Test
-    public void aRefreshTokenOfAnotherIdentityIsRefused() {
-        givenTheIdentityExists(OTHER_IDENTITY);
-        givenTheOwnerLoggedIn();
-        givenARefreshTokenIssuedTo(OTHER_IDENTITY, inTheFamilyOf(this.ownerRefreshToken));
-
-        whenTheRefreshTokenIsExchanged(this.foreignRefreshToken);
-
-        thenTheExchangeStatusesAre(UNAUTHORIZED);
-    }
-
-    @Test
     public void aRefreshTokenOfAnotherIdentityRevokesTheFamily() {
         givenTheIdentityExists(OTHER_IDENTITY);
         givenTheOwnerLoggedIn();

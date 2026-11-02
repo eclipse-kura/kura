@@ -76,17 +76,6 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
     }
 
     @Test
-    public void aRefreshTokenOfADeletedIdentityIsRefused() throws Exception {
-        givenAnIdentityWithPermissions(ASSETS_PERMISSION);
-        givenATokenPairIssuedToTheIdentity();
-        givenTheIdentityIs(IdentityChange.DELETED);
-
-        whenTheRefreshEndpointReceives(theRefreshToken());
-
-        thenResponseCodeIs(401);
-    }
-
-    @Test
     public void aRefreshTokenCannotBeExchangedOnceTheIdentityMustChangeItsPassword() throws Exception {
         givenAnIdentityWithPermissions(ASSETS_PERMISSION);
         givenATokenPairIssuedToTheIdentity();

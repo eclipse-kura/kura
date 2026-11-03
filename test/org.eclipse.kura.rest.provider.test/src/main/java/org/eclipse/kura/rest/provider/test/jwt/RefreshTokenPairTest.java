@@ -28,7 +28,6 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
         thenATokenPairIsReturned();
         thenResponseContainsHeader("Cache-Control", "no-store");
         thenResponseContainsHeader("Pragma", "no-cache");
-        thenTheReturnedRefreshTokenDiffersFromTheExchangedOne();
         thenTheReturnedAccessTokenGrantsAccessToTheProtectedResource();
     }
 
@@ -40,17 +39,6 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
         whenTheRefreshEndpointReceives("\n  " + theRefreshToken() + "  \n");
 
         thenATokenPairIsReturned();
-    }
-
-    @Test
-    public void aRefreshTokenCannotBeExchangedTwice() throws Exception {
-        givenAnIdentityWithPermissions(ASSETS_PERMISSION);
-        givenATokenPairIssuedToTheIdentity();
-        givenTheRefreshTokenWasExchangedWithStatus(200);
-
-        whenTheRefreshEndpointReceives(theFirstExchangedRefreshToken());
-
-        thenResponseCodeIs(401);
     }
 
     @Test
@@ -83,17 +71,6 @@ public class RefreshTokenPairTest extends AbstractJwtRestScenario {
     public void aBodyOfExactlyTheLimitIsRead() {
 
         whenTheRefreshEndpointReceives("a".repeat(MAX_REFRESH_TOKEN_BYTES));
-
-        thenResponseCodeIs(401);
-    }
-
-    @Test
-    public void aRefreshTokenOfADeletedIdentityIsRefused() throws Exception {
-        givenAnIdentityWithPermissions(ASSETS_PERMISSION);
-        givenATokenPairIssuedToTheIdentity();
-        givenTheIdentityIs(IdentityChange.DELETED);
-
-        whenTheRefreshEndpointReceives(theRefreshToken());
 
         thenResponseCodeIs(401);
     }

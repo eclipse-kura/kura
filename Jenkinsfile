@@ -64,6 +64,8 @@ node {
     stage('Generate test reports') {
         dir("kura") {
             junit 'kura/test/*/target/surefire-reports/*.xml,kura/examples/test/*/target/surefire-reports/*.xml'
+
+            archiveArtifacts artifacts: 'kura/coverage-report/target/site/jacoco-aggregate/**', allowEmptyArchive: false
         }
     }
 

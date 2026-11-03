@@ -14,10 +14,8 @@
 package org.eclipse.kura.linux.watchdog;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -65,7 +63,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
     private ScheduledExecutorService pollExecutor;
     private ScheduledFuture<?> pollTask;
-    private Writer watchdogFileWriter;
+    private volatile WatchdogDevice device;
     private volatile WatchdogServiceOptions options;
 
     private final Object statusLock = new Object();
@@ -88,9 +86,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     protected void deactivate() {
         cancelPollTask();
         shutdownPollExecutor();
-        if (this.watchdogFileWriter != null) {
+        if (this.device != null) {
             refreshWatchdog();
-            closeWatchdogFileWriter();
+            closeWatchdogDevice();
         }
     }
 
@@ -108,7 +106,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         this.options = newOptions;
         this.pollExecutor.submit(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
-            if (!toggleRequired && this.watchdogFileWriter != null) {
+            if (!toggleRequired && this.device != null) {
                 logger.debug(
                         "Watchdog device and enablement unchanged. Updating configuration without toggling the watchdog");
                 if (pingIntervalChanged) {
@@ -117,7 +115,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 return;
             }
             cancelPollTask();
-            if (this.watchdogFileWriter != null) {
+            if (this.device != null) {
                 disableWatchdog();
             }
             doUpdate(newOptions);
@@ -154,9 +152,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
     }
 
-    private void openWatchdog(final String watchdogDevice, final boolean tryStopWatchdogd) throws IOException {
+    private void openWatchdog(final String watchdogDevice, final boolean tryStopWatchdogd)
+            throws IOException, KuraException {
         try {
-            this.watchdogFileWriter = getWatchdogDeviceWriter(watchdogDevice);
+            this.device = createWatchdogDevice(watchdogDevice);
         } catch (IOException e) {
             if (tryStopWatchdogd) {
                 stopWatchdogd();
@@ -176,7 +175,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         this.timedOutOn = null;
-        this.watchdogFileWriter = null;
+        this.device = null;
 
         final Optional<String> unavailableReason = openWatchdogDevice(newOptions.getWatchdogDevice(), true);
         if (unavailableReason.isPresent()) {
@@ -199,7 +198,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
         try {
             openWatchdog(watchdogDevice, firstAttempt);
-        } catch (IOException e) {
+        } catch (IOException | KuraException e) {
             if (firstAttempt) {
                 logger.error("Failed to open watchdog device", e);
             } else {
@@ -304,8 +303,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         return TimeUnit.NANOSECONDS.toMillis(GRACE_PERIOD);
     }
 
-    protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
-        return new FileWriter(new File(watchdogDevice));
+    protected WatchdogDevice createWatchdogDevice(String watchdogDevice) throws IOException, KuraException {
+        return LinuxWatchdogDevice.open(watchdogDevice);
     }
 
     private void deleteWatchdogEnabledTemporaryFile(WatchdogServiceOptions currentOptions) {
@@ -322,7 +321,15 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public int getHardwareTimeout() {
-        return 0;
+        if (this.device == null) {
+            return 0;
+        }
+        try {
+            return (int) TimeUnit.SECONDS.toMillis(this.device.getTimeout());
+        } catch (IOException e) {
+            logger.warn("Unable to read the hardware watchdog timeout", e);
+            return 0;
+        }
     }
 
     @Override
@@ -492,7 +499,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void refreshWatchdog() {
         try {
-            writeWatchdogDevice("w");
+            this.device.keepAlive();
             setLastRefreshTime(Instant.now());
         } catch (IOException e) {
             logger.error("Failed to refresh watchdog device", e);
@@ -501,26 +508,22 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void disableWatchdog() {
         try {
-            writeWatchdogDevice("V");
+            this.device.disarm();
         } catch (IOException e) {
             logger.error("Failed to write magic character to watchdog device", e);
         }
-        closeWatchdogFileWriter();
+        closeWatchdogDevice();
     }
 
-    private void closeWatchdogFileWriter() {
+    private void closeWatchdogDevice() {
         try {
-            this.watchdogFileWriter.close();
-            this.watchdogFileWriter = null;
-            setDeviceOpen(false);
+            this.device.close();
         } catch (IOException e) {
             logger.error("Failed to close watchdog device", e);
+        } finally {
+            this.device = null;
+            setDeviceOpen(false);
         }
-    }
-
-    private synchronized void writeWatchdogDevice(String value) throws IOException {
-        this.watchdogFileWriter.write(value);
-        this.watchdogFileWriter.flush();
     }
 
     private void cancelPollTask() {

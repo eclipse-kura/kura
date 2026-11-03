@@ -23,8 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -67,11 +65,11 @@ public class WatchdogServiceImplTest {
     private WatchdogStatus status;
     private WatchdogStatus previousStatus;
     private Future<?> pollTaskBeforeUpdate;
-    private WatchdogTestWriter statusWriter;
+    private WatchdogTestDevice statusDevice;
     private RebootRecordingWatchdogServiceImpl rebootRecordingSvc;
     private Long timedOutOnBeforeUpdate;
     private long activationNanos;
-    private FailingWatchdogTestWriter failingWriter;
+    private FailingWatchdogTestDevice failingDevice;
     private ToggleDeviceWatchdogServiceImpl toggleSvc;
     private WatchdogServiceImpl registrySvc;
     private List<CriticalComponentRegistration> registrations;
@@ -219,7 +217,7 @@ public class WatchdogServiceImplTest {
         givenUnavailableDeviceWatchdogService(false, 0, LONG_GRACE_PERIOD_MS);
         givenUnavailableDeviceWatchdogServiceActivated(getUnavailableDeviceProperties(true, 50));
 
-        whenWatchdogDeviceBecomesAvailable(new WatchdogTestWriter());
+        whenWatchdogDeviceBecomesAvailable(new WatchdogTestDevice());
 
         thenUnavailableDeviceServiceStateBecomes(WatchdogState.SUPERVISING);
         thenNoFurtherRebootRequests();
@@ -267,7 +265,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusIsSupervisingWhenDeviceIsOpenAndRefreshed() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()), true);
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()), true);
 
         whenWatchdogStatusIsRequested(this.statusSvc);
 
@@ -281,7 +279,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusIsDisabledWhenServiceIsDisabled() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()), false);
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()), false);
 
         whenWatchdogStatusIsRequested(this.statusSvc);
 
@@ -293,7 +291,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusIsDisabledAndDeviceClosedAfterServiceIsDisabled() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()), true);
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()), true);
         givenStatusWatchdogServiceUpdated(false);
 
         whenWatchdogStatusIsRequested(this.statusSvc);
@@ -370,7 +368,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusLastRefreshTimeAdvancesOnEachRefresh() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
         givenStatusLastRefreshTimeIsPresent();
 
@@ -381,7 +379,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusLastRefreshTimeNotUpdatedWhenRefreshFails() throws Throwable {
-        givenStatusWatchdogServiceWithFailingWriterActivated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
+        givenStatusWatchdogServiceWithFailingDeviceActivated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
         givenStatusLastRefreshTimeIsPresent();
 
         whenWatchdogDeviceWritesFail();
@@ -393,7 +391,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void statusReflectsUpdatedConfiguration() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
 
         whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, OTHER_WATCHDOG_TEST_DEVICE, 20000));
@@ -472,7 +470,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void updateSkippedWhenConfigurationIsUnchanged() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenCurrentPollTaskIsRecorded();
 
@@ -484,7 +482,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void updateSkippedWhenOnlyUnrelatedPropertiesChange() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusPropertiesWith("kura.service.pid", "org.eclipse.kura.watchdog.WatchdogService"));
         givenCurrentPollTaskIsRecorded();
 
@@ -496,7 +494,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void updateSkippedWhenMissingPropertiesAreSetToTheirDefaults() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusPropertiesWithout("pingInterval"));
         givenCurrentPollTaskIsRecorded();
 
@@ -508,7 +506,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void updateSkippedWhenPropertyHasWrongTypeAndFallsBackToDefault() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenCurrentPollTaskIsRecorded();
 
@@ -644,7 +642,7 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void watchdogSupervisesAgainWhenPreviousConfigurationIsRestoredAfterDisable() throws Throwable {
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestWriter()),
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(new WatchdogTestDevice()),
                 getStatusProperties(true, WATCHDOG_TEST_DEVICE, 10000));
         givenStatusWatchdogServiceUpdated(getStatusProperties(false, WATCHDOG_TEST_DEVICE, 10000));
         givenStatusStateIs(WatchdogState.DISABLED);
@@ -686,7 +684,7 @@ public class WatchdogServiceImplTest {
         whenWatchdogServiceIsActivated(false);
 
         thenNothingIsWrittenToWatchdogDevice();
-        thenWatchdogDeviceWriterIsNotCreated();
+        thenWatchdogDeviceIsNotCreated();
     }
 
     @Test
@@ -909,15 +907,15 @@ public class WatchdogServiceImplTest {
         assertEquals(expectedState, this.statusSvc.getWatchdogStatus().getState());
     }
 
-    private void givenStatusWatchdogServiceWithFailingWriterActivated(Map<String, Object> properties)
+    private void givenStatusWatchdogServiceWithFailingDeviceActivated(Map<String, Object> properties)
             throws Throwable {
-        this.failingWriter = new FailingWatchdogTestWriter();
-        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(this.failingWriter), properties);
+        this.failingDevice = new FailingWatchdogTestDevice();
+        givenStatusWatchdogServiceActivated(new TestWatchdogServiceImpl(this.failingDevice), properties);
     }
 
     private void givenToggleDeviceWatchdogServiceActivated(boolean deviceAvailable, Map<String, Object> properties)
             throws Throwable {
-        this.toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestWriter(), deviceAvailable);
+        this.toggleSvc = new ToggleDeviceWatchdogServiceImpl(new WatchdogTestDevice(), deviceAvailable);
         givenStatusWatchdogServiceActivated(this.toggleSvc, properties);
     }
 
@@ -926,8 +924,8 @@ public class WatchdogServiceImplTest {
     }
 
     private void givenSupervisingWatchdogService(Map<String, Object> properties) throws Throwable {
-        this.statusWriter = new WatchdogTestWriter();
-        this.rebootRecordingSvc = new RebootRecordingWatchdogServiceImpl(this.statusWriter);
+        this.statusDevice = new WatchdogTestDevice();
+        this.rebootRecordingSvc = new RebootRecordingWatchdogServiceImpl(this.statusDevice);
         givenStatusWatchdogServiceActivated(this.rebootRecordingSvc, properties);
         givenStatusStateIs(WatchdogState.SUPERVISING);
     }
@@ -958,7 +956,7 @@ public class WatchdogServiceImplTest {
 
     private void givenStatusWatchdogServiceWithTimedOutCriticalComponent(String componentName) throws Throwable {
         new File(UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE).delete();
-        this.statusSvc = new RebootRecordingWatchdogServiceImpl(new WatchdogTestWriter());
+        this.statusSvc = new RebootRecordingWatchdogServiceImpl(new WatchdogTestDevice());
         Map<String, Object> properties = getProperties(true);
         properties.put("rebootCauseFilePath", UNAVAILABLE_DEVICE_REBOOT_CAUSE_FILE);
         properties.put("pingInterval", 50);
@@ -979,7 +977,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void givenWatchdogServiceEnabled() throws Throwable {
-        this.scenarioSvc = new TestWatchdogServiceImpl(new WatchdogTestWriter());
+        this.scenarioSvc = new TestWatchdogServiceImpl(new WatchdogTestDevice());
 
         this.scenarioSvc.activate(getProperties(true));
         awaitPendingUpdate();
@@ -990,8 +988,8 @@ public class WatchdogServiceImplTest {
     }
 
     private void givenWatchdogService() {
-        this.statusWriter = new WatchdogTestWriter();
-        this.statusSvc = new TestWatchdogServiceImpl(this.statusWriter);
+        this.statusDevice = new WatchdogTestDevice();
+        this.statusSvc = new TestWatchdogServiceImpl(this.statusDevice);
     }
 
     private void givenWatchdogServiceActivated(boolean enabled) throws Throwable {
@@ -1002,7 +1000,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void givenWatchdogDeviceIsOpen() throws NoSuchFieldException {
-        TestUtil.setFieldValue(this.statusSvc, "watchdogFileWriter", this.statusWriter);
+        TestUtil.setFieldValue(this.statusSvc, "device", this.statusDevice);
     }
 
     private void givenWatchdogServiceWithoutCriticalComponents() throws NoSuchFieldException {
@@ -1047,8 +1045,8 @@ public class WatchdogServiceImplTest {
         awaitPendingUpdate(this.unavailableDeviceSvc);
     }
 
-    private void whenWatchdogDeviceBecomesAvailable(Writer deviceWriter) {
-        this.unavailableDeviceSvc.setDeviceWriter(deviceWriter);
+    private void whenWatchdogDeviceBecomesAvailable(WatchdogDevice testDevice) {
+        this.unavailableDeviceSvc.setDevice(testDevice);
         this.unavailableDeviceSvc.setDeviceExists(true);
     }
 
@@ -1068,7 +1066,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void whenWatchdogDeviceWritesFail() throws Throwable {
-        this.failingWriter.startFailing();
+        this.failingDevice.startFailing();
         awaitPendingUpdate(this.statusSvc);
         this.previousStatus = this.statusSvc.getWatchdogStatus();
         Thread.sleep(250); // let several refreshes fail
@@ -1180,7 +1178,7 @@ public class WatchdogServiceImplTest {
 
     private void thenWatchdogDeviceIsOpen() throws NoSuchFieldException {
         assertTrue(this.unavailableDeviceSvc.getWatchdogStatus().isDeviceOpen());
-        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
+        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "device"));
         assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollTask"));
     }
 
@@ -1210,21 +1208,21 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenWatchdogIsNotToggled() {
-        assertFalse(this.statusWriter.toString().contains("V"));
+        assertFalse(this.statusDevice.toString().contains("V"));
         assertTrue(this.statusSvc.getWatchdogStatus().isDeviceOpen());
     }
 
     private void thenWatchdogIsToggled() throws InterruptedException {
         final long deadline = System.currentTimeMillis() + 10000;
-        while (!isRefreshedAfterDisable(this.statusWriter.toString()) && System.currentTimeMillis() < deadline) {
+        while (!isRefreshedAfterDisable(this.statusDevice.toString()) && System.currentTimeMillis() < deadline) {
             Thread.sleep(10);
         }
-        assertTrue(isRefreshedAfterDisable(this.statusWriter.toString()));
+        assertTrue(isRefreshedAfterDisable(this.statusDevice.toString()));
         assertTrue(this.statusSvc.getWatchdogStatus().isDeviceOpen());
     }
 
     private void thenWatchdogIsClosed() {
-        assertTrue(this.statusWriter.toString().endsWith("V"));
+        assertTrue(this.statusDevice.toString().endsWith("V"));
         assertFalse(this.statusSvc.getWatchdogStatus().isDeviceOpen());
     }
 
@@ -1311,7 +1309,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenWatchdogDeviceIsNotOpen() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "watchdogFileWriter"));
+        assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "device"));
     }
 
     private void thenWatchdogEnabledTemporaryFileDoesNotExist() {
@@ -1327,7 +1325,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenWatchdogIsRefreshed() {
-        assertTrue(this.statusWriter.toString().startsWith("w"));
+        assertTrue(this.statusDevice.toString().startsWith("w"));
     }
 
     private void thenPollTaskIsScheduled() throws NoSuchFieldException {
@@ -1347,22 +1345,22 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenWatchdogIsRefreshedWithoutBeingDisabled() {
-        final String written = this.statusWriter.toString();
+        final String written = this.statusDevice.toString();
         assertTrue(written.endsWith("ww"));
         assertFalse(written.contains("V"));
     }
 
     private void thenNothingIsWrittenToWatchdogDevice() {
-        assertTrue(this.statusWriter.toString().isEmpty());
+        assertTrue(this.statusDevice.toString().isEmpty());
     }
 
-    private void thenWatchdogDeviceWriterIsNotCreated() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.statusSvc, "watchdogFileWriter"));
+    private void thenWatchdogDeviceIsNotCreated() throws NoSuchFieldException {
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "device"));
         assertNull(TestUtil.getFieldValue(this.statusSvc, "timedOutOn"));
     }
 
     private void thenOnlyMagicCharacterIsWritten() {
-        assertEquals("V", this.statusWriter.toString());
+        assertEquals("V", this.statusDevice.toString());
     }
 
     private void thenCriticalComponentsAre(CriticalComponent... expectedCriticalComponents) {
@@ -1384,7 +1382,7 @@ public class WatchdogServiceImplTest {
 
     private void thenPollTaskIsNotScheduled() throws NoSuchFieldException {
         assertNull(TestUtil.getFieldValue(this.scenarioSvc, "pollTask"));
-        assertNull(TestUtil.getFieldValue(this.scenarioSvc, "watchdogFileWriter"));
+        assertNull(TestUtil.getFieldValue(this.scenarioSvc, "device"));
     }
 
     private void thenWatchdogDeviceFileDoesNotExist() {
@@ -1476,26 +1474,45 @@ public class WatchdogServiceImplTest {
         }).get(10, TimeUnit.SECONDS);
     }
 
-    private class WatchdogTestWriter extends StringWriter {
+    private class WatchdogTestDevice implements WatchdogDevice {
+
+        private final StringBuilder written = new StringBuilder();
 
         @Override
-        public synchronized void write(String str) {
-            super.write(str);
+        public synchronized void keepAlive() {
+            this.written.append('w');
             notify();
+        }
+
+        @Override
+        public int getTimeout() {
+            return 0;
+        }
+
+        @Override
+        public synchronized void disarm() {
+            this.written.append('V');
+            notify();
+        }
+
+        @Override
+        public void close() {
+            // nothing to close
+        }
+
+        @Override
+        public synchronized String toString() {
+            return this.written.toString();
         }
     }
 
     public class TestWatchdogServiceImpl extends WatchdogServiceImpl {
 
-        private final Writer testWriter;
+        private final WatchdogDevice testDevice;
         private volatile boolean hasCheckedCriticalComponents;
 
-        public TestWatchdogServiceImpl(Writer fileWriter) {
-            this.testWriter = fileWriter;
-        }
-
-        protected Writer getWatchdogFileWriter() throws IOException {
-            return this.testWriter;
+        public TestWatchdogServiceImpl(WatchdogDevice testDevice) {
+            this.testDevice = testDevice;
         }
 
         @Override
@@ -1506,8 +1523,8 @@ public class WatchdogServiceImplTest {
         }
 
         @Override
-        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
-            return testWriter;
+        protected WatchdogDevice createWatchdogDevice(String watchdogDevice) {
+            return this.testDevice;
         }
 
         @Override
@@ -1526,7 +1543,7 @@ public class WatchdogServiceImplTest {
         }
     }
 
-    private class FailingWatchdogTestWriter extends Writer {
+    private class FailingWatchdogTestDevice implements WatchdogDevice {
 
         private volatile boolean failing;
 
@@ -1535,20 +1552,30 @@ public class WatchdogServiceImplTest {
         }
 
         @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
+        public void keepAlive() throws IOException {
+            failIfRequested();
+        }
+
+        @Override
+        public int getTimeout() throws IOException {
+            failIfRequested();
+            return 0;
+        }
+
+        @Override
+        public void disarm() throws IOException {
+            failIfRequested();
+        }
+
+        @Override
+        public void close() {
+            // nothing to close
+        }
+
+        private void failIfRequested() throws IOException {
             if (this.failing) {
                 throw new IOException("Write failed");
             }
-        }
-
-        @Override
-        public void flush() throws IOException {
-            // nothing to flush
-        }
-
-        @Override
-        public void close() throws IOException {
-            // nothing to close
         }
     }
 
@@ -1556,8 +1583,8 @@ public class WatchdogServiceImplTest {
 
         private volatile boolean deviceAvailable;
 
-        public ToggleDeviceWatchdogServiceImpl(Writer fileWriter, boolean deviceAvailable) {
-            super(fileWriter);
+        public ToggleDeviceWatchdogServiceImpl(WatchdogDevice testDevice, boolean deviceAvailable) {
+            super(testDevice);
             this.deviceAvailable = deviceAvailable;
         }
 
@@ -1573,8 +1600,8 @@ public class WatchdogServiceImplTest {
 
     public class RebootRecordingWatchdogServiceImpl extends TestWatchdogServiceImpl {
 
-        public RebootRecordingWatchdogServiceImpl(Writer fileWriter) {
-            super(fileWriter);
+        public RebootRecordingWatchdogServiceImpl(WatchdogDevice testDevice) {
+            super(testDevice);
         }
 
         private int rebootRequests;
@@ -1604,7 +1631,7 @@ public class WatchdogServiceImplTest {
     public class UnavailableDeviceWatchdogServiceImpl extends WatchdogServiceImpl {
 
         private volatile boolean deviceExists;
-        private volatile Writer deviceWriter;
+        private volatile WatchdogDevice testDevice;
         private final int failingReboots;
         private final long gracePeriodMs;
         private int rebootRequests;
@@ -1624,8 +1651,8 @@ public class WatchdogServiceImplTest {
             this.deviceExists = deviceExists;
         }
 
-        public void setDeviceWriter(Writer deviceWriter) {
-            this.deviceWriter = deviceWriter;
+        public void setDevice(WatchdogDevice testDevice) {
+            this.testDevice = testDevice;
         }
 
         @Override
@@ -1634,12 +1661,12 @@ public class WatchdogServiceImplTest {
         }
 
         @Override
-        protected Writer getWatchdogDeviceWriter(String watchdogDevice) throws IOException {
-            final Writer writer = this.deviceWriter;
-            if (writer == null) {
+        protected WatchdogDevice createWatchdogDevice(String watchdogDevice) throws IOException {
+            final WatchdogDevice currentDevice = this.testDevice;
+            if (currentDevice == null) {
                 throw new IOException("Device or resource busy");
             }
-            return writer;
+            return currentDevice;
         }
 
         @Override

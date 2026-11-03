@@ -8,6 +8,8 @@ Import-Package: \
 Bundle-Name: org.eclipse.kura.linux.watchdog
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,lib/jna.jar
 -includeresource: \
+    lib/jna.jar=lib/jna.jar,\
     about.html,\
     about_files=about_files/

@@ -321,11 +321,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public int getHardwareTimeout() {
-        if (this.device == null) {
+        final WatchdogDevice currentDevice = this.device;
+        if (currentDevice == null) {
             return 0;
         }
         try {
-            return (int) TimeUnit.SECONDS.toMillis(this.device.getTimeout());
+            return (int) TimeUnit.SECONDS.toMillis(currentDevice.getTimeout());
         } catch (IOException e) {
             logger.warn("Unable to read the hardware watchdog timeout", e);
             return 0;

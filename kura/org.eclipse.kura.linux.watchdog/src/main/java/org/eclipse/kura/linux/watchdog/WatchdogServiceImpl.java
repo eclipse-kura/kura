@@ -134,6 +134,11 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void updateSupervision(final WatchdogServiceOptions newOptions) {
         setRefreshInterval(newOptions.getPingInterval());
         cancelPollTask();
+
+        if (rejectInvalidConfiguration(newOptions)) {
+            return;
+        }
+
         scheduleCriticalComponentsCheck(newOptions);
     }
 
@@ -183,6 +188,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             return;
         }
 
+        if (rejectInvalidConfiguration(newOptions)) {
+            return;
+        }
+
         startSupervision(newOptions);
     }
 
@@ -208,6 +217,50 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         return Optional.empty();
+    }
+
+    private boolean rejectInvalidConfiguration(final WatchdogServiceOptions newOptions) {
+        final Optional<String> invalidConfigurationReason = checkPingIntervalAgainstHardwareTimeout(newOptions);
+        if (!invalidConfigurationReason.isPresent()) {
+            return false;
+        }
+
+        disableWatchdog();
+        handleInvalidConfiguration(newOptions, invalidConfigurationReason.get());
+        return true;
+    }
+
+    private Optional<String> checkPingIntervalAgainstHardwareTimeout(final WatchdogServiceOptions newOptions) {
+        final int pingInterval = newOptions.getPingInterval();
+        final int hardwareTimeout = getHardwareTimeout();
+        if (hardwareTimeout <= 0 || pingInterval <= hardwareTimeout / 2) {
+            return Optional.empty();
+        }
+
+        logger.error("Ping interval {} ms exceeds half of the hardware watchdog timeout {} ms", pingInterval,
+                hardwareTimeout);
+        return Optional.of("Ping interval " + pingInterval + " ms exceeds half of the hardware watchdog timeout "
+                + hardwareTimeout + " ms");
+    }
+
+    private void handleInvalidConfiguration(final WatchdogServiceOptions newOptions,
+            final String invalidConfigurationReason) {
+        setState(WatchdogState.INVALID_CONFIGURATION, invalidConfigurationReason);
+
+        if (!newOptions.isFailOnUnavailableDevice()) {
+            return;
+        }
+
+        final long gracePeriod = getUnavailableDeviceGracePeriod();
+
+        logger.error("Watchdog configuration is invalid and fail on unavailable device is enabled. "
+                + "System will reboot in {} ms if the configuration is not fixed", gracePeriod);
+
+        this.pollTask = this.pollExecutor.schedule(() -> {
+            Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
+            logger.error("Watchdog configuration is still invalid after the grace period. System will reboot");
+            requestRebootAfterGracePeriod(newOptions, invalidConfigurationReason);
+        }, gracePeriod, TimeUnit.MILLISECONDS);
     }
 
     private void startSupervision(final WatchdogServiceOptions newOptions) {
@@ -256,7 +309,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         if (!unavailableReason.isPresent()) {
             logger.info("Watchdog device '{}' is now available. Reboot cancelled", newOptions.getWatchdogDevice());
             cancelPollTask();
-            startSupervision(newOptions);
+            if (!rejectInvalidConfiguration(newOptions)) {
+                startSupervision(newOptions);
+            }
             return;
         }
 
@@ -267,12 +322,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         cancelPollTask();
-        requestUnavailableDeviceReboot(newOptions, unavailableReason.get());
+        logger.error("Watchdog device is still unavailable after the grace period. System will reboot");
+        requestRebootAfterGracePeriod(newOptions, unavailableReason.get());
     }
 
-    private void requestUnavailableDeviceReboot(final WatchdogServiceOptions newOptions, final String rebootCause) {
+    private void requestRebootAfterGracePeriod(final WatchdogServiceOptions newOptions, final String rebootCause) {
         setState(WatchdogState.REBOOT_REQUESTED, rebootCause);
-        logger.error("Watchdog device is still unavailable after the grace period. System will reboot");
         if (!requestReboot(newOptions, rebootCause)) {
             logger.error(
                     "System reboot failed. The system is running without hardware watchdog supervision. Retrying every {} ms",

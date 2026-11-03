@@ -38,9 +38,17 @@ public enum WatchdogState {
     DEVICE_UNAVAILABLE,
 
     /**
-     * A system reboot has been requested, either because a {@link CriticalComponent} timed out or because the
-     * watchdog device is still unavailable at the end of the grace period and the service is configured to fail on
-     * unavailable device. The state is kept while a failed reboot is being retried.
+     * The {@link WatchdogService} is enabled but its configuration is not compatible with the hardware watchdog,
+     * because the refresh interval exceeds half of the hardware watchdog timeout. The watchdog device is closed and
+     * the system is not under hardware watchdog supervision. If the service is configured to fail on unavailable
+     * device, this is also the state during the grace period that precedes the reboot request.
+     */
+    INVALID_CONFIGURATION,
+
+    /**
+     * A system reboot has been requested, either because a {@link CriticalComponent} timed out or because, at the end
+     * of the grace period, the watchdog device is still unavailable or the configuration is still invalid and the
+     * service is configured to fail on unavailable device. The state is kept while a failed reboot is being retried.
      */
     REBOOT_REQUESTED
 }

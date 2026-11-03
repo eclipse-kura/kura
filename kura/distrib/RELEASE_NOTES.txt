@@ -1,13 +1,14 @@
-Eclipse Kura - 5.6.3 - October 2026
+Eclipse Kura - 5.6.3 - November 2026
 -------------------------------------------------------------------------------------------------
 Description:
 This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:
   - Security hardening of the REST APIs and Web Console: permission checks enforced before the request body is read, request body capped to 64 KiB on the relevant REST APIs, stricter permission checks on identity and user store management, file transfer size limits for DeploymentAgent, DEPLOY-V2 and the Web UI, limits on followed HTTP redirects and on property filter nesting depth
   - Reviewed Web Console session lifecycle management
   - OSGi console disabled by default
-  - Security updates to address vulnerabilities in dependencies (Netty to 4.1.139.Final, Bouncy Castle to 1.86, GSON to 2.12.1, httpcore5 to 5.4.3 and httpclient5 to 5.6.4)
+  - Security updates to address vulnerabilities in dependencies (Netty to 4.1.139.Final, Bouncy Castle to 1.86, GSON to 2.12.1, httpcore5 to 5.4.3, httpclient5 to 5.6.4 and jackson-databind to 2.21.8)
   - Safer archive extraction and a standalone unzip utility
   - DHCP server range validation in the Web UI and several BLE provider fixes
+  - Fixes for the network interface detection in the Docker images, the validation of the Identity REST password flags and the Web UI Command tab
 
 
 Features:
@@ -27,6 +28,10 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * b431188cc4 - [rest.identity.provider] reject non boolean password flags [backport release-5.6.0] (#6534) (Salvatore Coppola)
+  * b6266d65f8 - [linux.net] ignore the parent link in the interface names reported by ip (#6532) (Salvatore Coppola)
+  * 492c322beb - [web2] do not report an upload failure when the Command tab has no file (#6530) (Salvatore Coppola)
+  * 3672f2f96d - address the Sonar quality gate issues of the file transfer size limit (#6519) (Salvatore Coppola)
   * 48e083c78b - [ble.provider] fix several conversion bugs (Pierantonio Merlino)
   * 7c8f943211 - [web2] review Web Console session lifecycle management (Matteo Maiero)
   * 1533f0165b - move permission checks to ContainerRequestFilter and cap request-body to 64 KiB on relevant REST APIs (Mattia Dal Ben)
@@ -58,6 +63,7 @@ Bug Fixes:
   * 275a26e5b9 - [web2] prevent APN password placeholder from being stored into configuration [backport release-5.6.0] (#6256) (Matteo Maiero)
 
 Target Platform Updates:
+  * afbbecd3f9 - bump jackson-databind to 2.21.8 (#6527) (Marcello Rinaldo Martina)
   * 9417fcbaea - bump io.netty from 4.1.135.Final to 4.1.139.Final [backport release-5.6.0] (#6511) (Matteo Maiero)
   * 149179e55a - update GSON to version 2.12.1 [backport release-5.6.0] (#6482) (Mattia Dal Ben)
   * 0befecd33a - merge duplicate maven-antrun-plugin declaration in docker-x86_64-nn profile (#6484) (Matteo Maiero)
@@ -134,6 +140,12 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * b431188cc4 - fix(rest.identity.provider): reject non boolean password flags [backport release-5.6.0] (#6534) (Salvatore Coppola)
+  * b6266d65f8 - fix(linux.net): ignore the parent link in the interface names reported by ip (#6532) (Salvatore Coppola)
+  * 492c322beb - fix(web2): do not report an upload failure when the Command tab has no file (#6530) (Salvatore Coppola)
+  * afbbecd3f9 - build(container.orchestration.provider): bump jackson-databind to 2.21.8 (#6527) (Marcello Rinaldo Martina)
+  * 3672f2f96d - fix: address the Sonar quality gate issues of the file transfer size limit (#6519) (Salvatore Coppola)
+  * 02f179fad2 - chore: update Kura 5.6.3 release notes (#6518) (eclipse-kura-bot)
   * f02fdba956 - chore: automated uptick to 5.6.3 (#6515) (eclipse-kura-bot)
   * bef36c66ed - chore: add Kura 5.6.3 release notes (#6509) (eclipse-kura-bot)
   * 9417fcbaea - build(deps): bump io.netty from 4.1.135.Final to 4.1.139.Final [backport release-5.6.0] (#6511) (Matteo Maiero)

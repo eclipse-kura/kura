@@ -5,9 +5,10 @@ This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:
   - Security hardening of the REST APIs and Web Console: permission checks enforced before the request body is read, request body capped to 64 KiB on the relevant REST APIs, stricter permission checks on identity and user store management, file transfer size limits for DeploymentAgent, DEPLOY-V2 and the Web UI, limits on followed HTTP redirects and on property filter nesting depth
   - Reviewed Web Console session lifecycle management
   - OSGi console disabled by default
-  - Security updates to address vulnerabilities in dependencies (Netty to 4.1.139.Final, Bouncy Castle to 1.86, GSON to 2.12.1, httpcore5 to 5.4.3 and httpclient5 to 5.6.4)
+  - Security updates to address vulnerabilities in dependencies (Netty to 4.1.139.Final, Bouncy Castle to 1.86, GSON to 2.12.1, httpcore5 to 5.4.3, httpclient5 to 5.6.4 and jackson-databind to 2.21.8)
   - Safer archive extraction and a standalone unzip utility
   - DHCP server range validation in the Web UI and several BLE provider fixes
+  - Fixes for the network interface detection in the Docker images, the validation of the Identity REST password flags and the Web UI Command tab
 
 
 Features:

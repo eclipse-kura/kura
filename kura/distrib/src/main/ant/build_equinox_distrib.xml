@@ -320,6 +320,7 @@ fi
 
 if [ -z "$KURA_RUNNING" ] ; then
         exec java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
+        -XX:+ExitOnOutOfMemoryError \
         -XX:+IgnoreUnrecognizedVMOptions \
         ${OPEN_MODULE_OPTIONS} \
         --add-modules=ALL-SYSTEM \
@@ -372,6 +373,7 @@ fi
 
 if [ -z "$KURA_RUNNING" ] ; then
         exec java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
+        -XX:+ExitOnOutOfMemoryError \
         -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
         -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
@@ -431,6 +433,7 @@ fi
 
 if [ -z "$KURA_RUNNING" ] ; then
   nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
+        -XX:+ExitOnOutOfMemoryError \
         -XX:+IgnoreUnrecognizedVMOptions \
         ${OPEN_MODULE_OPTIONS} \
         --add-modules=ALL-SYSTEM \

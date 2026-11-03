@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.linux.watchdog;
 
 import java.util.Map;
@@ -24,6 +24,8 @@ public class WatchdogServiceOptions {
             "watchdogDevice", "/dev/watchdog");
     private static final ConfigurationProperty<String> PROPERTY_REBOOT_CAUSE_FILE_PATH = new ConfigurationProperty<>(
             "rebootCauseFilePath", "/opt/eclipse/kura/data/kura-reboot-cause");
+    private static final ConfigurationProperty<Boolean> PROPERTY_FAIL_ON_UNAVAILABLE_DEVICE = new ConfigurationProperty<>(
+            "failOnUnavailableDevice", false);
 
     private static final String WD_ENABLED_TEMPORARY_FILE_PATH = "/tmp/watchdog";
 
@@ -47,6 +49,10 @@ public class WatchdogServiceOptions {
 
     public String getRebootCauseFilePath() {
         return PROPERTY_REBOOT_CAUSE_FILE_PATH.get(this.properties);
+    }
+
+    public boolean isFailOnUnavailableDevice() {
+        return PROPERTY_FAIL_ON_UNAVAILABLE_DEVICE.get(this.properties);
     }
 
     public String getWatchdogEnabledTemporaryFilePath() {

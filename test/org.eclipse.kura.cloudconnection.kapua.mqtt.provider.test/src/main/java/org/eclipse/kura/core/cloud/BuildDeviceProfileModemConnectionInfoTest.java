@@ -50,12 +50,12 @@ public class BuildDeviceProfileModemConnectionInfoTest {
     private static final String WWAN0 = "wwan0";
     private static final String WWAN0_IP = "10.20.30.40";
 
-    private CloudServiceImpl cloudServiceImpl;
+    private KapuaCloudConnectionManager cloudConnectionManager;
     private KuraDeviceProfile deviceProfile;
 
     @Test
     public void includesModemIpWhenNetworkStatusServiceReportsConnectedModem() throws Exception {
-        givenCloudServiceImplWithLegacyActiveInterface(ETH0, ETH0_IP);
+        givenCloudConnectionManagerWithLegacyActiveInterface(ETH0, ETH0_IP);
         givenNetworkStatusServiceWithConnectedModem(WWAN0, WWAN0_IP);
 
         whenDeviceProfileIsBuilt();
@@ -68,7 +68,7 @@ public class BuildDeviceProfileModemConnectionInfoTest {
 
     @Test
     public void fallsBackToLegacyInterfacesOnlyWhenNetworkStatusServiceIsAbsent() throws Exception {
-        givenCloudServiceImplWithLegacyActiveInterface(ETH0, ETH0_IP);
+        givenCloudConnectionManagerWithLegacyActiveInterface(ETH0, ETH0_IP);
         givenNoNetworkStatusService();
 
         whenDeviceProfileIsBuilt();
@@ -79,7 +79,7 @@ public class BuildDeviceProfileModemConnectionInfoTest {
 
     @Test
     public void skipsModemInterfaceWithoutAnIpAddress() throws Exception {
-        givenCloudServiceImplWithLegacyActiveInterface(ETH0, ETH0_IP);
+        givenCloudConnectionManagerWithLegacyActiveInterface(ETH0, ETH0_IP);
         givenNetworkStatusServiceWithModemWithoutIp(WWAN0);
 
         whenDeviceProfileIsBuilt();
@@ -88,15 +88,15 @@ public class BuildDeviceProfileModemConnectionInfoTest {
         thenConnectionIpEquals(ETH0_IP);
     }
 
-    private void givenCloudServiceImplWithLegacyActiveInterface(String interfaceName, String ip) throws Exception {
-        this.cloudServiceImpl = new CloudServiceImpl();
-        this.cloudServiceImpl.setSystemService(mock(SystemService.class));
-        this.cloudServiceImpl.setSystemAdminService(mock(SystemAdminService.class));
+    private void givenCloudConnectionManagerWithLegacyActiveInterface(String interfaceName, String ip) throws Exception {
+        this.cloudConnectionManager = new KapuaCloudConnectionManager();
+        this.cloudConnectionManager.setSystemService(mock(SystemService.class));
+        this.cloudConnectionManager.setSystemAdminService(mock(SystemAdminService.class));
 
         final List<NetInterface<? extends NetInterfaceAddress>> interfaces = buildLegacyInterface(interfaceName, ip);
         final NetworkService networkService = mock(NetworkService.class);
         when(networkService.getActiveNetworkInterfaces()).thenReturn(interfaces);
-        this.cloudServiceImpl.setNetworkService(networkService);
+        this.cloudConnectionManager.setNetworkService(networkService);
     }
 
     private void givenNetworkStatusServiceWithConnectedModem(String interfaceName, String ip) throws Exception {
@@ -105,7 +105,7 @@ public class BuildDeviceProfileModemConnectionInfoTest {
                 Optional.of(ip));
         when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList("1-8"));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatus));
-        this.cloudServiceImpl.setNetworkStatusService(networkStatusService);
+        this.cloudConnectionManager.setNetworkStatusService(networkStatusService);
     }
 
     private void givenNetworkStatusServiceWithModemWithoutIp(String interfaceName) throws Exception {
@@ -114,15 +114,15 @@ public class BuildDeviceProfileModemConnectionInfoTest {
                 Optional.empty());
         when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList("1-8"));
         when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatus));
-        this.cloudServiceImpl.setNetworkStatusService(networkStatusService);
+        this.cloudConnectionManager.setNetworkStatusService(networkStatusService);
     }
 
     private void givenNoNetworkStatusService() {
-        // no-op: CloudServiceImpl already defaults to an empty NetworkStatusService reference
+        // no-op: KapuaCloudConnectionManager already defaults to an empty NetworkStatusService reference
     }
 
     private void whenDeviceProfileIsBuilt() {
-        this.deviceProfile = new LifeCyclePayloadBuilder(this.cloudServiceImpl).buildDeviceProfile();
+        this.deviceProfile = new LifeCyclePayloadBuilder(this.cloudConnectionManager).buildDeviceProfile();
     }
 
     private void thenConnectionInterfaceContains(String interfaceName) {

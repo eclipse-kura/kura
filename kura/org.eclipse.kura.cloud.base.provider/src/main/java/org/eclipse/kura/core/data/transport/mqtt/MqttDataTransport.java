@@ -819,6 +819,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
             conOpt.setMqttVersion((Integer) properties.get(MQTT_DEFAULT_VERSION_PROP_NAME));
             conOpt.setAutomaticReconnect(false);
+            conOpt.setHttpsHostnameVerificationEnabled(false);
 
             synchronized (this.topicContext) {
                 this.topicContext.clear();

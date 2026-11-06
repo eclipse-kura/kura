@@ -18,13 +18,28 @@ import java.io.IOException;
 
 interface WatchdogDevice extends Closeable {
 
+    /**
+     * Kick the watchdog writing a character to the device
+     *
+     * @throws IOException if the watchdog device cannot be written
+     */
     public void keepAlive() throws IOException;
 
+    /**
+     * Get the hardware timeout of the watchdog device
+     * 
+     * @return the timeout in seconds
+     * 
+     * @throws IOException if the watchdog cannot be read
+     */
     public int getTimeout() throws IOException;
 
-    // int setTimeout(int seconds) throws IOException;
-
-    // int getTimeLeft() throws IOException;
-
+    /**
+     * Disable the watchdog device writing the Magic Character.
+     * This is not supported by some devices.
+     * 
+     * @throws IOException if the watchdog device cannot be disabled or
+     *                     the write operation fails.
+     */
     public void disarm() throws IOException;
 }

@@ -41,12 +41,9 @@ final class LinuxWatchdogDevice implements WatchdogDevice {
     private static final int O_WRONLY = 1;
 
     // Generic asm-generic/ioctl.h encoding (x86, x86_64, ARM, ARM64, RISC-V)
-    private static final int IOC_WRITE = 1;
     private static final int IOC_READ = 2;
 
-    private static final long WDIOC_SETTIMEOUT = ioc(IOC_READ | IOC_WRITE, 'W', 6, 4); // 0xC0045706
     private static final long WDIOC_GETTIMEOUT = ioc(IOC_READ, 'W', 7, 4); // 0x80045707
-    private static final long WDIOC_GETTIMELEFT = ioc(IOC_READ, 'W', 10, 4); // 0x8004570A
 
     private static final byte KEEP_ALIVE_CHARACTER = 'w';
     private static final byte MAGIC_CLOSE_CHARACTER = 'V';
@@ -65,7 +62,7 @@ final class LinuxWatchdogDevice implements WatchdogDevice {
         try {
             return new LinuxWatchdogDevice(path, getCLib().open(path, O_WRONLY));
         } catch (LastErrorException e) {
-            throw new IOException("Cannot open watchdog device " + path + ": " + e.getMessage(), e);
+            throw new IOException("Cannot open watchdog device " + path, e);
         }
     }
 
@@ -78,16 +75,6 @@ final class LinuxWatchdogDevice implements WatchdogDevice {
     public synchronized int getTimeout() throws IOException {
         return ioctl(WDIOC_GETTIMEOUT, "WDIOC_GETTIMEOUT", 0);
     }
-
-    // @Override
-    // public synchronized int setTimeout(int seconds) throws IOException {
-    // return ioctl(WDIOC_SETTIMEOUT, "WDIOC_SETTIMEOUT", seconds);
-    // }
-
-    // @Override
-    // public synchronized int getTimeLeft() throws IOException {
-    // return ioctl(WDIOC_GETTIMELEFT, "WDIOC_GETTIMELEFT", 0);
-    // }
 
     @Override
     public synchronized void disarm() throws IOException {
@@ -130,7 +117,7 @@ final class LinuxWatchdogDevice implements WatchdogDevice {
 
     private void ensureOpen() throws IOException {
         if (this.fd == INVALID_FD) {
-            throw new IOException("Watchdog device " + this.path + " is closed");
+            throw new IOException("Watchdog device " + this.path + " is closed or invalid.");
         }
     }
 

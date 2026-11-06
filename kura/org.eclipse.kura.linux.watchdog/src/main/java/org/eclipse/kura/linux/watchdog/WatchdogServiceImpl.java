@@ -56,10 +56,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
-    private static final long GRACE_PERIOD = Duration.ofMinutes(5).toNanos();
+    private static final long GRACE_PERIOD = Duration.ofMinutes(5).toMillis();
     private static final long REBOOT_RETRY_INTERVAL = Duration.ofMinutes(1).toMillis();
 
-    private Long timedOutOn;
+    private Long refreshDeadline;
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
     private ScheduledExecutorService pollExecutor;
     private ScheduledFuture<?> pollTask;
@@ -110,7 +110,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 logger.debug(
                         "Watchdog device and enablement unchanged. Updating configuration without toggling the watchdog");
                 if (pingIntervalChanged) {
-                    updateSupervision(newOptions);
+                    cancelPollTask();
+                    scheduleCriticalComponentsCheck(newOptions);
                 }
                 return;
             }
@@ -129,17 +130,6 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private boolean isPingIntervalChanged(final WatchdogServiceOptions newOptions) {
         return this.options == null || !this.options.getPingInterval().equals(newOptions.getPingInterval());
-    }
-
-    private void updateSupervision(final WatchdogServiceOptions newOptions) {
-        setRefreshInterval(newOptions.getPingInterval());
-        cancelPollTask();
-
-        if (rejectInvalidConfiguration(newOptions)) {
-            return;
-        }
-
-        scheduleCriticalComponentsCheck(newOptions);
     }
 
     protected void stopWatchdogd() {
@@ -162,12 +152,11 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         try {
             this.device = createWatchdogDevice(watchdogDevice);
         } catch (IOException e) {
-            if (tryStopWatchdogd) {
-                stopWatchdogd();
-                openWatchdog(watchdogDevice, false);
-            } else {
+            if (!tryStopWatchdogd) {
                 throw e;
             }
+            stopWatchdogd();
+            this.device = createWatchdogDevice(watchdogDevice);
         }
     }
 
@@ -179,16 +168,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             return;
         }
 
-        this.timedOutOn = null;
+        this.refreshDeadline = null;
         this.device = null;
 
         final Optional<String> unavailableReason = openWatchdogDevice(newOptions.getWatchdogDevice(), true);
         if (unavailableReason.isPresent()) {
             handleUnavailableDevice(newOptions, unavailableReason.get());
-            return;
-        }
-
-        if (rejectInvalidConfiguration(newOptions)) {
             return;
         }
 
@@ -219,50 +204,6 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         return Optional.empty();
     }
 
-    private boolean rejectInvalidConfiguration(final WatchdogServiceOptions newOptions) {
-        final Optional<String> invalidConfigurationReason = checkPingIntervalAgainstHardwareTimeout(newOptions);
-        if (!invalidConfigurationReason.isPresent()) {
-            return false;
-        }
-
-        disableWatchdog();
-        handleInvalidConfiguration(newOptions, invalidConfigurationReason.get());
-        return true;
-    }
-
-    private Optional<String> checkPingIntervalAgainstHardwareTimeout(final WatchdogServiceOptions newOptions) {
-        final int pingInterval = newOptions.getPingInterval();
-        final int hardwareTimeout = getHardwareTimeout();
-        if (hardwareTimeout <= 0 || pingInterval <= hardwareTimeout / 2) {
-            return Optional.empty();
-        }
-
-        logger.error("Ping interval {} ms exceeds half of the hardware watchdog timeout {} ms", pingInterval,
-                hardwareTimeout);
-        return Optional.of("Ping interval " + pingInterval + " ms exceeds half of the hardware watchdog timeout "
-                + hardwareTimeout + " ms");
-    }
-
-    private void handleInvalidConfiguration(final WatchdogServiceOptions newOptions,
-            final String invalidConfigurationReason) {
-        setState(WatchdogState.INVALID_CONFIGURATION, invalidConfigurationReason);
-
-        if (!newOptions.isFailOnUnavailableDevice()) {
-            return;
-        }
-
-        final long gracePeriod = getUnavailableDeviceGracePeriod();
-
-        logger.error("Watchdog configuration is invalid and fail on unavailable device is enabled. "
-                + "System will reboot in {} ms if the configuration is not fixed", gracePeriod);
-
-        this.pollTask = this.pollExecutor.schedule(() -> {
-            Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
-            logger.error("Watchdog configuration is still invalid after the grace period. System will reboot");
-            requestRebootAfterGracePeriod(newOptions, invalidConfigurationReason);
-        }, gracePeriod, TimeUnit.MILLISECONDS);
-    }
-
     private void startSupervision(final WatchdogServiceOptions newOptions) {
         setDeviceOpen(true);
         setState(WatchdogState.SUPERVISING, null);
@@ -277,10 +218,26 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private void scheduleCriticalComponentsCheck(final WatchdogServiceOptions newOptions) {
+        final long refreshInterval = getRefreshInterval(newOptions);
+        setRefreshInterval(refreshInterval);
+
         this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
             checkCriticalComponents();
-        }, 0, newOptions.getPingInterval(), TimeUnit.MILLISECONDS);
+        }, 0, refreshInterval, TimeUnit.MILLISECONDS);
+    }
+
+    private long getRefreshInterval(final WatchdogServiceOptions newOptions) {
+        final int pingInterval = newOptions.getPingInterval();
+        final int hardwareTimeout = getHardwareTimeout();
+        if (hardwareTimeout <= 0 || pingInterval <= hardwareTimeout / 2) {
+            return pingInterval;
+        }
+
+        final long refreshInterval = hardwareTimeout / 2L;
+        logger.warn("Ping interval {} ms exceeds half of the hardware watchdog timeout {} ms. "
+                + "The watchdog device will be refreshed every {} ms", pingInterval, hardwareTimeout, refreshInterval);
+        return refreshInterval;
     }
 
     private void handleUnavailableDevice(final WatchdogServiceOptions newOptions, final String unavailableReason) {
@@ -290,50 +247,38 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             return;
         }
 
-        final long gracePeriod = getUnavailableDeviceGracePeriod();
+        final long gracePeriod = getGracePeriod();
         final long checkInterval = Math.min(newOptions.getPingInterval(), gracePeriod);
-        final long unavailableSince = System.nanoTime();
+        final long rebootDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(gracePeriod);
 
         logger.error("Watchdog device is unavailable and fail on unavailable device is enabled. "
                 + "System will reboot in {} ms if the device does not become available", gracePeriod);
 
         this.pollTask = this.pollExecutor.scheduleWithFixedDelay(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
-            checkUnavailableDevice(newOptions, unavailableSince);
+            checkUnavailableDevice(newOptions, rebootDeadline);
         }, checkInterval, checkInterval, TimeUnit.MILLISECONDS);
     }
 
-    private void checkUnavailableDevice(final WatchdogServiceOptions newOptions, final long unavailableSince) {
+    private void checkUnavailableDevice(final WatchdogServiceOptions newOptions, final long rebootDeadline) {
         final Optional<String> unavailableReason = openWatchdogDevice(newOptions.getWatchdogDevice(), false);
 
         if (!unavailableReason.isPresent()) {
             logger.info("Watchdog device '{}' is now available. Reboot cancelled", newOptions.getWatchdogDevice());
             cancelPollTask();
-            if (!rejectInvalidConfiguration(newOptions)) {
-                startSupervision(newOptions);
-            }
+            startSupervision(newOptions);
             return;
         }
 
         setState(WatchdogState.DEVICE_UNAVAILABLE, unavailableReason.get());
 
-        if (System.nanoTime() - unavailableSince < TimeUnit.MILLISECONDS.toNanos(getUnavailableDeviceGracePeriod())) {
+        if (System.nanoTime() - rebootDeadline < 0) {
             return;
         }
 
         cancelPollTask();
         logger.error("Watchdog device is still unavailable after the grace period. System will reboot");
-        requestRebootAfterGracePeriod(newOptions, unavailableReason.get());
-    }
-
-    private void requestRebootAfterGracePeriod(final WatchdogServiceOptions newOptions, final String rebootCause) {
-        setState(WatchdogState.REBOOT_REQUESTED, rebootCause);
-        if (!requestReboot(newOptions, rebootCause)) {
-            logger.error(
-                    "System reboot failed. The system is running without hardware watchdog supervision. Retrying every {} ms",
-                    getRebootRetryInterval());
-            scheduleRebootRetry();
-        }
+        requestReboot(newOptions, unavailableReason.get(), unavailableReason.get());
     }
 
     private void scheduleRebootRetry() {
@@ -354,8 +299,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         return REBOOT_RETRY_INTERVAL;
     }
 
-    protected long getUnavailableDeviceGracePeriod() {
-        return TimeUnit.NANOSECONDS.toMillis(GRACE_PERIOD);
+    protected long getGracePeriod() {
+        return GRACE_PERIOD;
     }
 
     protected WatchdogDevice createWatchdogDevice(String watchdogDevice) throws IOException, KuraException {
@@ -475,22 +420,16 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     protected void checkCriticalComponents() {
         logger.debug("Starting critical components check...");
-        if (this.timedOutOn == null) {
-            CriticalComponentRegistration ccr = getAnyTimedOutRegistration();
+        if (this.refreshDeadline == null) {
+            final CriticalComponentRegistration ccr = getAnyTimedOutRegistration();
             if (ccr != null) {
-                this.timedOutOn = System.nanoTime();
                 logger.warn("Critical component '{}' timed out. System will reboot", ccr.getCriticalComponentName());
-                setState(WatchdogState.REBOOT_REQUESTED,
-                        "Critical component '" + ccr.getCriticalComponentName() + "' timed out");
-
-                if (!requestReboot(this.options, ccr.getCriticalComponentName())) {
-                    logger.error("System reboot failed. Watchdog will not be refreshed");
-                    this.timedOutOn -= GRACE_PERIOD;
-                }
+                requestReboot(this.options, "Critical component '" + ccr.getCriticalComponentName() + "' timed out",
+                        ccr.getCriticalComponentName());
             }
         }
 
-        if (this.timedOutOn == null || System.nanoTime() - this.timedOutOn < GRACE_PERIOD) {
+        if (this.refreshDeadline == null || System.nanoTime() - this.refreshDeadline < 0) {
             logger.debug("Refreshing watchdog.");
             refreshWatchdog();
         }
@@ -509,11 +448,22 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         return result;
     }
 
-    private boolean requestReboot(final WatchdogServiceOptions currentOptions, final String rebootCause) {
-        RebootCauseFileWriter rebootCauseWriter = new RebootCauseFileWriter(currentOptions.getRebootCauseFilePath());
-        rebootCauseWriter.writeRebootCause(rebootCause);
+    private void requestReboot(final WatchdogServiceOptions currentOptions, final String failureReason,
+            final String rebootCause) {
+        setState(WatchdogState.REBOOT_REQUESTED, failureReason);
+        new RebootCauseFileWriter(currentOptions.getRebootCauseFilePath()).writeRebootCause(rebootCause);
 
-        return tryReboot();
+        if (tryReboot()) {
+            this.refreshDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(getGracePeriod());
+        } else if (this.device != null) {
+            logger.error("System reboot failed. Watchdog will not be refreshed");
+            this.refreshDeadline = System.nanoTime();
+        } else {
+            logger.error(
+                    "System reboot failed. The system is running without hardware watchdog supervision. Retrying every {} ms",
+                    getRebootRetryInterval());
+            scheduleRebootRetry();
+        }
     }
 
     private boolean tryReboot() {

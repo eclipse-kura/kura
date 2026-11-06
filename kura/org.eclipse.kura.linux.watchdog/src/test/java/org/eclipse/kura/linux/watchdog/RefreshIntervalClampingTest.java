@@ -19,12 +19,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
@@ -33,82 +32,48 @@ import org.eclipse.kura.watchdog.WatchdogState;
 import org.junit.After;
 import org.junit.Test;
 
-public class PingIntervalCheckTest {
+public class RefreshIntervalClampingTest {
 
-    private static final String WATCHDOG_DEVICE = "target/pingIntervalCheckTestDevice";
-    private static final String REBOOT_CAUSE_FILE = "target/pingIntervalCheckRebootCause";
-    private static final long SHORT_GRACE_PERIOD_MS = 200;
-    private static final long LONG_GRACE_PERIOD_MS = 1000;
-    private static final String MISMATCH_REASON = "Ping interval 40000 ms exceeds half of the hardware watchdog timeout 60000 ms";
+    private static final String WATCHDOG_DEVICE = "target/refreshIntervalClampingTestDevice";
+    private static final String REBOOT_CAUSE_FILE = "target/refreshIntervalClampingRebootCause";
+    private static final long GRACE_PERIOD_MS = 200;
+    private static final long SCHEDULING_TOLERANCE_MS = 5000;
 
     private int timeoutSeconds;
     private boolean timeoutUnreadable;
-    private long gracePeriodMs = SHORT_GRACE_PERIOD_MS;
-    private PingIntervalTestDevice device;
+    private RefreshIntervalTestDevice device;
     private int deviceOpens;
-    private PingIntervalWatchdogServiceImpl svc;
+    private RefreshIntervalWatchdogServiceImpl svc;
 
     @Test
-    public void supervisionStartsWhenPingIntervalIsHalfOfHardwareTimeout() throws Exception {
+    public void pingIntervalIsUsedWhenItIsHalfOfHardwareTimeout() throws Exception {
         givenWatchdogDevice(60);
 
         whenWatchdogServiceIsActivated(30000, false);
 
         thenStateIs(WatchdogState.SUPERVISING);
         thenDeviceIsOpen();
+        thenWatchdogIsRefreshedEvery(30000);
         thenNoFailureReasonIsReported();
     }
 
     @Test
-    public void configurationIsReportedInvalidWhenPingIntervalExceedsHalfOfHardwareTimeout() throws Exception {
+    public void refreshIntervalIsClampedWhenPingIntervalExceedsHalfOfHardwareTimeout() throws Exception {
         givenWatchdogDevice(60);
 
         whenWatchdogServiceIsActivated(40000, false);
 
-        thenStateIs(WatchdogState.INVALID_CONFIGURATION);
-        thenFailureReasonIs(MISMATCH_REASON);
-        thenDeviceIsDisarmedAndClosed();
+        thenStateIs(WatchdogState.SUPERVISING);
+        thenDeviceIsOpen();
+        thenWatchdogIsRefreshedEvery(30000);
+        thenNoFailureReasonIsReported();
     }
 
     @Test
-    public void noRebootIsRequestedWhenFailOnUnavailableDeviceIsDisabled() throws Exception {
-        givenWatchdogDevice(60);
-
-        whenWatchdogServiceIsActivated(40000, false);
-        whenGracePeriodElapses();
-
-        thenStateIs(WatchdogState.INVALID_CONFIGURATION);
-        thenNoRebootIsRequested();
-    }
-
-    @Test
-    public void rebootIsRequestedAfterGracePeriodWhenFailOnUnavailableDeviceIsEnabled() throws Exception {
+    public void noRebootIsRequestedWhenPingIntervalExceedsHalfOfHardwareTimeout() throws Exception {
         givenWatchdogDevice(60);
 
         whenWatchdogServiceIsActivated(40000, true);
-
-        thenRebootIsRequested();
-        thenStateIs(WatchdogState.REBOOT_REQUESTED);
-        thenRebootCauseContains(MISMATCH_REASON);
-    }
-
-    @Test
-    public void deviceIsNotReopenedDuringGracePeriod() throws Exception {
-        givenWatchdogDevice(60);
-
-        whenWatchdogServiceIsActivated(40000, true);
-
-        thenRebootIsRequested();
-        thenDeviceWasOpenedTimes(1);
-    }
-
-    @Test
-    public void rebootIsCancelledWhenConfigurationIsFixedDuringGracePeriod() throws Exception {
-        givenWatchdogDevice(60);
-        givenGracePeriod(LONG_GRACE_PERIOD_MS);
-        givenWatchdogServiceActivated(40000, true, WatchdogState.INVALID_CONFIGURATION);
-
-        whenPingIntervalIsUpdated(30000, true);
         whenGracePeriodElapses();
 
         thenStateIs(WatchdogState.SUPERVISING);
@@ -117,25 +82,38 @@ public class PingIntervalCheckTest {
     }
 
     @Test
-    public void supervisionStopsWhenPingIntervalIsIncreasedAboveHalfOfHardwareTimeout() throws Exception {
+    public void refreshIntervalIsClampedWhenPingIntervalIsIncreasedAboveHalfOfHardwareTimeout() throws Exception {
         givenWatchdogDevice(60);
-        givenWatchdogServiceActivated(10000, false, WatchdogState.SUPERVISING);
+        givenWatchdogServiceActivated(10000);
 
-        whenPingIntervalIsUpdated(40000, false);
+        whenPingIntervalIsUpdated(40000);
 
-        thenStateIs(WatchdogState.INVALID_CONFIGURATION);
-        thenFailureReasonIs(MISMATCH_REASON);
-        thenDeviceIsDisarmedAndClosed();
+        thenStateIs(WatchdogState.SUPERVISING);
+        thenDeviceWasOpenedTimes(1);
+        thenWatchdogIsRefreshedEvery(30000);
     }
 
     @Test
-    public void supervisionStartsWhenHardwareTimeoutCannotBeRead() throws Exception {
+    public void pingIntervalIsUsedAgainWhenItIsDecreasedBelowHalfOfHardwareTimeout() throws Exception {
+        givenWatchdogDevice(60);
+        givenWatchdogServiceActivated(40000);
+
+        whenPingIntervalIsUpdated(20000);
+
+        thenStateIs(WatchdogState.SUPERVISING);
+        thenDeviceWasOpenedTimes(1);
+        thenWatchdogIsRefreshedEvery(20000);
+    }
+
+    @Test
+    public void pingIntervalIsUsedWhenHardwareTimeoutCannotBeRead() throws Exception {
         givenUnreadableWatchdogDevice();
 
         whenWatchdogServiceIsActivated(40000, false);
 
         thenStateIs(WatchdogState.SUPERVISING);
         thenDeviceIsOpen();
+        thenWatchdogIsRefreshedEvery(40000);
     }
 
     @After
@@ -155,29 +133,24 @@ public class PingIntervalCheckTest {
         this.timeoutUnreadable = true;
     }
 
-    private void givenGracePeriod(long newGracePeriodMs) {
-        this.gracePeriodMs = newGracePeriodMs;
-    }
-
-    private void givenWatchdogServiceActivated(int pingInterval, boolean failOnUnavailableDevice,
-            WatchdogState expectedState) throws Exception {
-        whenWatchdogServiceIsActivated(pingInterval, failOnUnavailableDevice);
-        thenStateIs(expectedState);
+    private void givenWatchdogServiceActivated(int pingInterval) throws Exception {
+        whenWatchdogServiceIsActivated(pingInterval, false);
+        thenStateIs(WatchdogState.SUPERVISING);
     }
 
     private void whenWatchdogServiceIsActivated(int pingInterval, boolean failOnUnavailableDevice) throws Exception {
-        this.svc = new PingIntervalWatchdogServiceImpl();
+        this.svc = new RefreshIntervalWatchdogServiceImpl();
         this.svc.activate(getProperties(pingInterval, failOnUnavailableDevice));
         awaitPendingUpdate();
     }
 
-    private void whenPingIntervalIsUpdated(int pingInterval, boolean failOnUnavailableDevice) throws Exception {
-        this.svc.updated(getProperties(pingInterval, failOnUnavailableDevice));
+    private void whenPingIntervalIsUpdated(int pingInterval) throws Exception {
+        this.svc.updated(getProperties(pingInterval, false));
         awaitPendingUpdate();
     }
 
     private void whenGracePeriodElapses() throws Exception {
-        Thread.sleep(this.gracePeriodMs * 3 / 2);
+        Thread.sleep(GRACE_PERIOD_MS * 3 / 2);
         awaitPendingUpdate();
     }
 
@@ -188,20 +161,22 @@ public class PingIntervalCheckTest {
     private void thenDeviceIsOpen() {
         assertTrue(this.svc.getWatchdogStatus().isDeviceOpen());
         assertFalse(this.device.isClosed());
+        assertFalse(this.device.isDisarmed());
+    }
+
+    private void thenWatchdogIsRefreshedEvery(long expectedIntervalMs) throws Exception {
+        assertEquals(expectedIntervalMs, this.svc.getWatchdogStatus().getRefreshIntervalMs());
+
+        awaitPendingUpdate();
+
+        final ScheduledFuture<?> pollTask = (ScheduledFuture<?>) TestUtil.getFieldValue(this.svc, "pollTask");
+        final long nextRefreshDelay = pollTask.getDelay(TimeUnit.MILLISECONDS);
+        assertTrue(nextRefreshDelay <= expectedIntervalMs);
+        assertTrue(nextRefreshDelay > expectedIntervalMs - SCHEDULING_TOLERANCE_MS);
     }
 
     private void thenNoFailureReasonIsReported() {
         assertEquals(Optional.empty(), this.svc.getWatchdogStatus().getFailureReason());
-    }
-
-    private void thenFailureReasonIs(String expectedReason) {
-        assertEquals(Optional.of(expectedReason), this.svc.getWatchdogStatus().getFailureReason());
-    }
-
-    private void thenDeviceIsDisarmedAndClosed() {
-        assertFalse(this.svc.getWatchdogStatus().isDeviceOpen());
-        assertTrue(this.device.isDisarmed());
-        assertTrue(this.device.isClosed());
     }
 
     private void thenDeviceWasOpenedTimes(int expectedOpens) {
@@ -210,16 +185,6 @@ public class PingIntervalCheckTest {
 
     private void thenNoRebootIsRequested() {
         assertEquals(0, this.svc.getRebootRequests());
-    }
-
-    private void thenRebootIsRequested() throws InterruptedException {
-        assertTrue(this.svc.waitForRebootRequest(this.gracePeriodMs * 20));
-    }
-
-    private void thenRebootCauseContains(String expectedCause) throws IOException {
-        final String rebootCause = new String(Files.readAllBytes(new File(REBOOT_CAUSE_FILE).toPath()),
-                StandardCharsets.UTF_8);
-        assertTrue(rebootCause.contains(expectedCause));
     }
 
     private Map<String, Object> getProperties(int pingInterval, boolean failOnUnavailableDevice) {
@@ -239,14 +204,14 @@ public class PingIntervalCheckTest {
         }).get(10, TimeUnit.SECONDS);
     }
 
-    private static class PingIntervalTestDevice implements WatchdogDevice {
+    private static class RefreshIntervalTestDevice implements WatchdogDevice {
 
         private final int timeoutSeconds;
         private final boolean timeoutUnreadable;
         private boolean disarmed;
         private boolean closed;
 
-        PingIntervalTestDevice(int timeoutSeconds, boolean timeoutUnreadable) {
+        RefreshIntervalTestDevice(int timeoutSeconds, boolean timeoutUnreadable) {
             this.timeoutSeconds = timeoutSeconds;
             this.timeoutUnreadable = timeoutUnreadable;
         }
@@ -283,14 +248,14 @@ public class PingIntervalCheckTest {
         }
     }
 
-    private class PingIntervalWatchdogServiceImpl extends WatchdogServiceImpl {
+    private class RefreshIntervalWatchdogServiceImpl extends WatchdogServiceImpl {
 
         private int rebootRequests;
 
         @Override
         protected WatchdogDevice createWatchdogDevice(String watchdogDevice) {
-            final PingIntervalCheckTest test = PingIntervalCheckTest.this;
-            test.device = new PingIntervalTestDevice(test.timeoutSeconds, test.timeoutUnreadable);
+            final RefreshIntervalClampingTest test = RefreshIntervalClampingTest.this;
+            test.device = new RefreshIntervalTestDevice(test.timeoutSeconds, test.timeoutUnreadable);
             test.deviceOpens++;
             return test.device;
         }
@@ -306,28 +271,17 @@ public class PingIntervalCheckTest {
         }
 
         @Override
-        protected long getUnavailableDeviceGracePeriod() {
-            return PingIntervalCheckTest.this.gracePeriodMs;
+        protected long getGracePeriod() {
+            return GRACE_PERIOD_MS;
         }
 
         @Override
         protected synchronized void rebootSystem() throws KuraException {
             this.rebootRequests++;
-            notifyAll();
         }
 
         synchronized int getRebootRequests() {
             return this.rebootRequests;
-        }
-
-        synchronized boolean waitForRebootRequest(long timeoutMs) throws InterruptedException {
-            final long deadline = System.currentTimeMillis() + timeoutMs;
-            long remaining = timeoutMs;
-            while (this.rebootRequests == 0 && remaining > 0) {
-                wait(remaining);
-                remaining = deadline - System.currentTimeMillis();
-            }
-            return this.rebootRequests > 0;
         }
     }
 }

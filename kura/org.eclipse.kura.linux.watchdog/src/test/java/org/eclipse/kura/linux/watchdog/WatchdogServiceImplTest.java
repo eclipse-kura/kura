@@ -67,7 +67,7 @@ public class WatchdogServiceImplTest {
     private Future<?> pollTaskBeforeUpdate;
     private WatchdogTestDevice statusDevice;
     private RebootRecordingWatchdogServiceImpl rebootRecordingSvc;
-    private Long timedOutOnBeforeUpdate;
+    private Long refreshDeadlineBeforeUpdate;
     private long activationNanos;
     private FailingWatchdogTestDevice failingDevice;
     private ToggleDeviceWatchdogServiceImpl toggleSvc;
@@ -603,13 +603,13 @@ public class WatchdogServiceImplTest {
     public void pendingRebootNotCancelledWhenPingIntervalChanges() throws Throwable {
         givenSupervisingWatchdogService(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
         givenCriticalComponentTimedOut("testComponent");
-        givenTimedOutOnIsRecorded();
+        givenRefreshDeadlineIsRecorded();
 
         whenStatusWatchdogServiceIsUpdated(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 100));
 
         thenWatchdogIsNotToggled();
         thenStatusStateIs(WatchdogState.REBOOT_REQUESTED);
-        thenTimedOutOnIsUnchanged();
+        thenRefreshDeadlineIsUnchanged();
         thenRebootIsRequestedOnlyOnce();
     }
 
@@ -617,14 +617,14 @@ public class WatchdogServiceImplTest {
     public void pendingRebootNotCancelledWhenRebootCauseFilePathChanges() throws Throwable {
         givenSupervisingWatchdogService(getStatusProperties(true, WATCHDOG_TEST_DEVICE, 50));
         givenCriticalComponentTimedOut("testComponent");
-        givenTimedOutOnIsRecorded();
+        givenRefreshDeadlineIsRecorded();
 
         whenStatusWatchdogServiceIsUpdated(
                 getStatusPropertiesWith(50, "rebootCauseFilePath", UPDATED_REBOOT_CAUSE_FILE));
 
         thenWatchdogIsNotToggled();
         thenStatusStateIs(WatchdogState.REBOOT_REQUESTED);
-        thenTimedOutOnIsUnchanged();
+        thenRefreshDeadlineIsUnchanged();
         thenRebootIsRequestedOnlyOnce();
         thenRebootCauseFileDoesNotExist(UPDATED_REBOOT_CAUSE_FILE);
     }
@@ -934,9 +934,9 @@ public class WatchdogServiceImplTest {
         whenCriticalComponentTimesOut(componentName);
     }
 
-    private void givenTimedOutOnIsRecorded() throws NoSuchFieldException {
-        this.timedOutOnBeforeUpdate = (Long) TestUtil.getFieldValue(this.statusSvc, "timedOutOn");
-        assertNotNull(this.timedOutOnBeforeUpdate);
+    private void givenRefreshDeadlineIsRecorded() throws NoSuchFieldException {
+        this.refreshDeadlineBeforeUpdate = (Long) TestUtil.getFieldValue(this.statusSvc, "refreshDeadline");
+        assertNotNull(this.refreshDeadlineBeforeUpdate);
     }
 
     private void givenCurrentPollTaskIsRecorded() throws NoSuchFieldException {
@@ -1156,7 +1156,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenNoRebootRequestedAfterGracePeriod() throws InterruptedException {
-        Thread.sleep(this.unavailableDeviceSvc.getUnavailableDeviceGracePeriod() * 2);
+        Thread.sleep(this.unavailableDeviceSvc.getGracePeriod() * 2);
         thenRebootRequests(0);
     }
 
@@ -1190,8 +1190,8 @@ public class WatchdogServiceImplTest {
         assertEquals(this.previousStatus.getLastRefreshTime(), this.status.getLastRefreshTime());
     }
 
-    private void thenTimedOutOnIsUnchanged() throws NoSuchFieldException {
-        assertEquals(this.timedOutOnBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "timedOutOn"));
+    private void thenRefreshDeadlineIsUnchanged() throws NoSuchFieldException {
+        assertEquals(this.refreshDeadlineBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "refreshDeadline"));
     }
 
     private void thenRebootIsRequestedOnlyOnce() throws InterruptedException {
@@ -1356,7 +1356,7 @@ public class WatchdogServiceImplTest {
 
     private void thenWatchdogDeviceIsNotCreated() throws NoSuchFieldException {
         assertNull(TestUtil.getFieldValue(this.statusSvc, "device"));
-        assertNull(TestUtil.getFieldValue(this.statusSvc, "timedOutOn"));
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "refreshDeadline"));
     }
 
     private void thenOnlyMagicCharacterIsWritten() {
@@ -1670,7 +1670,7 @@ public class WatchdogServiceImplTest {
         }
 
         @Override
-        protected long getUnavailableDeviceGracePeriod() {
+        protected long getGracePeriod() {
             return this.gracePeriodMs;
         }
 

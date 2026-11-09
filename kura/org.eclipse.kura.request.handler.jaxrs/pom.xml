@@ -29,6 +29,6 @@
 	</properties>
 
 	<artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>1.6.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 </project>

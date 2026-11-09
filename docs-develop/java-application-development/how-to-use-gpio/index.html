@@ -5884,7 +5884,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><em>controller</em>: the <em>gpiochip</em> the pin belongs to</li>
 <li><em>line</em>: the <em>line</em> offset of the pin in the gpiochip</li>
 <li><em>name</em>: the optional pin name. If not provided, it defaults to "unknown"</li>
-<li><em>displayName</em>: the pin name used to present the pin, with the default format "<em>name</em>:<em>controller</em>:<em>line</em>"</li>
+<li><em>displayName</em>: the pin name used to present the pin, with the default format "<em>name</em>:_controller_:<em>line</em>"</li>
 </ul>
 <p>Applications can use the <code>getAvailablePinDescriptions</code> method to retrieve all the available GPIO descriptions and use it to get the desired <code>KuraGPIOPin</code> or directly fill the properties above and pass the map to the <code>getPins</code> method.
 To get the <strong>gpiochip</strong>, <strong>line</strong> numbers and names, use the following command that lists all the GPIOS available on the system:</p>

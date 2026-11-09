@@ -5720,6 +5720,69 @@ You are viewing the documentation relative to the develop branch or to an outdat
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kura-core-and-add-ons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kura core and add-ons
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-api-two-ways-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One API, two ways in
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flows-with-kura-wires" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data flows with Kura Wires
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        More resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -5743,70 +5806,225 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <figcaption></figcaption>
 </figure>
 <h1 id="welcome-to-the-eclipse-kuratm-documentation">Welcome to the Eclipse Kura™ Documentation</h1>
-<p>The emergence of an Internet of Thing (IoT) service gateway model running modern software stacks, operating on the edge of an IoT deployment as an aggregator and controller, has opened up the possibility of enabling enterprise level technologies to IoT gateways.</p>
-<p>Advanced software frameworks, which abstract and isolate the developer from the complexity of the hardware and the networking sub-systems, re-define the development and re-usability of integrated hardware and software solutions.</p>
-<p>Eclipse Kura is an Eclipse IoT project that provides a platform for building IoT gateways. It is a smart application container that enables remote management of such gateways and provides a wide range of APIs for allowing you to write and deploy your own IoT application.</p>
-<p>Kura runs on top of the Java Virtual Machine (JVM) and leverages OSGi, a dynamic component system for Java, to simplify the process of writing reusable software building blocks. Kura APIs offer easy access to the underlying hardware including serial ports, GPS, watchdog, USB, GPIOs, I2C, etc. It also offer OSGI bundle to simplify the management of network configurations, the communication with IoT servers, and the remote management of the gateway.</p>
-<p>Kura components are designed as configurable OSGi Declarative Service exposing service API and raising events. While several Kura components are in pure Java, others are invoked through JNI and have a dependency on the Linux operating system.</p>
-<p>Kura comes with the following services:</p>
-<p><img alt="Intro" src="intro/images/intro.png" /></p>
+<p>Eclipse Kura™ turns an edge device into a managed IoT gateway. It collects data from field devices, processes it at the edge and delivers it to the cloud, while the gateway itself stays configurable, secure and manageable from its web console, through its REST APIs or from an IoT platform over MQTT.</p>
+<p>Kura is a Java 21 application built on OSGi. Every feature is a configurable OSGi Declarative Services component that exposes a service API, so you can extend the gateway with your own add-ons, drivers and containerized applications.</p>
+<div class="grid cards">
 <ul>
-<li>I/O Services<ul>
-<li>Serial port access through javax.comm 2.0 API or OSGi I/O connection</li>
-<li>USB access and events through javax.usb, HID API, custom extensions</li>
-<li>Bluetooth access through javax.bluetooth or OSGi I/O connection</li>
-<li>Position Service for GPS information from an NMEA stream</li>
-<li>Clock Service for the synchronization of the system clock</li>
-<li>Kura API for GPIO/PWM/I2C/SPI access</li>
-</ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 17v-2h8v2zm8-7-4 4-4-4h2.5V6h3v4zm-4-8c5.5 0 10 4.5 10 10s-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2m0 2c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8"/></svg></span> <strong>Install</strong></p>
+<hr />
+<p>Install Kura from the Eclipse Kura APT repository on Debian-based arm64 and amd64 systems, or start the Docker image.</p>
+<p><a href="getting-started/install-kura/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Install Kura</a></p>
 </li>
-<li>Data Services<ul>
-<li>Store and forward functionality for the telemetry data collected by the gateway and published to remote servers.</li>
-<li>Policy-driven publishing system, which abstracts the application developer from the complexity of the network layer and the
-publishing protocol used. Eclipse Paho and its MQTT client provide the default messaging library used.</li>
-</ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 16V4H3v12zm0-14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7v2h2v2H8v-2h2v-2H3a2 2 0 0 1-2-2V4c0-1.11.89-2 2-2zM5 6h9v5H5zm10 0h4v2h-4zm4 3v5h-4V9zM5 12h4v2H5zm5 0h4v2h-4z"/></svg></span> <strong>Configure the gateway</strong></p>
+<hr />
+<p>Set up network interfaces, firewall, cloud connections, certificates and users from the web console.</p>
+<p><a href="gateway-configuration/gateway-administration-console/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Gateway Administration Console</a></p>
 </li>
-<li>Cloud Services<ul>
-<li>Easy to use API layer for IoT application to communicate with a remote server. In addition to simple publish/subscribe,
-  the Cloud Service API simplifies the implementation of more complex interaction flows like request/response or remote resource management.
-  Allow for a single connection to a remote server to be shared across more than one application in the gateway providing the necessary topic partitioning.</li>
-</ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h12v1h3v2h-3v2h3v2h-3v2h3v2h-3v2h3v2h-3v1H6v-1H3v-2h3v-2H3v-2h3v-2H3V9h3V7H3V5h3zm5 11v3h1v-3zm2 0v3h1v-3zm2 0v3h1v-3z"/></svg></span> <strong>Connect field devices</strong></p>
+<hr />
+<p>Read and write industrial and IoT devices through Drivers and Assets: OPC UA, S7, Modbus, GPIO, Bluetooth LE, CAN.</p>
+<p><a href="connect-field-devices/driver-and-assets/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Drivers, Assets and Channels</a></p>
 </li>
-<li>Configuration Service<ul>
-<li>Leverage the OSGi specifications ConfigurationAdmin and MetaType to provide a snapshot service to import/export the configuration of all registered services in the container.</li>
-</ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 11h-3.18C14.4 9.84 13.3 9 12 9s-2.4.84-2.82 2H6c-.33 0-2-.1-2-2V8c0-1.83 1.54-2 2-2h10.18C16.6 7.16 17.7 8 19 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3c-1.3 0-2.4.84-2.82 2H6C4.39 4 2 5.06 2 8v1c0 2.94 2.39 4 4 4h3.18c.42 1.16 1.52 2 2.82 2s2.4-.84 2.82-2H18c.33 0 2 .1 2 2v1c0 1.83-1.54 2-2 2H7.82C7.4 16.84 6.3 16 5 16a3 3 0 0 0-3 3 3 3 0 0 0 3 3c1.3 0 2.4-.84 2.82-2H18c1.61 0 4-1.07 4-4v-1c0-2.93-2.39-4-4-4m1-7a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M5 20a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1"/></svg></span> <strong>Process data with Wires</strong></p>
+<hr />
+<p>Build data pipelines by wiring components together: acquire, filter, store, run AI inference and publish.</p>
+<p><a href="kura-wires/introduction/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Kura Wires</a></p>
 </li>
-<li>Remote Management<ul>
-<li>Allow for remote management of the IoT applications installed in Kura including their deployment, upgrade and configuration management. The Remote Management
-  service relies on the Configuration Service and the Cloud Service.</li>
-</ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.5 20q-2.28 0-3.89-1.57Q1 16.85 1 14.58q0-1.95 1.17-3.48 1.18-1.53 3.08-1.95.63-2.3 2.5-3.72Q9.63 4 12 4q2.93 0 4.96 2.04Q19 8.07 19 11q1.73.2 2.86 1.5 1.14 1.28 1.14 3 0 1.88-1.31 3.19T18.5 20H13q-.82 0-1.41-.59Q11 18.83 11 18v-5.15L9.4 14.4 8 13l4-4 4 4-1.4 1.4-1.6-1.55V18h5.5q1.05 0 1.77-.73.73-.72.73-1.77t-.73-1.77Q19.55 13 18.5 13H17v-2q0-2.07-1.46-3.54Q14.08 6 12 6 9.93 6 8.46 7.46 7 8.93 7 11h-.5q-1.45 0-2.47 1.03Q3 13.05 3 14.5T4.03 17q1.02 1 2.47 1H9v2m3-7"/></svg></span> <strong>Connect to the cloud</strong></p>
+<hr />
+<p>Publish telemetry and accept remote management through Eclipse Kapua, Eclipse Hono, Sparkplug B or any MQTT broker.</p>
+<p><a href="cloud-api/overview/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Cloud Connections</a></p>
 </li>
-<li>Networking<ul>
-<li>Provide API for introspects and configure the network interfaces available in the gateway like Ethernet, Wifi, and Cellular modems.</li>
-</ul>
-</li>
-<li>Watchdog Service<ul>
-<li>Register critical components to the Watchdog Service, which will force a system reset through the hardware watchdog when a problem is detected.</li>
-</ul>
-</li>
-<li>Web administration interface<ul>
-<li>Offer a web-based management console running within the Kura container to manage the gateway.</li>
-</ul>
-</li>
-<li>Drivers and Assets<ul>
-<li>A unified model is introduced to simplify the communication with the devices attached to the gateway. The Driver encapsulates the communication protocol and its configuration parameters, while the Asset, which is generic across Drivers, models the information data channels towards the device. When an Asset is created, a Mirror of the device is automatically available for on-demand read and writes via Java APIs or via Cloud through remote messages.</li>
-</ul>
-</li>
-<li>Wires<ul>
-<li>Offers modular and visual data flow programming tool to define data collection and processing pipelines at the edge by simply selecting components from a palette and wiring them together. This way users can, for example, configure an Asset, periodically acquire data from its channels, store them in the gateway, filter or aggregate them using powerful SQL queries, and send the results to the Cloud. The Eclipse Kura Marketplace is a repository from which additional Wires components can be installed into your Kura runtime with a simple drag-and-drop.</li>
-</ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 3a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2H3v2h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2v-2H8v-5a2 2 0 0 0-2-2 2 2 0 0 0 2-2V5h2V3m6 0a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1v2h-1a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2v-2h2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5h-2V3z"/></svg></span> <strong>Build your add-on</strong></p>
+<hr />
+<p>Generate a project with the Kura Addon Archetype, then build, package and deploy it to your gateway.</p>
+<p><a href="java-application-development/hello-world-application/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Hello World Application</a></p>
 </li>
 </ul>
-<p><img alt="Wires" src="intro/images/wires.png" /></p>
-<p>This documentation illustrates the core concepts and components of Kura core. More Kura addons resources are available at the following locations:</p>
+</div>
+<h2 id="architecture">Architecture</h2>
+<p><a href="intro/images/kura-architecture-light.png"><img alt="Eclipse Kura architecture: kura-core and add-ons on top of OSGi, Java 21 and Linux" src="intro/images/kura-architecture-light.png#only-light" /></a>
+<a href="intro/images/kura-architecture-dark.png"><img alt="Eclipse Kura architecture: kura-core and add-ons on top of OSGi, Java 21 and Linux" src="intro/images/kura-architecture-dark.png#only-dark" /></a></p>
+<p>Select the diagram to open it at full size. Read it from the bottom up. Kura runs on Linux, on a Java 21 runtime, inside the Eclipse Equinox OSGi framework. The <strong>Kura API</strong> (<code>org.eclipse.kura.api</code>) defines the service contracts that <code>kura-core</code> and the add-ons implement. Solid boxes ship with the <code>kura-core</code> package, dashed boxes are add-ons installed by the <code>kura</code> meta-package, dotted boxes are optional add-ons.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it provides</th>
+<th>Learn more</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Device Abstraction</strong></td>
+<td>Serial ports, USB and HID devices in the core; GPIO (libgpiod), GPS (gpsd), Bluetooth LE (BlueZ) and CAN (SocketCAN) from their add-ons</td>
+<td><a href="java-application-development/how-to-serial-ports/">Serial Ports</a>, <a href="java-application-development/how-to-use-gpio/">GPIO</a>, <a href="java-application-development/how-to-use-bt-le-apis/">Bluetooth LE</a>, <a href="java-application-development/how-to-use-can-bus/">CAN bus</a></td>
+</tr>
+<tr>
+<td><strong>Basic Gateway Services</strong></td>
+<td>Configuration and snapshots, system information and inventory, H2 and SQLite databases, clock synchronization, watchdog, position</td>
+<td><a href="core-services/configuration-service/">Configuration Service</a>, <a href="administration/snapshot-management/">Snapshots</a>, <a href="administration/system-component-inventory/">Inventory</a></td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Crypto service, file and PKCS#11 keystores, certificates and CRLs, identities and permissions, JWT tokens, tamper detection</td>
+<td><a href="core-services/crypto-service/">Crypto Service</a>, <a href="gateway-configuration/keystores-management/">Keystores</a>, <a href="gateway-configuration/authentication-and-authorization/">Authentication and Authorization</a></td>
+</tr>
+<tr>
+<td><strong>Network Configuration</strong></td>
+<td>Ethernet, Wi-Fi, cellular and VLAN interfaces through NetworkManager and ModemManager, firewall and NAT, network threat manager</td>
+<td><a href="gateway-configuration/network-configuration/">Network Configuration</a>, <a href="gateway-configuration/firewall-configuration/">Firewall</a></td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>Docker and Podman container orchestration, image signature verification, authenticated registries</td>
+<td><a href="core-services/container-orchestration-provider/">Container Orchestration</a></td>
+</tr>
+<tr>
+<td><strong>Connectivity &amp; Delivery</strong></td>
+<td>Multiple cloud connections (Eclipse Kapua, Eclipse IoT, Raw MQTT, Sparkplug B), store-and-forward data service, embedded Artemis MQTT broker</td>
+<td><a href="cloud-api/overview/">Cloud Connection API</a>, <a href="cloud-platform/kura-sparkplug/">Sparkplug</a></td>
+</tr>
+<tr>
+<td><strong>Assets &amp; Drivers</strong></td>
+<td>Driver API and helpers in the core; OPC UA, S7, Modbus, GPIO, Bluetooth LE and CAN drivers and protocols as add-ons</td>
+<td><a href="connect-field-devices/driver-and-assets/">Drivers and Assets</a>, <a href="connect-field-devices/field-protocols/">Field Protocols</a></td>
+</tr>
+<tr>
+<td><strong>Applications</strong></td>
+<td>Your Java add-ons, containerized applications, Kura Wires data flows, AI inference with Nvidia Triton</td>
+<td><a href="kura-wires/introduction/">Kura Wires</a>, <a href="core-services/nvidia-triton-server-inference-engine/">Triton Inference Engine</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="kura-core-and-add-ons">Kura core and add-ons</h2>
+<p>Since version 6.0.0 Kura is made of a mandatory core and a set of add-ons, each developed in its own repository and shipped as its own Debian package. Installing the <code>kura</code> meta-package gives you <code>kura-core</code> plus the add-ons that make up the complete gateway; the optional add-ons can be installed when you need them.</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>What it adds</th>
+<th>Installed by <code>kura</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura">kura-core</a></td>
+<td>Kura API, configuration, security, cloud connections, REST APIs, containers, databases</td>
+<td>Yes, mandatory</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-management-ui">kura-management-ui</a></td>
+<td>Web console</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-networking">kura-networking</a></td>
+<td>Network interfaces, firewall and network threat manager</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-wires">kura-wires</a></td>
+<td>Kura Wires and Assets</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-artemis">kura-artemis</a></td>
+<td>Embedded Apache ActiveMQ Artemis MQTT broker</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-bluetooth">kura-bluetooth</a></td>
+<td>Bluetooth LE, iBeacon™ and Eddystone™, BLE drivers</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-position">kura-position</a></td>
+<td>Position service based on gpsd</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-command">kura-command</a></td>
+<td>Remote command execution</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-deployment">kura-deployment</a></td>
+<td>Remote installation of deployment packages</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-gpio">kura-gpio</a></td>
+<td>GPIO service and driver based on libgpiod</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-opcua">kura-opcua</a>, <a href="https://github.com/eclipse-kura/kura-s7">kura-s7</a></td>
+<td>OPC UA and S7comm drivers</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-modbus">kura-modbus</a>, <a href="https://github.com/eclipse-kura/kura-can">kura-can</a></td>
+<td>Modbus and CAN bus protocols</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-camel">kura-camel</a></td>
+<td>Apache Camel™ integration</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-triton">kura-triton</a></td>
+<td>Nvidia™ Triton Server inference engine</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-log-filesystem">kura-log-filesystem</a></td>
+<td>Filesystem log provider</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-kura/kura-apps">kura-apps</a></td>
+<td>Example applications and prototypes</td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Install only what you need</p>
+<p><code>kura-core</code> can also be installed on its own, together with the add-ons your gateway needs. The <a href="getting-started/install-kura/#kura-packages">Install Kura</a> page lists the system dependencies of each package.</p>
+</div>
+<h2 id="one-api-two-ways-in">One API, two ways in</h2>
+<p><img alt="The same resource is reached over HTTPS and over MQTT" src="intro/images/kura-management-paths-light.png#only-light" />
+<img alt="The same resource is reached over HTTPS and over MQTT" src="intro/images/kura-management-paths-dark.png#only-dark" /></p>
+<p>Most REST resources are also registered as MQTT request handlers. A script calling <code>/services/configuration/v2</code> over HTTPS and a cloud platform sending a request to <code>CONF-V2</code> over MQTT run the same code, so the same operations are available to REST clients and to cloud platforms. The same applies to keystores (<code>KEYS-V2</code>), identities (<code>IDN-V2</code>), security (<code>SEC-V2</code>), system information (<code>SYS-V1</code>), inventory (<code>INVENTORY-V1</code>) and cloud connections (<code>CLD-V1</code>).</p>
+<p><a href="core-services/rest-service/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> REST Service</a> · <a href="references/mqtt-namespace/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> MQTT Namespace</a> · <a href="administration/remote-management-kapua/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Remote Management with Eclipse Kapua</a></p>
+<h2 id="data-flows-with-kura-wires">Data flows with Kura Wires</h2>
+<p>Kura Wires lets you design data pipelines from the web console by placing components on a graph and wiring them together. A typical flow polls an Asset, stores the records in the gateway database, filters or aggregates them with SQL or JavaScript, and publishes the result to the cloud.</p>
+<p><img alt="Kura Wires graph in the web console" src="intro/images/wires.png" /></p>
+<h2 id="more-resources">More resources</h2>
 <ul>
-<li><a href="https://eclipse-kura.github.io/kura-artemis">Eclipse Kura™ Apache ActiveMQ Artemis MQTT broker addon</a></li>
+<li><a href="references/javadoc/">Javadoc</a> of the Kura API</li>
+<li><a href="https://github.com/eclipse-kura">Eclipse Kura™ GitHub organization</a>, with the repositories of the core and of every add-on</li>
+<li><a href="https://eclipse-kura.github.io/kura-artemis">Eclipse Kura™ Apache ActiveMQ Artemis MQTT broker addon</a> documentation</li>
 </ul>
+<details class="info">
+<summary>Coming from Kura 5?</summary>
+<ul>
+<li>Kura 6 requires <strong>Java 21</strong>.</li>
+<li>The framework is split into <code>kura-core</code> and add-ons: networking, web console, Wires and Assets, Bluetooth, position and command moved out of the core into the packages listed above.</li>
+<li>Remote installation of deployment packages (<code>DEPLOY-V2</code>) is provided by the optional <code>kura-deployment</code> add-on.</li>
+<li>Apache Camel™, the S7comm and OPC UA drivers, Modbus, CAN, the filesystem log provider and the Nvidia™ Triton integration are developed in their own repositories.</li>
+<li>Deprecated APIs have been removed from <code>org.eclipse.kura.api</code>: check the <a href="references/javadoc/">Javadoc</a> before porting an add-on.</li>
+<li>Add-ons are built with Maven and bnd: start from the <a href="java-application-development/kura-addon-archetype/">Kura Addon Archetype</a>.</li>
+</ul>
+</details>
 
 
 

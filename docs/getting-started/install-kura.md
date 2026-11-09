@@ -90,12 +90,6 @@ Packages installed by the `kura` meta-package:
 - [kura-position](https://github.com/eclipse-kura/kura-position): Eclipse Kura™ Position addon
 - [kura-wires](https://github.com/eclipse-kura/kura-wires): Eclipse Kura™ Wires and Assets addon
 
-Optional packages, to be installed separately:
-
-- [kura-apps](https://github.com/eclipse-kura/kura-apps): Applications and examples for Eclipse Kura™ framework
-- [kura-deployment](https://github.com/eclipse-kura/kura-deployment): Eclipse Kura™ Deployment addon
-- [kura-gpio](https://github.com/eclipse-kura/kura-gpio): Eclipse Kura™ GPIO handling addon
-
 The [home page](../index.md#kura-core-and-add-ons) lists the other add-ons, such as field protocols and drivers.
 
 ### Java Heap Memory Assignment

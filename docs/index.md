@@ -9,7 +9,7 @@ hide:
 
 # Welcome to the Eclipse Kura™ Documentation
 
-Eclipse Kura™ turns an edge device into a managed IoT gateway. It collects data from field devices, processes it at the edge and delivers it to the cloud, while the gateway itself stays configurable, secure and manageable: locally from its web console and REST APIs, remotely from an IoT platform over MQTT.
+Eclipse Kura™ turns an edge device into a managed IoT gateway. It collects data from field devices, processes it at the edge and delivers it to the cloud, while the gateway itself stays configurable, secure and manageable from its web console, through its REST APIs or from an IoT platform over MQTT.
 
 Kura is a Java 21 application built on OSGi. Every feature is a configurable OSGi Declarative Services component that exposes a service API, so you can extend the gateway with your own add-ons, drivers and containerized applications.
 
@@ -114,7 +114,7 @@ Since version 6.0.0 Kura is made of a mandatory core and a set of add-ons, each 
 ![The same resource is reached over HTTPS and over MQTT](./intro/images/kura-management-paths-light.png#only-light)
 ![The same resource is reached over HTTPS and over MQTT](./intro/images/kura-management-paths-dark.png#only-dark)
 
-Most REST resources are also registered as MQTT request handlers. A script calling `/services/configuration/v2` over HTTPS and a cloud platform sending a request to `CONF-V2` over MQTT run the same code, so everything you automate locally can also be done remotely. The same applies to keystores (`KEYS-V2`), identities (`IDN-V2`), security (`SEC-V2`), system information (`SYS-V1`), inventory (`INVENTORY-V1`) and cloud connections (`CLD-V1`).
+Most REST resources are also registered as MQTT request handlers. A script calling `/services/configuration/v2` over HTTPS and a cloud platform sending a request to `CONF-V2` over MQTT run the same code, so the same operations are available to REST clients and to cloud platforms. The same applies to keystores (`KEYS-V2`), identities (`IDN-V2`), security (`SEC-V2`), system information (`SYS-V1`), inventory (`INVENTORY-V1`) and cloud connections (`CLD-V1`).
 
 [:octicons-arrow-right-24: REST Service](core-services/rest-service.md) · [:octicons-arrow-right-24: MQTT Namespace](references/mqtt-namespace.md) · [:octicons-arrow-right-24: Remote Management with Eclipse Kapua](administration/remote-management-kapua.md)
 

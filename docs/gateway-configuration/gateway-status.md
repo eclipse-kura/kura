@@ -14,6 +14,8 @@ This section provides a summary of the IoT Cloud connection status including the
 - **Service Status** - provides the status of the DataService and DataTransport connection. Valid values are CONNECTED or DISCONNECTED.
 - **Username** - supplies the name of the user used by the MqttDataTransport service when an MQTT connection is opened.
 
+The connection status can also be reported on an LED or in the Kura log, see [Cloud Connection Status](cloud-connection-status.md).
+
 
 ## Ethernet, Wireless, and Cellular Settings
 

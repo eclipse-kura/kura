@@ -935,7 +935,8 @@ public class WatchdogServiceImplTest {
     }
 
     private void givenRefreshDeadlineIsRecorded() throws NoSuchFieldException {
-        this.refreshDeadlineBeforeUpdate = (Long) TestUtil.getFieldValue(this.statusSvc, "refreshDeadline");
+        this.refreshDeadlineBeforeUpdate = (Long) TestUtil.getFieldValue(this.statusSvc,
+                "refreshDeadlineAfterRebootRequest");
         assertNotNull(this.refreshDeadlineBeforeUpdate);
     }
 
@@ -1191,7 +1192,8 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenRefreshDeadlineIsUnchanged() throws NoSuchFieldException {
-        assertEquals(this.refreshDeadlineBeforeUpdate, TestUtil.getFieldValue(this.statusSvc, "refreshDeadline"));
+        assertEquals(this.refreshDeadlineBeforeUpdate,
+                TestUtil.getFieldValue(this.statusSvc, "refreshDeadlineAfterRebootRequest"));
     }
 
     private void thenRebootIsRequestedOnlyOnce() throws InterruptedException {
@@ -1356,7 +1358,7 @@ public class WatchdogServiceImplTest {
 
     private void thenWatchdogDeviceIsNotCreated() throws NoSuchFieldException {
         assertNull(TestUtil.getFieldValue(this.statusSvc, "device"));
-        assertNull(TestUtil.getFieldValue(this.statusSvc, "refreshDeadline"));
+        assertNull(TestUtil.getFieldValue(this.statusSvc, "refreshDeadlineAfterRebootRequest"));
     }
 
     private void thenOnlyMagicCharacterIsWritten() {

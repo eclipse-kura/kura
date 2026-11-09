@@ -13,6 +13,7 @@ nav:
     - Gateway Configuration:
       - Gateway Administration Console: gateway-configuration/gateway-administration-console.md
       - Gateway Status: gateway-configuration/gateway-status.md
+      - Cloud Connection Status: gateway-configuration/cloud-connection-status.md
       - Device Information: gateway-configuration/device-information.md
       - Network Configuration:
         - Network Configuration: gateway-configuration/network-configuration.md

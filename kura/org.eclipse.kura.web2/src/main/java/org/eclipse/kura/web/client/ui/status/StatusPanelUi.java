@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -79,7 +79,8 @@ public class StatusPanelUi extends Composite {
             if ("Cloud Services".equals(row.getName()) || "Connection Name".equals(row.getName())
                     || "Ethernet Settings".equals(row.getName()) || "Wireless Settings".equals(row.getName())
                     || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())
-                    || "Tamper Detection Status".equals(row.getName())) {
+                    || "Tamper Detection Status".equals(row.getName())
+                    || "Watchdog Status".equals(row.getName())) {
                 return "rowHeader";
             } else {
                 return " ";

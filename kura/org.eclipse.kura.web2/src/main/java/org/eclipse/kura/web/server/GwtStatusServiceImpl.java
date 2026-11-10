@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,8 +39,11 @@ import org.eclipse.kura.security.tamper.detection.TamperDetectionProperties;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.watchdog.WatchdogService;
+import org.eclipse.kura.watchdog.WatchdogStatus;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionInfo;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -65,6 +68,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final String MODE = "Mode: ";
     private static final String SUBNET_MASK = "Subnet Mask: ";
     private static final String POSITION_STATUS = "positionStatus";
+    private static final String WATCHDOG_STATUS = "watchdogStatus";
     private static final Logger logger = LoggerFactory.getLogger(GwtStatusServiceImpl.class);
     private static final long serialVersionUID = 8256280782910423734L;
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
@@ -89,6 +93,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
         pairs.addAll(getPositionStatus());
         pairs.addAll(getTamperDetectionStatus());
+        pairs.addAll(getWatchdogStatus());
 
         return new ArrayList<>(pairs);
     }
@@ -119,6 +124,43 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
 
         return result;
+    }
+
+    private List<GwtGroupedNVPair> getWatchdogStatus() {
+        final List<GwtGroupedNVPair> pairs = new ArrayList<>();
+
+        try {
+            ServiceLocator.applyToServiceOptionally(WatchdogService.class, watchdogService -> {
+                if (watchdogService != null) {
+                    fillWatchdogStatus(pairs, watchdogService.getWatchdogStatus());
+                }
+                return null;
+            });
+        } catch (final Exception e) {
+            logger.warn("failed to get watchdog status", e);
+        }
+
+        return pairs;
+    }
+
+    private static void fillWatchdogStatus(final List<GwtGroupedNVPair> pairs, final WatchdogStatus status) {
+        pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Supervision State", getWatchdogStateLabel(status)));
+        pairs.add(new GwtGroupedNVPair(WATCHDOG_STATUS, "Watchdog Device",
+                status.getDevicePath().map(GwtSafeHtmlUtils::htmlEscape).orElse("N/A")));
+    }
+
+    private static String getWatchdogStateLabel(final WatchdogStatus status) {
+        switch (status.getState()) {
+        case SUPERVISING:
+            return "Supervising";
+        case DEVICE_UNAVAILABLE:
+            return "Not supervising - device unavailable";
+        case REBOOT_REQUESTED:
+            return "Reboot requested";
+        case DISABLED:
+        default:
+            return "Disabled";
+        }
     }
 
     private List<GwtGroupedNVPair> getCloudStatus() throws GwtKuraException {

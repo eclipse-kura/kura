@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -64,8 +65,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
     private ScheduledExecutorService pollExecutor;
     private ScheduledFuture<?> pollTask;
-    private volatile WatchdogDevice device;
-    private volatile WatchdogServiceOptions options;
+    private final AtomicReference<WatchdogDevice> device = new AtomicReference<>();
+    private WatchdogServiceOptions options;
 
     private final Object statusLock = new Object();
     private WatchdogState state = WatchdogState.DISABLED;
@@ -87,7 +88,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     protected void deactivate() {
         cancelPollTask();
         shutdownPollExecutor();
-        if (this.device != null) {
+        if (this.device.get() != null) {
             refreshWatchdog();
             closeWatchdogDevice();
         }
@@ -107,7 +108,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         this.options = newOptions;
         this.pollExecutor.submit(() -> {
             Thread.currentThread().setName(WATCHDOG_SERVICE_IMPL_NAME);
-            if (!toggleRequired && this.device != null) {
+            if (!toggleRequired && this.device.get() != null) {
                 logger.debug(
                         "Watchdog device and enablement unchanged. Updating configuration without toggling the watchdog");
                 if (pingIntervalChanged) {
@@ -117,7 +118,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 return;
             }
             cancelPollTask();
-            if (this.device != null) {
+            if (this.device.get() != null) {
                 disableWatchdog();
             }
             doUpdate(newOptions);
@@ -151,14 +152,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void openWatchdog(final String watchdogDevice, final boolean tryStopWatchdogd)
             throws IOException, KuraException {
         try {
-            this.device = createWatchdogDevice(watchdogDevice);
+            this.device.set(createWatchdogDevice(watchdogDevice));
         } catch (IOException e) {
             // Try to stop watchdogd only at the first attempt
             if (!tryStopWatchdogd) {
                 throw e;
             }
             stopWatchdogd();
-            this.device = createWatchdogDevice(watchdogDevice);
+            this.device.set(createWatchdogDevice(watchdogDevice));
         }
     }
 
@@ -171,7 +172,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         this.refreshDeadlineAfterRebootRequest = null;
-        this.device = null;
+        this.device.set(null);
 
         final Optional<String> unavailableReason = openWatchdogDevice(newOptions.getWatchdogDevice(), true);
         if (unavailableReason.isPresent()) {
@@ -324,7 +325,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public int getHardwareTimeout() {
-        final WatchdogDevice currentDevice = this.device;
+        final WatchdogDevice currentDevice = this.device.get();
         if (currentDevice == null) {
             return 0;
         }
@@ -452,7 +453,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             // then stop so the hardware watchdog resets the system if the reboot hangs
             this.refreshDeadlineAfterRebootRequest = System.nanoTime()
                     + TimeUnit.MILLISECONDS.toNanos(getGracePeriod());
-        } else if (this.device != null) {
+        } else if (this.device.get() != null) {
             // Reboot command failed but the watchdog device is open: stop refreshing
             // immediately
             // and let the hardware watchdog reset the system when its timeout expires
@@ -508,7 +509,11 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void refreshWatchdog() {
         try {
-            this.device.keepAlive();
+            final WatchdogDevice currentDevice = this.device.get();
+            if (currentDevice == null) {
+                return;
+            }
+            currentDevice.keepAlive();
             setLastRefreshTime(Instant.now());
         } catch (IOException e) {
             logger.error("Failed to refresh watchdog device", e);
@@ -517,7 +522,11 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void disableWatchdog() {
         try {
-            this.device.disarm();
+            final WatchdogDevice currentDevice = this.device.get();
+            if (currentDevice == null) {
+                return;
+            }
+            currentDevice.disarm();
         } catch (IOException e) {
             logger.error("Failed to write magic character to watchdog device", e);
         }
@@ -526,11 +535,15 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void closeWatchdogDevice() {
         try {
-            this.device.close();
+            final WatchdogDevice currentDevice = this.device.get();
+            if (currentDevice == null) {
+                return;
+            }
+            currentDevice.close();
         } catch (IOException e) {
             logger.error("Failed to close watchdog device", e);
         } finally {
-            this.device = null;
+            this.device.set(null);
             setDeviceOpen(false);
         }
     }

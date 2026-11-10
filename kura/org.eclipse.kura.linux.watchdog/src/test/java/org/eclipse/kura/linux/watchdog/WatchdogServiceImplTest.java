@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -1001,7 +1002,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void givenWatchdogDeviceIsOpen() throws NoSuchFieldException {
-        TestUtil.setFieldValue(this.statusSvc, "device", this.statusDevice);
+        getDeviceReference(this.statusSvc).set(this.statusDevice);
     }
 
     private void givenWatchdogServiceWithoutCriticalComponents() throws NoSuchFieldException {
@@ -1179,7 +1180,7 @@ public class WatchdogServiceImplTest {
 
     private void thenWatchdogDeviceIsOpen() throws NoSuchFieldException {
         assertTrue(this.unavailableDeviceSvc.getWatchdogStatus().isDeviceOpen());
-        assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "device"));
+        assertNotNull(getDeviceReference(this.unavailableDeviceSvc).get());
         assertNotNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollTask"));
     }
 
@@ -1311,7 +1312,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenWatchdogDeviceIsNotOpen() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.unavailableDeviceSvc, "device"));
+        assertNull(getDeviceReference(this.unavailableDeviceSvc).get());
     }
 
     private void thenWatchdogEnabledTemporaryFileDoesNotExist() {
@@ -1357,7 +1358,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenWatchdogDeviceIsNotCreated() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.statusSvc, "device"));
+        assertNull(getDeviceReference(this.statusSvc).get());
         assertNull(TestUtil.getFieldValue(this.statusSvc, "refreshDeadlineAfterRebootRequest"));
     }
 
@@ -1384,7 +1385,13 @@ public class WatchdogServiceImplTest {
 
     private void thenPollTaskIsNotScheduled() throws NoSuchFieldException {
         assertNull(TestUtil.getFieldValue(this.scenarioSvc, "pollTask"));
-        assertNull(TestUtil.getFieldValue(this.scenarioSvc, "device"));
+        assertNull(getDeviceReference(this.scenarioSvc).get());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static AtomicReference<WatchdogDevice> getDeviceReference(final WatchdogServiceImpl svc)
+            throws NoSuchFieldException {
+        return (AtomicReference<WatchdogDevice>) TestUtil.getFieldValue(svc, "device");
     }
 
     private void thenWatchdogDeviceFileDoesNotExist() {

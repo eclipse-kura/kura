@@ -191,6 +191,7 @@ public class RefreshIntervalClampingTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("watchdogDevice", WATCHDOG_DEVICE);
+        properties.put("watchdogMode", "direct");
         properties.put("pingInterval", pingInterval);
         properties.put("rebootCauseFilePath", REBOOT_CAUSE_FILE);
         properties.put("failOnUnavailableDevice", failOnUnavailableDevice);
@@ -248,7 +249,7 @@ public class RefreshIntervalClampingTest {
         }
     }
 
-    private class RefreshIntervalWatchdogServiceImpl extends WatchdogServiceImpl {
+    private class RefreshIntervalWatchdogServiceImpl extends HookedWatchdogServiceImpl {
 
         private int rebootRequests;
 

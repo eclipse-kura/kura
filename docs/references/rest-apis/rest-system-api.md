@@ -82,6 +82,7 @@ Identities with `rest.system` permissions can access these APIs.
 | os.name | String |
 | dpa.read.timeout | String |
 | file.upload.size.max | String |
+| file.transfer.size.max | String |
 | console.device.management.service.ignore | String |
 | kura.command.user | String |
 | kura.device.name | String |
@@ -255,7 +256,8 @@ Identities with `rest.system` permissions can access these APIs.
         "kura.data": "/opt/eclipse/kura/data",
         "os.name": "Linux",
         "dpa.read.timeout": "60000",
-        "file.upload.size.max": "-1",
+        "file.upload.size.max": "26214400",
+        "file.transfer.size.max": "26214400",
         "console.device.management.service.ignore": "org.eclipse.kura.net.admin.NetworkConfigurationService,org.eclipse.kura.net.admin.FirewallConfigurationService",
         "kura.command.user": "kura",
         "kura.device.name": "raspberry",
@@ -385,7 +387,7 @@ This method allows to retrieve Kura-related properties (derived from the `kura.p
 
 ```JSON
 {
-    "names": ["kura.platform", "file.upload.size.max", "kura.have.net.admin"]
+    "names": ["kura.platform", "file.transfer.size.max", "kura.have.net.admin"]
 }
 ```
 
@@ -398,7 +400,7 @@ This method allows to retrieve Kura-related properties (derived from the `kura.p
     "kuraProperties": {
         "kura.platform": "aarch64",
         "kura.have.net.admin": "true",
-        "file.upload.size.max": "-1"
+        "file.transfer.size.max": "26214400"
     }
 }
 ```

@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -27,16 +28,20 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class MultiValuedServicePidTest {
 
     private static final String FACTORY_PID = "org.eclipse.kura.test.PublisherFactory";
     private static final String GENERATED_PID = "org.eclipse.kura.test.PublisherFactory-1762761600000-0";
+    private static final String DECLARED_PID = "org.eclipse.kura.test.Publisher";
+    private static final String CONFIGURATION_PID = "org.eclipse.kura.test.PublisherConfiguration";
     private static final String OTHER_CONFIGURATION_PID = "org.eclipse.kura.test.SharedConfiguration";
     private static final String INSTANCE_PID = "myPublisher";
 
     private ConfigurationServiceImpl configurationService;
+    private ConfigurationAdmin configurationAdmin;
     private ServiceReference<ConfigurableComponent> reference;
 
     @Test
@@ -63,21 +68,77 @@ public class MultiValuedServicePidTest {
     }
 
     @Test
-    public void servicePidEqualToKuraServicePidIsChosen() throws Throwable {
-        givenConfigurationService();
-        givenConfigurableComponentReference(INSTANCE_PID, Arrays.asList(OTHER_CONFIGURATION_PID, INSTANCE_PID), null);
+    public void factoryInstanceIsTrackedBeforeConfigurationAdminIsBound() throws Throwable {
+        givenConfigurationServiceWithoutConfigurationAdmin();
+        givenConfigurableComponentReference(INSTANCE_PID, Arrays.asList(FACTORY_PID, GENERATED_PID), FACTORY_PID);
 
         whenTheComponentIsAdded();
 
         thenPidIsTracked(INSTANCE_PID);
-        thenServicePidOf(INSTANCE_PID, INSTANCE_PID);
+        thenServicePidOf(INSTANCE_PID, GENERATED_PID);
     }
 
     @Test
-    public void factoryInstanceWithSeveralConfigurationPidsIsRejected() throws Throwable {
+    public void factoryInstanceDeclaringAnotherServicePidIsTrackedUnderItsConfigurationPid() throws Throwable {
         givenConfigurationService();
+        givenConfigurations(GENERATED_PID);
+        givenConfigurableComponentReference(INSTANCE_PID, Arrays.asList(DECLARED_PID, GENERATED_PID), FACTORY_PID);
+
+        whenTheComponentIsAdded();
+
+        thenPidIsTracked(INSTANCE_PID);
+        thenServicePidOf(INSTANCE_PID, GENERATED_PID);
+    }
+
+    @Test
+    public void singletonDeclaringAnotherServicePidIsTrackedUnderItsConfigurationPid() throws Throwable {
+        givenConfigurationService();
+        givenConfigurations(CONFIGURATION_PID, OTHER_CONFIGURATION_PID);
+        givenConfigurableComponentReference(DECLARED_PID, Arrays.asList(DECLARED_PID, CONFIGURATION_PID), null);
+
+        whenTheComponentIsAdded();
+
+        thenPidIsTracked(DECLARED_PID);
+        thenServicePidOf(DECLARED_PID, CONFIGURATION_PID);
+    }
+
+    @Test
+    public void severalConfigurationPidsAreRejected() throws Throwable {
+        givenConfigurationService();
+        givenConfigurations(GENERATED_PID, OTHER_CONFIGURATION_PID);
         givenConfigurableComponentReference(INSTANCE_PID,
                 Arrays.asList(FACTORY_PID, GENERATED_PID, OTHER_CONFIGURATION_PID), FACTORY_PID);
+
+        whenTheComponentIsAdded();
+
+        thenNoPidIsTracked();
+    }
+
+    @Test
+    public void servicePidsWithoutConfigurationAreRejected() throws Throwable {
+        givenConfigurationService();
+        givenConfigurableComponentReference(DECLARED_PID, Arrays.asList(DECLARED_PID, CONFIGURATION_PID), null);
+
+        whenTheComponentIsAdded();
+
+        thenNoPidIsTracked();
+    }
+
+    @Test
+    public void severalServicePidsAreRejectedBeforeConfigurationAdminIsBound() throws Throwable {
+        givenConfigurationServiceWithoutConfigurationAdmin();
+        givenConfigurableComponentReference(DECLARED_PID, Arrays.asList(DECLARED_PID, CONFIGURATION_PID), null);
+
+        whenTheComponentIsAdded();
+
+        thenNoPidIsTracked();
+    }
+
+    @Test
+    public void severalServicePidsAreRejectedWhenConfigurationsCannotBeListed() throws Throwable {
+        givenConfigurationService();
+        givenConfigurationsThatCannotBeListed();
+        givenConfigurableComponentReference(DECLARED_PID, Arrays.asList(DECLARED_PID, CONFIGURATION_PID), null);
 
         whenTheComponentIsAdded();
 
@@ -88,16 +149,49 @@ public class MultiValuedServicePidTest {
     public void factoryInstanceIsUntrackedOnRemoval() throws Throwable {
         givenConfigurationService();
         givenConfigurableComponentReference(INSTANCE_PID, Arrays.asList(FACTORY_PID, GENERATED_PID), FACTORY_PID);
-        givenTrackedComponent();
+        givenTrackedComponent(INSTANCE_PID);
 
         whenTheComponentIsRemoved();
 
         thenNoPidIsTracked();
     }
 
-    private void givenConfigurationService() throws Throwable {
+    @Test
+    public void componentIsUntrackedAfterItsConfigurationIsDeleted() throws Throwable {
+        givenConfigurationService();
+        givenConfigurations(CONFIGURATION_PID);
+        givenConfigurableComponentReference(DECLARED_PID, Arrays.asList(DECLARED_PID, CONFIGURATION_PID), null);
+        givenTrackedComponent(DECLARED_PID);
+        givenConfigurations();
+
+        whenTheComponentIsRemoved();
+
+        thenNoPidIsTracked();
+    }
+
+    private void givenConfigurationService() {
+        this.configurationAdmin = mock(ConfigurationAdmin.class);
         this.configurationService = new ConfigurationServiceImpl();
-        this.configurationService.setConfigurationAdmin(mock(ConfigurationAdmin.class));
+        this.configurationService.setConfigurationAdmin(this.configurationAdmin);
+    }
+
+    private void givenConfigurationServiceWithoutConfigurationAdmin() {
+        this.configurationService = new ConfigurationServiceImpl();
+    }
+
+    private void givenConfigurations(final String... pids) throws Throwable {
+        final Configuration[] configurations = new Configuration[pids.length];
+
+        for (int i = 0; i < pids.length; i++) {
+            configurations[i] = mock(Configuration.class);
+            when(configurations[i].getPid()).thenReturn(pids[i]);
+        }
+
+        when(this.configurationAdmin.listConfigurations(null)).thenReturn(configurations);
+    }
+
+    private void givenConfigurationsThatCannotBeListed() throws Throwable {
+        when(this.configurationAdmin.listConfigurations(null)).thenThrow(new IOException("test"));
     }
 
     @SuppressWarnings("unchecked")
@@ -108,10 +202,10 @@ public class MultiValuedServicePidTest {
         when(this.reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID)).thenReturn(factoryPid);
     }
 
-    private void givenTrackedComponent() {
+    private void givenTrackedComponent(final String pid) {
         this.configurationService.addConfigurableComponent(this.reference);
 
-        assertTrue(this.configurationService.getConfigurableComponentPids().contains(INSTANCE_PID));
+        assertTrue(this.configurationService.getConfigurableComponentPids().contains(pid));
     }
 
     private void whenTheComponentIsAdded() {

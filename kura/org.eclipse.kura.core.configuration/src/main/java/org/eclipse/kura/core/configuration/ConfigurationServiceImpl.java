@@ -262,9 +262,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void removeConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-        final String servicePid = getServicePid(reference);
-
-        if (servicePid == null) {
+        if (distinctValues(reference.getProperty(Constants.SERVICE_PID)).isEmpty()) {
             return;
         }
 
@@ -1676,20 +1674,43 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return singleValue(distinctValues(value));
     }
 
-    private static String getServicePid(final ServiceReference<?> reference) {
+    private String getServicePid(final ServiceReference<?> reference) {
         final Set<String> servicePids = distinctValues(reference.getProperty(Constants.SERVICE_PID));
 
         if (servicePids.size() > 1) {
             servicePids.remove(makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID)));
         }
 
-        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+        if (servicePids.size() > 1) {
+            final Set<String> configurationPids = getConfigurationPids();
+            configurationPids.retainAll(servicePids);
 
-        if (servicePids.size() > 1 && servicePids.contains(kuraPid)) {
-            return kuraPid;
+            if (configurationPids.size() == 1) {
+                return configurationPids.iterator().next();
+            }
         }
 
         return singleValue(servicePids);
+    }
+
+    private Set<String> getConfigurationPids() {
+        final Set<String> configurationPids = new HashSet<>();
+
+        if (this.configurationAdmin == null) {
+            return configurationPids;
+        }
+
+        try {
+            final Configuration[] configurations = this.configurationAdmin.listConfigurations(null);
+
+            if (configurations != null) {
+                Arrays.stream(configurations).map(Configuration::getPid).forEach(configurationPids::add);
+            }
+        } catch (final IOException | InvalidSyntaxException e) {
+            logger.warn("Failed to list the configurations", e);
+        }
+
+        return configurationPids;
     }
 
     private static Set<String> distinctValues(Object value) {

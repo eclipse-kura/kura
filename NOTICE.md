@@ -82,9 +82,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.4.3, Apache-2.0, approved, #27052
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.6.4, Apache-2.0 AND MPL-2.0, approved, #28182
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.4.3, Apache-2.0, approved, #29518
-* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.3, Apache-2.0, approved, #21940
-* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.3, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
-* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.3, Apache-2.0, approved, #21938
+* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.5, Apache-2.0, approved, #21940
+* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.5, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
+* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.5, Apache-2.0, approved, #21938
 * maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.86, MIT AND Apache-2.0, approved, #31043
 * maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.86, MIT, approved, #31037
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.86, MIT AND CC0-1.0, approved, #31038

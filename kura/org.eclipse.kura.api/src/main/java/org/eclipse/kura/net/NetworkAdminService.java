@@ -28,11 +28,15 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service API for getting and setting network interface configurations.
+ * <p>
+ * This service is provided only by the distributions that use the legacy Kura networking implementation; it is not
+ * available on the distributions marked as "generic", where the network configuration has to be managed through the
+ * {@link org.eclipse.kura.configuration.ConfigurationService}.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @deprecated since 2.9. This service will be removed in 3.0. Use the
- *             {@link org.eclipse.kura.configuration.ConfigurationService} to manage the network configuration
- *             instead.
+ * @deprecated since 2.9. This service is not provided anymore starting from Kura 6.0 and will be removed in a future
+ *             release. Use the {@link org.eclipse.kura.configuration.ConfigurationService} to manage the network
+ *             configuration instead.
  */
 @ProviderType
 @Deprecated

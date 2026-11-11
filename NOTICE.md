@@ -112,9 +112,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5, Apache-2.0 AND MPL-2.0, approved, #21346
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.4, Apache-2.0, approved, #16866
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.4, Apache-2.0, approved, #16867
-* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.23.1, Apache-2.0, approved, #13368
-* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.23.1, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #14737
-* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.23.1, Apache-2.0, approved, #14736
+* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.5, Apache-2.0, approved, #21940
+* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.5, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
+* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.25.5, Apache-2.0, approved, #25345
 * maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.17, MIT, approved, #7698
 * maven/mavencentral/org.apache.qpid/proton-j/0.33.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.qpid/qpid-jms-client/0.45.0, Apache-2.0, approved, clearlydefined

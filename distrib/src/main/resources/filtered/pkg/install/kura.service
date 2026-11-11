@@ -7,8 +7,11 @@ After=dbus.service,docker.service
 User=kurad
 Group=kurad
 Type=forking
+NotifyAccess=all
 ExecStart=/bin/bash ${kura.install.dir}/kura/bin/start_kura.sh --detached
 ExecStopPost=/bin/bash -c 'if [ -f /tmp/watchdog ]; then echo w > `cat /tmp/watchdog`; fi'
+ExecStopPost=/bin/sh -c 'if [ "$SERVICE_RESULT" = "watchdog" ]; then systemctl reboot; fi'
+RestartPreventExitStatus=SIGABRT
 PIDFile=/var/run/kura.pid
 Restart=on-failure
 RestartSec=5

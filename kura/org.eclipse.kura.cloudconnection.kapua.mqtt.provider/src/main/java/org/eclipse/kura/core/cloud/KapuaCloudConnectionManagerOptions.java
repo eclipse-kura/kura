@@ -88,7 +88,7 @@ public class KapuaCloudConnectionManagerOptions {
     }
 
     /**
-     * Returns true if the current CloudService configuration
+     * Returns true if the current CloudConnectionManager configuration
      * specifies Gzip compression enabled for outgoing payloads.
      *
      * @return a boolean value.
@@ -102,7 +102,7 @@ public class KapuaCloudConnectionManagerOptions {
     }
 
     /**
-     * Returns true if the current CloudService configuration
+     * Returns true if the current CloudConnectionManager configuration
      * specifies the cloud client should republish the MQTT birth
      * certificate on GPS lock events.
      *
@@ -140,7 +140,7 @@ public class KapuaCloudConnectionManagerOptions {
     }
 
     /**
-     * Returns true if the current CloudService configuration
+     * Returns true if the current CloudConnectionManager configuration
      * specifies that the cloud client should perform default subscriptions.
      *
      * @return a boolean value.

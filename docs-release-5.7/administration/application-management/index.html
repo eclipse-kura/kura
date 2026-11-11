@@ -1572,6 +1572,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#download-size-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Download Size Limit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#eclipse-kura-marketplace" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5876,6 +5887,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#download-size-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Download Size Limit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#eclipse-kura-marketplace" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5920,6 +5942,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><img alt="" src="../images/packageInstall.png" /></p>
 <p>Upon a successful installation, the new component appears in the Services list (shown as the <em>Heater</em> example in these screen captures). Its configuration may be modified according to the defined parameters as shown the <em>Heater</em> display that follows.</p>
 <p><img alt="" src="../images/packageConfig.png" /></p>
+<h2 id="download-size-limit">Download Size Limit</h2>
+<p>The size of the files transferred to Kura, either downloaded from a remote server (e.g. using HTTP or HTTPS) or uploaded through the Kura Gateway Administration Console, is limited by the <code>file.transfer.size.max</code> Kura property. The limit applies to:</p>
+<ul>
+<li>files uploaded from the local machine through the Kura Gateway Administration Console:<ul>
+<li>deployment packages uploaded from the <strong>Packages</strong> page;</li>
+<li>configuration snapshots uploaded with the <a href="../snapshot-management/#upload-and-apply">Upload and Apply</a> option of the <strong>Snapshots</strong> tab in the <strong>Settings</strong> page;</li>
+<li>zip archives uploaded with the <strong>File</strong> option of the <a href="../../core-services/command-service/">Command</a> tab in the <strong>Device</strong> page;</li>
+<li>channel lists uploaded with the <a href="../../connect-field-devices/asset-implemetation/#csv-upload">Upload Channels</a> button of an Asset;</li>
+</ul>
+</li>
+<li>packages installed from a URL or from the <a href="#eclipse-kura-marketplace">Eclipse Kura Marketplace</a> through the <strong>Packages</strong> page of the Kura Gateway Administration Console;</li>
+<li>packages installed with the <a href="../../references/rest-apis/rest-deploy-api/#install-package-from-url">Rest Deploy v2 API</a>, when the provided URL refers to a remote server;</li>
+<li>deployment packages, shell scripts and verifier scripts downloaded through the <a href="../../references/mqtt-namespace/#deploy-v2">DEPLOY-V2</a> cloud request handler.</li>
+</ul>
+<p>The value is expressed in bytes and defaults to <code>26214400</code> (25 MB). Setting it to a negative value disables the limit, while setting it to <code>0</code> rejects any transfer.</p>
+<p>The default value is defined in the <code>/opt/eclipse/kura/framework/kura.properties</code> file. To change it, add the property to the <code>/opt/eclipse/kura/user/kura_custom.properties</code> file, so that the new value is preserved across Kura updates. For example, to raise the limit to 50 MB:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>file.transfer.size.max=52428800
+</code></pre></div>
+<p>Then restart Kura to apply the change.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Deployment packages already available on the device filesystem (i.e. referenced by a <code>file:</code> URL) are not subject to this limit.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>file.upload.size.max</code> property, previously used to limit the size of the files uploaded through the Kura Gateway Administration Console, is deprecated and no longer used. Use <code>file.transfer.size.max</code> instead.</p>
+</div>
 <h2 id="eclipse-kura-marketplace">Eclipse Kura Marketplace</h2>
 <p>Kura allows the installation and update of running applications via the Eclipse Kura Marketplace.
 The <strong>Packages</strong> page has, in the top part of the page a section dedicated to the Eclipse Kura Marketplace.</p>
@@ -5937,16 +5986,16 @@ The <strong>Packages</strong> page has, in the top part of the page a section de
 <ul>
 <li>Identify the download link of the package to be installed from the Eclipse Kura Marketplace (for example, <code>https://download.eclipse.org/kura/releases/4.1.0/kura-4.1.0-deployment-package.dp</code>).</li>
 <li>Retrieve the certificate with this command:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>openssl<span class="w"> </span>s_client<span class="w"> </span>-showcerts<span class="w"> </span>-connect<span class="w"> </span>download.eclipse.org:443<span class="w">  </span>&lt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'1,/-----END CERTIFICATE-----/p'</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>openssl<span class="w"> </span>s_client<span class="w"> </span>-showcerts<span class="w"> </span>-connect<span class="w"> </span>download.eclipse.org:443<span class="w">  </span>&lt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">'1,/-----END CERTIFICATE-----/p'</span>
 </code></pre></div></li>
 </ul>
 <p>the command will return an output like this:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>-----BEGIN CERTIFICATE-----
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>MIIF2DCCA8CgAwIBAgIQBv6pX9+v6KX9v5r+V7fDzANBgkqhkiG99w0BAQsFADCB
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>...
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>-----END CERTIFICATE-----   
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>-----BEGIN CERTIFICATE-----
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>MIIF2DCCA8CgAwIBAgIQBv6pX9+v6KX9v5r+V7fDzANBgkqhkiG99w0BAQsFADCB
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>...
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>-----END CERTIFICATE-----   
 </code></pre></div>
 that can be imported in the <em>SSLKeystore</em>.</p>
 </div>

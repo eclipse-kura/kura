@@ -38,28 +38,24 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
-@Component(
-    name = "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
-    immediate = true,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = {
-        "service.pid=org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
-        "kura.ui.service.hide:Boolean=true",
-        "kura.ui.factory.hide=true" })
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component(name = "org.eclipse.kura.cloud.subscriber.CloudSubscriber", xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0", immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = {
+        org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class,
+        org.eclipse.kura.configuration.ConfigurableComponent.class }, property = {
+                "service.pid=org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+                "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+                "kura.ui.service.hide:Boolean=true",
+                "kura.ui.factory.hide=true" })
 @Designate(ocd = CloudSubscriberMetatype.class, factory = true)
 public class CloudSubscriberImpl
         implements CloudSubscriber, ConfigurableComponent, CloudConnectionListener, CloudSubscriberListener {
@@ -71,8 +67,8 @@ public class CloudSubscriberImpl
         public CloudConnectionManager addingService(final ServiceReference<CloudConnectionManager> reference) {
             CloudConnectionManager tempCloudService = CloudSubscriberImpl.this.bundleContext.getService(reference);
 
-            if (tempCloudService instanceof KapuaCloudConnectionManager) {
-                CloudSubscriberImpl.this.cloudService = (KapuaCloudConnectionManager) tempCloudService;
+            if (tempCloudService instanceof KapuaCloudConnectionManager tempKapuaCloudConnectionManager) {
+                CloudSubscriberImpl.this.cloudService = tempKapuaCloudConnectionManager;
 
                 Map<String, Object> subscriptionProps = new HashMap<>();
                 subscriptionProps.put(APP_ID.name(), CloudSubscriberImpl.this.cloudSubscriberOptions.getAppId());

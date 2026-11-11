@@ -5479,6 +5479,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#upload-size-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upload size limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6131,6 +6142,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#upload-size-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upload size limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6278,6 +6300,10 @@ Identities with <code>rest.deploy</code> permissions can access these APIs.</p>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span>
 </code></pre></div>
 <p>Please note that the url can refer to a <code>.dp</code> already in the device filesystem.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the URL refers to a remote server, the size of the downloaded deployment package is limited by the <code>file.transfer.size.max</code> Kura property (default: <code>26214400</code> bytes, i.e. 25 MB). If the package exceeds the limit, the download is aborted and the package is not installed. Deployment packages already available on the device filesystem are not subject to this limit. Refer to <a href="../../../administration/application-management/#download-size-limit">Download Size Limit</a> for further details on how to change the limit.</p>
+</div>
 <h5 id="responses_1">Responses</h5>
 <ul>
 <li>200 OK status</li>
@@ -6301,6 +6327,9 @@ Identities with <code>rest.deploy</code> permissions can access these APIs.</p>
 <ul>
 <li><code>file</code></li>
 </ul>
+<h6 id="upload-size-limit">Upload size limit</h6>
+<p>Starting from Kura 5.6.3, the size of the request body is limited by the <code>file.transfer.size.max</code> Kura property (in bytes). If the property is not set, the default limit is 25 MiB (26214400 bytes). A negative value disables the limit.</p>
+<p>Requests exceeding the limit are rejected with a <code>413 Request Entity Too Large</code> response and the connection is closed. The partially uploaded data is discarded.</p>
 <h6 id="example">Example</h6>
 <p>Example using <code>curl</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-k<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USERNAME</span>:<span class="nv">$PASSWORD</span><span class="w"> </span><span class="se">\</span>
@@ -6312,6 +6341,7 @@ Identities with <code>rest.deploy</code> permissions can access these APIs.</p>
 <ul>
 <li>200 OK status</li>
 <li>400 Bad request</li>
+<li>413 Request Entity Too Large, if the uploaded file exceeds the configured size limit</li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>"REQUEST_RECEIVED"
 </code></pre></div>

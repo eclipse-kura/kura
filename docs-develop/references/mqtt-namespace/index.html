@@ -7790,6 +7790,10 @@ The installation procedure will be performed after the download completes if the
 <p class="admonition-title">Warning</p>
 <p>As said above, in case of <strong>Executable Shell Script</strong>, the completion notification will <strong>not</strong> be sent if the verifier script is not provided and/or the framework is not restarted.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The size of each downloaded file (the deployment package or shell script referenced by <strong>dp.uri</strong> and the verifier script referenced by <strong>dp.install.verifier.uri</strong>) is limited by the <code>file.transfer.size.max</code> Kura property (default: <code>26214400</code> bytes, i.e. 25 MB). If the size declared in the <code>Content-Length</code> HTTP header or the number of received bytes exceeds the limit, the download is aborted, the partially downloaded file is deleted and a <a href="#unsolicited-messages-for-download-progress">download notification message</a> is sent with <strong>dp.download.status</strong> = <code>FAILED</code>. Refer to <a href="../../administration/application-management/#download-size-limit">Download Size Limit</a> for further details on how to change the limit.</p>
+</div>
 <p>Request:</p>
 <ul>
 <li>

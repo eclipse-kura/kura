@@ -53,7 +53,9 @@ import org.osgi.service.component.annotations.Reference;
     name = "org.eclipse.kura.certificate.CertificatesService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.certificate.CertificatesService.class })
+    service = { org.eclipse.kura.certificate.CertificatesService.class },
+    property = {
+        "service.pid=org.eclipse.kura.certificate.CertificatesService" })
 public class CertificatesManager implements CertificatesService {
 
     private static final Logger logger = LoggerFactory.getLogger(CertificatesManager.class);

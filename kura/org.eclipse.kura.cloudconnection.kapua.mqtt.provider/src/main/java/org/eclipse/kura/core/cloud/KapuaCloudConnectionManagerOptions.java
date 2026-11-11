@@ -76,8 +76,8 @@ public class KapuaCloudConnectionManagerOptions {
         }
         // Return the custom field defined by the user
         else if ("custom".equals(deviceDisplayNameOption)
-                && this.properties.get(DEVICE_CUSTOM_NAME) instanceof String) {
-            displayName = (String) this.properties.get(DEVICE_CUSTOM_NAME);
+                && this.properties.get(DEVICE_CUSTOM_NAME) instanceof String customName) {
+            displayName = customName;
         }
         // Return empty string to the server
         else if ("server".equals(deviceDisplayNameOption)) {
@@ -95,8 +95,8 @@ public class KapuaCloudConnectionManagerOptions {
      */
     public boolean getEncodeGzip() {
         boolean encodeGzip = false;
-        if (this.properties != null && this.properties.get(ENCODE_GZIP) instanceof Boolean) {
-            encodeGzip = (Boolean) this.properties.get(ENCODE_GZIP);
+        if (this.properties != null && this.properties.get(ENCODE_GZIP) instanceof Boolean isGzipEncoded) {
+            encodeGzip = isGzipEncoded;
         }
         return encodeGzip;
     }
@@ -110,16 +110,18 @@ public class KapuaCloudConnectionManagerOptions {
      */
     public boolean getRepubBirthCertOnGpsLock() {
         boolean repubBirth = false;
-        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_GPS_LOCK) instanceof Boolean) {
-            repubBirth = (Boolean) this.properties.get(REPUB_BIRTH_ON_GPS_LOCK);
+        if (this.properties != null
+                && this.properties.get(REPUB_BIRTH_ON_GPS_LOCK) instanceof Boolean isRepubBirthOnGpsLock) {
+            repubBirth = isRepubBirthOnGpsLock;
         }
         return repubBirth;
     }
 
     public boolean getRepubBirthCertOnTamperEvent() {
         boolean repubBirth = true;
-        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_TAMPER_EVENT) instanceof Boolean) {
-            repubBirth = (Boolean) this.properties.get(REPUB_BIRTH_ON_TAMPER_EVENT);
+        if (this.properties != null
+                && this.properties.get(REPUB_BIRTH_ON_TAMPER_EVENT) instanceof Boolean isRepubBirthOnTamperEvent) {
+            repubBirth = isRepubBirthOnTamperEvent;
         }
         return repubBirth;
     }
@@ -131,8 +133,8 @@ public class KapuaCloudConnectionManagerOptions {
      */
     public String getTopicControlPrefix() {
         String prefix = TOPIC_CONTROL_PREFIX_DEFAULT;
-        if (this.properties != null && this.properties.get(TOPIC_CONTROL_PREFIX) instanceof String) {
-            prefix = (String) this.properties.get(TOPIC_CONTROL_PREFIX);
+        if (this.properties != null && this.properties.get(TOPIC_CONTROL_PREFIX) instanceof String topicControlPrefix) {
+            prefix = topicControlPrefix;
         }
         return prefix;
     }
@@ -145,15 +147,18 @@ public class KapuaCloudConnectionManagerOptions {
      */
     public boolean getEnableDefaultSubscriptions() {
         boolean enable = true;
-        if (this.properties != null && this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS) instanceof Boolean) {
-            enable = (Boolean) this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS);
+        if (this.properties != null
+                && this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS) instanceof Boolean isDfltSubEnabled) {
+            enable = isDfltSubEnabled;
         }
         return enable;
     }
 
     /**
-     * This method parses the Cloud Service configuration and returns the selected cloud payload encoding.
-     * By default, this method returns {@link CloudPayloadEncoding} {@code KURA_PROTOBUF}.
+     * This method parses the Cloud Service configuration and returns the selected
+     * cloud payload encoding.
+     * By default, this method returns {@link CloudPayloadEncoding}
+     * {@code KURA_PROTOBUF}.
      *
      * @return a boolean value.
      */
@@ -161,8 +166,8 @@ public class KapuaCloudConnectionManagerOptions {
         CloudPayloadEncoding result = CloudPayloadEncoding.KURA_PROTOBUF;
         String encodingString = "";
         if (this.properties != null && this.properties.get(PAYLOAD_ENCODING) != null
-                && this.properties.get(PAYLOAD_ENCODING) instanceof String) {
-            encodingString = (String) this.properties.get(PAYLOAD_ENCODING);
+                && this.properties.get(PAYLOAD_ENCODING) instanceof String payloadEncoding) {
+            encodingString = payloadEncoding;
         }
         try {
             result = CloudPayloadEncoding.getEncoding(encodingString);

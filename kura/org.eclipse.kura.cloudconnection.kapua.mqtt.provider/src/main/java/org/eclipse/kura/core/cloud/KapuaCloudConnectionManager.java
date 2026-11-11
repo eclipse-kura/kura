@@ -53,6 +53,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
@@ -102,13 +105,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -117,18 +113,21 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.Designate;
-@Component(
-    name = "org.eclipse.kura.cloud.CloudService",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
-            org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
-            org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
-            org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
-            org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
-            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
-    property = { "kura.ui.service.hide:Boolean=true" })
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component(name = "org.eclipse.kura.cloud.CloudService", immediate = false, configurationPolicy = ConfigurationPolicy.REQUIRE, service = {
+        org.eclipse.kura.configuration.ConfigurableComponent.class,
+        org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
+        org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
+        org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+        org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
+        org.eclipse.kura.cloudconnection.CloudEndpoint.class }, property = { "kura.ui.service.hide:Boolean=true" })
 @Designate(ocd = KapuaCloudConnectionManagerMetatype.class, factory = true)
 public class KapuaCloudConnectionManager
         implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
@@ -180,6 +179,8 @@ public class KapuaCloudConnectionManager
     private boolean subscribed;
 
     private final AtomicInteger messageId;
+    private final Lock messageIdLock = new ReentrantLock();
+    private final Condition messagePublished = this.messageIdLock.newCondition();
 
     private ServiceRegistration<?> cloudServiceRegistration;
 
@@ -195,6 +196,7 @@ public class KapuaCloudConnectionManager
     private ScheduledFuture<?> scheduledBirthPublisherFuture;
     private final ScheduledExecutorService scheduledBirthPublisher = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean shouldPublishDelayedBirth = new AtomicBoolean();
+    private final Lock delayedBirthLock = new ReentrantLock();
 
     public KapuaCloudConnectionManager() {
         this.messageId = new AtomicInteger();
@@ -257,11 +259,7 @@ public class KapuaCloudConnectionManager
         return this.systemService;
     }
 
-    @Reference(name = "NetworkService",
-            service = org.eclipse.kura.net.NetworkService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetNetworkService")
+    @Reference(name = "NetworkService", service = org.eclipse.kura.net.NetworkService.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, unbind = "unsetNetworkService")
     public void setNetworkService(NetworkService networkService) {
         this.networkService = Optional.of(networkService);
     }
@@ -276,11 +274,7 @@ public class KapuaCloudConnectionManager
         return this.networkService;
     }
 
-    @Reference(name = "PositionService",
-            service = org.eclipse.kura.position.PositionService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetPositionService")
+    @Reference(name = "PositionService", service = org.eclipse.kura.position.PositionService.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, unbind = "unsetPositionService")
     public void setPositionService(PositionService positionService) {
         this.positionService = Optional.of(positionService);
     }
@@ -306,10 +300,7 @@ public class KapuaCloudConnectionManager
         }
     }
 
-    @Reference(name = "Unmarshaller",
-            service = org.eclipse.kura.marshalling.Unmarshaller.class,
-            target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
-            unbind = "unsetJsonUnmarshaller")
+    @Reference(name = "Unmarshaller", service = org.eclipse.kura.marshalling.Unmarshaller.class, target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)", unbind = "unsetJsonUnmarshaller")
     public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
         this.jsonUnmarshaller = jsonUnmarshaller;
     }
@@ -320,10 +311,7 @@ public class KapuaCloudConnectionManager
         }
     }
 
-    @Reference(name = "Marshaller",
-            service = org.eclipse.kura.marshalling.Marshaller.class,
-            target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
-            unbind = "unsetJsonMarshaller")
+    @Reference(name = "Marshaller", service = org.eclipse.kura.marshalling.Marshaller.class, target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)", unbind = "unsetJsonMarshaller")
     public void setJsonMarshaller(Marshaller jsonMarshaller) {
         this.jsonMarshaller = jsonMarshaller;
     }
@@ -334,11 +322,7 @@ public class KapuaCloudConnectionManager
         }
     }
 
-    @Reference(name = "TamperDetectionService",
-            service = org.eclipse.kura.security.tamper.detection.TamperDetectionService.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetTamperDetectionService")
+    @Reference(name = "TamperDetectionService", service = org.eclipse.kura.security.tamper.detection.TamperDetectionService.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind = "unsetTamperDetectionService")
     public void setTamperDetectionService(final TamperDetectionService tamperDetectionService) {
         synchronized (this.tamperDetectionServices) {
             this.tamperDetectionServices.add(tamperDetectionService);
@@ -353,11 +337,7 @@ public class KapuaCloudConnectionManager
         }
     }
 
-    @Reference(name = "NetworkStatusService",
-            service = org.eclipse.kura.net.status.NetworkStatusService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetNetworkStatusService")
+    @Reference(name = "NetworkStatusService", service = org.eclipse.kura.net.status.NetworkStatusService.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, unbind = "unsetNetworkStatusService")
     public void setNetworkStatusService(NetworkStatusService networkStatusService) {
         this.networkStatusService = Optional.of(networkStatusService);
     }
@@ -534,12 +514,15 @@ public class KapuaCloudConnectionManager
         byte[] bytes;
         CloudPayloadEncoding preferencesEncoding = this.options.getPayloadEncoding();
 
-        if (preferencesEncoding == KURA_PROTOBUF) {
-            bytes = encodeProtobufPayload(payload);
-        } else if (preferencesEncoding == SIMPLE_JSON) {
-            bytes = encodeJsonPayload(payload);
-        } else {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD);
+        switch (preferencesEncoding) {
+            case KURA_PROTOBUF:
+                bytes = encodeProtobufPayload(payload);
+                break;
+            case SIMPLE_JSON:
+                bytes = encodeJsonPayload(payload);
+                break;
+            default:
+                throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD);
         }
         return bytes;
     }
@@ -568,9 +551,12 @@ public class KapuaCloudConnectionManager
     private void setupDeviceSubscriptions(boolean subscribe) throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
         sbDeviceSubscription.append(this.options.getTopicControlPrefix())
-                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(KapuaCloudConnectionManagerOptions.getTopicAccountToken())
-                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(KapuaCloudConnectionManagerOptions.getTopicClientIdToken())
-                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(KapuaCloudConnectionManagerOptions.getTopicWildCard());
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(KapuaCloudConnectionManagerOptions.getTopicAccountToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(KapuaCloudConnectionManagerOptions.getTopicClientIdToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(KapuaCloudConnectionManagerOptions.getTopicWildCard());
 
         // restore or remove default subscriptions
         if (subscribe) {
@@ -716,23 +702,26 @@ public class KapuaCloudConnectionManager
 
     @Override
     public void onMessagePublished(int messageId, String topic) {
-        synchronized (this.messageId) {
-            if (this.messageId.get() != -1 && this.messageId.get() == messageId) {
-                this.messageId.set(-1);
-                this.messageId.notifyAll();
-                return;
+        this.messageIdLock.lock();
+        try {
+            if (messageId != -1 && this.messageId.compareAndSet(messageId, -1)) {
+                this.messagePublished.signalAll();
             }
+        } finally {
+            this.messageIdLock.unlock();
         }
     }
 
     @Override
     public void onMessageConfirmed(int messageId, String topic) {
-        synchronized (this.messageId) {
-            if (this.messageId.get() != -1 && this.messageId.get() == messageId) {
-                this.messageId.set(-1);
-                this.messageId.notifyAll();
+        this.messageIdLock.lock();
+        try {
+            if (messageId != -1 && this.messageId.compareAndSet(messageId, -1)) {
+                this.messagePublished.signalAll();
                 return;
             }
+        } finally {
+            this.messageIdLock.unlock();
         }
 
         this.registeredCloudPublisherDeliveryListeners
@@ -840,7 +829,8 @@ public class KapuaCloudConnectionManager
     }
 
     private void publishWithDelay(boolean isAppUpdate) {
-        synchronized (this.shouldPublishDelayedBirth) {
+        this.delayedBirthLock.lock();
+        try {
             if (!isAppUpdate) {
                 this.shouldPublishDelayedBirth.set(true);
             }
@@ -854,44 +844,50 @@ public class KapuaCloudConnectionManager
 
             this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(this::publishDelayedMessage, 30L,
                     TimeUnit.SECONDS);
+        } finally {
+            this.delayedBirthLock.unlock();
         }
     }
 
     private void publishLifeCycleMessage(LifecycleMessage message) throws KuraException {
         // track the message ID and block until the message
         // has been published (i.e. written to the socket).
-        synchronized (this.messageId) {
+        this.messageIdLock.lock();
+        try {
             this.messageId.set(-1);
             // add a timestamp to the message
             KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
             int id = this.dataService.publish(message.getTopic(), encodedPayload, message.getQos(),
-                    KapuaCloudConnectionManagerOptions.getLifeCycleMessageRetain(), KapuaCloudConnectionManagerOptions.getLifeCycleMessagePriority());
+                    KapuaCloudConnectionManagerOptions.getLifeCycleMessageRetain(),
+                    KapuaCloudConnectionManagerOptions.getLifeCycleMessagePriority());
             this.messageId.set(id);
-            try {
-                this.messageId.wait(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.info("Interrupted while waiting for the message to be published", e);
+            long remainingNanos = TimeUnit.SECONDS.toNanos(1);
+            while (this.messageId.get() == id && remainingNanos > 0) {
+                remainingNanos = this.messagePublished.awaitNanos(remainingNanos);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.info("Interrupted while waiting for the message to be published", e);
+        } finally {
+            this.messageIdLock.unlock();
         }
     }
 
     private void publishDelayedMessage() {
-        synchronized (this.shouldPublishDelayedBirth) {
-            try {
-
-                if (this.shouldPublishDelayedBirth.get()) {
-                    publishLifeCycleMessage(new LifecycleMessage(this.options, this).asBirthCertificateMessage());
-                } else {
-                    publishLifeCycleMessage(new LifecycleMessage(this.options, this).asAppCertificateMessage());
-                }
-                this.shouldPublishDelayedBirth.set(false);
-
-            } catch (KuraException e) {
-                logger.error("Error sending cached BIRTH/APP certificate.", e);
+        this.delayedBirthLock.lock();
+        try {
+            if (this.shouldPublishDelayedBirth.get()) {
+                publishLifeCycleMessage(new LifecycleMessage(this.options, this).asBirthCertificateMessage());
+            } else {
+                publishLifeCycleMessage(new LifecycleMessage(this.options, this).asAppCertificateMessage());
             }
+            this.shouldPublishDelayedBirth.set(false);
+        } catch (KuraException e) {
+            logger.error("Error sending cached BIRTH/APP certificate.", e);
+        } finally {
+            this.delayedBirthLock.unlock();
         }
     }
 
@@ -1052,7 +1048,8 @@ public class KapuaCloudConnectionManager
             return;
         }
 
-        String fullTopic = encodeTopic(appId, KapuaCloudConnectionManagerOptions.getTopicClientIdToken(), appTopic, isControl);
+        String fullTopic = encodeTopic(appId, KapuaCloudConnectionManagerOptions.getTopicClientIdToken(), appTopic,
+                isControl);
 
         CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos);
 
@@ -1123,10 +1120,12 @@ public class KapuaCloudConnectionManager
     private String encodeTopic(String appId, String deviceId, String appTopic, boolean isControl) {
         StringBuilder sb = new StringBuilder();
         if (isControl) {
-            sb.append(this.options.getTopicControlPrefix()).append(KapuaCloudConnectionManagerOptions.getTopicSeparator());
+            sb.append(this.options.getTopicControlPrefix())
+                    .append(KapuaCloudConnectionManagerOptions.getTopicSeparator());
         }
 
-        sb.append(KapuaCloudConnectionManagerOptions.getTopicAccountToken()).append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+        sb.append(KapuaCloudConnectionManagerOptions.getTopicAccountToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
                 .append(deviceId).append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
@@ -1204,7 +1203,7 @@ public class KapuaCloudConnectionManager
     }
 
     private void readModemInfos(List<ModemInterfaceStatus> modemStatuses) {
-        Collections.sort(modemStatuses, Comparator.comparing(ModemInterfaceStatus::getConnectionStatus));
+        modemStatuses.sort(Comparator.comparing(ModemInterfaceStatus::getConnectionStatus));
         ModemInterfaceStatus modemStatus = modemStatuses.get(modemStatuses.size() - 1);
         Optional<Sim> activeSim = Optional.empty();
 

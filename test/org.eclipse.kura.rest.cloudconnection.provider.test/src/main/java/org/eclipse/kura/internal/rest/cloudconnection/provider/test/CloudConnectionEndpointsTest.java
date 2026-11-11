@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
+import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
@@ -147,8 +148,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         givenNewCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
         givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
                 "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
-        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService",
-                "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
+        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/cloudEndpoint",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
@@ -304,9 +304,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void givenExistingCloudEndpoint(String cloudConnectionFactoryPid, String cloudEndpointPid)
+    private void givenExistingCloudEndpoint(String cloudEndpointPid)
             throws InterruptedException, ExecutionException, TimeoutException {
-        CompletableFuture<Object> trackFuture = ServiceUtil.trackService(cloudConnectionFactoryPid,
+        CompletableFuture<CloudEndpoint> trackFuture = ServiceUtil.trackService(CloudEndpoint.class,
                 Optional.of(String.format("(kura.service.pid=%s)", cloudEndpointPid)));
         trackFuture.get(5, TimeUnit.SECONDS);
     }

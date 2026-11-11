@@ -371,6 +371,9 @@ The completion notification logic differs depending on the package type.
 !!! warning
     As said above, in case of **Executable Shell Script**, the completion notification will **not** be sent if the verifier script is not provided and/or the framework is not restarted.
 
+!!! note
+    The size of each downloaded file (the deployment package or shell script referenced by **dp.uri** and the verifier script referenced by **dp.install.verifier.uri**) is limited by the `file.transfer.size.max` Kura property (default: `26214400` bytes, i.e. 25 MB). If the size declared in the `Content-Length` HTTP header or the number of received bytes exceeds the limit, the download is aborted, the partially downloaded file is deleted and a [download notification message](#unsolicited-messages-for-download-progress) is sent with **dp.download.status** = `FAILED`. Refer to [Download Size Limit](../administration/application-management.md#download-size-limit) for further details on how to change the limit.
+
 Request:
 
 *  Request Topic:

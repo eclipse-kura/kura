@@ -10,6 +10,35 @@ Upon a successful installation, the new component appears in the Services list (
 
 ![](images/packageConfig.png)
 
+## Download Size Limit
+
+The size of the files transferred to Kura, either downloaded from a remote server (e.g. using HTTP or HTTPS) or uploaded through the Kura Gateway Administration Console, is limited by the `file.transfer.size.max` Kura property. The limit applies to:
+
+- files uploaded from the local machine through the Kura Gateway Administration Console:
+    - deployment packages uploaded from the **Packages** page;
+    - configuration snapshots uploaded with the [Upload and Apply](snapshot-management.md#upload-and-apply) option of the **Snapshots** tab in the **Settings** page;
+    - zip archives uploaded with the **File** option of the [Command](../core-services/command-service.md) tab in the **Device** page;
+    - channel lists uploaded with the [Upload Channels](../connect-field-devices/asset-implemetation.md#csv-upload) button of an Asset;
+- packages installed from a URL or from the [Eclipse Kura Marketplace](#eclipse-kura-marketplace) through the **Packages** page of the Kura Gateway Administration Console;
+- packages installed with the [Rest Deploy v2 API](../references/rest-apis/rest-deploy-api.md#install-package-from-url), when the provided URL refers to a remote server;
+- deployment packages, shell scripts and verifier scripts downloaded through the [DEPLOY-V2](../references/mqtt-namespace.md#deploy-v2) cloud request handler.
+
+The value is expressed in bytes and defaults to `26214400` (25 MB). Setting it to a negative value disables the limit, while setting it to `0` rejects any transfer.
+
+The default value is defined in the `/opt/eclipse/kura/framework/kura.properties` file. To change it, add the property to the `/opt/eclipse/kura/user/kura_custom.properties` file, so that the new value is preserved across Kura updates. For example, to raise the limit to 50 MB:
+
+```
+file.transfer.size.max=52428800
+```
+
+Then restart Kura to apply the change.
+
+!!! note
+    Deployment packages already available on the device filesystem (i.e. referenced by a `file:` URL) are not subject to this limit.
+
+!!! warning
+    The `file.upload.size.max` property, previously used to limit the size of the files uploaded through the Kura Gateway Administration Console, is deprecated and no longer used. Use `file.transfer.size.max` instead.
+
 ## Eclipse Kura Marketplace
 
 Kura allows the installation and update of running applications via the Eclipse Kura Marketplace.

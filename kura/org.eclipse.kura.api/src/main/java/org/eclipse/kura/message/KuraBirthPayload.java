@@ -163,14 +163,6 @@ public class KuraBirthPayload extends KuraPayload {
         return TamperStatus.valueOf(tamperStatus);
     }
 
-    /**
-     * @deprecated Use {@link #getApplicationFrameworkVersion()}
-     */
-    @Deprecated
-    public String getKuraVersion() {
-        return (String) getMetric(KURA_VERSION_KEY);
-    }
-
     public String getApplicationFramework() {
         final String value = (String) getMetric(APPLICATION_FRAMEWORK_KEY);
         if (value != null) {

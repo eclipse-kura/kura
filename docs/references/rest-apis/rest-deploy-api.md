@@ -38,6 +38,9 @@ Example:
 
 Please note that the url can refer to a `.dp` already in the device filesystem.
 
+!!! note
+    If the URL refers to a remote server, the size of the downloaded deployment package is limited by the `file.transfer.size.max` Kura property (default: `26214400` bytes, i.e. 25 MB). If the package exceeds the limit, the download is aborted and the package is not installed. Deployment packages already available on the device filesystem are not subject to this limit. Refer to [Download Size Limit](../../administration/application-management.md#download-size-limit) for further details on how to change the limit.
+
 ##### Responses
 - 200 OK status
 - 400 Bad request
@@ -63,6 +66,11 @@ The POST request body should be encoded in the `multipart/form-data` `enctype`, 
 
 - `file`
 
+###### Upload size limit
+
+Starting from Kura 5.6.3, the size of the request body is limited by the `file.transfer.size.max` Kura property (in bytes). If the property is not set, the default limit is 25 MiB (26214400 bytes). A negative value disables the limit.
+
+Requests exceeding the limit are rejected with a `413 Request Entity Too Large` response and the connection is closed. The partially uploaded data is discarded.
 
 ###### Example
 
@@ -78,6 +86,7 @@ curl -X POST -k -u $USERNAME:$PASSWORD \
 ##### Responses
 - 200 OK status
 - 400 Bad request
+- 413 Request Entity Too Large, if the uploaded file exceeds the configured size limit
 
 ```
 "REQUEST_RECEIVED"

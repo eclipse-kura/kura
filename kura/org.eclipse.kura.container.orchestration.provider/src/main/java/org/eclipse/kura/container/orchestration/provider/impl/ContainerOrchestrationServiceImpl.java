@@ -115,10 +115,14 @@ public class ContainerOrchestrationServiceImpl
     private DockerClient dockerClient;
     private CryptoService cryptoService;
 
-    private final AllowlistEnforcement enforcement = new AllowlistEnforcement(this);
+    private AllowlistEnforcement enforcement = new AllowlistEnforcement(this);
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
+    }
+
+    public void setAllowlistEnforcement(AllowlistEnforcement enforcement) {
+        this.enforcement = enforcement;
     }
 
     @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
@@ -1002,9 +1006,4 @@ public class ContainerOrchestrationServiceImpl
 
         return imageDigests;
     }
-
-    public Set<String> getContainerInstancesAllowlist() {
-        return this.enforcement.getRegisteredDigests();
-    }
-
 }

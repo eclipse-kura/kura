@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -53,6 +54,7 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.AuthConfig;
@@ -989,22 +991,13 @@ public class ContainerOrchestrationServiceImpl
 
     @Override
     public Set<String> getImageDigestsByContainerId(String containerId) {
+        try {
+            String imageId = this.dockerClient.inspectContainerCmd(containerId).exec().getImageId();
 
-        Set<String> imageDigests = new HashSet<>();
-
-        String containerName = listContainerDescriptors().stream()
-                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
-                .map(container -> container.getContainerName()).orElse(null);
-
-        if (containerName == null) {
-            return imageDigests;
+            return this.dockerClient.inspectImageCmd(imageId).exec().getRepoDigests().stream()
+                    .map(repoDigest -> repoDigest.split("@")[1]).collect(Collectors.toSet());
+        } catch (NotFoundException e) {
+            return new HashSet<>();
         }
-
-        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
-            List<String> digests = Arrays.asList(image.getRepoDigests());
-            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
-        });
-
-        return imageDigests;
     }
 }

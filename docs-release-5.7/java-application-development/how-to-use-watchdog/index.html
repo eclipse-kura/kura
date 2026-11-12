@@ -4759,6 +4759,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#watchdog-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Watchdog Status
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5899,6 +5910,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#watchdog-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Watchdog Status
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5931,27 +5953,109 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>enabled</strong> - sets whether or not this service is enabled or disabled. If enabled, you must set a pingInterval periodicity compatible with the watchdog driver.</p>
 </li>
 <li>
-<p><strong>pingInterval</strong> - specifies the time between two watchdog notifications. This time is hardware dependent. Generally, the maximum time between two notifications should be between 30 seconds and 1 minute. 10000 milliseconds for the pingInterval is typically a good choice.</p>
+<p><strong>pingInterval</strong> - specifies the time between two watchdog notifications. The value can be set between 1 and 60 seconds; 10000 milliseconds is typically a good choice. The maximum time allowed between two notifications is hardware dependent: the service reads the timeout from the watchdog driver and, if the pingInterval is greater than half of that timeout, it notifies the watchdog every half of the timeout instead.</p>
+</li>
+<li>
+<p><strong>Watchdog device path</strong> - sets the watchdog device path.</p>
+</li>
+<li>
+<p><strong>Reboot Cause File Path</strong> - sets the path to the file that will contain the reboot cause information.</p>
+</li>
+<li>
+<p><strong>Fail on unavailable device</strong> - if enabled and the watchdog device does not exist or cannot be opened, the service requests a system reboot after a grace period of 5 minutes instead of running without hardware supervision.</p>
 </li>
 </ul>
+<p>Refer to the <a href="../../core-services/watchdog-service/">Watchdog Service</a> page for further details on the configuration parameters.</p>
 <h2 id="code-example">Code Example</h2>
 <p>The WatchdogService references a list of Critical Components that correspond to the applications implementing the CriticalComponent interface.</p>
 <p><strong>CriticalComponent</strong> is an interface that can be used to denote a component that is crucial to system operations. If a component implements CriticalComponent, then it must state its name as well as its <strong>criticalComponentTimeout</strong>. The name is a unique identifier in the system. The timeout is the length of time in milliseconds that the CriticalComponent must "check in" with the WatchdogService. If the CriticalComponent extends beyond the period of time specified in this timeout, a system reboot will be performed based on the WatchdogService configuration.</p>
-<p>If at least one of the registered CriticalComponents has not "checked in" during the pingInterval time, the WatchdogService stops notifying the watchdog driver. The system reboots when the time interval reaches the hardware time that is programmed for the watchdog. When the WatchdogService is enabled and no application is using it, the service runs silently in the background.</p>
+<p>The WatchdogService checks the registered CriticalComponents at every pingInterval. If at least one of them has not "checked in" within its criticalComponentTimeout, the WatchdogService writes the name of the component to the reboot cause file and requests a system reboot. It keeps notifying the watchdog driver for a grace period of 5 minutes to allow a clean shutdown, then it stops: if the shutdown hangs, a hardware reset occurs when the time interval reaches the hardware time that is programmed for the watchdog. If the reboot request fails, the WatchdogService stops notifying the watchdog driver immediately. When the WatchdogService is enabled and no application is using it, the service runs silently in the background.</p>
 <p>An example of the WatchdogService can be found <a href="https://github.com/eurotech/edc-examples/blob/master/com.eurotech.framework.edcdevkit">here</a>.</p>
 <p>The following code snippets demonstrate how to implement the CriticalComponent interface:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ModbusManager</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">,</span><span class="w"> </span><span class="n">CriticalComponent</span><span class="p">,</span><span class="w"> </span><span class="n">CloudClientListener</span>
 </code></pre></div>
 <p>Registration of the class in WatchdogService::</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">if</span><span class="p">(</span><span class="n">m_watchdogService</span><span class="o">!=</span><span class="kc">null</span><span class="p">){</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="n">m_watchdogService</span><span class="p">.</span><span class="na">registerCriticalComponent</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">if</span><span class="p">(</span><span class="n">watchdogService</span><span class="o">!=</span><span class="kc">null</span><span class="p">){</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="n">watchdogService</span><span class="p">.</span><span class="na">registerCriticalComponent</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span>
 </code></pre></div>
 <p>Periodic call to checkin method of WatchdogService in the main loop (keeps watchdog notification alive):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">if</span><span class="p">(</span><span class="n">m_watchdogService</span><span class="o">!=</span><span class="kc">null</span><span class="p">){</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="n">m_watchdogService</span><span class="p">.</span><span class="na">checkin</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">if</span><span class="p">(</span><span class="n">watchdogService</span><span class="o">!=</span><span class="kc">null</span><span class="p">){</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="n">watchdogService</span><span class="p">.</span><span class="na">checkin</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
 </code></pre></div>
+<h2 id="watchdog-status">Watchdog Status</h2>
+<p>An application can verify that the system is actually under hardware watchdog supervision using the <code>getWatchdogStatus()</code> method. It returns a <code>WatchdogStatus</code> object, that is a snapshot of the state of the hardware watchdog providing the following information:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getState()</code></td>
+<td>The supervision state as a <code>WatchdogState</code> value. The system is under hardware watchdog supervision only if the state is <code>SUPERVISING</code>.</td>
+</tr>
+<tr>
+<td><code>isDeviceOpen()</code></td>
+<td>Whether the watchdog device is currently open.</td>
+</tr>
+<tr>
+<td><code>getDevicePath()</code></td>
+<td>The path of the configured watchdog device, if any.</td>
+</tr>
+<tr>
+<td><code>getLastRefreshTime()</code></td>
+<td>The time of the last successful refresh of the watchdog device since the device has been opened. It is empty if the device has not been refreshed.</td>
+</tr>
+<tr>
+<td><code>getRefreshIntervalMs()</code></td>
+<td>The interval between two refreshes of the watchdog device, in milliseconds. This is the configured pingInterval, limited to half of the hardware watchdog timeout while the watchdog device is open.</td>
+</tr>
+<tr>
+<td><code>getFailureReason()</code></td>
+<td>A description of the reason why the system is not under hardware watchdog supervision or a reboot has been requested. It is empty if there is no failure.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>WatchdogState</code> can assume the following values:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DISABLED</code></td>
+<td>The WatchdogService is disabled by configuration and does not supervise the system.</td>
+</tr>
+<tr>
+<td><code>SUPERVISING</code></td>
+<td>The watchdog device is open and it is periodically refreshed.</td>
+</tr>
+<tr>
+<td><code>DEVICE_UNAVAILABLE</code></td>
+<td>The WatchdogService is enabled but the watchdog device does not exist or cannot be opened. If the service is configured to fail on unavailable device, this is also the state during the grace period that precedes the reboot request.</td>
+</tr>
+<tr>
+<td><code>REBOOT_REQUESTED</code></td>
+<td>A system reboot has been requested, either because a CriticalComponent timed out or because the watchdog device is still unavailable at the end of the grace period. The state is kept while a failed reboot is being retried.</td>
+</tr>
+</tbody>
+</table>
+<p>The following code snippet demonstrates how to check the supervision state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">WatchdogStatus</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">watchdogService</span><span class="p">.</span><span class="na">getWatchdogStatus</span><span class="p">();</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="na">getState</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">WatchdogState</span><span class="p">.</span><span class="na">SUPERVISING</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="n">logger</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">"The system is not under hardware watchdog supervision: {}"</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="n">status</span><span class="p">.</span><span class="na">getFailureReason</span><span class="p">().</span><span class="na">orElse</span><span class="p">(</span><span class="s">"watchdog disabled"</span><span class="p">));</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>The hardware time that is programmed for the watchdog can be retrieved using the <code>getHardwareTimeout()</code> method. The value is expressed in milliseconds and it is read from the watchdog driver; the method returns 0 if the watchdog device is not open or the timeout cannot be read.</p>
 
 
 

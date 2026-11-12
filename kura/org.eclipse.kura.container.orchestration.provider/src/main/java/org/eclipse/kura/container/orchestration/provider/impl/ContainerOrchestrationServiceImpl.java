@@ -43,7 +43,6 @@ import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
-import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.EnforcementTarget;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
@@ -116,8 +115,6 @@ public class ContainerOrchestrationServiceImpl
     private DockerClient dockerClient;
     private CryptoService cryptoService;
 
-    private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
-
     private final AllowlistEnforcement enforcement = new AllowlistEnforcement(this);
 
     public void setDockerClient(DockerClient dockerClient) {
@@ -162,9 +159,7 @@ public class ContainerOrchestrationServiceImpl
                 return;
             }
 
-            if (this.allowlistEnforcementMonitor != null) {
-                closeEnforcementMonitor();
-            }
+            this.enforcement.close();
 
             connect();
 
@@ -174,57 +169,12 @@ public class ContainerOrchestrationServiceImpl
             }
             logger.info("Connection Successful");
 
-            if (currentConfig.isEnforcementEnabled()) {
-                try {
-                    startEnforcementMonitor();
-                } catch (Exception ex) {
-                    logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
-                    closeEnforcementMonitor();
-                    logger.warn("Enforcement won't be active.");
-                }
-                enforceAlreadyRunningContainer();
+            if (this.currentConfig.isEnforcementEnabled()) {
+                this.enforcement.startEnforcing(this.currentConfig.getEnforcementAllowlist(), this.dockerClient);
             }
         }
 
         logger.info("Bundle {} has updated with config!", APP_ID);
-    }
-
-    private void startEnforcementMonitor() {
-        logger.info("Enforcement monitor starting...");
-        this.enforcement.setAllowlist(this.currentConfig.getEnforcementAllowlist());
-        this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
-                .exec(new AllowlistEnforcementMonitor(this.enforcement));
-        logger.info("Enforcement monitor starting...done.");
-    }
-
-    private void closeEnforcementMonitor() {
-
-        if (this.allowlistEnforcementMonitor == null) {
-            return;
-        }
-
-        try {
-            logger.info("Enforcement monitor closing...");
-            this.allowlistEnforcementMonitor.close();
-            this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
-            this.allowlistEnforcementMonitor = null;
-            logger.info("Enforcement monitor closing...done.");
-        } catch (InterruptedException ex) {
-            logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
-            Thread.currentThread().interrupt();
-        } catch (IOException ex) {
-            logger.error("Failed to close enforcement monitor, stopping it...", ex);
-        }
-    }
-
-    private void enforceAlreadyRunningContainer() {
-        if (this.allowlistEnforcementMonitor == null) {
-            logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
-            return;
-        }
-        logger.info("Enforcement check on already running containers...");
-        this.enforcement.enforceAll();
-        logger.info("Enforcement check on already running containers...done");
     }
 
     @Override
@@ -450,7 +400,7 @@ public class ContainerOrchestrationServiceImpl
 
             this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
 
-            removeContainerInstanceDigest(id);
+            this.enforcement.unregister(id);
 
         } catch (Exception e) {
             logger.error("Could not remove container {}", id, e);
@@ -872,10 +822,7 @@ public class ContainerOrchestrationServiceImpl
     }
 
     private void cleanUpDocker() {
-
-        if (this.allowlistEnforcementMonitor != null) {
-            closeEnforcementMonitor();
-        }
+        this.enforcement.close();
 
         if (testConnection()) {
             this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisabled);
@@ -1054,12 +1001,6 @@ public class ContainerOrchestrationServiceImpl
         });
 
         return imageDigests;
-    }
-
-    private void removeContainerInstanceDigest(String containerId) {
-        if (this.enforcement.unregister(containerId)) {
-            enforceAlreadyRunningContainer();
-        }
     }
 
     public Set<String> getContainerInstancesAllowlist() {

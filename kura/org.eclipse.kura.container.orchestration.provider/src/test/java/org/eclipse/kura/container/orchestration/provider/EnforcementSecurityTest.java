@@ -29,10 +29,12 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
-import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.EnforcementTarget;
 import org.junit.Test;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.command.EventsCmd;
 import com.github.dockerjava.api.model.Event;
 
 public class EnforcementSecurityTest {
@@ -48,14 +50,14 @@ public class EnforcementSecurityTest {
     private static final String CORRECT_DIGEST = "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
     private static final String WRONG_DIGEST = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 
-    private EnforcementTarget target;
+    private final EnforcementTarget target = mock(EnforcementTarget.class);
     private AllowlistEnforcement enforcement;
-    private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
+    private ResultCallback<Event> eventCallback;
 
     @Test
     public void shouldAllowStartingWithCorrectAllowlistContent() throws KuraException {
-        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
+        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
@@ -65,8 +67,8 @@ public class EnforcementSecurityTest {
 
     @Test
     public void shouldAllowStartingWithCorrectAllowlistContentWithSpaces() throws KuraException {
-        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_WITH_SPACES);
+        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
@@ -76,8 +78,8 @@ public class EnforcementSecurityTest {
 
     @Test
     public void shouldAllowStartingWithRegisteredContainerDigest() throws KuraException {
-        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
+        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenRegisteredContainerDigest(CONTAINER_ID, CORRECT_DIGEST);
 
         whenContainerStartEventArrives(CONTAINER_ID);
@@ -87,9 +89,21 @@ public class EnforcementSecurityTest {
     }
 
     @Test
-    public void shouldNotAllowStartingWithEmptyAllowlistContent() throws KuraException {
-        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
+    public void shouldStopContainerRelyingOnUnregisteredDigest() throws KuraException {
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
+        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
+        givenRegisteredContainerDigest(CONTAINER_ID, CORRECT_DIGEST);
+
+        whenContainerDigestIsUnregistered(CONTAINER_ID);
+
+        thenStopContainerWasCalledFor(CONTAINER_ID);
+        thenDeleteContainerWasCalledFor(CONTAINER_ID);
+    }
+
+    @Test
+    public void shouldNotAllowStartingWithEmptyAllowlistContent() throws KuraException {
+        givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
+        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
@@ -99,8 +113,8 @@ public class EnforcementSecurityTest {
 
     @Test
     public void shouldNotAllowStartingWithWrongContainerDigest() throws KuraException {
-        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, WRONG_DIGEST);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
+        givenContainer(CONTAINER_ID, ContainerState.ACTIVE, WRONG_DIGEST);
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
@@ -111,9 +125,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldStopAndDeleteContainerWithWrongDigestAndActiveState() throws KuraException {
         givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
-        givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
-        whenAllContainersAreChecked();
+        whenEnforcementStarts(EMPTY_ALLOWLIST_CONTENT);
 
         thenStopContainerWasCalledFor(CONTAINER_ID);
         thenDeleteContainerWasCalledFor(CONTAINER_ID);
@@ -122,17 +135,14 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldOnlyDeleteContainerWithWrongDigestAndFailedState() throws KuraException {
         givenContainer(CONTAINER_ID, ContainerState.FAILED, CORRECT_DIGEST);
-        givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
-        whenAllContainersAreChecked();
+        whenEnforcementStarts(EMPTY_ALLOWLIST_CONTENT);
 
         thenStopContainerWasNeverCalled();
         thenDeleteContainerWasCalledFor(CONTAINER_ID);
     }
 
     private void givenContainer(String containerId, ContainerState containerState, String imageDigest) {
-        this.target = mock(EnforcementTarget.class);
-
         ContainerInstanceDescriptor descriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
                 .setContainerName(CONTAINER_NAME).setContainerImage(IMAGE_NAME).setContainerState(containerState)
                 .build();
@@ -143,9 +153,17 @@ public class EnforcementSecurityTest {
     }
 
     private void givenAllowlistEnforcement(String rawAllowlistContent) {
+        DockerClient dockerClient = mock(DockerClient.class);
+        EventsCmd eventsCmd = mock(EventsCmd.class);
+        when(dockerClient.eventsCmd()).thenReturn(eventsCmd);
+        when(eventsCmd.withEventFilter("start")).thenReturn(eventsCmd);
+        when(eventsCmd.exec(any())).thenAnswer(invocation -> {
+            this.eventCallback = invocation.getArgument(0);
+            return this.eventCallback;
+        });
+
         this.enforcement = new AllowlistEnforcement(this.target);
-        this.enforcement.setAllowlist(rawAllowlistContent);
-        this.allowlistEnforcementMonitor = new AllowlistEnforcementMonitor(this.enforcement);
+        this.enforcement.startEnforcing(rawAllowlistContent, dockerClient);
     }
 
     private void givenRegisteredContainerDigest(String containerId, String digest) {
@@ -153,11 +171,15 @@ public class EnforcementSecurityTest {
     }
 
     private void whenContainerStartEventArrives(String containerId) {
-        this.allowlistEnforcementMonitor.onNext(new Event("start", containerId, "nginx:latest", 1708963202L));
+        this.eventCallback.onNext(new Event("start", containerId, "nginx:latest", 1708963202L));
     }
 
-    private void whenAllContainersAreChecked() {
-        this.enforcement.enforceAll();
+    private void whenContainerDigestIsUnregistered(String containerId) {
+        this.enforcement.unregister(containerId);
+    }
+
+    private void whenEnforcementStarts(String rawAllowlistContent) {
+        givenAllowlistEnforcement(rawAllowlistContent);
     }
 
     private void thenStopContainerWasNeverCalled() throws KuraException {

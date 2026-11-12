@@ -79,8 +79,7 @@ node {
                         REPORT=kura/target/coverage/report
                         mkdir -p "$CLASSES" "$REPORT"
 
-                        # same scope as the Sonar analysis; a class name present in two bundles keeps only the last copied variant
-                        for classes in kura/org.eclipse.kura.*/target/classes kura/emulator/*/target/classes; do
+                        for classes in kura/org.eclipse.kura.*/target/classes; do
                             cp -R "$classes"/. "$CLASSES"
                         done
                         find "$CLASSES" -type f ! -name '*.class' -delete
@@ -88,7 +87,7 @@ node {
                         find "$CLASSES" -name 'LibGpiodV[12]Native.class' -delete -o -name 'LibGpiodV[12]Native$*.class' -delete
 
                         SOURCES=""
-                        for sources in kura/org.eclipse.kura.*/src/main/java kura/emulator/*/src/main/java; do
+                        for sources in kura/org.eclipse.kura.*/src/main/java; do
                             SOURCES="$SOURCES --sourcefiles $sources"
                         done
 
@@ -129,7 +128,7 @@ node {
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
                                     -Dsonar.java.pmd.reportPaths=target/pmd.xml \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
-                                    -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
+                                    -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,emulator/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
                             '''
                         }
                     }

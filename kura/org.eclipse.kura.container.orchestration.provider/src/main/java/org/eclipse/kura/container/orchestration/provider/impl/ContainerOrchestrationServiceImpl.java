@@ -994,8 +994,17 @@ public class ContainerOrchestrationServiceImpl
         try {
             String imageId = this.dockerClient.inspectContainerCmd(containerId).exec().getImageId();
 
-            return this.dockerClient.inspectImageCmd(imageId).exec().getRepoDigests().stream()
-                    .map(repoDigest -> repoDigest.split("@")[1]).collect(Collectors.toSet());
+            if (imageId == null) {
+                return new HashSet<>();
+            }
+
+            List<String> repoDigests = this.dockerClient.inspectImageCmd(imageId).exec().getRepoDigests();
+
+            if (repoDigests == null) {
+                return new HashSet<>();
+            }
+
+            return repoDigests.stream().map(repoDigest -> repoDigest.split("@")[1]).collect(Collectors.toSet());
         } catch (NotFoundException e) {
             return new HashSet<>();
         }

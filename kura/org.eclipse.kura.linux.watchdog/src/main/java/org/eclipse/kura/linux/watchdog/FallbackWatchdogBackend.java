@@ -14,7 +14,6 @@
 package org.eclipse.kura.linux.watchdog;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.watchdog.WatchdogServiceOptions.WatchdogMode;
@@ -30,13 +29,8 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
     private boolean active = false;
     private boolean triggered = false;
     private long pingIntervalMs;
-    private volatile Consumer<String> rebootCauseListener = cause -> {
-    };
-
-    @Override
-    public void setRebootCauseListener(final Consumer<String> listener) {
-        this.rebootCauseListener = listener;
-    }
+    private String rebootCauseFilePath;
+    private Optional<WatchdogStatus> failedBackendStatus = Optional.empty();
 
     @Override
     public WatchdogMode getMode() {
@@ -44,9 +38,11 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public boolean configure(WatchdogServiceOptions options, final Optional<WatchdogBackend> activeBackend) {
+    public boolean configure(WatchdogServiceOptions options, final Optional<WatchdogStatus> failedBackendStatus) {
         final boolean shouldBeActive = options.isEnabled()
-                && (options.getWatchdogMode() == getMode() || activeBackend.isEmpty());
+                && (options.getWatchdogMode() == getMode() || failedBackendStatus.isPresent());
+
+        this.failedBackendStatus = failedBackendStatus;
 
         if (shouldBeActive && !this.active) {
             this.triggered = false;
@@ -54,6 +50,7 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
                     "WatchdogService is running in degraded mode: a reboot will be initiated on critical component failure.");
         }
 
+        this.rebootCauseFilePath = options.getRebootCauseFilePath();
         this.pingIntervalMs = options.getPingInterval();
         this.active = shouldBeActive;
         return this.active;
@@ -65,16 +62,18 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public void onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+    public TickResult onTick(final Optional<String> failedCriticalComponent) throws KuraException {
         if (!this.active) {
-            return;
+            return TickResult.unchanged();
         }
 
         if (failedCriticalComponent.isPresent() && !this.triggered) {
-            this.rebootCauseListener.accept(failedCriticalComponent.get());
+            RebootCauseFileWriter.writeRebootCause(this.rebootCauseFilePath, failedCriticalComponent.get());
             SystemUtils.rebootSystem();
             this.triggered = true;
         }
+
+        return TickResult.unchanged();
     }
 
 
@@ -88,11 +87,19 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
         if (!this.active) {
             return WatchdogStatus.builder().build();
         }
-        return WatchdogStatus.builder()
-                .withState(this.triggered ? WatchdogState.REBOOT_REQUESTED : WatchdogState.DEVICE_UNAVAILABLE)
+        final WatchdogStatus status = this.failedBackendStatus.orElseGet(this::getDegradedStatus);
+        if (!this.triggered) {
+            return status;
+        }
+        return WatchdogStatus.builder().withState(WatchdogState.REBOOT_REQUESTED).withDeviceOpen(status.isDeviceOpen())
+                .withDevicePath(status.getDevicePath()).withLastRefreshTime(status.getLastRefreshTime())
+                .withRefreshIntervalMs(status.getRefreshIntervalMs())
+                .withFailureReason(Optional.of("Critical component timed out")).build();
+    }
+
+    private WatchdogStatus getDegradedStatus() {
+        return WatchdogStatus.builder().withState(WatchdogState.DEVICE_UNAVAILABLE)
                 .withRefreshIntervalMs(this.pingIntervalMs)
-                .withFailureReason(Optional.of(this.triggered ? "Critical component timed out"
-                        : "Hardware watchdog supervision is not available"))
-                .build();
+                .withFailureReason(Optional.of("Hardware watchdog supervision is not available")).build();
     }
 }

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,7 @@ public class DirectWatchdogBackendStateTest {
 
     private TestDirectBackend backend;
     private boolean active;
-    private final List<String> rebootCauses = new ArrayList<>();
+    private TickResult tickResult;
 
     @Test
     public void disabledBackendIsNotActive() throws Exception {
@@ -322,6 +323,61 @@ public class DirectWatchdogBackendStateTest {
         thenRefreshIntervalIs(10000);
     }
 
+    @Test
+    public void lateDeviceWithShortTimeoutReportsLimitedRefreshInterval() throws Exception {
+        givenBackend();
+        givenDeviceTimeout(15);
+        givenDeviceDoesNotExist();
+        givenConfigured(options(true, DEVICE, true));
+        givenDeviceExists();
+
+        whenBackendIsTicked(false);
+
+        thenStateIs(WatchdogState.SUPERVISING);
+        thenTickReportsRefreshInterval(7500);
+        thenRefreshIntervalIs(7500);
+    }
+
+    @Test
+    public void lateDeviceWithLongTimeoutKeepsRefreshInterval() throws Exception {
+        givenBackend();
+        givenDeviceTimeout(60);
+        givenDeviceDoesNotExist();
+        givenConfigured(options(true, DEVICE, true));
+        givenDeviceExists();
+
+        whenBackendIsTicked(false);
+
+        thenStateIs(WatchdogState.SUPERVISING);
+        thenTickReportsNoRefreshIntervalChange();
+        thenRefreshIntervalIs(10000);
+    }
+
+    @Test
+    public void supervisingTickKeepsRefreshInterval() throws Exception {
+        givenBackend();
+        givenDeviceTimeout(15);
+        givenConfigured(options(true, DEVICE, false));
+
+        whenBackendIsTicked(false);
+
+        thenTickReportsNoRefreshIntervalChange();
+        thenRefreshIntervalIs(7500);
+    }
+
+    @Test
+    public void rebootRequestKeepsRefreshInterval() throws Exception {
+        givenBackend();
+        givenDeviceTimeout(15);
+        givenConfigured(options(true, DEVICE, false));
+
+        whenBackendIsTicked(true);
+
+        thenStateIs(WatchdogState.REBOOT_REQUESTED);
+        thenTickReportsNoRefreshIntervalChange();
+        thenRefreshIntervalIs(7500);
+    }
+
     @After
     public void cleanup() {
         this.markerFile.delete();
@@ -329,9 +385,7 @@ public class DirectWatchdogBackendStateTest {
 
     private void givenBackend() {
         this.markerFile.delete();
-        this.rebootCauses.clear();
         this.backend = new TestDirectBackend();
-        this.backend.setRebootCauseListener(this.rebootCauses::add);
     }
 
     private void givenConfigured(WatchdogServiceOptions options) throws Exception {
@@ -379,7 +433,7 @@ public class DirectWatchdogBackendStateTest {
     }
 
     private void whenBackendIsTicked(boolean criticalComponentsFailed) throws Exception {
-        this.backend.onTick(criticalComponentsFailed ? Optional.of(FAILED_COMPONENT) : Optional.empty());
+        this.tickResult = this.backend.onTick(criticalComponentsFailed ? Optional.of(FAILED_COMPONENT) : Optional.empty());
     }
 
     private void whenBackendIsStoppedForDeactivation() {
@@ -457,11 +511,11 @@ public class DirectWatchdogBackendStateTest {
     }
 
     private void thenRebootCauseIs(String expectedCause) {
-        assertEquals(expectedCause, this.rebootCauses.get(0));
+        assertEquals(expectedCause, this.backend.rebootCauses.get(0));
     }
 
     private void thenNoRebootCauseIsReported() {
-        assertTrue(this.rebootCauses.isEmpty());
+        assertTrue(this.backend.rebootCauses.isEmpty());
     }
 
     private void thenHardwareTimeoutIs(int expectedTimeoutMs) {
@@ -470,6 +524,14 @@ public class DirectWatchdogBackendStateTest {
 
     private void thenRefreshIntervalIs(long expectedIntervalMs) {
         assertEquals(expectedIntervalMs, this.backend.getStatus().getRefreshIntervalMs());
+    }
+
+    private void thenTickReportsRefreshInterval(long expectedIntervalMs) {
+        assertEquals(Optional.of(Duration.ofMillis(expectedIntervalMs)), this.tickResult.newRefreshInterval());
+    }
+
+    private void thenTickReportsNoRefreshIntervalChange() {
+        assertEquals(Optional.empty(), this.tickResult.newRefreshInterval());
     }
 
     private WatchdogServiceOptions options(boolean enabled, String device, boolean failOnUnavailableDevice) {
@@ -491,6 +553,7 @@ public class DirectWatchdogBackendStateTest {
 
         private final Map<String, RecordingWatchdogDevice> devices = new HashMap<>();
         private final List<String> openedDevices = new ArrayList<>();
+        private final List<String> rebootCauses = new ArrayList<>();
         private boolean deviceExists = true;
         private boolean openFails;
         private int timeoutSeconds;
@@ -518,6 +581,11 @@ public class DirectWatchdogBackendStateTest {
         @Override
         protected void stopWatchdogd() {
             // do not run system commands in tests
+        }
+
+        @Override
+        protected void writeRebootCause(WatchdogServiceOptions options, String rebootCause) {
+            this.rebootCauses.add(rebootCause);
         }
 
         @Override

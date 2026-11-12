@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.watchdog.WatchdogService"
          name="WatchdogService" 
-         description="The WatchdogService handles the hardware watchdog of the platform.  The parameter define the ping periodicity of the hardware watchdog to ensure it does not reboot. The WatchdogService will reset the watchdog timeout, can disable it (where supported) with the Magic Character, but cannot set the refresh rate of a watchdog device.">
+         description="The WatchdogService handles the hardware watchdog of the platform. It defines the ping periodicity of the hardware watchdog to ensure it does not reboot. The WatchdogService will reset the watchdog timeout, can disable it (where supported) with the Magic Character, but cannot set the refresh rate of a watchdog device.">
         
         <Icon resource="WatchdogService" size="32"/>
         
@@ -35,7 +35,7 @@
             required="true"
             default="10000"
             max="60000"
-            description="WatchdogService's refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds and should not be set to a value greater or equal to the Watchdog device's timeout value"/>
+            description="WatchdogService's refresh interval in ms of the Watchdog device. The value can be set between 1 and 60 seconds. If it is set to a value greater than half of the Watchdog device's timeout value, the WatchdogService will clamp the interval to half of the timeout."/>
 
         <AD id="watchdogDevice"
             name="Watchdog device path"
@@ -52,6 +52,14 @@
             required="true"
             default="/opt/eclipse/kura/data/kura-reboot-cause"
             description="The path for the file that will contain the reboot cause information."/>
+
+        <AD id="failOnUnavailableDevice"
+            name="Fail on unavailable device"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If enabled and the watchdog device does not exist or cannot be opened, the WatchdogService requests a system reboot instead of running without hardware supervision. The device is checked again at every refresh interval for a grace period of 5 minutes, as for a critical component timeout: if it becomes available, supervision starts and no reboot is requested. The reboot cause is written to the reboot cause file."/>
             
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">

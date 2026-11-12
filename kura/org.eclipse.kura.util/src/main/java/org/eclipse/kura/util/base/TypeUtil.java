@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,7 @@ public final class TypeUtil {
      * Returns a byte array representation of the provided integer value.
      *
      * @param value
-     *            The provided integer value
+     *              The provided integer value
      * @return the byte array instance
      */
     public static byte[] intToBytes(final int value) {
@@ -51,9 +51,9 @@ public final class TypeUtil {
      * @param value
      * @return the byte array
      * @throws IOException
-     *             if the access to byte stream fails
+     *                              if the access to byte stream fails
      * @throws NullPointerException
-     *             if the argument is null
+     *                              if the argument is null
      */
     public static byte[] objectToByteArray(final Object value) throws IOException {
         requireNonNull(value, "Value cannot be null.");
@@ -65,13 +65,14 @@ public final class TypeUtil {
 
     /**
      * 
-     * Convert an hex string to a byte array. Simple copy-paste of the method in standard JRE 8
+     * Convert an hex string to a byte array. Simple copy-paste of the method in
+     * standard JRE 8
      * {@link javax.xml.bind.DatatypeConverter#parseHexBinary(String)}
      * 
      * @param string
      * @return the byte array
      * @throws IllegalArgumentException
-     *             if the hex string is invalid
+     *                                  if the hex string is invalid
      */
 
     public static byte[] parseHexBinary(String string) {
@@ -108,6 +109,21 @@ public final class TypeUtil {
             return ch - 'a' + 10;
         }
         return -1;
+    }
+
+    /**
+     * Convert a byte array to a lowercase hex string.
+     * 
+     * @param byte[]
+     * @return the hex string
+     */
+    public static String toHexString(byte[] value) {
+        StringBuilder sb = new StringBuilder(value.length * 2);
+        for (byte b : value) {
+            sb.append(Character.forDigit((b >> 4) & 0xF, 16));
+            sb.append(Character.forDigit(b & 0xF, 16));
+        }
+        return sb.toString();
     }
 
 }

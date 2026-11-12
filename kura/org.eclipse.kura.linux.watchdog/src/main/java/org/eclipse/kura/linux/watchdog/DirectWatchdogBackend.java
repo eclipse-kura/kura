@@ -40,9 +40,9 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             "/etc/init.d/watchdog stop", "/etc/init.d/watchdog.sh stop" };
 
     private static final long GRACE_PERIOD_MS = Duration.ofMinutes(5).toMillis();
-    private static final long REBOOT_RETRY_INTERVAL_MS = Duration.ofMinutes(1).toMillis();
 
-    private State state = new Disabled(new WatchdogServiceOptions(Collections.emptyMap()));
+    private WatchdogServiceOptions options = new WatchdogServiceOptions(Collections.emptyMap());
+    private State state = new Disabled();
     private Optional<Instant> lastRefreshTime = Optional.empty();
 
     @Override
@@ -55,15 +55,15 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             final Optional<WatchdogStatus> failedBackendStatus) throws KuraException {
         updateState(current -> current.configure(newOptions));
 
-        if (this.state instanceof DeviceUnavailable deviceUnavailable) {
-            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, deviceUnavailable.failureReason);
+        if (this.state instanceof DeviceMissing) {
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, this.state.failureReason);
         }
 
         return !(this.state instanceof Disabled);
     }
 
     @Override
-    public synchronized TickResult onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+    public synchronized TickResult onTick(final Optional<String> failedCriticalComponent) {
         final long previousRefreshIntervalMs = this.state.refreshIntervalMs();
         updateState(current -> current.onTick(failedCriticalComponent));
         final long refreshIntervalMs = this.state.refreshIntervalMs();
@@ -75,14 +75,14 @@ public class DirectWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public synchronized void stop(final boolean deactivating) {
-        this.state.stop(deactivating);
-        this.state = new Disabled(this.state.options);
+    public synchronized void deactivate() {
+        this.state.device.ifPresent(this::releaseDeviceForShutdown);
+        this.state = new Disabled();
     }
 
     @Override
     public synchronized int getHardwareTimeout() {
-        return this.state.device().map(this::readTimeoutMs).orElse(0);
+        return this.state.device.map(this::readTimeoutMs).orElse(0);
     }
 
     @Override
@@ -154,21 +154,18 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         }
     }
 
-    private void stopDevice(final WatchdogDevice device, final boolean deactivating) {
-        if (deactivating) {
-            refreshDevice(device);
-        } else {
-            disarmDevice(device);
-        }
+    private void releaseDeviceForShutdown(final WatchdogDevice device) {
+        refreshDevice(device);
         closeDevice(device);
     }
 
-    private void disarmDevice(final WatchdogDevice device) {
+    private void disarmAndCloseDevice(final WatchdogDevice device) {
         try {
             device.disarm();
         } catch (IOException e) {
             logger.error("Failed to write magic character to watchdog device", e);
         }
+        closeDevice(device);
     }
 
     private void closeDevice(final WatchdogDevice device) {
@@ -202,10 +199,14 @@ public class DirectWatchdogBackend implements WatchdogBackend {
 
     private abstract class State {
 
-        WatchdogServiceOptions options;
+        final WatchdogState watchdogState;
+        final Optional<WatchdogDevice> device;
+        String failureReason;
 
-        State(final WatchdogServiceOptions options) {
-            this.options = options;
+        State(final WatchdogState watchdogState, final Optional<WatchdogDevice> device, final String failureReason) {
+            this.watchdogState = watchdogState;
+            this.device = device;
+            this.failureReason = failureReason;
         }
 
         State onTick(final Optional<String> failedCriticalComponent) {
@@ -215,28 +216,21 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         final State configure(final WatchdogServiceOptions newOptions) {
             final boolean active = newOptions.isEnabled() && newOptions.getWatchdogMode() == getMode();
 
-            if (device().isPresent() && active
-                    && this.options.getWatchdogDevice().equals(newOptions.getWatchdogDevice())) {
-                this.options = newOptions;
+            final boolean keepCurrentState = this.device.isPresent() && active
+                    && options.getWatchdogDevice().equals(newOptions.getWatchdogDevice());
+
+            DirectWatchdogBackend.this.options = newOptions;
+
+            if (keepCurrentState) {
                 return this;
             }
 
-            stop(false);
-            return active ? new Enabling(newOptions) : new Disabled(newOptions);
+            this.device.ifPresent(DirectWatchdogBackend.this::disarmAndCloseDevice);
+            return active ? new AwaitingDevice() : new Disabled();
         }
-
-        abstract WatchdogState watchdogState();
 
         State enter() {
             return this;
-        }
-
-        Optional<WatchdogDevice> device() {
-            return Optional.empty();
-        }
-
-        Optional<String> failureReason() {
-            return Optional.empty();
         }
 
         int hardwareTimeoutMs() {
@@ -244,77 +238,54 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         }
 
         final long refreshIntervalMs() {
-            return WatchdogServiceOptions.limitPingInterval(this.options.getPingInterval(), hardwareTimeoutMs());
-        }
-
-        final void stop(final boolean deactivating) {
-            device().ifPresent(device -> stopDevice(device, deactivating));
+            return WatchdogServiceOptions.limitPingInterval(options.getPingInterval(), hardwareTimeoutMs());
         }
 
         final WatchdogStatus status() {
             return WatchdogStatus.builder() //
-                    .withState(watchdogState()) //
-                    .withDeviceOpen(device().isPresent()) //
+                    .withState(this.watchdogState) //
+                    .withDeviceOpen(this.device.isPresent()) //
                     .withDevicePath(Optional.of(options.getWatchdogDevice())) //
                     .withLastRefreshTime(lastRefreshTime) //
                     .withRefreshIntervalMs(refreshIntervalMs()) //
-                    .withFailureReason(failureReason()) //
+                    .withFailureReason(Optional.ofNullable(this.failureReason)) //
                     .build();
         }
     }
 
     private class Disabled extends State {
 
-        Disabled(final WatchdogServiceOptions options) {
-            super(options);
+        Disabled() {
+            super(WatchdogState.DISABLED, Optional.empty(), null);
         }
 
         @Override
         State enter() {
             lastRefreshTime = Optional.empty();
-            deleteWatchdogEnabledTemporaryFile(this.options.getWatchdogEnabledTemporaryFilePath());
+            deleteWatchdogEnabledTemporaryFile(options.getWatchdogEnabledTemporaryFilePath());
             return this;
         }
+    }
 
-        @Override
-        WatchdogState watchdogState() {
-            return WatchdogState.DISABLED;
+    private class DeviceMissing extends State {
+
+        DeviceMissing(final String failureReason) {
+            super(WatchdogState.DEVICE_UNAVAILABLE, Optional.empty(), failureReason);
         }
     }
 
-    private class DeviceUnavailable extends State {
-
-        private final String failureReason;
-
-        DeviceUnavailable(final WatchdogServiceOptions options, final String failureReason) {
-            super(options);
-            this.failureReason = failureReason;
-        }
-
-        @Override
-        WatchdogState watchdogState() {
-            return WatchdogState.DEVICE_UNAVAILABLE;
-        }
-
-        @Override
-        Optional<String> failureReason() {
-            return Optional.of(this.failureReason);
-        }
-    }
-
-    private class Enabling extends State {
+    private class AwaitingDevice extends State {
 
         private final long gracePeriodEnd = System.nanoTime() + toNanos(getGracePeriod());
-        private String failureReason = "Watchdog device is unavailable";
 
-        Enabling(final WatchdogServiceOptions options) {
-            super(options);
+        AwaitingDevice() {
+            super(WatchdogState.DEVICE_UNAVAILABLE, Optional.empty(), "Watchdog device is unavailable");
         }
 
         @Override
         State enter() {
             lastRefreshTime = Optional.empty();
-            deleteWatchdogEnabledTemporaryFile(this.options.getWatchdogEnabledTemporaryFilePath());
+            deleteWatchdogEnabledTemporaryFile(options.getWatchdogEnabledTemporaryFilePath());
             return attempt(true);
         }
 
@@ -326,17 +297,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             }
 
             logger.error("Watchdog device is still unavailable after the grace period. System will reboot");
-            return new Rebooting(this.options, Optional.empty(), 0, this.failureReason, this.failureReason);
-        }
-
-        @Override
-        WatchdogState watchdogState() {
-            return WatchdogState.DEVICE_UNAVAILABLE;
-        }
-
-        @Override
-        Optional<String> failureReason() {
-            return Optional.of(this.failureReason);
+            return new Rebooting(Optional.empty(), 0, this.failureReason, this.failureReason);
         }
 
         State attempt(final boolean firstAttempt) {
@@ -351,7 +312,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
                     if (!firstAttempt) {
                         logger.info("Watchdog device '{}' is now available. Reboot cancelled", watchdogDevice);
                     }
-                    return new Supervising(this.options, device);
+                    return new Supervising(device);
                 } catch (IOException | KuraException e) {
                     this.failureReason = "Failed to open watchdog device '" + watchdogDevice + "'";
                     logFailure(firstAttempt, "Failed to open watchdog device", Optional.of(e));
@@ -359,7 +320,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             }
 
             if (!options.isFailOnUnavailableDevice()) {
-                return new DeviceUnavailable(this.options, this.failureReason);
+                return new DeviceMissing(this.failureReason);
             }
 
             if (firstAttempt) {
@@ -393,12 +354,10 @@ public class DirectWatchdogBackend implements WatchdogBackend {
 
     private class Supervising extends State {
 
-        private final WatchdogDevice device;
         private final int hardwareTimeoutMs;
 
-        Supervising(final WatchdogServiceOptions options, final WatchdogDevice device) {
-            super(options);
-            this.device = device;
+        Supervising(final WatchdogDevice device) {
+            super(WatchdogState.SUPERVISING, Optional.of(device), null);
             this.hardwareTimeoutMs = readTimeoutMs(device);
         }
 
@@ -416,45 +375,31 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         State onTick(final Optional<String> failedCriticalComponent) {
             if (failedCriticalComponent.isPresent()) {
                 final String name = failedCriticalComponent.get();
-                return new Rebooting(this.options, Optional.of(this.device), this.hardwareTimeoutMs,
+                return new Rebooting(this.device, this.hardwareTimeoutMs,
                         "Critical component '" + name + "' timed out", name);
             }
 
-            refreshDevice(this.device);
+            refreshDevice(this.device.orElseThrow(() -> new IllegalStateException("unreachable")));
             return this;
-        }
-
-        @Override
-        Optional<WatchdogDevice> device() {
-            return Optional.of(this.device);
         }
 
         @Override
         int hardwareTimeoutMs() {
             return this.hardwareTimeoutMs;
         }
-
-        @Override
-        WatchdogState watchdogState() {
-            return WatchdogState.SUPERVISING;
-        }
     }
 
     private class Rebooting extends State {
 
-        private final Optional<WatchdogDevice> device;
         private final int hardwareTimeoutMs;
-        private final String failureReason;
         private final String rebootCause;
         private boolean accepted;
         private long deadline;
 
-        Rebooting(final WatchdogServiceOptions options, final Optional<WatchdogDevice> device,
-                final int hardwareTimeoutMs, final String failureReason, final String rebootCause) {
-            super(options);
-            this.device = device;
+        Rebooting(final Optional<WatchdogDevice> device, final int hardwareTimeoutMs, final String failureReason,
+                final String rebootCause) {
+            super(WatchdogState.REBOOT_REQUESTED, device, failureReason);
             this.hardwareTimeoutMs = hardwareTimeoutMs;
-            this.failureReason = failureReason;
             this.rebootCause = rebootCause;
         }
 
@@ -462,7 +407,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         State enter() {
             try {
                 logger.debug("Requesting reboot.");
-                writeRebootCause(this.options, this.rebootCause);
+                writeRebootCause(options, this.rebootCause);
                 rebootSystem();
                 this.accepted = true;
                 this.deadline = System.nanoTime() + toNanos(getGracePeriod());
@@ -496,27 +441,12 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             }
 
             logger.warn("Retrying system reboot");
-            return new Rebooting(this.options, this.device, this.hardwareTimeoutMs, this.failureReason, this.rebootCause);
-        }
-
-        @Override
-        Optional<WatchdogDevice> device() {
-            return this.device;
+            return new Rebooting(this.device, this.hardwareTimeoutMs, this.failureReason, this.rebootCause);
         }
 
         @Override
         int hardwareTimeoutMs() {
             return this.hardwareTimeoutMs;
-        }
-
-        @Override
-        WatchdogState watchdogState() {
-            return WatchdogState.REBOOT_REQUESTED;
-        }
-
-        @Override
-        Optional<String> failureReason() {
-            return Optional.of(this.failureReason);
         }
     }
 }

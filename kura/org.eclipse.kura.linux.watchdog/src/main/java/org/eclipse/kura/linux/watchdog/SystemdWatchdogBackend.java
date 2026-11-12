@@ -40,13 +40,21 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
 
     private static final long SYSTEMD_NOTIFY_TIMEOUT_SEC = 5;
 
-    private static final long REBOOT_GRACE_PERIOD_NS = TimeUnit.MINUTES.toNanos(5);
+    private static final long WATCHDOG_TIMEOUT_PING_INTERVALS = 3L;
+
+    private static final long GRACE_PERIOD_MINUTES = 5;
+
+    private static final long REBOOT_GRACE_PERIOD_NS = TimeUnit.MINUTES.toNanos(GRACE_PERIOD_MINUTES);
+
+    private static final long DEACTIVATION_TIMEOUT_USEC = TimeUnit.MINUTES.toMicros(GRACE_PERIOD_MINUTES);
 
     private long watchdogUsec;
     private long rebootRequestedAt;
     private String pidArg;
     private String systemdNotifyPath = SYSTEMD_NOTIFY_PATHS[0];
+    private long nextRebootAttemptAt;
     private boolean triggered = false;
+    private boolean rebootAccepted = false;
     private boolean active = false;
     private boolean usecFromEnvironment = false;
     private long pingIntervalMs;
@@ -87,6 +95,7 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     private void activate(WatchdogServiceOptions options) throws KuraException {
         if (!this.active) {
             this.triggered = false;
+            this.rebootAccepted = false;
         }
         this.active = false;
         this.pingIntervalMs = options.getPingInterval();
@@ -136,7 +145,7 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
         if (this.usecFromEnvironment) {
             logger.info("Using systemd watchdog timeout from WATCHDOG_USEC: {} usec", this.watchdogUsec);
         } else {
-            this.watchdogUsec = TimeUnit.MILLISECONDS.toMicros(options.getPingInterval() * 2L);
+            this.watchdogUsec = TimeUnit.MILLISECONDS.toMicros(options.getPingInterval() * WATCHDOG_TIMEOUT_PING_INTERVALS);
             logger.info("Setting systemd watchdog timeout to {} usec", this.watchdogUsec);
         }
 
@@ -151,30 +160,33 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public synchronized void stop(final boolean deactivating) {
+    public synchronized void deactivate() {
         this.activationFailure = null;
         if (this.active) {
             this.active = false;
             if (!this.usecFromEnvironment) {
-                sendNotify("WATCHDOG_USEC=0");
+                sendNotify("WATCHDOG=1");
+                sendNotify("WATCHDOG_USEC=" + DEACTIVATION_TIMEOUT_USEC);
             }
         }
     }
 
     @Override
-    public TickResult onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+    public synchronized TickResult onTick(final Optional<String> failedCriticalComponent) {
         if (!this.active) {
             return TickResult.unchanged();
         }
 
-        if (failedCriticalComponent.isPresent() && !triggered) {
-            RebootCauseFileWriter.writeRebootCause(this.rebootCauseFilePath, failedCriticalComponent.get());
-            SystemUtils.rebootSystem();
-            triggered = true;
-            this.rebootRequestedAt = System.nanoTime();
+        if (failedCriticalComponent.isPresent() && !this.rebootAccepted
+                && (!this.triggered || System.nanoTime() - this.nextRebootAttemptAt >= 0)) {
+            requestReboot(failedCriticalComponent.get());
         }
 
-        if (triggered && System.nanoTime() - this.rebootRequestedAt >= REBOOT_GRACE_PERIOD_NS) {
+        if (this.triggered && !this.rebootAccepted) {
+            return TickResult.unchanged();
+        }
+
+        if (this.rebootAccepted && System.nanoTime() - this.rebootRequestedAt >= REBOOT_GRACE_PERIOD_NS) {
             return TickResult.unchanged();
         }
 
@@ -185,15 +197,37 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
         return TickResult.unchanged();
     }
 
+    private void requestReboot(final String failedCriticalComponent) {
+        this.triggered = true;
+        try {
+            RebootCauseFileWriter.writeRebootCause(this.rebootCauseFilePath, failedCriticalComponent);
+            rebootSystem();
+            this.rebootAccepted = true;
+            this.rebootRequestedAt = System.nanoTime();
+        } catch (KuraException e) {
+            logger.error("System reboot failed. Watchdog will not be refreshed until a reboot request is accepted. "
+                    + "Retrying every {} ms", getRebootRetryInterval(), e);
+            this.nextRebootAttemptAt = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(getRebootRetryInterval());
+        }
+    }
+
+    protected void rebootSystem() throws KuraException {
+        SystemUtils.rebootSystem();
+    }
+
+    protected long getRebootRetryInterval() {
+        return REBOOT_RETRY_INTERVAL_MS;
+    }
+
     @Override
-    public int getHardwareTimeout() {
+    public synchronized int getHardwareTimeout() {
         if (this.watchdogUsec > 0) {
             return (int) (this.watchdogUsec / 1000);
         }
         return 0;
     }
 
-    long getWatchdogUsec() {
+    synchronized long getWatchdogUsec() {
         return this.watchdogUsec;
     }
 
@@ -212,14 +246,15 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     }
 
     // Each refresh() spawns a short-lived systemd-notify process. At the default
-    // 10s ping interval this is ~8,640 spawns/day. While individually lightweight
-    // with --no-block (~5ms each), this is not zero-cost. On heavily constrained
-    // devices consider direct mode or increasing pingInterval. A future improvement
-    // could use JNA to call sd_notify() directly, eliminating process overhead.
+    // 10s ping interval this is ~8,640 spawns/day. Each call spawns a short-lived
+    // process that waits until the service manager has processed the message, so it
+    // is not zero-cost. On heavily constrained devices consider direct mode or
+    // increasing pingInterval. A future improvement could use JNA to call
+    // sd_notify() directly, eliminating process overhead.
     protected synchronized boolean sendNotify(String message) {
         boolean sent = false;
         try {
-            Process proc = new ProcessBuilder(this.systemdNotifyPath, "--no-block", this.pidArg, message).start();
+            Process proc = new ProcessBuilder(this.systemdNotifyPath, this.pidArg, message).start();
             boolean finished = proc.waitFor(SYSTEMD_NOTIFY_TIMEOUT_SEC, TimeUnit.SECONDS);
             if (!finished) {
                 proc.destroyForcibly();

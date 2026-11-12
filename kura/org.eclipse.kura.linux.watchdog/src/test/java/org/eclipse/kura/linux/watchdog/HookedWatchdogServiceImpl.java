@@ -25,8 +25,33 @@ class HookedWatchdogServiceImpl extends WatchdogServiceImpl {
 
     @Override
     protected WatchdogBackend createBackend(final WatchdogMode mode) {
-        if (mode != WatchdogMode.DIRECT) {
-            return super.createBackend(mode);
+        if (mode == WatchdogMode.FALLBACK) {
+            return new FallbackWatchdogBackend() {
+
+                @Override
+                protected void rebootSystem() throws KuraException {
+                    HookedWatchdogServiceImpl.this.rebootSystem();
+                }
+
+                @Override
+                protected long getRebootRetryInterval() {
+                    return HookedWatchdogServiceImpl.this.getRebootRetryInterval();
+                }
+            };
+        }
+        if (mode == WatchdogMode.SYSTEMD) {
+            return new SystemdWatchdogBackend() {
+
+                @Override
+                protected void rebootSystem() throws KuraException {
+                    HookedWatchdogServiceImpl.this.rebootSystem();
+                }
+
+                @Override
+                protected long getRebootRetryInterval() {
+                    return HookedWatchdogServiceImpl.this.getRebootRetryInterval();
+                }
+            };
         }
         return new DirectWatchdogBackend() {
 

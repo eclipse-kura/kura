@@ -301,11 +301,11 @@ public class DirectWatchdogBackendStateTest {
     }
 
     @Test
-    public void stoppingForDeactivationRefreshesAndClosesWithoutDisarming() throws Exception {
+    public void deactivationRefreshesAndClosesWithoutDisarming() throws Exception {
         givenBackend();
         givenConfigured(options(true, DEVICE, false));
 
-        whenBackendIsStoppedForDeactivation();
+        whenBackendIsDeactivated();
 
         thenDeviceReceived(DEVICE, "w");
         thenDeviceIsClosed(DEVICE);
@@ -436,8 +436,8 @@ public class DirectWatchdogBackendStateTest {
         this.tickResult = this.backend.onTick(criticalComponentsFailed ? Optional.of(FAILED_COMPONENT) : Optional.empty());
     }
 
-    private void whenBackendIsStoppedForDeactivation() {
-        this.backend.stop(true);
+    private void whenBackendIsDeactivated() {
+        this.backend.deactivate();
     }
 
     private void whenGracePeriodElapses() throws InterruptedException {

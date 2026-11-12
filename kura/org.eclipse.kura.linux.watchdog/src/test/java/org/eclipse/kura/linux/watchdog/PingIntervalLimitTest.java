@@ -88,7 +88,7 @@ public class PingIntervalLimitTest {
         }
 
         @Override
-        public void stop(boolean deactivating) {
+        public void deactivate() {
             // nothing to do
         }
 

@@ -82,6 +82,17 @@ public class ContainerImageDigestsTest {
     }
 
     @Test
+    public void imageWithoutRepoDigestsHasNoDigests() {
+        givenServiceConnectedToDocker();
+        givenContainerRunningImage(CONTAINER_ID, IMAGE_ID);
+        givenImageWithoutRepoDigests(IMAGE_ID);
+
+        whenImageDigestsAreRequestedFor(CONTAINER_ID);
+
+        thenImageDigestsAre();
+    }
+
+    @Test
     public void unknownContainerHasNoDigests() {
         givenServiceConnectedToDocker();
         givenNoContainerWithId(CONTAINER_ID);
@@ -124,6 +135,10 @@ public class ContainerImageDigestsTest {
 
     private void givenImageWithRepoDigests(String imageId, String... repoDigests) {
         when(this.dockerClient.inspectImageCmd(imageId).exec().getRepoDigests()).thenReturn(Arrays.asList(repoDigests));
+    }
+
+    private void givenImageWithoutRepoDigests(String imageId) {
+        when(this.dockerClient.inspectImageCmd(imageId).exec().getRepoDigests()).thenReturn(null);
     }
 
     private void givenNoContainerWithId(String containerId) {

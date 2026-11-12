@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ public class AllowlistEnforcement {
     private final EnforcementTarget target;
     private final AtomicReference<Set<String>> allowlist = new AtomicReference<>(Collections.emptySet());
     private final Map<String, String> containerDigests = new ConcurrentHashMap<>();
+    private final AtomicInteger pendingChecks = new AtomicInteger();
     private AllowlistEnforcementMonitor monitor;
 
     public AllowlistEnforcement(EnforcementTarget target) {
@@ -140,6 +142,19 @@ public class AllowlistEnforcement {
             logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
             return;
         }
+        if (this.pendingChecks.getAndIncrement() > 0) {
+            return;
+        }
+        try {
+            do {
+                checkRunningContainers();
+            } while (this.pendingChecks.updateAndGet(pending -> pending > 1 ? 1 : 0) > 0);
+        } finally {
+            this.pendingChecks.set(0);
+        }
+    }
+
+    private void checkRunningContainers() {
         logger.info("Enforcement check on already running containers...");
         for (ContainerInstanceDescriptor descriptor : this.target.listContainerDescriptors()) {
             enforce(descriptor.getContainerId());

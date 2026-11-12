@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThrows;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,14 +26,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.watchdog.WatchdogState;
 import org.eclipse.kura.watchdog.WatchdogStatus;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class SystemdWatchdogBackendTest {
 
     private static final String NOTIFY_SOCKET = "/tmp/test-notify-socket";
+
+    private static final long SHORT_PERIOD_MS = 50;
+    private static final long LONG_PERIOD_MS = 60000;
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private TestSystemdBackend backend;
     private boolean activated;
@@ -61,11 +71,11 @@ public class SystemdWatchdogBackendTest {
     }
 
     @Test
-    public void activationFailureIsClearedWhenTheBackendIsStopped() {
+    public void activationFailureIsClearedWhenTheBackendIsDeactivated() {
         givenBackend(null, true, null);
 
         whenActivationIsAttempted();
-        whenBackendIsStopped();
+        whenBackendIsDeactivated();
 
         thenStatusIsDisabled();
     }
@@ -87,7 +97,7 @@ public class SystemdWatchdogBackendTest {
 
         whenBackendIsConfigured();
         whenBackendIsTicked();
-        whenBackendIsStopped();
+        whenBackendIsDeactivated();
 
         thenMessagesSentAre("WATCHDOG=1");
     }
@@ -98,10 +108,61 @@ public class SystemdWatchdogBackendTest {
 
         whenBackendIsConfigured();
         whenBackendIsTicked();
-        whenBackendIsStopped();
+        whenBackendIsDeactivated();
 
-        thenMessagesSentAre("WATCHDOG_USEC=20000000", "WATCHDOG=1", "WATCHDOG_USEC=0");
-        thenHardwareTimeoutIs(20000);
+        thenMessagesSentAre("WATCHDOG_USEC=30000000", "WATCHDOG=1", "WATCHDOG=1", "WATCHDOG_USEC=300000000");
+        thenHardwareTimeoutIs(30000);
+    }
+
+    @Test
+    public void deactivationPingsThenRaisesTheTimeoutToTheGracePeriod() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, null);
+        givenBackendIsConfigured();
+
+        whenBackendIsDeactivated();
+
+        thenMessagesSentAre("WATCHDOG_USEC=30000000", "WATCHDOG=1", "WATCHDOG_USEC=300000000");
+    }
+
+    @Test
+    public void deactivationSendsNothingWhenTimeoutIsSetByEnvironment() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+
+        whenBackendIsDeactivated();
+
+        thenMessagesSentAre();
+    }
+
+    @Test
+    public void inactiveBackendSendsNothingWhenConfiguredDisabled() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, null);
+
+        whenBackendIsConfiguredDisabled();
+
+        thenBackendIsNotActive();
+        thenMessagesSentAre();
+    }
+
+    @Test
+    public void configurationDisablingTheWatchdogWhileActiveSendsZero() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, null);
+        givenBackendIsConfigured();
+
+        whenBackendIsConfiguredDisabled();
+
+        thenBackendIsNotActive();
+        thenMessagesSentAre("WATCHDOG_USEC=30000000", "WATCHDOG_USEC=0");
+    }
+
+    @Test
+    public void configurationSwitchingModeWhileActiveSendsZero() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, null);
+        givenBackendIsConfigured();
+
+        whenBackendIsConfiguredForMode("direct");
+
+        thenMessagesSentAre("WATCHDOG_USEC=30000000", "WATCHDOG_USEC=0");
     }
 
     @Test
@@ -111,7 +172,7 @@ public class SystemdWatchdogBackendTest {
         whenBackendIsConfigured();
 
         thenBackendIsActive();
-        thenMessagesSentAre("WATCHDOG_USEC=20000000");
+        thenMessagesSentAre("WATCHDOG_USEC=30000000");
     }
 
     @Test
@@ -123,18 +184,139 @@ public class SystemdWatchdogBackendTest {
         thenBackendIsNotActive();
     }
 
+    @Test
+    public void refusedRebootDoesNotThrowAndSendsNoPing() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+        givenRebootsFailing(Integer.MAX_VALUE);
+
+        whenBackendIsTickedWithFailedComponent();
+
+        thenRebootsRequested(1);
+        thenMessagesSentAre();
+    }
+
+    @Test
+    public void refusedRebootIsNotRetriedBeforeTheInterval() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+        givenRebootRetryInterval(LONG_PERIOD_MS);
+        givenRebootsFailing(Integer.MAX_VALUE);
+
+        whenBackendIsTickedWithFailedComponent();
+        whenBackendIsTickedWithFailedComponent();
+
+        thenRebootsRequested(1);
+        thenMessagesSentAre();
+    }
+
+    @Test
+    public void refusedRebootIsRetriedAfterTheInterval() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+        givenRebootRetryInterval(SHORT_PERIOD_MS);
+        givenRebootsFailing(Integer.MAX_VALUE);
+
+        whenBackendIsTickedWithFailedComponent();
+        whenRetryIntervalElapses();
+        whenBackendIsTickedWithFailedComponent();
+        whenRetryIntervalElapses();
+        whenBackendIsTickedWithFailedComponent();
+
+        thenRebootsRequested(3);
+        thenMessagesSentAre();
+    }
+
+    @Test
+    public void acceptedRetryStopsFurtherRequestsAndResumesPings() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+        givenRebootRetryInterval(SHORT_PERIOD_MS);
+        givenRebootsFailing(1);
+
+        whenBackendIsTickedWithFailedComponent();
+        whenRetryIntervalElapses();
+        whenBackendIsTickedWithFailedComponent();
+        whenRetryIntervalElapses();
+        whenBackendIsTickedWithFailedComponent();
+
+        thenRebootsRequested(2);
+        thenMessagesSentAre("WATCHDOG=1", "WATCHDOG=1");
+    }
+
+    @Test
+    public void statusIsRebootRequestedAfterRefusedFirstAttempt() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+        givenRebootsFailing(Integer.MAX_VALUE);
+
+        whenBackendIsTickedWithFailedComponent();
+
+        thenStatusIs(WatchdogState.REBOOT_REQUESTED);
+    }
+
+    @Test
+    public void acceptedRebootRequestsOnlyOnceAndKeepsPinging() throws Exception {
+        givenBackend(NOTIFY_SOCKET, true, "30000000");
+        givenBackendIsConfigured();
+
+        whenBackendIsTickedWithFailedComponent();
+        whenBackendIsTickedWithFailedComponent();
+
+        thenRebootsRequested(1);
+        thenMessagesSentAre("WATCHDOG=1", "WATCHDOG=1");
+        thenStatusIs(WatchdogState.REBOOT_REQUESTED);
+    }
+
     private void givenBackend(String notifySocket, boolean notifyAvailable, String watchdogUsec) {
         this.backend = new TestSystemdBackend(notifySocket, notifyAvailable, watchdogUsec);
+    }
+
+    private void givenRebootRetryInterval(long retryIntervalMs) {
+        this.backend.rebootRetryIntervalMs = retryIntervalMs;
+    }
+
+    private void givenRebootsFailing(int failingReboots) {
+        this.backend.failingReboots = failingReboots;
+    }
+
+    private void whenBackendIsTickedWithFailedComponent() throws Exception {
+        this.backend.onTick(Optional.of("testComponent"));
+    }
+
+    private void whenRetryIntervalElapses() throws InterruptedException {
+        Thread.sleep(this.backend.rebootRetryIntervalMs * 2);
+    }
+
+    private void thenRebootsRequested(int expectedRequests) {
+        assertEquals(expectedRequests, this.backend.rebootRequests);
+    }
+
+    private void thenStatusIs(WatchdogState expectedState) {
+        assertEquals(expectedState, this.backend.getStatus().getState());
+    }
+
+    private void givenBackendIsConfigured() throws Exception {
+        whenBackendIsConfigured();
+        thenBackendIsActive();
     }
 
     private void whenBackendIsConfigured() throws Exception {
         whenBackendIsConfiguredForMode("systemd");
     }
 
+    private void whenBackendIsConfiguredDisabled() throws Exception {
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put("enabled", false);
+        properties.put("watchdogMode", "systemd");
+        this.activated = this.backend.configure(new WatchdogServiceOptions(properties), Optional.empty());
+    }
+
     private void whenBackendIsConfiguredForMode(String mode) throws Exception {
         final Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("watchdogMode", mode);
+        properties.put("rebootCauseFilePath", new File(this.temporaryFolder.getRoot(), "reboot-cause").getPath());
         this.activated = this.backend.configure(new WatchdogServiceOptions(properties), Optional.empty());
     }
 
@@ -146,8 +328,8 @@ public class SystemdWatchdogBackendTest {
         this.backend.onTick(Optional.empty());
     }
 
-    private void whenBackendIsStopped() {
-        this.backend.stop(false);
+    private void whenBackendIsDeactivated() {
+        this.backend.deactivate();
     }
 
     private void thenActivationFails() {
@@ -190,6 +372,9 @@ public class SystemdWatchdogBackendTest {
         private final boolean notifyAvailable;
         private final String watchdogUsec;
         private final List<String> sentMessages = new ArrayList<>();
+        private long rebootRetryIntervalMs = LONG_PERIOD_MS;
+        private int failingReboots;
+        private int rebootRequests;
 
         TestSystemdBackend(String notifySocket, boolean notifyAvailable, String watchdogUsec) {
             this.notifySocket = notifySocket;
@@ -201,6 +386,19 @@ public class SystemdWatchdogBackendTest {
         protected synchronized boolean sendNotify(String message) {
             this.sentMessages.add(message);
             return true;
+        }
+
+        @Override
+        protected void rebootSystem() throws KuraException {
+            this.rebootRequests++;
+            if (this.rebootRequests <= this.failingReboots) {
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "reboot", 1);
+            }
+        }
+
+        @Override
+        protected long getRebootRetryInterval() {
+            return this.rebootRetryIntervalMs;
         }
 
         @Override

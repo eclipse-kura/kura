@@ -14,6 +14,7 @@
 package org.eclipse.kura.linux.watchdog;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.watchdog.WatchdogServiceOptions.WatchdogMode;
@@ -28,6 +29,8 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
 
     private boolean active = false;
     private boolean triggered = false;
+    private boolean rebootAccepted = false;
+    private long nextRebootAttemptAt;
     private long pingIntervalMs;
     private String rebootCauseFilePath;
     private Optional<WatchdogStatus> failedBackendStatus = Optional.empty();
@@ -38,7 +41,7 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public boolean configure(WatchdogServiceOptions options, final Optional<WatchdogStatus> failedBackendStatus) {
+    public synchronized boolean configure(WatchdogServiceOptions options, final Optional<WatchdogStatus> failedBackendStatus) {
         final boolean shouldBeActive = options.isEnabled()
                 && (options.getWatchdogMode() == getMode() || failedBackendStatus.isPresent());
 
@@ -46,6 +49,7 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
 
         if (shouldBeActive && !this.active) {
             this.triggered = false;
+            this.rebootAccepted = false;
             logger.warn(
                     "WatchdogService is running in degraded mode: a reboot will be initiated on critical component failure.");
         }
@@ -57,33 +61,51 @@ public class FallbackWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public void stop(final boolean deactivating) {
+    public synchronized void deactivate() {
         this.active = false;
     }
 
     @Override
-    public TickResult onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+    public synchronized TickResult onTick(final Optional<String> failedCriticalComponent) {
         if (!this.active) {
             return TickResult.unchanged();
         }
 
-        if (failedCriticalComponent.isPresent() && !this.triggered) {
-            RebootCauseFileWriter.writeRebootCause(this.rebootCauseFilePath, failedCriticalComponent.get());
-            SystemUtils.rebootSystem();
-            this.triggered = true;
+        if (failedCriticalComponent.isPresent() && !this.rebootAccepted
+                && (!this.triggered || System.nanoTime() - this.nextRebootAttemptAt >= 0)) {
+            requestReboot(failedCriticalComponent.get());
         }
 
         return TickResult.unchanged();
     }
 
+    private void requestReboot(final String failedCriticalComponent) {
+        this.triggered = true;
+        try {
+            RebootCauseFileWriter.writeRebootCause(this.rebootCauseFilePath, failedCriticalComponent);
+            rebootSystem();
+            this.rebootAccepted = true;
+        } catch (KuraException e) {
+            logger.error("System reboot failed. Retrying every {} ms", getRebootRetryInterval(), e);
+            this.nextRebootAttemptAt = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(getRebootRetryInterval());
+        }
+    }
+
+    protected void rebootSystem() throws KuraException {
+        SystemUtils.rebootSystem();
+    }
+
+    protected long getRebootRetryInterval() {
+        return REBOOT_RETRY_INTERVAL_MS;
+    }
 
     @Override
-    public int getHardwareTimeout() {
+    public synchronized int getHardwareTimeout() {
         return 0;
     }
 
     @Override
-    public WatchdogStatus getStatus() {
+    public synchronized WatchdogStatus getStatus() {
         if (!this.active) {
             return WatchdogStatus.builder().build();
         }

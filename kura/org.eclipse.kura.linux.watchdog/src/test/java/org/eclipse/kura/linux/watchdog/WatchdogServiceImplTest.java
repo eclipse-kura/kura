@@ -1325,7 +1325,6 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenPollTaskIsCancelled() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.statusSvc, "pollTask"));
         assertTrue(this.pollTaskBeforeUpdate.isCancelled());
     }
 

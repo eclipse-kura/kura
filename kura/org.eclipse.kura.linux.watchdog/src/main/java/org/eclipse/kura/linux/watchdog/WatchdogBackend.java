@@ -14,12 +14,15 @@
 package org.eclipse.kura.linux.watchdog;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.watchdog.WatchdogServiceOptions.WatchdogMode;
 import org.eclipse.kura.watchdog.WatchdogStatus;
 
 public interface WatchdogBackend {
+
+    long REBOOT_RETRY_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
 
     WatchdogMode getMode();
 
@@ -39,9 +42,9 @@ public interface WatchdogBackend {
      * component that timed out, and stays set on every following tick. The result tells the service whether the
      * refresh interval changed; the interval it carries is already limited to the hardware timeout.
      */
-    TickResult onTick(Optional<String> failedCriticalComponent) throws KuraException;
+    TickResult onTick(Optional<String> failedCriticalComponent);
 
-    void stop(boolean deactivating);
+    void deactivate();
 
     int getHardwareTimeout();
 

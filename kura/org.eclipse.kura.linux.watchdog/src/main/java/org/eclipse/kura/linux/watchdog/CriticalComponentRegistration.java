@@ -18,7 +18,7 @@ import org.eclipse.kura.watchdog.CriticalComponent;
 public class CriticalComponentRegistration {
 
     private final CriticalComponent criticalComponent;
-    private long updated;
+    private volatile long updated;
 
     public CriticalComponentRegistration(CriticalComponent criticalComponent) {
         this.criticalComponent = criticalComponent;

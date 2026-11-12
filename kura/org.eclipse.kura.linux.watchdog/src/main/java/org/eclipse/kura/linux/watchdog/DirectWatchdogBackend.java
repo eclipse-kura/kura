@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -45,8 +44,6 @@ public class DirectWatchdogBackend implements WatchdogBackend {
 
     private State state = new Disabled(new WatchdogServiceOptions(Collections.emptyMap()));
     private Optional<Instant> lastRefreshTime = Optional.empty();
-    private Consumer<String> rebootCauseListener = cause -> {
-    };
 
     @Override
     public WatchdogMode getMode() {
@@ -55,24 +52,26 @@ public class DirectWatchdogBackend implements WatchdogBackend {
 
     @Override
     public synchronized boolean configure(final WatchdogServiceOptions newOptions,
-            final Optional<WatchdogBackend> activeBackend) throws KuraException {
+            final Optional<WatchdogStatus> failedBackendStatus) throws KuraException {
         updateState(current -> current.configure(newOptions));
 
-        if (this.state instanceof DeviceUnavailable) {
-            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, ((DeviceUnavailable) this.state).failureReason);
+        if (this.state instanceof DeviceUnavailable deviceUnavailable) {
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, deviceUnavailable.failureReason);
         }
 
         return !(this.state instanceof Disabled);
     }
 
     @Override
-    public synchronized void setRebootCauseListener(final Consumer<String> listener) {
-        this.rebootCauseListener = listener;
-    }
-
-    @Override
-    public synchronized void onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+    public synchronized TickResult onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+        final long previousRefreshIntervalMs = this.state.refreshIntervalMs();
         updateState(current -> current.onTick(failedCriticalComponent));
+        final long refreshIntervalMs = this.state.refreshIntervalMs();
+
+        if (refreshIntervalMs == previousRefreshIntervalMs) {
+            return TickResult.unchanged();
+        }
+        return TickResult.refreshIntervalChanged(Duration.ofMillis(refreshIntervalMs));
     }
 
     @Override
@@ -117,6 +116,10 @@ public class DirectWatchdogBackend implements WatchdogBackend {
 
     protected void rebootSystem() throws KuraException {
         SystemUtils.rebootSystem();
+    }
+
+    protected void writeRebootCause(final WatchdogServiceOptions options, final String rebootCause) {
+        RebootCauseFileWriter.writeRebootCause(options.getRebootCauseFilePath(), rebootCause);
     }
 
     protected long getGracePeriod() {
@@ -236,6 +239,14 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             return Optional.empty();
         }
 
+        int hardwareTimeoutMs() {
+            return 0;
+        }
+
+        final long refreshIntervalMs() {
+            return WatchdogServiceOptions.limitPingInterval(this.options.getPingInterval(), hardwareTimeoutMs());
+        }
+
         final void stop(final boolean deactivating) {
             device().ifPresent(device -> stopDevice(device, deactivating));
         }
@@ -246,8 +257,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
                     .withDeviceOpen(device().isPresent()) //
                     .withDevicePath(Optional.of(options.getWatchdogDevice())) //
                     .withLastRefreshTime(lastRefreshTime) //
-                    .withRefreshIntervalMs(RefreshInterval.limit(options.getPingInterval(),
-                            device().map(DirectWatchdogBackend.this::readTimeoutMs).orElse(0))) //
+                    .withRefreshIntervalMs(refreshIntervalMs()) //
                     .withFailureReason(failureReason()) //
                     .build();
         }
@@ -316,7 +326,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             }
 
             logger.error("Watchdog device is still unavailable after the grace period. System will reboot");
-            return new Rebooting(this.options, Optional.empty(), this.failureReason, this.failureReason);
+            return new Rebooting(this.options, Optional.empty(), 0, this.failureReason, this.failureReason);
         }
 
         @Override
@@ -384,10 +394,12 @@ public class DirectWatchdogBackend implements WatchdogBackend {
     private class Supervising extends State {
 
         private final WatchdogDevice device;
+        private final int hardwareTimeoutMs;
 
         Supervising(final WatchdogServiceOptions options, final WatchdogDevice device) {
             super(options);
             this.device = device;
+            this.hardwareTimeoutMs = readTimeoutMs(device);
         }
 
         @Override
@@ -404,7 +416,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         State onTick(final Optional<String> failedCriticalComponent) {
             if (failedCriticalComponent.isPresent()) {
                 final String name = failedCriticalComponent.get();
-                return new Rebooting(this.options, Optional.of(this.device),
+                return new Rebooting(this.options, Optional.of(this.device), this.hardwareTimeoutMs,
                         "Critical component '" + name + "' timed out", name);
             }
 
@@ -418,6 +430,11 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         }
 
         @Override
+        int hardwareTimeoutMs() {
+            return this.hardwareTimeoutMs;
+        }
+
+        @Override
         WatchdogState watchdogState() {
             return WatchdogState.SUPERVISING;
         }
@@ -426,15 +443,17 @@ public class DirectWatchdogBackend implements WatchdogBackend {
     private class Rebooting extends State {
 
         private final Optional<WatchdogDevice> device;
+        private final int hardwareTimeoutMs;
         private final String failureReason;
         private final String rebootCause;
         private boolean accepted;
         private long deadline;
 
         Rebooting(final WatchdogServiceOptions options, final Optional<WatchdogDevice> device,
-                final String failureReason, final String rebootCause) {
+                final int hardwareTimeoutMs, final String failureReason, final String rebootCause) {
             super(options);
             this.device = device;
+            this.hardwareTimeoutMs = hardwareTimeoutMs;
             this.failureReason = failureReason;
             this.rebootCause = rebootCause;
         }
@@ -443,7 +462,7 @@ public class DirectWatchdogBackend implements WatchdogBackend {
         State enter() {
             try {
                 logger.debug("Requesting reboot.");
-                rebootCauseListener.accept(this.rebootCause);
+                writeRebootCause(this.options, this.rebootCause);
                 rebootSystem();
                 this.accepted = true;
                 this.deadline = System.nanoTime() + toNanos(getGracePeriod());
@@ -477,12 +496,17 @@ public class DirectWatchdogBackend implements WatchdogBackend {
             }
 
             logger.warn("Retrying system reboot");
-            return new Rebooting(this.options, this.device, this.failureReason, this.rebootCause);
+            return new Rebooting(this.options, this.device, this.hardwareTimeoutMs, this.failureReason, this.rebootCause);
         }
 
         @Override
         Optional<WatchdogDevice> device() {
             return this.device;
+        }
+
+        @Override
+        int hardwareTimeoutMs() {
+            return this.hardwareTimeoutMs;
         }
 
         @Override

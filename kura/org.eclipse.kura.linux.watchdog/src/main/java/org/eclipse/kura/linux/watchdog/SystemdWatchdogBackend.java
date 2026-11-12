@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -37,8 +36,6 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     static final String WATCHDOG_USEC_ENV = "WATCHDOG_USEC";
     static final String WATCHDOG_PID_ENV = "WATCHDOG_PID";
 
-    static final String SYSTEMD_NOTIFY_CMD = "systemd-notify";
-
     private static final String[] SYSTEMD_NOTIFY_PATHS = { "/usr/bin/systemd-notify", "/bin/systemd-notify" };
 
     private static final long SYSTEMD_NOTIFY_TIMEOUT_SEC = 5;
@@ -48,18 +45,14 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     private long watchdogUsec;
     private long rebootRequestedAt;
     private String pidArg;
+    private String systemdNotifyPath = SYSTEMD_NOTIFY_PATHS[0];
     private boolean triggered = false;
     private boolean active = false;
     private boolean usecFromEnvironment = false;
     private long pingIntervalMs;
     private Instant lastRefreshTime;
-    private volatile Consumer<String> rebootCauseListener = cause -> {
-    };
-
-    @Override
-    public void setRebootCauseListener(final Consumer<String> listener) {
-        this.rebootCauseListener = listener;
-    }
+    private String rebootCauseFilePath;
+    private String activationFailure;
 
     @Override
     public WatchdogMode getMode() {
@@ -68,11 +61,19 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
 
     @Override
     public synchronized boolean configure(WatchdogServiceOptions options,
-            final Optional<WatchdogBackend> activeBackend) throws KuraException {
+            final Optional<WatchdogStatus> failedBackendStatus) throws KuraException {
+        this.rebootCauseFilePath = options.getRebootCauseFilePath();
         final boolean shouldBeActive = options.isEnabled() && options.getWatchdogMode() == getMode();
 
+        this.activationFailure = null;
+
         if (shouldBeActive) {
-            activate(options);
+            try {
+                activate(options);
+            } catch (KuraException e) {
+                this.activationFailure = e.getMessage();
+                throw e;
+            }
         } else if (this.active) {
             this.active = false;
             if (!this.usecFromEnvironment) {
@@ -88,12 +89,13 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
             this.triggered = false;
         }
         this.active = false;
+        this.pingIntervalMs = options.getPingInterval();
 
         Optional<String> notifySocketPath = getEnvVar(NOTIFY_SOCKET_ENV);
 
         if (!notifySocketPath.isPresent()) {
             throw new KuraException(KuraErrorCode.CONNECTION_FAILED,
-                    "NOTIFY_SOCKET environment variable is not set.NOTIFY_SOCKET environment variable is not set.");
+                    "NOTIFY_SOCKET environment variable is not set.");
         }
 
         if (!isSystemdNotifyAvailable()) {
@@ -138,7 +140,6 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
             logger.info("Setting systemd watchdog timeout to {} usec", this.watchdogUsec);
         }
 
-        this.pingIntervalMs = options.getPingInterval();
         this.pidArg = "--pid=" + ProcessHandle.current().pid();
 
         logger.info("Systemd watchdog backend activated. NOTIFY_SOCKET={}", notifySocketPath);
@@ -151,6 +152,7 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
 
     @Override
     public synchronized void stop(final boolean deactivating) {
+        this.activationFailure = null;
         if (this.active) {
             this.active = false;
             if (!this.usecFromEnvironment) {
@@ -160,25 +162,27 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     }
 
     @Override
-    public void onTick(final Optional<String> failedCriticalComponent) throws KuraException {
+    public TickResult onTick(final Optional<String> failedCriticalComponent) throws KuraException {
         if (!this.active) {
-            return;
+            return TickResult.unchanged();
         }
 
         if (failedCriticalComponent.isPresent() && !triggered) {
-            this.rebootCauseListener.accept(failedCriticalComponent.get());
+            RebootCauseFileWriter.writeRebootCause(this.rebootCauseFilePath, failedCriticalComponent.get());
             SystemUtils.rebootSystem();
             triggered = true;
             this.rebootRequestedAt = System.nanoTime();
         }
 
         if (triggered && System.nanoTime() - this.rebootRequestedAt >= REBOOT_GRACE_PERIOD_NS) {
-            return;
+            return TickResult.unchanged();
         }
 
         if (sendNotify("WATCHDOG=1")) {
             this.lastRefreshTime = Instant.now();
         }
+
+        return TickResult.unchanged();
     }
 
     @Override
@@ -200,6 +204,7 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     protected boolean isSystemdNotifyAvailable() {
         for (String path : SYSTEMD_NOTIFY_PATHS) {
             if (new File(path).exists()) {
+                this.systemdNotifyPath = path;
                 return true;
             }
         }
@@ -214,7 +219,7 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     protected synchronized boolean sendNotify(String message) {
         boolean sent = false;
         try {
-            Process proc = new ProcessBuilder(SYSTEMD_NOTIFY_CMD, "--no-block", this.pidArg, message).start();
+            Process proc = new ProcessBuilder(this.systemdNotifyPath, "--no-block", this.pidArg, message).start();
             boolean finished = proc.waitFor(SYSTEMD_NOTIFY_TIMEOUT_SEC, TimeUnit.SECONDS);
             if (!finished) {
                 proc.destroyForcibly();
@@ -240,11 +245,15 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
     public synchronized WatchdogStatus getStatus() {
         final WatchdogStatus.Builder builder = WatchdogStatus.builder();
         if (!this.active) {
-            return builder.build();
+            if (this.activationFailure == null) {
+                return builder.build();
+            }
+            return builder.withState(WatchdogState.DEVICE_UNAVAILABLE).withRefreshIntervalMs(this.pingIntervalMs)
+                    .withFailureReason(Optional.of(this.activationFailure)).build();
         }
         return builder.withState(this.triggered ? WatchdogState.REBOOT_REQUESTED : WatchdogState.SUPERVISING)
                 .withLastRefreshTime(Optional.ofNullable(this.lastRefreshTime))
-                .withRefreshIntervalMs(RefreshInterval.limit(this.pingIntervalMs, getHardwareTimeout()))
+                .withRefreshIntervalMs(WatchdogServiceOptions.limitPingInterval(this.pingIntervalMs, getHardwareTimeout()))
                 .withFailureReason(this.triggered ? Optional.of("Critical component timed out") : Optional.empty())
                 .build();
     }

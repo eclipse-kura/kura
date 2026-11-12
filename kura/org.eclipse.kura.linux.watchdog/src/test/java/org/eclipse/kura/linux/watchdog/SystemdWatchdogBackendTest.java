@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.watchdog.WatchdogState;
+import org.eclipse.kura.watchdog.WatchdogStatus;
 import org.junit.Test;
 
 public class SystemdWatchdogBackendTest {
@@ -47,6 +49,25 @@ public class SystemdWatchdogBackendTest {
         givenBackend(NOTIFY_SOCKET, false, null);
 
         thenActivationFails();
+    }
+
+    @Test
+    public void statusReportsTheActivationFailure() {
+        givenBackend(null, true, null);
+
+        whenActivationIsAttempted();
+
+        thenStatusIsUnavailableWithReasonContaining("NOTIFY_SOCKET");
+    }
+
+    @Test
+    public void activationFailureIsClearedWhenTheBackendIsStopped() {
+        givenBackend(null, true, null);
+
+        whenActivationIsAttempted();
+        whenBackendIsStopped();
+
+        thenStatusIsDisabled();
     }
 
     @Test
@@ -117,6 +138,10 @@ public class SystemdWatchdogBackendTest {
         this.activated = this.backend.configure(new WatchdogServiceOptions(properties), Optional.empty());
     }
 
+    private void whenActivationIsAttempted() {
+        assertThrows(KuraException.class, this::whenBackendIsConfigured);
+    }
+
     private void whenBackendIsTicked() throws Exception {
         this.backend.onTick(Optional.empty());
     }
@@ -127,6 +152,16 @@ public class SystemdWatchdogBackendTest {
 
     private void thenActivationFails() {
         assertThrows(KuraException.class, this::whenBackendIsConfigured);
+    }
+
+    private void thenStatusIsUnavailableWithReasonContaining(String expectedText) {
+        final WatchdogStatus status = this.backend.getStatus();
+        assertEquals(WatchdogState.DEVICE_UNAVAILABLE, status.getState());
+        assertTrue(status.getFailureReason().get().contains(expectedText));
+    }
+
+    private void thenStatusIsDisabled() {
+        assertEquals(WatchdogState.DISABLED, this.backend.getStatus().getState());
     }
 
     private void thenBackendIsActive() {

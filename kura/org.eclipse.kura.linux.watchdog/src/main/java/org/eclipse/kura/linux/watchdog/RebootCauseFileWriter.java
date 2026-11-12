@@ -33,6 +33,10 @@ public class RebootCauseFileWriter {
         this.rebootCauseFile = new File(rebootCauseFilePath).getAbsoluteFile();
     }
 
+    public static void writeRebootCause(final String rebootCauseFilePath, final String cause) {
+        new RebootCauseFileWriter(rebootCauseFilePath).writeRebootCause(cause);
+    }
+
     public void writeRebootCause(String cause) {
         final File rebootCauseFileDir = this.rebootCauseFile.getParentFile();
 

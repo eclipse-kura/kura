@@ -82,6 +82,14 @@ public class WatchdogServiceOptions {
         return PROPERTY_PING_INTERVAL.get(this.properties);
     }
 
+    public static long limitPingInterval(final long configuredMs, final int hardwareTimeoutMs) {
+        if (hardwareTimeoutMs <= 0) {
+            return configuredMs;
+        }
+        final int upperBound = Math.clamp(hardwareTimeoutMs / 2, 1, Integer.MAX_VALUE);
+        return Math.clamp(configuredMs, 1, upperBound);
+    }
+
     public String getWatchdogDevice() {
         return PROPERTY_WD_DEVICE.get(this.properties);
     }

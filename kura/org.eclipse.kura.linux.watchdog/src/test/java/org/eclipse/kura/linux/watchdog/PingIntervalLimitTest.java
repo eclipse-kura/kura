@@ -78,13 +78,13 @@ public class PingIntervalLimitTest {
         }
 
         @Override
-        public boolean configure(WatchdogServiceOptions options, Optional<WatchdogBackend> activeBackend) {
+        public boolean configure(WatchdogServiceOptions options, Optional<WatchdogStatus> failedBackendStatus) {
             return true;
         }
 
         @Override
-        public void onTick(Optional<String> failedCriticalComponent) {
-            // nothing to do
+        public TickResult onTick(Optional<String> failedCriticalComponent) {
+            return TickResult.unchanged();
         }
 
         @Override

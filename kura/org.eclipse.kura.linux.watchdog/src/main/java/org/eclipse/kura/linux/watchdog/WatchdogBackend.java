@@ -14,7 +14,6 @@
 package org.eclipse.kura.linux.watchdog;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.watchdog.WatchdogServiceOptions.WatchdogMode;
@@ -26,25 +25,21 @@ public interface WatchdogBackend {
 
     /**
      * Applies the given configuration. A backend is active when the watchdog is enabled and the configured mode is
-     * its own; the fallback backend is also active when the watchdog is enabled and no other backend is. The service
-     * configures the backends in order and passes the backend that was already activated during the same pass, if
-     * any. Returns whether the backend is running after the call, and throws if it should be active but could not be
-     * activated. A backend that is not active releases every resource it holds.
+     * its own; the fallback backend is also active when the watchdog is enabled and a backend failed to activate. The
+     * service configures the backends in order and passes the status of the backend that failed to activate during
+     * the same pass, if any; the fallback backend reports it to explain why it is running. Returns whether the
+     * backend is running after the call, and throws if it should be active but could not be activated. A backend
+     * that is not active releases every resource it holds.
      */
-    boolean configure(WatchdogServiceOptions options, Optional<WatchdogBackend> activeBackend) throws KuraException;
-
-    /**
-     * Sets the listener that a backend calls with the reason of a reboot, right before it requests the reboot.
-     */
-    default void setRebootCauseListener(final Consumer<String> listener) {
-        // nothing to do by default
-    }
+    boolean configure(WatchdogServiceOptions options, Optional<WatchdogStatus> failedBackendStatus)
+            throws KuraException;
 
     /**
      * Called periodically by the service while the watchdog is enabled. The argument holds the name of the critical
-     * component that timed out, and stays set on every following tick.
+     * component that timed out, and stays set on every following tick. The result tells the service whether the
+     * refresh interval changed; the interval it carries is already limited to the hardware timeout.
      */
-    void onTick(Optional<String> failedCriticalComponent) throws KuraException;
+    TickResult onTick(Optional<String> failedCriticalComponent) throws KuraException;
 
     void stop(boolean deactivating);
 

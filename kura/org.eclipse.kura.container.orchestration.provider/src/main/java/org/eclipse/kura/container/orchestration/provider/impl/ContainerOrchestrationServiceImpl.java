@@ -44,6 +44,7 @@ import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.EnforcementTarget;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +95,8 @@ import org.osgi.service.metatype.annotations.Designate;
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class })
 @Designate(ocd = ContainerOrchestrationServiceMetatype.class)
-public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
+public class ContainerOrchestrationServiceImpl
+        implements ConfigurableComponent, ContainerOrchestrationService, EnforcementTarget {
 
     private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
@@ -1032,6 +1034,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
+    @Override
     public Set<String> getImageDigestsByContainerId(String containerId) {
 
         Set<String> imageDigests = new HashSet<>();
@@ -1075,6 +1078,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
+    @Override
     public Set<String> getContainerInstancesAllowlist() {
         return new HashSet<>(this.containerInstancesDigests.values());
     }

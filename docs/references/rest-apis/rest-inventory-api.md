@@ -242,7 +242,7 @@ Supported **type** values are:
 
  --- 
 ## Images
-#### Images Images
+#### GET Images
 - Method: Get
 - Description: returns a list of Images.
 - API PATH: `/services/inventory/v1/images`
@@ -250,7 +250,7 @@ Supported **type** values are:
 - 200 OK
 ```JSON
 {
-  "containers":
+  "images":
   [
     {
       "name":"nginx",

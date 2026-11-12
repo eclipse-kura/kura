@@ -84,7 +84,7 @@ node {
                             cp -R "$classes"/. "$CLASSES"
                         done
                         find "$CLASSES" -type f ! -name '*.class' -delete
-                        rm -rf "$CLASSES/org/eclipse/kura/web" "$CLASSES/org/freedesktop" "$CLASSES/fi/w1"
+                        rm -rf "$CLASSES/org/eclipse/kura/web" "$CLASSES/org/freedesktop" "$CLASSES/fi/w1" "$CLASSES/inference" "$CLASSES/org/eclipse/tahu/protobuf"
                         find "$CLASSES" -name 'LibGpiodV[12]Native.class' -delete -o -name 'LibGpiodV[12]Native$*.class' -delete
 
                         SOURCES=""

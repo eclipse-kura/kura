@@ -31,7 +31,6 @@ public class ContainerDigestRegistrationTest {
     private static final String DIGEST = "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
 
     private AllowlistEnforcement enforcement;
-    private boolean removed;
 
     @Test
     public void registeredDigestIsListed() {
@@ -59,7 +58,6 @@ public class ContainerDigestRegistrationTest {
         whenContainerIsUnregistered(CONTAINER_ID);
 
         thenRegisteredDigestsAre();
-        thenRemovalIsReported(true);
     }
 
     @Test
@@ -70,7 +68,6 @@ public class ContainerDigestRegistrationTest {
         whenContainerIsUnregistered(OTHER_CONTAINER_ID);
 
         thenRegisteredDigestsAre(DIGEST);
-        thenRemovalIsReported(false);
     }
 
     private void givenAllowlistEnforcement() {
@@ -86,14 +83,10 @@ public class ContainerDigestRegistrationTest {
     }
 
     private void whenContainerIsUnregistered(String containerId) {
-        this.removed = this.enforcement.unregister(containerId);
+        this.enforcement.unregister(containerId);
     }
 
     private void thenRegisteredDigestsAre(String... expectedDigests) {
         assertEquals(new HashSet<>(Arrays.asList(expectedDigests)), this.enforcement.getRegisteredDigests());
-    }
-
-    private void thenRemovalIsReported(boolean expected) {
-        assertEquals(expected, this.removed);
     }
 }

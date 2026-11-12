@@ -118,7 +118,7 @@ public class ContainerOrchestrationServiceImpl
 
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
 
-    private final AllowlistEnforcement enforcement = new AllowlistEnforcement();
+    private final AllowlistEnforcement enforcement = new AllowlistEnforcement(this);
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -191,8 +191,9 @@ public class ContainerOrchestrationServiceImpl
 
     private void startEnforcementMonitor() {
         logger.info("Enforcement monitor starting...");
+        this.enforcement.setAllowlist(this.currentConfig.getEnforcementAllowlist());
         this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
-                .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
+                .exec(new AllowlistEnforcementMonitor(this.enforcement));
         logger.info("Enforcement monitor starting...done.");
     }
 
@@ -222,7 +223,7 @@ public class ContainerOrchestrationServiceImpl
             return;
         }
         logger.info("Enforcement check on already running containers...");
-        this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
+        this.enforcement.enforceAll();
         logger.info("Enforcement check on already running containers...done");
     }
 
@@ -1061,7 +1062,6 @@ public class ContainerOrchestrationServiceImpl
         }
     }
 
-    @Override
     public Set<String> getContainerInstancesAllowlist() {
         return this.enforcement.getRegisteredDigests();
     }

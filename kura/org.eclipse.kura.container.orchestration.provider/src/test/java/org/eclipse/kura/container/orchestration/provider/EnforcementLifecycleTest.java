@@ -20,6 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -31,7 +32,9 @@ import org.eclipse.kura.container.orchestration.provider.impl.enforcement.Enforc
 import org.junit.Test;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.EventsCmd;
+import com.github.dockerjava.api.model.Event;
 
 public class EnforcementLifecycleTest {
 
@@ -83,6 +86,19 @@ public class EnforcementLifecycleTest {
     }
 
     @Test
+    public void enforcementThatFailedToCloseDoesNotCheckContainers() throws KuraException {
+        givenDockerEventStreamFailingToClose();
+        givenStartedEnforcement();
+        givenClosedEnforcement();
+        givenContainerNotInAllowlist();
+        givenRegisteredContainerDigest();
+
+        whenContainerDigestIsUnregistered();
+
+        thenContainerWasNotDeleted();
+    }
+
+    @Test
     public void failedSubscriptionLeavesEnforcementInactive() throws KuraException {
         givenContainerNotInAllowlist();
         givenFailingDockerEventStream();
@@ -110,6 +126,17 @@ public class EnforcementLifecycleTest {
         when(this.dockerClient.eventsCmd()).thenReturn(this.eventsCmd);
         when(this.eventsCmd.withEventFilter("start")).thenReturn(this.eventsCmd);
         when(this.eventsCmd.exec(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void givenDockerEventStreamFailingToClose() {
+        givenDockerEventStream();
+        when(this.eventsCmd.exec(any())).thenAnswer(invocation -> {
+            ResultCallback<Event> eventStream = invocation.getArgument(0);
+            eventStream.onStart(() -> {
+                throw new IOException("connection to docker lost");
+            });
+            return eventStream;
+        });
     }
 
     private void givenFailingDockerEventStream() {

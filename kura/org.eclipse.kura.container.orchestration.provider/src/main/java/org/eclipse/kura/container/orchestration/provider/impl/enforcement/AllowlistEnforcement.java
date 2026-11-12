@@ -85,13 +85,14 @@ public class AllowlistEnforcement {
             logger.info("Enforcement monitor closing...");
             this.monitor.close();
             this.monitor.awaitCompletion(5, TimeUnit.SECONDS);
-            this.monitor = null;
             logger.info("Enforcement monitor closing...done.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);
+        } finally {
+            this.monitor = null;
         }
     }
 

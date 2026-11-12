@@ -18,7 +18,6 @@ import static java.util.Objects.isNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,6 +42,7 @@ import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.EnforcementTarget;
 import org.eclipse.kura.crypto.CryptoService;
@@ -118,7 +118,7 @@ public class ContainerOrchestrationServiceImpl
 
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
 
-    private Map<String, String> containerInstancesDigests = new HashMap<>();
+    private final AllowlistEnforcement enforcement = new AllowlistEnforcement();
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -407,7 +407,7 @@ public class ContainerOrchestrationServiceImpl
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
-            addContainerInstanceDigest(containerId, container.getEnforcementDigest());
+            this.enforcement.register(containerId, container.getEnforcementDigest());
             startContainer(containerId);
         }
 
@@ -1055,32 +1055,15 @@ public class ContainerOrchestrationServiceImpl
         return imageDigests;
     }
 
-    private void addContainerInstanceDigest(String containerId, Optional<String> containerInstanceDigest) {
-
-        if (containerInstanceDigest.isPresent()) {
-            logger.info(
-                    "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
-                    containerId);
-            this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
-        } else {
-            logger.info("Container {} doesn't contain the enforcement digest. "
-                    + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
-                    containerId);
-        }
-
-    }
-
     private void removeContainerInstanceDigest(String containerId) {
-        if (this.containerInstancesDigests.containsKey(containerId)) {
-            this.containerInstancesDigests.remove(containerId);
-            logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
+        if (this.enforcement.unregister(containerId)) {
             enforceAlreadyRunningContainer();
         }
     }
 
     @Override
     public Set<String> getContainerInstancesAllowlist() {
-        return new HashSet<>(this.containerInstancesDigests.values());
+        return this.enforcement.getRegisteredDigests();
     }
 
 }

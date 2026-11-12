@@ -90,9 +90,13 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Restart Container On Failure** - A boolean that tells the container engine to automatically restart the container when it has failed or shut down.
 
-- **Identity Integration Enabled** - When enabled, Kura automatically creates a temporary identity with the specified permissions and provides the container with authentication credentials to access Kura's REST APIs. See [Container Identity Integration](#container-identity-integration) for more details.
+- **Enable Identity Integration** - When enabled, Kura creates a temporary identity with the specified permissions and provides the container with a JWT token pair to access Kura's REST APIs. See [Container Identity Integration](#container-identity-integration) for more details.
 
-- **Container Permissions (optional)** - A comma-separated list of permission names to grant to the container's temporary identity (e.g., `rest.system,rest.configuration`). This field is only used when **Identity Integration Enabled** is set to true. See [Container Identity Integration](#container-identity-integration) for available permissions and usage examples.
+- **Container Permissions (optional)** - A comma-separated list of permission names to grant to the container's temporary identity (e.g., `rest.system,rest.configuration`). This field is only used when **Enable Identity Integration** is set to true.
+
+- **Token Issuing Service Target** - OSGi filter selecting the service that issues the container's JWT token pair. This field is only used when **Enable Identity Integration** is set to true.
+
+- **JWT Access Token Duration (Seconds)** and **JWT Refresh Token Duration (Seconds)** - Lifetimes of the JWT token pair provided to the container. These fields are only used when **Enable Identity Integration** is set to true.
 
 After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework is power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
@@ -147,198 +151,94 @@ The result should be a single line with all the existing options plus the new on
 
 ## Container Identity Integration
 
-The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically provisions a temporary identity and delivers its credentials to the container through a read-only file mounted from an in-memory filesystem (tmpfs), eliminating the need for manual credential configuration and keeping the password out of the container's environment.
+Container Identity Integration lets a container call Kura's REST APIs without any credential configured by hand. Every time Kura starts the container, it creates a temporary identity with the configured permissions and gives the container a **JWT token pair** issued for that identity. The container must authenticate with the access token and must periodically exchange the refresh token for new pairs. The temporary identity has no password, so no password exists that could leak through environment variables, volumes or `docker inspect`.
 
-### Overview
+A complete, working example (a Python client and its Dockerfile) is available in the kura-apps repository: [`kura-examples/containers/jwt-rest-client`](https://github.com/eclipse-kura/kura-apps/tree/develop/kura-examples/containers/jwt-rest-client).
 
-When Identity Integration is enabled for a container instance, Kura performs the following operations:
+### Prerequisites
 
-1. **Creates a Temporary Identity**: A temporary, non-persistent identity is created specifically for the container with a unique name based on the container name (e.g., `container_myapp` for a container named `myapp`).
-
-2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field. These are the same permissions used by Kura identities (for example `rest.system` or `rest.configuration`), so each name must reference a permission that already exists in the gateway.
-
-3. **Provides Credentials**: The container receives the following environment variables:
-    - `KURA_IDENTITY_NAME`: The temporary identity name for accessing Kura's REST APIs
-    - `KURA_TOKEN_FILE`: The in-container path of a read-only file containing the temporary password (always `/run/secrets/kura-token`)
-    - `KURA_REST_BASE_URL`: The complete base URL for Kura's REST API endpoints (e.g., `http://172.17.0.1:8080/services` or `https://172.17.0.1:443/services`)
-
-4. **Mounts a Secure Token File**: The temporary password is written to a file on an in-memory filesystem (tmpfs) on the host — `<base>/kura-tokens/<uuid>/kura-token`, where `<base>` defaults to `/dev/shm` — with owner-read-only permissions (`400`), and is mounted **read-only** into the container at `/run/secrets/kura-token`. Because the password is never placed in an environment variable, it does not appear in `docker inspect` or in `/proc/<pid>/environ`.
-
-5. **Automatic Cleanup**: When the container stops or is deleted, Kura automatically removes the temporary identity, invalidates its credentials, and deletes the token file and its parent directory from tmpfs.
-
-### Features
-
-- **Zero Configuration**: Containers automatically receive the correct REST API URL based on the gateway's HTTPS configuration and network mode.
-- **Network-Aware**: The REST base URL is automatically adjusted based on the container's networking mode (bridge, host, etc.).
-- **Secure**: Credentials are temporary and automatically invalidated when containers stop. The password is delivered through a read-only tmpfs file, so it is not exposed via `docker inspect` or `/proc/<pid>/environ`.
-- **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk. The token file lives on tmpfs (RAM) and is cleared on reboot.
-- **Permission-Based**: Fine-grained access control using Kura's existing permission system.
+1. A **JWT Issuing Service** and a **JWT Verification Service** configured as described in [JWT Services](jwt-services.md). The verification trust store must contain the certificate of the signing key and, if *Trusted Issuers* is set, it must include the *Issuer* of the issuing service.
+2. In the [REST Service](rest-service.md#rest-service-configuration) configuration, **JWT Authentication Enabled** set to `true`. Its **Token Verification Service Target** must select a verification service that accepts the tokens of the issuing service used by the container (see **Token Issuing Service Target** below).
+3. A writable in-memory filesystem (tmpfs) at `/dev/shm`, or at the directory set with the `kura.tmpfs.base` system property.
 
 ### Configuration
 
-To enable Identity Integration for a container:
+The following container instance parameters control the feature:
 
-1. Set **Identity Integration Enabled** to `true`
-2. Specify the required permissions in **Container Permissions** field (comma-separated)
-3. Apply the configuration
+- **Enable Identity Integration** - Enables the feature. (Default: `false`)
+- **Container Permissions** - Comma-separated list of permissions granted to the temporary identity, for example `rest.system,rest.configuration`. Each name must reference a permission that already exists in the gateway. See [REST Service](rest-service.md).
+- **Token Issuing Service Target** - OSGi filter selecting the `TokenIssuingService` that issues the token pair, for example `(kura.service.pid=org.eclipse.kura.core.token.jwt.issuer.JwtIssuingService)`. Its tokens must be accepted by the verification service used by the REST Service.
+- **JWT Access Token Duration (Seconds)** - Lifetime of the access token given to the container. (Default: `60`)
+- **JWT Refresh Token Duration (Seconds)** - Lifetime of the refresh token given to the container: the container must refresh within this time, otherwise it loses access. The maximum value is `31536000` (one year), the lifetime of the temporary identity. (Default: `900`)
 
-To use the temporary credentials with REST APIs, ensure **Basic Authentication Enabled** is set to `true` in the **RestService** configuration.
+Both durations are silently capped by the *Maximum Token Lifetime* of the issuing service (`3600` seconds by default). They apply only to the pair Kura gives to the container: the pairs obtained by refreshing follow the **JWT Access Token Duration** and **JWT Refresh Token Duration** of the REST Service.
 
-The framework will create the temporary identity when the container starts and clean it up when the container stops.
+### What Kura does when it starts the container
 
-!!! note
-    The token file is written to an in-memory filesystem (tmpfs). The base directory is `/dev/shm` by default and can be changed with the `kura.tmpfs.base` system property. The platform must provide a writable tmpfs at that location: if it is missing, the container fails to start with a clear error message.
+1. **Creates a temporary identity** named `container_<name>_<suffix>`, where `<name>` is the container name with every character other than letters, digits, `.` and `_` replaced by `_` (`auto` if nothing is left) and `<suffix>` is 8 random hexadecimal characters, for example `container_myapp_3fa94c1d`. The suffix changes at every start, so tokens issued for a previous start can never be used with the new identity. The identity has password authentication disabled, holds the **Container Permissions** and exists in memory only.
+2. **Removes any leftover container** with the same name, for example one that survived a Kura restart, so that it is recreated with the new credentials.
+3. **At every startup attempt**:
+    1. pulls the image, if it is not already available locally;
+    2. issues a **new token pair** whose subject (`sub`) is the temporary identity;
+    3. writes the pair to `<base>/kura-tokens/<uuid>/kura-jwt.json` on the host tmpfs (`<base>` is `/dev/shm` by default), readable by its owner only (`400`), and mounts it **read-only** into the container at `/run/secrets/kura-jwt.json`. The file of a failed attempt is deleted;
+    4. creates and starts the container with the following environment variables:
+        - `KURA_IDENTITY_NAME`: the name of the temporary identity;
+        - `KURA_JWT_FILE`: the in-container path of the token pair file, always `/run/secrets/kura-jwt.json`;
+        - `KURA_REST_BASE_URL`: the base URL of the Kura REST APIs, for example `http://172.17.0.1:8080/services` or `https://172.17.0.1:443/services`.
 
-### Available Permissions
+If the temporary identity cannot be created, the startup is aborted immediately. Any other failure (no issuing service matching the target, token issuing errors, missing tmpfs, image or container errors) fails only the current attempt: Kura retries according to **Image Download Retries** and **Image Download Retry Interval**. When the retries are exhausted, the startup fails and the temporary identity and its file are deleted. The reason is reported in the Kura log.
 
-For a complete list of available permissions, use the [REST Identity API](/references/rest-apis/rest-identity-api-v2/#get-defined-permissions) to query defined permissions in your system.
+### Using the token pair in the container
 
-### Usage Example
+The file referenced by `KURA_JWT_FILE` has the same format as the response of the [JWT refresh endpoint](../references/rest-apis/rest-jwt-token-api-v1.md#tokenpair):
 
-#### Example: Container with Read-Only System Access
-
-A monitoring container that needs to read system information but cannot modify configuration:
-
-**Container Configuration:**
-- **Identity Integration Enabled**: `true`
-- **Container Permissions**: `rest.system`
-
-**Container Code (Java):**
-```java
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
-
-public class SystemInfoExample {
-
-    public static void main(String[] args) throws Exception {
-        // Read the identity name and the REST base URL from the environment
-        String identityName = System.getenv("KURA_IDENTITY_NAME");
-        String baseUrl = System.getenv("KURA_REST_BASE_URL");
-
-        // Read the password from the read-only token file
-        String password = new String(Files.readAllBytes(Path.of(System.getenv("KURA_TOKEN_FILE"))));
-
-        // Make an authenticated request to get system information
-        String basicAuth = Base64.getEncoder()
-                .encodeToString((identityName + ":" + password).getBytes());
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/system/info"))
-                .header("Authorization", "Basic " + basicAuth)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = HttpClient.newHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-            System.out.println("System info: " + response.body());
-        } else {
-            System.out.println("Failed to get system info: " + response.statusCode());
-        }
-    }
+```json
+{
+  "tokenType": "Bearer",
+  "accessToken": "eyJraWQiOi...",
+  "accessTokenExpiresInSeconds": 60,
+  "refreshToken": "eyJraWQiOi...",
+  "refreshTokenExpiresInSeconds": 900
 }
 ```
 
-The same flow can be implemented in other languages. In each case the identity name and REST base URL are read from the environment, while the password is read from the file referenced by `KURA_TOKEN_FILE`.
+1. Read the file once, at startup.
+2. Call the REST APIs with the header `Authorization: Bearer <accessToken>`.
+3. Before the access token expires, call `POST {KURA_REST_BASE_URL}/token/jwt/v1/refresh` with the refresh token as `text/plain` body, no other credentials are needed. Replace both tokens with the returned ones: a refresh token can be used only once.
+4. If the refresh fails with `401`, the access is lost for good: Kura does not provide new tokens until the container is created again (see [Behaviour](#behaviour)).
 
-!!! note
-    When Kura's REST endpoint uses HTTPS with a self-signed certificate, the client must either trust that certificate or disable TLS verification (the examples below disable verification for brevity). Prefer trusting the certificate in production.
+Things to keep in mind:
 
-**Container Code (Python):**
-```python
-import os
-import requests
+- **Kura never updates the file.** The refreshed pairs exist only in the memory of the container.
+- **Use the `exp` claim of the tokens to schedule the refresh.** The `...ExpiresInSeconds` values of the file are counted from the time Kura issued the pair, not from the time the container started.
+- **Refresh even when idle.** A container that makes no request for longer than the refresh token lifetime loses its access.
+- **Serialize refreshes.** Two concurrent refreshes with the same refresh token make one of them fail with `401`.
+- **Permissions are checked at every request** against the temporary identity, so a request to an API not covered by **Container Permissions** fails with `403` while the tokens remain valid.
+- **Treat tokens as credentials**: never log them or put them in URLs.
 
-identity_name = os.environ['KURA_IDENTITY_NAME']
-base_url = os.environ['KURA_REST_BASE_URL']
+See [JWT Token V1 REST APIs](../references/rest-apis/rest-jwt-token-api-v1.md#behavior) for the complete behaviour of the token endpoints.
 
-with open(os.environ['KURA_TOKEN_FILE']) as token_file:
-    identity_password = token_file.read()
+### Behaviour
 
-response = requests.get(
-    f'{base_url}/system/info',
-    auth=(identity_name, identity_password),
-    verify=False
-)
-response.raise_for_status()
-print(response.json())
-```
+| Event | Effect on the container access |
+| - | - |
+| The container does not refresh before the refresh token expires | Access is lost. The container keeps running; disable and enable the instance, change its configuration or restart Kura to get new credentials. |
+| Docker restarts the container (**Restart Container On Failure**, or `docker restart`) | The container gets the same file again. If it had already refreshed, the refresh token in the file is used up and access is lost. To survive this, the container can keep its latest pair in a writable volume of its own and prefer it to the file. |
+| Kura restarts or container instance configuration changes | The container is recreated with a new temporary identity and a new token pair. The previous tokens are rejected. The previous identity is deleted. |
+| Only Token Issuing Service Target changes | The running container is not affected; the new issuing service is used at the next start. |
+| The instance is disabled or deleted, or Kura stops | The temporary identity is deleted, so every token issued for it is rejected immediately, and the file is deleted.                                                                                                                                    |
+| The container runs for one year without being recreated | The temporary identity expires and access is lost. |
+| JWT Authentication Enabled is set to `false` in the REST Service | Bearer tokens and the refresh endpoint are rejected; access is lost while JWT authentication is disabled. |
 
-**Container Code (Shell):**
-```bash
-#!/bin/sh
-# KURA_IDENTITY_NAME, KURA_TOKEN_FILE and KURA_REST_BASE_URL are provided by Kura
-curl -k -u "${KURA_IDENTITY_NAME}:$(cat "${KURA_TOKEN_FILE}")" \
-  "${KURA_REST_BASE_URL}/system/info"
-```
+### Network considerations
 
-**Container Code (Node.js):**
-```javascript
-const fs = require('fs');
+The REST base URL is computed by Kura:
 
-const identityName = process.env.KURA_IDENTITY_NAME;
-const baseUrl = process.env.KURA_REST_BASE_URL;
-const password = fs.readFileSync(process.env.KURA_TOKEN_FILE, 'utf8');
+- **Protocol and port**: HTTPS and the first HTTPS port if HTTPS is enabled in the HTTP Service configuration, HTTP and the first HTTP port otherwise.
+- **bridge mode** (default): the address of the Docker bridge (`docker0`, typically `172.17.0.1`).
+- **host mode**: `localhost`.
 
-const auth = Buffer.from(`${identityName}:${password}`).toString('base64');
-
-// Allow self-signed certificates (development only)
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-fetch(`${baseUrl}/system/info`, {
-  headers: { Authorization: `Basic ${auth}` }
-})
-  .then((response) => response.json())
-  .then((info) => console.log(info))
-  .catch((error) => console.error(error));
-```
-
-### Best Practices
-
-1. **Principle of Least Privilege**: Only grant permissions that are absolutely necessary for the container's functionality.
-
-2. **Validate Environment Variables and Token File**: Always check that `KURA_IDENTITY_NAME`, `KURA_TOKEN_FILE`, and `KURA_REST_BASE_URL` are present, and that the file referenced by `KURA_TOKEN_FILE` exists and is non-empty, before making API calls.
-
-3. **Handle Credential Lifecycle**: Be prepared for credentials to become invalid when the container is stopping or restarting.
-
-4. **Error Handling**: Implement proper error handling for API calls, as permissions may be denied if the container doesn't have the required permission.
-
-5. **Network Mode Considerations**: The REST base URL is automatically adjusted based on network mode:
-   - **bridge mode** (default): Uses the Docker bridge gateway IP (typically `172.17.0.1`)
-   - **host mode**: Uses `localhost`
-
-6. **HTTPS Support**: The REST base URL automatically uses HTTPS if enabled in Kura's HTTP Service configuration.
-
-### Troubleshooting
-
-**Container cannot access Kura APIs:**
-- Verify that **Identity Integration Enabled** is set to `true`
-- Check that the container has been granted the necessary permissions in **Container Permissions**
-- Ensure the container is reading the environment variables and the token file correctly
-- If Kura firewall is installed and enabled, allow traffic from container networks (for example `docker0` or user-defined Docker bridges) to the Kura REST API port
-- Check container logs for authentication errors
-
-**Token file missing or empty:**
-- Verify that `KURA_TOKEN_FILE` is set and points to `/run/secrets/kura-token`
-- Confirm the file is mounted read-only and readable by the process inside the container
-- Check the Kura logs for token file creation errors (for example a missing or non-writable tmpfs base directory)
-
-**Basic authentication fails:**
-- Verify the request includes valid Basic credentials (`KURA_IDENTITY_NAME` as the username and the content of the file referenced by `KURA_TOKEN_FILE` as the password)
-- Check that the temporary identity was created successfully in Kura logs
-- Ensure the container is using the correct REST base URL
-- Verify **Basic Authentication Enabled** is set to `true` in **RestService**
-
-**Permission denied errors:**
-- Verify the permission name is correct (case-sensitive)
-- Ensure the permission exists in the system (use the REST Identity API to list defined permissions)
-- Check that the permission was correctly added to the **Container Permissions** field
+If the Kura firewall is enabled, allow traffic from the container networks (for example `docker0` or user-defined Docker bridges) to the REST API port. If the REST Service **Allowed Ports** parameter is set, it must include the port of the REST base URL.
 
 ## Stopping the container
 

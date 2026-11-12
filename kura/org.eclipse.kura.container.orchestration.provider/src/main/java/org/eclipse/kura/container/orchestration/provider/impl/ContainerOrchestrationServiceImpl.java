@@ -358,6 +358,7 @@ public class ContainerOrchestrationServiceImpl
                 deleteContainer(containerId);
                 pullImage(container.getImageConfiguration());
                 containerId = createContainer(container);
+                this.enforcement.register(containerId, container.getEnforcementDigest());
                 startContainer(containerId);
 
             }

@@ -44,6 +44,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(
     name = "org.eclipse.kura.status.CloudConnectionStatusService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.eclipse.kura.status.CloudConnectionStatusService.class },
     property = {
         "service.pid=org.eclipse.kura.status.CloudConnectionStatusService" })

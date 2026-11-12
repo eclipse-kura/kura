@@ -39,6 +39,7 @@ import org.osgi.service.component.annotations.Component;
 @Path("security/v2")
 @Component(
     name = "org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2.class },
     property = {

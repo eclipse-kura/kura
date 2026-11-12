@@ -42,6 +42,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.net.NetworkService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.net.NetworkService.class },
     property = {

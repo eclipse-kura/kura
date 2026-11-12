@@ -72,6 +72,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Path("/configuration/v2")
 @Component(
     name = "org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.eclipse.kura.internal.rest.configuration.ConfigurationRestService.class },
     property = {
         "service.pid=org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",

@@ -160,6 +160,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
     name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
     property = {
         "service.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory",

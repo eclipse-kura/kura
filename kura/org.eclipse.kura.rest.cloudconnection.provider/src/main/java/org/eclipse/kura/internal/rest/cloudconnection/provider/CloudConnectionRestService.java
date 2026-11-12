@@ -59,6 +59,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Path("cloudconnection/v1")
 @Component(
     name = "org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService.class },
     property = {

@@ -32,6 +32,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 @Component(
     name = "org.eclipse.kura.usb.UsbService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.usb.UsbService.class },
     property = {

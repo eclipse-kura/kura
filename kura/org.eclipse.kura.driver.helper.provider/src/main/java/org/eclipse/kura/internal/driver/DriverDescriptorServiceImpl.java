@@ -36,6 +36,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.driver.descriptor.DriverDescriptorService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.driver.descriptor.DriverDescriptorService.class },
     property = {

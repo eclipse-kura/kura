@@ -35,6 +35,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
     property = {
         "service.pid=org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory",

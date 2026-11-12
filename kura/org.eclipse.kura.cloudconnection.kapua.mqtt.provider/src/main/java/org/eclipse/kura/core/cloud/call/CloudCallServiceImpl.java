@@ -41,6 +41,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.cloud.CloudCallService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.eclipse.kura.cloud.CloudCallService.class },
     property = {
         "service.pid=org.eclipse.kura.cloud.CloudCallService" })

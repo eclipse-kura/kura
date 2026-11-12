@@ -19,6 +19,7 @@ import org.osgi.service.component.annotations.Component;
 @Path("/keystores/v1")
 @Component(
     name = "org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV1",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService.class },
     property = {

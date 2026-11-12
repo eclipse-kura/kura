@@ -35,6 +35,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.system.SystemAdminService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.system.SystemAdminService.class },
     property = {

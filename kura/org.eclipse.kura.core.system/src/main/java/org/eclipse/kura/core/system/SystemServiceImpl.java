@@ -80,6 +80,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.system.SystemService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     service = { org.eclipse.kura.system.SystemService.class },
     property = {

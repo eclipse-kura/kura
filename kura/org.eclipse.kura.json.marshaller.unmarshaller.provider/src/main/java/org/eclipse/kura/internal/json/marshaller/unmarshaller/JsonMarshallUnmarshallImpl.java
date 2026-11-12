@@ -54,6 +54,7 @@ import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.json.marshaller.unmarshaller.provider",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = false,
     service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
     property = {

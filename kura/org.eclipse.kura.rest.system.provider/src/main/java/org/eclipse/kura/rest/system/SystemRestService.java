@@ -53,6 +53,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Path(REST_APP_ID)
 @Component(
     name = "org.eclipse.kura.rest.system.SystemRestService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.eclipse.kura.rest.system.SystemRestService.class },
     property = {
         "service.pid=org.eclipse.kura.rest.system.SystemRestService",

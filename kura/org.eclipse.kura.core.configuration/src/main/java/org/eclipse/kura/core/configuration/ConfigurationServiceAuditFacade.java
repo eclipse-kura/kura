@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.configuration.ConfigurationService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.4.0",
     immediate = true,
     service = { org.eclipse.kura.configuration.ConfigurationService.class, org.eclipse.kura.configuration.metatype.OCDService.class },
     property = {

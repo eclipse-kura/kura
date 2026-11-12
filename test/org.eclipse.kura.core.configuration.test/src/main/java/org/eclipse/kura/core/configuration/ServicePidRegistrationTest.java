@@ -16,20 +16,29 @@ package org.eclipse.kura.core.configuration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class ServicePidRegistrationTest {
 
     private static final long TIMEOUT_MS = 30000;
     private static final long POLL_INTERVAL_MS = 100;
+    private static final String CONFIGURED_PROPERTY = "service.pid.registration.test";
 
     private BundleContext bundleContext;
     private ServiceReference<?> reference;
+    private Configuration configuration;
 
     @Test
     public void configurationServiceIsRegisteredWithItsServicePid() throws Exception {
@@ -117,13 +126,56 @@ public class ServicePidRegistrationTest {
         thenServicePidIs("org.eclipse.kura.status.CloudConnectionStatusService");
     }
 
+    @Test
+    public void servicePidIsASingleValueWhenAConfigurationExists() throws Exception {
+        givenBundleContext();
+        givenConfigurationWithPid("org.eclipse.kura.json.marshaller.unmarshaller.provider");
+
+        whenConfiguredServiceIsLookedUp("org.eclipse.kura.marshalling.Marshaller",
+                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
+
+        thenServicePidIs("org.eclipse.kura.json.marshaller.unmarshaller.provider");
+    }
+
+    @After
+    public void deleteConfiguration() throws IOException, InvalidSyntaxException, InterruptedException {
+        if (this.configuration != null) {
+            final String servicePid = this.configuration.getPid();
+
+            this.configuration.delete();
+
+            lookUp(null, "(&(" + Constants.SERVICE_PID + "=" + servicePid + ")(!(" + CONFIGURED_PROPERTY + "=*)))");
+        }
+    }
+
     private void givenBundleContext() {
         this.bundleContext = FrameworkUtil.getBundle(ServicePidRegistrationTest.class).getBundleContext();
     }
 
+    private void givenConfigurationWithPid(final String pid) throws IOException {
+        final ConfigurationAdmin configurationAdmin = this.bundleContext
+                .getService(this.bundleContext.getServiceReference(ConfigurationAdmin.class));
+        final Dictionary<String, Object> properties = new Hashtable<>();
+
+        properties.put(CONFIGURED_PROPERTY, "true");
+
+        this.configuration = configurationAdmin.getConfiguration(pid, "?");
+        this.configuration.update(properties);
+    }
+
     private void whenServiceIsLookedUp(final String serviceInterface, final String servicePid)
             throws InvalidSyntaxException, InterruptedException {
-        final String filter = "(" + Constants.SERVICE_PID + "=" + servicePid + ")";
+        lookUp(serviceInterface, "(" + Constants.SERVICE_PID + "=" + servicePid + ")");
+    }
+
+    private void whenConfiguredServiceIsLookedUp(final String serviceInterface, final String servicePid)
+            throws InvalidSyntaxException, InterruptedException {
+        lookUp(serviceInterface,
+                "(&(" + Constants.SERVICE_PID + "=" + servicePid + ")(" + CONFIGURED_PROPERTY + "=true))");
+    }
+
+    private void lookUp(final String serviceInterface, final String filter)
+            throws InvalidSyntaxException, InterruptedException {
         final long deadline = System.currentTimeMillis() + TIMEOUT_MS;
 
         this.reference = null;

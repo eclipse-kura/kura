@@ -74,6 +74,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(
     name = "org.eclipse.kura.core.inventory.InventoryHandlerV1",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.OPTIONAL,
     service = { org.eclipse.kura.core.inventory.InventoryHandlerV1.class },

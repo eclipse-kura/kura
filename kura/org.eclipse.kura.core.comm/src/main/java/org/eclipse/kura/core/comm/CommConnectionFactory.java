@@ -25,6 +25,7 @@ import org.osgi.service.io.ConnectionFactory;
 import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.core.comm.CommConnectionFactory",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     service = { org.osgi.service.io.ConnectionFactory.class },
     property = {
         "service.pid=org.eclipse.kura.core.comm.CommConnectionFactory",

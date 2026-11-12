@@ -41,6 +41,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -247,7 +248,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             unbind = "removeConfigurableComponent")
     protected void addConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+        final String servicePid = getServicePid(reference);
 
         if (servicePid == null) {
             return;
@@ -261,9 +262,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void removeConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
-
-        if (servicePid == null) {
+        if (distinctValues(reference.getProperty(Constants.SERVICE_PID)).isEmpty()) {
             return;
         }
 
@@ -280,7 +279,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     protected void addSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
         final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+        final String servicePid = getServicePid(reference);
 
         registerSelfConfiguringComponent(kuraPid, servicePid != null ? servicePid : kuraPid);
     }
@@ -1672,35 +1671,75 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof String) {
-            return (String) value;
-        }
-        if (value instanceof Collection) {
-            return makeStringFromCollection((Collection<?>) value);
-        }
-        if (value.getClass().isArray()) {
-            final int length = Array.getLength(value);
-            final List<Object> elements = new ArrayList<>(length);
-            for (int i = 0; i < length; i++) {
-                elements.add(Array.get(value, i));
-            }
-            return makeStringFromCollection(elements);
-        }
-        return value.toString();
+        return singleValue(distinctValues(value));
     }
 
-    private static String makeStringFromCollection(Collection<?> values) {
-        final Set<String> distinctValues = values.stream().filter(Objects::nonNull).map(Object::toString)
-                .collect(Collectors.toSet());
+    private String getServicePid(final ServiceReference<?> reference) {
+        final Set<String> servicePids = distinctValues(reference.getProperty(Constants.SERVICE_PID));
 
-        if (distinctValues.size() == 1) {
-            return distinctValues.iterator().next();
+        if (servicePids.size() > 1) {
+            servicePids.remove(makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID)));
         }
 
-        logger.warn("Expected a single property value, found {}. Ignoring it.", values);
+        if (servicePids.size() > 1) {
+            final Set<String> configurationPids = getConfigurationPids();
+            configurationPids.retainAll(servicePids);
+
+            if (configurationPids.size() == 1) {
+                return configurationPids.iterator().next();
+            }
+        }
+
+        return singleValue(servicePids);
+    }
+
+    private Set<String> getConfigurationPids() {
+        final Set<String> configurationPids = new HashSet<>();
+
+        if (this.configurationAdmin == null) {
+            return configurationPids;
+        }
+
+        try {
+            final Configuration[] configurations = this.configurationAdmin.listConfigurations(null);
+
+            if (configurations != null) {
+                Arrays.stream(configurations).map(Configuration::getPid).forEach(configurationPids::add);
+            }
+        } catch (final IOException | InvalidSyntaxException e) {
+            logger.warn("Failed to list the configurations", e);
+        }
+
+        return configurationPids;
+    }
+
+    private static Set<String> distinctValues(Object value) {
+        final Set<String> values = new LinkedHashSet<>();
+
+        if (value instanceof Collection) {
+            ((Collection<?>) value).stream().filter(Objects::nonNull).map(Object::toString).forEach(values::add);
+        } else if (value != null && value.getClass().isArray()) {
+            for (int i = 0; i < Array.getLength(value); i++) {
+                final Object element = Array.get(value, i);
+                if (element != null) {
+                    values.add(element.toString());
+                }
+            }
+        } else if (value != null) {
+            values.add(value.toString());
+        }
+
+        return values;
+    }
+
+    private static String singleValue(Set<String> values) {
+        if (values.size() == 1) {
+            return values.iterator().next();
+        }
+
+        if (!values.isEmpty()) {
+            logger.warn("Expected a single property value, found {}. Ignoring it.", values);
+        }
 
         return null;
     }

@@ -345,32 +345,32 @@ public class ContainerOrchestrationServiceImpl
         final Optional<ContainerInstanceDescriptor> existingInstance = listContainerDescriptors().stream()
                 .filter(c -> c.getContainerName().equals(container.getContainerName())).findAny();
 
+        final boolean alreadyRunning = existingInstance.isPresent()
+                && existingInstance.get().getContainerState() == ContainerState.ACTIVE;
+
         String containerId;
 
-        if (existingInstance.isPresent()) {
-
-            if (existingInstance.get().getContainerState() == ContainerState.ACTIVE) {
-                logger.info("Found already existing running container");
-                containerId = existingInstance.get().getContainerId();
-            } else {
-                logger.info("Found already exisiting not running container, recreating it..");
-                containerId = existingInstance.get().getContainerId();
-                deleteContainer(containerId);
-                pullImage(container.getImageConfiguration());
-                containerId = createContainer(container);
-                this.enforcement.register(containerId, container.getEnforcementDigest());
-                startContainer(containerId);
-
-            }
+        if (alreadyRunning) {
+            containerId = existingInstance.get().getContainerId();
         } else {
-            logger.info("Creating new container instance");
+            if (existingInstance.isPresent()) {
+                logger.info("Found already exisiting not running container, recreating it..");
+                deleteContainer(existingInstance.get().getContainerId());
+            } else {
+                logger.info("Creating new container instance");
+            }
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
-            this.enforcement.register(containerId, container.getEnforcementDigest());
-            startContainer(containerId);
         }
 
-        logger.info("Container Started Successfully");
+        this.enforcement.register(containerId, container.getEnforcementDigest());
+
+        if (!alreadyRunning) {
+            startContainer(containerId);
+            logger.info("Container '{}' started successfully", containerId);
+        } else {
+            logger.info("Container '{}' is already running", containerId);
+        }
 
         if (container.isFrameworkManaged()) {
             this.frameworkManagedContainers

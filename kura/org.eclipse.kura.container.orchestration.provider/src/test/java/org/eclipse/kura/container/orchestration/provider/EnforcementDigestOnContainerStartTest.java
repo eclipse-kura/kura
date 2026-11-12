@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -50,6 +51,17 @@ public class EnforcementDigestOnContainerStartTest {
     private ContainerOrchestrationServiceImpl service;
 
     @Test
+    public void newContainerHasItsDigestRegisteredBeforeStarting() throws KuraException, InterruptedException {
+        givenServiceConnectedToDocker();
+        givenNoExistingContainer();
+        givenCreatedContainersGetId(CREATED_CONTAINER_ID);
+
+        whenContainerIsStarted(CONTAINER_NAME, ENFORCEMENT_DIGEST);
+
+        thenDigestIsRegisteredBeforeContainerStarts(CREATED_CONTAINER_ID, ENFORCEMENT_DIGEST);
+    }
+
+    @Test
     public void recreatedContainerHasItsDigestRegisteredBeforeStarting() throws KuraException, InterruptedException {
         givenServiceConnectedToDocker();
         givenExistingContainer(EXISTING_CONTAINER_ID, CONTAINER_NAME, "exited");
@@ -60,11 +72,25 @@ public class EnforcementDigestOnContainerStartTest {
         thenDigestIsRegisteredBeforeContainerStarts(CREATED_CONTAINER_ID, ENFORCEMENT_DIGEST);
     }
 
+    @Test
+    public void reusedRunningContainerHasItsDigestRegistered() throws KuraException, InterruptedException {
+        givenServiceConnectedToDocker();
+        givenExistingContainer(EXISTING_CONTAINER_ID, CONTAINER_NAME, "running");
+
+        whenContainerIsStarted(CONTAINER_NAME, ENFORCEMENT_DIGEST);
+
+        thenDigestIsRegistered(EXISTING_CONTAINER_ID, ENFORCEMENT_DIGEST);
+    }
+
     private void givenServiceConnectedToDocker() throws KuraException, InterruptedException {
         this.service = Mockito.spy(new ContainerOrchestrationServiceImpl());
         Mockito.doNothing().when(this.service).pullImage(any(ImageConfiguration.class));
         this.service.setDockerClient(this.dockerClient);
         this.service.setAllowlistEnforcement(this.enforcement);
+    }
+
+    private void givenNoExistingContainer() {
+        when(this.dockerClient.listContainersCmd().withShowAll(true).exec()).thenReturn(Collections.emptyList());
     }
 
     private void givenExistingContainer(String containerId, String containerName, String dockerState) {
@@ -104,5 +130,9 @@ public class EnforcementDigestOnContainerStartTest {
         InOrder order = inOrder(this.enforcement, this.dockerClient);
         order.verify(this.enforcement).register(containerId, Optional.of(enforcementDigest));
         order.verify(this.dockerClient).startContainerCmd(containerId);
+    }
+
+    private void thenDigestIsRegistered(String containerId, String enforcementDigest) {
+        verify(this.enforcement).register(containerId, Optional.of(enforcementDigest));
     }
 }

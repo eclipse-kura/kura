@@ -69,11 +69,16 @@ node {
 
     stage('Generate coverage report') {
         timeout(time: 30, unit: 'MINUTES') {
+            // read the script from the trusted revision: the build fails if an untrusted PR modifies it
+            def coverageScript = readTrusted '.jenkins/generate-coverage-report.sh'
+
             dir("kura") {
+                writeFile file: 'kura/target/coverage/generate-coverage-report.sh', text: coverageScript
+
                 withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', publisherStrategy: 'EXPLICIT') {
                     // keep the CLI version aligned with jacoco.version in kura/pom.xml
                     sh "mvn -B org.apache.maven.plugins:maven-dependency-plugin:3.6.1:copy -Dartifact=org.jacoco:org.jacoco.cli:0.8.8:jar:nodeps -Dmdep.stripVersion=true -DoutputDirectory=kura/target/coverage"
-                    sh ".jenkins/generate-coverage-report.sh"
+                    sh "bash kura/target/coverage/generate-coverage-report.sh"
                 }
 
                 zip zipFile: 'kura/target/coverage/coverage-report.zip', dir: 'kura/target/coverage/report'

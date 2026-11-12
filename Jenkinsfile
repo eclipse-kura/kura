@@ -73,28 +73,7 @@ node {
                 withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', publisherStrategy: 'EXPLICIT') {
                     // keep the CLI version aligned with jacoco.version in kura/pom.xml
                     sh "mvn -B org.apache.maven.plugins:maven-dependency-plugin:3.6.1:copy -Dartifact=org.jacoco:org.jacoco.cli:0.8.8:jar:nodeps -Dmdep.stripVersion=true -DoutputDirectory=kura/target/coverage"
-                    sh '''
-                        set -e
-                        CLASSES=kura/target/coverage/classes
-                        REPORT=kura/target/coverage/report
-                        mkdir -p "$CLASSES" "$REPORT"
-
-                        for classes in kura/org.eclipse.kura.*/target/classes; do
-                            cp -R "$classes"/. "$CLASSES"
-                        done
-                        find "$CLASSES" -type f ! -name '*.class' -delete
-                        rm -rf "$CLASSES/org/eclipse/kura/web" "$CLASSES/org/freedesktop" "$CLASSES/fi/w1" "$CLASSES/inference" "$CLASSES/org/eclipse/tahu/protobuf"
-                        find "$CLASSES" -name 'LibGpiodV[12]Native.class' -delete -o -name 'LibGpiodV[12]Native$*.class' -delete
-
-                        SOURCES=""
-                        for sources in kura/org.eclipse.kura.*/src/main/java; do
-                            SOURCES="$SOURCES --sourcefiles $sources"
-                        done
-
-                        java -jar kura/target/coverage/org.jacoco.cli-nodeps.jar report kura/test/*/target/jacoco.exec \
-                            --classfiles "$CLASSES" $SOURCES --encoding UTF-8 --name "Eclipse Kura" \
-                            --html "$REPORT/html" --xml "$REPORT/jacoco.xml" --csv "$REPORT/jacoco.csv"
-                    '''
+                    sh ".jenkins/generate-coverage-report.sh"
                 }
 
                 zip zipFile: 'kura/target/coverage/coverage-report.zip', dir: 'kura/target/coverage/report'

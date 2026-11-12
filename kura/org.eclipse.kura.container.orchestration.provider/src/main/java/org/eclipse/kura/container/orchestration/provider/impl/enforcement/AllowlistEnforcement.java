@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallbackTemplate;
+import com.github.dockerjava.api.model.Event;
 
 public class AllowlistEnforcement {
 
@@ -45,7 +47,7 @@ public class AllowlistEnforcement {
     private final AtomicReference<Set<String>> allowlist = new AtomicReference<>(Collections.emptySet());
     private final Map<String, String> containerDigests = new ConcurrentHashMap<>();
     private final AtomicInteger pendingChecks = new AtomicInteger();
-    private AllowlistEnforcementMonitor monitor;
+    private ContainerStartMonitor monitor;
 
     public AllowlistEnforcement(EnforcementTarget target) {
         this.target = target;
@@ -56,7 +58,7 @@ public class AllowlistEnforcement {
         enforceAll();
     }
 
-    public void enforce(String containerId) {
+    private void enforce(String containerId) {
         Set<String> imageDigests = this.target.getImageDigestsByContainerId(containerId);
 
         Set<String> allowedDigests = intersection(this.allowlist.get(), imageDigests);
@@ -123,7 +125,7 @@ public class AllowlistEnforcement {
             logger.info("Enforcement monitor starting...");
             setAllowlist(allowlistContent);
             this.monitor = dockerClient.eventsCmd().withEventFilter("start")
-                    .exec(new AllowlistEnforcementMonitor(this));
+                    .exec(new ContainerStartMonitor());
             logger.info("Enforcement monitor starting...done.");
         } catch (Exception ex) {
             logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
@@ -191,6 +193,14 @@ public class AllowlistEnforcement {
             this.target.deleteContainer(containerId);
         } catch (KuraException ex) {
             logger.error("Error during container deleting process of {}:", containerId, ex);
+        }
+    }
+
+    private class ContainerStartMonitor extends ResultCallbackTemplate<ContainerStartMonitor, Event> {
+
+        @Override
+        public void onNext(Event item) {
+            enforce(item.getId());
         }
     }
 }

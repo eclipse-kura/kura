@@ -121,6 +121,7 @@ public class ContainerOrchestrationServiceImpl
         this.dockerClient = dockerClient;
     }
 
+    // Used only by unit tests
     public void setAllowlistEnforcement(AllowlistEnforcement enforcement) {
         this.enforcement = enforcement;
     }

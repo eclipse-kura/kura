@@ -6525,6 +6525,7 @@ The received configuration must satisfy the following requirements. If any of th
   * The configuration of all components referenced by <strong>WireGraphService</strong> configuration that do not exist on target device must be specified.
   * The configuration of all components referenced by <strong>WireGraphService</strong> configuration that do not exist on target device must specify the <code>service.factoryPid</code> configuration property reporting the component factory pid.</p>
 <p>If a component already exists on the system and its configuration is supplied as part of the request, the component configuration will be updated. In this case the usual configuration merge semantics will be applied, the set of received properties will be merged with the existing one. The properties in the request body will overwrite the existing ones with the same name.</p>
+<p>Starting from Kura 5.6.3, if a component already exists on the system, the <code>service.factoryPid</code> property specified in the request must match the factory pid of the existing component, otherwise the request is rejected with the <code>400</code> status and no changes are applied to the system.</p>
 <p>WireAsset configurations are treated sligtly differently, an update to a WireAsset configuration is performed by deleting the existing component and creating a new instance with the received configuration. This behavior is necessary in order to allow channel removal.</p>
 <p>It is also allowed to specify Driver or Asset configurations that are not referenced by the Wire Graph included in the request body.</p>
 <h3 id="delgraph">DEL/graph</h3>
@@ -6677,7 +6678,7 @@ The received configuration must satisfy the following requirements. If any of th
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded</li>
 <li><strong>400</strong></li>
-<li><strong>description</strong> : The request body is not valid JSON or it contains invalid parameters. This status will be returned also if the request involves the creation of components that are not Wire Components, Driver or Asset instances, or the creation of Wire Components that are not referenced by the current Wire Graph. If this status is retured, no changes will be applied to the system.</li>
+<li><strong>description</strong> : The request body is not valid JSON or it contains invalid parameters. This status will be returned also if the request involves the creation of components that are not Wire Components, Driver or Asset instances, or the creation of Wire Components that are not referenced by the current Wire Graph. Starting from Kura 5.6.3, this status is also returned if the <code>service.factoryPid</code> specified for an existing component does not match its factory pid. If this status is retured, no changes will be applied to the system.</li>
 <li><strong>response body</strong> :<ul>
 <li><a href="doc:configuration-v2-rest-apis-and-conf-v2-request-handler#genericfailurereport">GenericFailureReport</a></li>
 </ul>

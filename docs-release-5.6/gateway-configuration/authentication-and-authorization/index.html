@@ -1473,6 +1473,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#identity-and-permission-management-through-the-rest-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identity and permission management through the REST APIs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Identity and permission management through the REST APIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restoring-the-previous-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restoring the previous behaviour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#useradmin-persistence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6021,6 +6049,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#identity-and-permission-management-through-the-rest-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identity and permission management through the REST APIs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Identity and permission management through the REST APIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restoring-the-previous-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restoring the previous behaviour
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#useradmin-persistence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6196,6 +6252,49 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>must be at least 3 and at most 255 characters long.</li>
 <li>can only be composed by one or more sequences of alphanumeric characters (<code>[A-Za-z0-9]+</code>) separated by the dot symbol, the dot is not allowed at the beginning or at the end of the permission name (examples of valid permission names are <code>foo1.bAr</code>, <code>foo</code>, <code>a.b.c</code>).</li>
 </ul>
+<h2 id="identity-and-permission-management-through-the-rest-apis">Identity and permission management through the REST APIs</h2>
+<p>Starting from Kura 5.6.3, the REST APIs that manage identities, permissions and the UserAdmin persistence apply the same rules enforced by the Kura Web UI, where identity management is reserved to identities holding the <code>kura.admin</code> permission:</p>
+<ul>
+<li><a href="../../references/rest-apis/rest-identity-api-v2/">Identity V2</a> and <a href="../../references/rest-apis/rest-identity-api-v1/">Identity V1</a> REST APIs: an identity holding the <code>rest.identity</code> permission, but not <code>kura.admin</code>, can only create, update or delete identities whose permissions are a subset of its own permissions, and can only assign permissions that it holds. Creating and deleting permissions requires <code>kura.admin</code>. Requests that do not satisfy these rules are rejected with the <code>403 Forbidden</code> status. The additional configurations of an identity, provided by the identity configuration extensions, are returned by the Identity V2 REST APIs to such an identity only for the identities it is allowed to manage.</li>
+<li><a href="../../references/rest-apis/rest-configuration-service-v2/">Configuration V2</a> REST APIs: the configuration of the UserAdmin persistence component (<code>org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl</code>, see <a href="#useradmin-persistence">UserAdmin persistence</a>) is returned and can be updated only by identities holding the <code>kura.admin</code> permission; for other identities it is also omitted from the pid lists and the default configuration requests. Snapshot rollback, which also restores the identities and permissions, requires <code>kura.admin</code> as well.</li>
+</ul>
+<p>Identities holding the <code>kura.admin</code> permission and requests received through the cloud request handlers (<code>IDN-V1</code>, <code>IDN-V2</code> and <code>CONF-V2</code>) are not affected.</p>
+<h3 id="restoring-the-previous-behaviour">Restoring the previous behaviour</h3>
+<p>The behaviour of the previous releases can be restored by adding the following arguments to the Java command line used to start Kura:</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-kura.rest.identity.legacyIdentityManagement</code></td>
+<td>Identity management requests received through the Identity V1 and V2 REST APIs are not checked against the permissions of the requesting identity.</td>
+</tr>
+<tr>
+<td><code>-kura.rest.configuration.legacyUserStoreAccess</code></td>
+<td>The UserAdmin persistence component configuration and snapshot rollback are available through the Configuration V2 REST APIs to all the identities holding the <code>rest.configuration</code> permission.</td>
+</tr>
+</tbody>
+</table>
+<p>The arguments are not present in the start scripts by default. To enable one of them, append it to the Java command line, after <code>-configuration /tmp/.kura/configuration</code>, in <code>/opt/eclipse/kura/bin/start_kura_background.sh</code> (production mode), <code>/opt/eclipse/kura/bin/start_kura_debug.sh</code> (development mode) and <code>/opt/eclipse/kura/bin/start_kura.sh</code>, for example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>        -configuration  /tmp/.kura/configuration -kura.rest.identity.legacyIdentityManagement
+</code></pre></div>
+<p>and restart Kura. The arguments are read only at startup and cannot be modified through the REST APIs, the cloud request handlers or the Kura Web UI. A warning is logged at startup for each enabled argument.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These are framework command line arguments, not Java system properties: Java system properties with the same names (for example set with <code>-D</code>, in the Equinox <code>config.ini</code> file or through the <code>JAVA_TOOL_OPTIONS</code> environment variable) are ignored. The arguments must be specified exactly as shown above, without a value.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>These arguments restore a less restrictive behaviour: an identity holding <code>rest.identity</code> or <code>rest.configuration</code> will be able to modify any identity, including the ones holding <code>kura.admin</code>. Enable them only if required by existing applications, and only for the time needed to adapt them.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The start scripts are generated by the Kura installer; if Kura is reinstalled or upgraded, the arguments need to be added again.</p>
+</div>
 <h2 id="useradmin-persistence">UserAdmin persistence</h2>
 <p>The <code>org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl</code> Kura service allows to persist the UserAdmin state in Kura configuration snapshot, this includes the defined identities and permissions.</p>
 <p>The following configuration properties are used to store the UserAdmin concepts in Json format:</p>
@@ -6237,9 +6336,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 </ul>
 <p>Examples:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="s2">"A string property"</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="s2">"A string property"</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span>
 </code></pre></div>
 <h4 id="useradmindict">UserAdminDict</h4>
 <p>A UserAdmin property dictionary, there are no well known property names, property values must be of <a href="#useradmindictvalue">UserAdminDictValue</a> type</p>
@@ -6247,10 +6346,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>type</strong> : <code>object</code></li>
 </ul>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"stringProperty"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A string property"</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"byteArrayProperty"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"stringProperty"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A string property"</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"byteArrayProperty"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="role">Role</h4>
 <p>An object describing and <strong>UserAdmin</strong> <strong>Role</strong></p>
@@ -6306,12 +6405,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 </ul>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kura.user.appadmin"</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">"kura.password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3hPckF8Zc+IF3pVineBvck3zJERUl8itosySULE1hpM="</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kura.user.appadmin"</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">"credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">"kura.password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3hPckF8Zc+IF3pVineBvck3zJERUl8itosySULE1hpM="</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="group">Group</h4>
 <p>An object describing and <strong>UserAdmin</strong> <strong>Group</strong></p>
@@ -6369,10 +6468,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 </ul>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kura.permission.kura.wires.admin"</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">"basicMembers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"kura.user.appadmin"</span><span class="p">]</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kura.permission.kura.wires.admin"</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">"basicMembers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"kura.user.appadmin"</span><span class="p">]</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">}</span>
 </code></pre></div>
 
 

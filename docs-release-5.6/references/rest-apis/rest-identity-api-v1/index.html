@@ -6477,6 +6477,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </div>
 <p>The <code>IdentityRestService</code> APIs provides methods to manage the system identities.
 Unless otherwise specified, identities with <code>rest.identity</code> permissions can access these APIs.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Starting from Kura 5.6.3, an identity holding the <code>rest.identity</code> permission, but not <code>kura.admin</code>, can only create, update or delete identities whose permissions are a subset of its own permissions, and can only assign permissions that it holds; requests that do not satisfy these rules are rejected with the <code>403 Forbidden</code> status. Requests received through the request handler are not affected. See <a href="../../../gateway-configuration/authentication-and-authorization/#identity-and-permission-management-through-the-rest-apis">Identity and permission management through the REST APIs</a> for details and for the startup argument that restores the previous behaviour.</p>
+</div>
 <h2 id="post-methods">POST methods</h2>
 <h4 id="create-user">Create User</h4>
 <ul>
@@ -6499,6 +6503,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <ul>
 <li>200 OK status</li>
 <li>400 Bad Request (Password strenght requirements not satisfied)</li>
+<li>403 Forbidden (since Kura 5.6.3, the target identity or the assigned permissions are not within the permissions of the requesting identity)</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h4 id="get-user-by-name">Get User by Name</h4>
@@ -6635,6 +6640,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <ul>
 <li>200 OK status</li>
 <li>400 Bad Request (Password strenght requirements not satisfied)</li>
+<li>403 Forbidden (since Kura 5.6.3, the target identity or the assigned permissions are not within the permissions of the requesting identity)</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h2 id="delete-methods">DELETE methods</h2>
@@ -6652,6 +6658,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h5 id="responses_6">Responses</h5>
 <ul>
 <li>200 OK status</li>
+<li>403 Forbidden (since Kura 5.6.3, the permissions of the target identity are not within the permissions of the requesting identity)</li>
 <li>404 <code>userName</code> does not exist</li>
 <li>500 Internal Server Error</li>
 </ul>

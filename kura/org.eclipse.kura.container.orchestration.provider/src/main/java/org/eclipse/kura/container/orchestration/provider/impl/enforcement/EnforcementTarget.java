@@ -23,8 +23,6 @@ public interface EnforcementTarget {
 
     Set<String> getImageDigestsByContainerId(String containerId);
 
-    Set<String> getContainerInstancesAllowlist();
-
     List<ContainerInstanceDescriptor> listContainerDescriptors();
 
     void stopContainer(String id) throws KuraException;

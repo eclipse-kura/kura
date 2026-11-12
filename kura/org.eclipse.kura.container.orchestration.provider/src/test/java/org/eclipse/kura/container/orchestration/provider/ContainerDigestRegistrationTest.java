@@ -14,12 +14,14 @@
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 
 import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.EnforcementTarget;
 import org.junit.Test;
 
 public class ContainerDigestRegistrationTest {
@@ -72,7 +74,7 @@ public class ContainerDigestRegistrationTest {
     }
 
     private void givenAllowlistEnforcement() {
-        this.enforcement = new AllowlistEnforcement();
+        this.enforcement = new AllowlistEnforcement(mock(EnforcementTarget.class));
     }
 
     private void givenRegisteredContainer(String containerId, String digest) {

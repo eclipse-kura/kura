@@ -18,7 +18,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -1290,7 +1289,7 @@ public class WatchdogServiceImplTest {
 
     private void thenWatchdogIsNotSupervising()
             throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
-        if (TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollExecutor") != null) {
+        if (!((ScheduledExecutorService) TestUtil.getFieldValue(this.unavailableDeviceSvc, "pollExecutor")).isShutdown()) {
             awaitPendingUpdate(this.unavailableDeviceSvc);
         }
         thenWatchdogDeviceIsNotOpen();
@@ -1318,7 +1317,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenPollTaskIsScheduled() throws NoSuchFieldException {
-        assertNotNull(TestUtil.getFieldValue(this.statusSvc, "pollExecutor"));
+        assertFalse(((ScheduledExecutorService) TestUtil.getFieldValue(this.statusSvc, "pollExecutor")).isShutdown());
         final Future<?> pollTask = (Future<?>) TestUtil.getFieldValue(this.statusSvc, "pollTask");
         assertNotNull(pollTask);
         assertFalse(pollTask.isCancelled());
@@ -1329,7 +1328,7 @@ public class WatchdogServiceImplTest {
     }
 
     private void thenPollExecutorIsShutDown() throws NoSuchFieldException {
-        assertNull(TestUtil.getFieldValue(this.statusSvc, "pollExecutor"));
+        assertTrue(((ScheduledExecutorService) TestUtil.getFieldValue(this.statusSvc, "pollExecutor")).isShutdown());
     }
 
     private void thenWatchdogIsRefreshedWithoutBeingDisabled() {

@@ -142,7 +142,7 @@ public class DeactivationOrderingTest {
         while (System.nanoTime() < deadline) {
             final ScheduledExecutorService executor = (ScheduledExecutorService) TestUtil.getFieldValue(this.svc,
                     "pollExecutor");
-            if (executor == null || executor.isShutdown()) {
+            if (executor.isShutdown()) {
                 return;
             }
             Thread.sleep(5);

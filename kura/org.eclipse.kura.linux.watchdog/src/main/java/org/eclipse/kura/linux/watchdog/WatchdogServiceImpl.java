@@ -21,11 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.linux.watchdog.WatchdogServiceOptions.WatchdogMode;
@@ -54,20 +55,16 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private Optional<String> timedOutComponent = Optional.empty();
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
-    private volatile ScheduledExecutorService pollExecutor;
+    private final ScheduledExecutorService pollExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> pollTask;
     private long pollPeriodMs;
     private WatchdogServiceOptions options;
     private final Map<WatchdogMode, WatchdogBackend> backends = new EnumMap<>(WatchdogMode.class);
-    private volatile Optional<WatchdogBackend> activeBackend = Optional.empty();
+    private final AtomicReference<Optional<WatchdogBackend>> activeBackend = new AtomicReference<>(Optional.empty());
 
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.criticalComponentRegistrations = new CopyOnWriteArrayList<>();
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-        executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-        this.pollExecutor = executor;
         for (WatchdogMode mode : WatchdogMode.values()) {
             final WatchdogBackend backend = createBackend(mode);
             this.backends.put(mode, backend);
@@ -81,7 +78,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 
         final ScheduledExecutorService executor = this.pollExecutor;
-        if (executor == null || executor.isShutdown()) {
+        if (executor.isShutdown()) {
             logger.debug("Watchdog executor is not running. Skipping update");
             return;
         }
@@ -111,15 +108,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     @Deactivate
     protected void deactivate() {
         final ScheduledExecutorService executor = this.pollExecutor;
-        if (executor != null) {
-            logger.debug("Terminating watchdog executor...");
-            executor.shutdown();
-            awaitPollExecutorTermination(executor);
-        }
+        logger.debug("Terminating watchdog executor...");
+        executor.shutdown();
+        awaitPollExecutorTermination(executor);
         for (WatchdogBackend backend : this.backends.values()) {
             backend.deactivate();
         }
-        this.pollExecutor = null;
     }
 
     private void awaitPollExecutorTermination(final ScheduledExecutorService executor) {
@@ -139,7 +133,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private void tickActiveBackend() {
-        final Optional<WatchdogBackend> backend = this.activeBackend;
+        final Optional<WatchdogBackend> backend = this.activeBackend.get();
         if (backend.isEmpty()) {
             return;
         }
@@ -168,7 +162,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
         configureBackends(newOptions);
 
-        if (this.activeBackend.isEmpty()) {
+        if (this.activeBackend.get().isEmpty()) {
             return;
         }
 
@@ -184,7 +178,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
 
         final ScheduledExecutorService executor = this.pollExecutor;
-        if (executor == null || executor.isShutdown()) {
+        if (executor.isShutdown()) {
             return;
         }
 
@@ -201,7 +195,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private void reschedulePollTask(final Duration refreshInterval) {
         final ScheduledExecutorService executor = this.pollExecutor;
-        if (executor == null || executor.isShutdown() || this.pollTask == null) {
+        if (executor.isShutdown() || this.pollTask == null) {
             return;
         }
 
@@ -235,7 +229,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             }
         }
 
-        this.activeBackend = newActiveBackend;
+        this.activeBackend.set(newActiveBackend);
     }
 
     private void doTick() {
@@ -246,12 +240,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public int getHardwareTimeout() {
-        return this.activeBackend.map(WatchdogBackend::getHardwareTimeout).orElse(0);
+        return this.activeBackend.get().map(WatchdogBackend::getHardwareTimeout).orElse(0);
     }
 
     @Override
     public WatchdogStatus getWatchdogStatus() {
-        return this.activeBackend.orElseGet(() -> this.backends.get(WatchdogMode.DIRECT)).getStatus();
+        return this.activeBackend.get().orElseGet(() -> this.backends.get(WatchdogMode.DIRECT)).getStatus();
     }
 
     @Override

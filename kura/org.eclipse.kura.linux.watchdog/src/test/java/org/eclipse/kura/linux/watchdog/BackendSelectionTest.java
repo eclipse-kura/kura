@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
@@ -202,11 +203,12 @@ public class BackendSelectionTest {
     }
 
     private void thenNoBackendIsActive() throws NoSuchFieldException {
-        assertEquals(Optional.empty(), TestUtil.getFieldValue(this.svc, "activeBackend"));
+        assertEquals(Optional.empty(), ((AtomicReference<?>) TestUtil.getFieldValue(this.svc, "activeBackend")).get());
     }
 
     private void thenActiveModeIs(WatchdogMode expectedMode) throws NoSuchFieldException {
-        final Optional<?> activeBackend = (Optional<?>) TestUtil.getFieldValue(this.svc, "activeBackend");
+        final Optional<?> activeBackend = (Optional<?>) ((AtomicReference<?>) TestUtil.getFieldValue(this.svc,
+                "activeBackend")).get();
         assertEquals(Optional.of(expectedMode), activeBackend.map(backend -> ((WatchdogBackend) backend).getMode()));
     }
 

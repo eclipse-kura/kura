@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.model.Event;
+import com.github.dockerjava.api.model.EventActor;
 
 public class AllowlistEnforcement {
 
@@ -201,7 +202,11 @@ public class AllowlistEnforcement {
 
         @Override
         public void onNext(Event item) {
-            enforce(item.getId());
+            String containerId = Optional.ofNullable(item.getActor()).map(EventActor::getId)
+                    .orElseGet(item::getId);
+            if (containerId != null) {
+                enforce(containerId);
+            }
         }
     }
 }

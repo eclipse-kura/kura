@@ -109,7 +109,6 @@ node {
                                     -Dsonar.branch.target=${CHANGE_TARGET} \
                                     -Dsonar.java.source=8 \
                                     -Dsonar.java.binaries='target/classes' \
-                                    -Dsonar.core.codeCoveragePlugin=jacoco \
                                     -Dsonar.java.pmd.reportPaths=target/pmd.xml \
                                     -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage/report/jacoco.xml \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \

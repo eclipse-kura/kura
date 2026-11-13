@@ -14,9 +14,44 @@
 package org.eclipse.kura.linux.watchdog;
 
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.Objects;
 
 public class WatchdogServiceOptions {
+
+    public enum WatchdogMode {
+        DIRECT("direct", DirectWatchdogBackend::new),
+        SYSTEMD("systemd", SystemdWatchdogBackend::new),
+        FALLBACK("fallback", FallbackWatchdogBackend::new);
+
+        private final String value;
+        private final Supplier<WatchdogBackend> backendFactory;
+
+        WatchdogMode(String value, Supplier<WatchdogBackend> backendFactory) {
+            this.backendFactory = backendFactory;
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+
+        public WatchdogBackend newBackend() {
+            return this.backendFactory.get();
+        }
+
+
+        public static WatchdogMode fromString(String value) {
+            if (value != null) {
+                for (WatchdogMode mode : WatchdogMode.values()) {
+                    if (mode.value.equalsIgnoreCase(value)) {
+                        return mode;
+                    }
+                }
+            }
+            return SYSTEMD;
+        }
+    }
 
     private static final ConfigurationProperty<Boolean> PROPERTY_ENABLED = new ConfigurationProperty<>("enabled",
             false);
@@ -26,6 +61,8 @@ public class WatchdogServiceOptions {
             "watchdogDevice", "/dev/watchdog");
     private static final ConfigurationProperty<String> PROPERTY_REBOOT_CAUSE_FILE_PATH = new ConfigurationProperty<>(
             "rebootCauseFilePath", "/opt/eclipse/kura/data/kura-reboot-cause");
+    private static final ConfigurationProperty<String> PROPERTY_WATCHDOG_MODE = new ConfigurationProperty<>(
+            "watchdogMode", "systemd");
     private static final ConfigurationProperty<Boolean> PROPERTY_FAIL_ON_UNAVAILABLE_DEVICE = new ConfigurationProperty<>(
             "failOnUnavailableDevice", false);
 
@@ -45,6 +82,14 @@ public class WatchdogServiceOptions {
         return PROPERTY_PING_INTERVAL.get(this.properties);
     }
 
+    public static long limitPingInterval(final long configuredMs, final int hardwareTimeoutMs) {
+        if (hardwareTimeoutMs <= 0) {
+            return configuredMs;
+        }
+        final int upperBound = Math.clamp(hardwareTimeoutMs / 2, 1, Integer.MAX_VALUE);
+        return Math.clamp(configuredMs, 1, upperBound);
+    }
+
     public String getWatchdogDevice() {
         return PROPERTY_WD_DEVICE.get(this.properties);
     }
@@ -61,10 +106,14 @@ public class WatchdogServiceOptions {
         return WD_ENABLED_TEMPORARY_FILE_PATH;
     }
 
+    public WatchdogMode getWatchdogMode() {
+        return WatchdogMode.fromString(PROPERTY_WATCHDOG_MODE.get(this.properties));
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(isEnabled(), getPingInterval(), getWatchdogDevice(), getRebootCauseFilePath(),
-                isFailOnUnavailableDevice());
+                isFailOnUnavailableDevice(), getWatchdogMode());
     }
 
     @Override
@@ -79,7 +128,8 @@ public class WatchdogServiceOptions {
         return isEnabled() == other.isEnabled() && Objects.equals(getPingInterval(), other.getPingInterval())
                 && Objects.equals(getWatchdogDevice(), other.getWatchdogDevice())
                 && Objects.equals(getRebootCauseFilePath(), other.getRebootCauseFilePath())
-                && isFailOnUnavailableDevice() == other.isFailOnUnavailableDevice();
+                && isFailOnUnavailableDevice() == other.isFailOnUnavailableDevice()
+                && getWatchdogMode() == other.getWatchdogMode();
     }
 
     private static class ConfigurationProperty<T> {

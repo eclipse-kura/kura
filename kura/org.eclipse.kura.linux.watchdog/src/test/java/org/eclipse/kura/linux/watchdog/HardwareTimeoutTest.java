@@ -144,6 +144,7 @@ public class HardwareTimeoutTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", enabled);
         properties.put("watchdogDevice", path);
+        properties.put("watchdogMode", "direct");
         properties.put("pingInterval", 10000);
         properties.put("rebootCauseFilePath", REBOOT_CAUSE_FILE);
         return properties;
@@ -196,7 +197,7 @@ public class HardwareTimeoutTest {
         }
     }
 
-    private class HardwareTimeoutWatchdogServiceImpl extends WatchdogServiceImpl {
+    private class HardwareTimeoutWatchdogServiceImpl extends HookedWatchdogServiceImpl {
 
         @Override
         protected WatchdogDevice createWatchdogDevice(String watchdogDevice) throws IOException {

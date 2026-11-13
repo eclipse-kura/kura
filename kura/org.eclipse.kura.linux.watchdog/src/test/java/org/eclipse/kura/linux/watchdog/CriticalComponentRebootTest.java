@@ -108,6 +108,7 @@ public class CriticalComponentRebootTest {
         final Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("watchdogDevice", WATCHDOG_DEVICE);
+        properties.put("watchdogMode", "direct");
         properties.put("pingInterval", PING_INTERVAL_MS);
         properties.put("rebootCauseFilePath", REBOOT_CAUSE_FILE);
         this.svc = new RebootWatchdogServiceImpl();
@@ -213,7 +214,7 @@ public class CriticalComponentRebootTest {
         }
     }
 
-    private class RebootWatchdogServiceImpl extends WatchdogServiceImpl {
+    private class RebootWatchdogServiceImpl extends HookedWatchdogServiceImpl {
 
         private int rebootRequests;
 

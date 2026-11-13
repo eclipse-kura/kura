@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.model.Event;
+import com.github.dockerjava.api.model.EventActor;
 
 public class AllowlistEnforcement {
 
@@ -85,13 +86,14 @@ public class AllowlistEnforcement {
             logger.info("Enforcement monitor closing...");
             this.monitor.close();
             this.monitor.awaitCompletion(5, TimeUnit.SECONDS);
-            this.monitor = null;
             logger.info("Enforcement monitor closing...done.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);
+        } finally {
+            this.monitor = null;
         }
     }
 
@@ -200,7 +202,11 @@ public class AllowlistEnforcement {
 
         @Override
         public void onNext(Event item) {
-            enforce(item.getId());
+            String containerId = Optional.ofNullable(item.getActor()).map(EventActor::getId)
+                    .orElseGet(item::getId);
+            if (containerId != null) {
+                enforce(containerId);
+            }
         }
     }
 }

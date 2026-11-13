@@ -327,42 +327,6 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    @Deprecated
-    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            IllegalBlockSizeException, BadPaddingException {
-        char[] encryptedValue = null;
-        try {
-            encryptedValue = encryptAes(value.toCharArray());
-        } catch (KuraException e) {
-            Throwable t = e.getCause();
-            if (t instanceof NoSuchAlgorithmException) {
-                throw (NoSuchAlgorithmException) t;
-            } else if (t instanceof NoSuchPaddingException) {
-                throw (NoSuchPaddingException) t;
-            } else if (t instanceof InvalidKeyException) {
-                throw (InvalidKeyException) t;
-            } else if (t instanceof IllegalBlockSizeException) {
-                throw (IllegalBlockSizeException) t;
-            } else if (t instanceof BadPaddingException) {
-                throw (BadPaddingException) t;
-            }
-        }
-
-        return new String(encryptedValue);
-    }
-
-    @Override
-    @Deprecated
-    public String decryptAes(String encryptedValue) throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
-        try {
-            return new String(decryptAes(encryptedValue.toCharArray()));
-        } catch (KuraException e) {
-            throw new IOException();
-        }
-    }
-
-    @Override
     public String encodeBase64(String stringValue) throws UnsupportedEncodingException {
         if (stringValue == null) {
             return null;
@@ -424,16 +388,6 @@ public class CryptoServiceImpl implements CryptoService {
             fos.flush();
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    @Deprecated
-    public void setKeyStorePassword(String keyStorePath, String password) throws IOException {
-        try {
-            setKeyStorePassword(keyStorePath, password.toCharArray());
-        } catch (KuraException e) {
-            throw new IOException(e);
         }
     }
 

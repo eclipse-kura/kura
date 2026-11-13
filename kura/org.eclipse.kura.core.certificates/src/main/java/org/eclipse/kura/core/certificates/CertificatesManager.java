@@ -51,9 +51,12 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
     name = "org.eclipse.kura.certificate.CertificatesService",
+    xmlns = "http://www.osgi.org/xmlns/scr/v1.1.0",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.certificate.CertificatesService.class })
+    service = { org.eclipse.kura.certificate.CertificatesService.class },
+    property = {
+        "service.pid=org.eclipse.kura.certificate.CertificatesService" })
 public class CertificatesManager implements CertificatesService {
 
     private static final Logger logger = LoggerFactory.getLogger(CertificatesManager.class);

@@ -16,6 +16,7 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -79,6 +80,12 @@ public class ContainerInstanceOptions {
     
     private static final Property<Boolean> IDENTITY_INTEGRATION_ENABLED = new Property<>("container.identity.enabled", false);
     private static final Property<String> CONTAINER_PERMISSIONS = new Property<>("container.permissions", "");
+    private static final Property<Integer> JWT_ACCESS_TOKEN_DURATION = new Property<>(
+            "container.identity.jwt.access.token.duration", 60);
+    private static final Property<Integer> JWT_REFRESH_TOKEN_DURATION = new Property<>(
+            "container.identity.jwt.refresh.token.duration", 900);
+
+    public static final long TEMPORARY_IDENTITY_LIFETIME_SECONDS = 365L * 24 * 60 * 60;
 
     private boolean enabled;
     private final String image;
@@ -115,6 +122,8 @@ public class ContainerInstanceOptions {
     
     private final boolean identityIntegrationEnabled;
     private final List<String> containerPermissions;
+    private final Duration jwtAccessTokenDuration;
+    private final Duration jwtRefreshTokenDuration;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -153,6 +162,8 @@ public class ContainerInstanceOptions {
         this.enforcementDigest = parseOptionalString(ENFORCEMENT_DIGEST.getOptional(properties));
         this.identityIntegrationEnabled = IDENTITY_INTEGRATION_ENABLED.get(properties);
         this.containerPermissions = parseStringListSplitByComma(CONTAINER_PERMISSIONS.get(properties));
+        this.jwtAccessTokenDuration = Duration.ofSeconds(JWT_ACCESS_TOKEN_DURATION.get(properties));
+        this.jwtRefreshTokenDuration = Duration.ofSeconds(JWT_REFRESH_TOKEN_DURATION.get(properties));
     }
 
     private String resolveContainerName(final Map<String, Object> properties) {
@@ -389,6 +400,14 @@ public class ContainerInstanceOptions {
         return this.containerPermissions;
     }
 
+    public Duration getJwtAccessTokenDuration() {
+        return this.jwtAccessTokenDuration;
+    }
+
+    public Duration getJwtRefreshTokenDuration() {
+        return this.jwtRefreshTokenDuration;
+    }
+
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
@@ -467,8 +486,9 @@ public class ContainerInstanceOptions {
                 containerLoggerType, containerLoggingParameters, containerMemory, containerName,
                 containerNetworkingMode, containerPermissions, containerPortProtocol, containerRuntime, containerVolumeString,
                 containerVolumes, enabled, enforcementDigest, externalPorts, identityIntegrationEnabled, image, imageDownloadTimeout, imageTag,
-                internalPorts, maxDownloadRetries, privilegedMode, registryPassword, registryURL, registryUsername,
-                restartOnFailure, retryInterval, signatureTrustAnchor, signatureVerifyTransparencyLog);
+                internalPorts, jwtAccessTokenDuration, jwtRefreshTokenDuration, maxDownloadRetries, privilegedMode,
+                registryPassword, registryURL, registryUsername, restartOnFailure, retryInterval, signatureTrustAnchor,
+                signatureVerifyTransparencyLog);
     }
 
     @Override
@@ -502,7 +522,10 @@ public class ContainerInstanceOptions {
                 && identityIntegrationEnabled == other.identityIntegrationEnabled
                 && Objects.equals(image, other.image)
                 && imageDownloadTimeout == other.imageDownloadTimeout && Objects.equals(imageTag, other.imageTag)
-                && Objects.equals(internalPorts, other.internalPorts) && maxDownloadRetries == other.maxDownloadRetries
+                && Objects.equals(internalPorts, other.internalPorts)
+                && Objects.equals(jwtAccessTokenDuration, other.jwtAccessTokenDuration)
+                && Objects.equals(jwtRefreshTokenDuration, other.jwtRefreshTokenDuration)
+                && maxDownloadRetries == other.maxDownloadRetries
                 && privilegedMode == other.privilegedMode && Objects.equals(registryPassword, other.registryPassword)
                 && Objects.equals(registryURL, other.registryURL)
                 && Objects.equals(registryUsername, other.registryUsername)

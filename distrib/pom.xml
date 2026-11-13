@@ -1427,6 +1427,7 @@
                                     jersey-container-servlet, mimepull,
                                     org.eclipse.soda.dk.comm.${native.tag}, jersey-client, hk2-api,
                                     javassist, jersey-media-sse, protobuf-java, bcpkix-jdk18on,
+                                    org.eclipse.paho.client.mqttv3,
                                     jersey-entity-filtering,
                                     jersey-media-jaxb, commons-csv, gson, aopalliance-repackaged,
                                     bcprov-jdk18on, jersey-container-servlet-core, 

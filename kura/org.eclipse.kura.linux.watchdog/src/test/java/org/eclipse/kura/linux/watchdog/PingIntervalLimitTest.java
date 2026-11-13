@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.linux.watchdog.WatchdogServiceOptions.WatchdogMode;
@@ -49,6 +50,7 @@ public class PingIntervalLimitTest {
         thenEffectivePingIntervalIs(10000);
     }
 
+    @SuppressWarnings("unchecked")
     private void givenServiceWithActiveBackendTimeout(int pingInterval, int hardwareTimeout) throws Throwable {
         final Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
@@ -57,7 +59,8 @@ public class PingIntervalLimitTest {
 
         this.svc = new WatchdogServiceImpl();
         TestUtil.setFieldValue(this.svc, "options", new WatchdogServiceOptions(properties));
-        TestUtil.setFieldValue(this.svc, "activeBackend", Optional.of(new TimeoutBackend(hardwareTimeout)));
+        ((AtomicReference<Optional<WatchdogBackend>>) TestUtil.getFieldValue(this.svc, "activeBackend"))
+                .set(Optional.of(new TimeoutBackend(hardwareTimeout)));
     }
 
     private void thenEffectivePingIntervalIs(long expectedIntervalMs) {

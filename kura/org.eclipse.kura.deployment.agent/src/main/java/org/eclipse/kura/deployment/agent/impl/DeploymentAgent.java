@@ -241,10 +241,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
         this.executor.submit(() -> {
             try {
-                logger.info("About to install package at URL {}", url);
+                logger.info("About to install package at URL {}", UrlCredentials.redact(url));
                 execInstall(url);
             } catch (final Exception e) {
-                logger.error("Unexpected exception installing {}", url, e);
+                logger.error("Unexpected exception installing {}", UrlCredentials.redact(url), e);
             }
         });
     }
@@ -416,10 +416,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             dp = installDeploymentPackageInternal(url);
         } catch (Exception e) {
             ex = e;
-            logger.error("Exception installing package at URL {}", url, e);
+            logger.error("Exception installing package at URL {}", UrlCredentials.redact(url), e);
         } finally {
             boolean successful = dp != null;
-            logger.info("Posting INSTALLED event for package at URL {}: {}", url,
+            logger.info("Posting INSTALLED event for package at URL {}: {}", UrlCredentials.redact(url),
                     successful ? "successful" : "unsuccessful");
             synchronized (this.instPackageUrls) {
                 this.instPackageUrls.remove(url);
@@ -625,9 +625,11 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private HttpURLConnection openRemoteConnection(URL url) throws GeneralSecurityException, IOException {
-        URLConnection urlConnection = url.openConnection();
+        URLConnection urlConnection = UrlCredentials.withoutUserInfo(url).openConnection();
         urlConnection.setConnectTimeout(this.connTimeout);
         urlConnection.setReadTimeout(this.readTimeout);
+        UrlCredentials.basicAuthorization(url)
+                .ifPresent(authorization -> urlConnection.setRequestProperty("Authorization", authorization));
 
         if (urlConnection instanceof HttpsURLConnection) {
             ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());

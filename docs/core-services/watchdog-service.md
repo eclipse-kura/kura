@@ -60,11 +60,11 @@ This mode requires Kura to be started by systemd as a service and the `systemd-n
 
 ### direct mode
 
-In this mode Kura opens the device set in **Watchdog device path** and refreshes it at every **pingInterval**. If the refreshes stop, the hardware watchdog resets the system.
+In this mode, Kura opens the device specified in the **Watchdog device path** and pings it at every **pingInterval**. Should the pings stop, the hardware watchdog resets the system.
 
-The watchdog device can be opened by a single process, so it must not be in use by other programs. In particular, systemd must not be configured to manage the same device with `RuntimeWatchdogSec=`. The Kura installer does not change the systemd watchdog configuration.
+The watchdog device can only be opened by a single process at a time, so it must not be used by other programs. In particular, systemd must not be configured to manage the same device with `RuntimeWatchdogSec=`. The Kura installer leaves the systemd watchdog configuration unchanged.
 
-When Kura is stopped while the service is enabled, the watchdog device is closed without being disarmed, so that the system is reset if Kura does not start again. As a consequence, restarting Kura resets the system if Kura takes longer than the hardware watchdog timeout to start and open the device again.
+When Kura is stopped while the service is enabled, the device is closed without being disarmed, ensuring the system resets if Kura does not start again. Consequently, restarting Kura resets the system if Kura takes longer to start and reopen the device than the hardware watchdog timeout allows.
 
 If the device does not exist or cannot be opened, the service behaves as described in [Unavailable watchdog device](#unavailable-watchdog-device).
 

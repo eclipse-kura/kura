@@ -44,10 +44,10 @@ In **direct** mode, a configuration update disarms and reopens the watchdog devi
 
 In this mode, Kura does not access the hardware watchdog device. At each **pingInterval**, it sends a keep-alive notification to systemd via the `sd_notify` protocol using the `systemd-notify` command. If the notifications stop (for example, because Kura hangs), systemd terminates the Kura service once the service watchdog timeout expires, and the Kura unit reboots the system.
 
-The timeout of the systemd service watchdog is defined as follows:
+The systemd service watchdog timeout is determined as follows:
 
-- if the `kura.service` unit sets `WatchdogSec=`, that value is used. In this case systemd supervises Kura also while it is starting, so the value must be longer than the Kura startup time;
-- otherwise, which is the default of the Kura installer, the service asks systemd for a timeout of three times the **pingInterval** when it is enabled. The supervision starts when the WatchdogService is activated, so the Kura startup is not supervised.
+- If the `kura.service` unit sets a `WatchdogSec=` value, that value is applied. In this configuration, systemd supervises Kura from its startup, so `WatchdogSec=` must exceed the Kura startup time.
+- Otherwise (the default for the Kura installer), the service requests a timeout of three times the **pingInterval** when it is enabled. Supervision only begins when the WatchdogService activates, so Kura's startup phase remains unsupervised.
 
 When the service is disabled by configuration, or the **Watchdog mode** is changed, Kura turns off the service watchdog that it requested. If instead the WatchdogService is stopped while it is enabled, for example because its bundle is stopped, the supervision is not turned off: the timeout is raised to 5 minutes, and the system is rebooted if the service is not running again by then.
 

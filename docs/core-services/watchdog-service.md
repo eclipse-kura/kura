@@ -70,7 +70,7 @@ If the device does not exist or cannot be opened, the service behaves as describ
 
 ### Degraded mode
 
-If the selected mode cannot be activated, for example because the systemd notification socket or the watchdog device is not available, the service runs in degraded mode: it still requests a system reboot when a critical component times out, but nothing reboots the system if Kura itself hangs. This condition is reported in the log and through the [watchdog status](#watchdog-status).
+If the selected mode cannot be activated (for example because the systemd notification socket or the watchdog device is unavailable) the service runs in degraded mode. In this mode, it still requests a system reboot when a critical component times out, but it does not reboot the system if Kura itself hangs. This degraded condition is reported in the log and through the [watchdog status](#watchdog-status).
 
 ## Reboot on critical component timeout
 

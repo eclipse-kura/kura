@@ -30,10 +30,10 @@ public @interface FilesystemKeystoreServiceImplOptions {
     @AttributeDefinition(name = "Randomize Password", required = false, description = "Specifies if the defined password will be randomized at the next keystore access. If this value is set to true and the keystore can be accessed, the password will be randomized and this field will automatically set to false.")
     boolean randomize_password() default false;
 
-    @AttributeDefinition(name = "CRL Cache Enabled", description = "If enabled, the service will maintain a local CRL cache by periodically downloading and storing CRLs from HTTP distribution points. The distribution points specified in the trusted certificates added to keystore will be considered along with the HTTP URLs specified using the CRL URLs parameter.")
+    @AttributeDefinition(name = "CRL Cache Enabled", description = "If enabled, the service will maintain a local CRL cache by periodically downloading and storing CRLs from HTTP, HTTPS and file distribution points. The distribution points specified in the trusted certificates added to keystore will be considered along with the URLs specified using the CRL URLs parameter.")
     boolean crl_management_enabled() default true;
 
-    @AttributeDefinition(name = "CRL URLs", cardinality = 5, required = false, description = "Alllows to specify a list of HTTP CRL distribution points that will be considered along with the HTTP distribution points specified in the trusted certificates added to keystore.")
+    @AttributeDefinition(name = "CRL URLs", cardinality = 5, required = false, description = "Allows to specify a list of HTTP, HTTPS or file CRL distribution points that will be considered along with the distribution points specified in the trusted certificates added to keystore. Distribution points with any other scheme are ignored.")
     String crl_urls() default "";
 
     @AttributeDefinition(name = "CRL Force Update Interval", description = "Defines a time interval for forcing the update of cached CRLs, this interval will be considered in addition to CRL next update date. The minimum time interval is 30 seconds.")

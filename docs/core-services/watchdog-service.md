@@ -58,7 +58,7 @@ The hardware watchdog of the platform is managed by systemd and it is configured
 
 This mode requires Kura to be started by systemd as a service and the `systemd-notify` command to be installed. If one of them is missing the service runs in [degraded mode](#degraded-mode).
 
-### direct mode
+### Direct mode
 
 In this mode, Kura opens the device specified in the **Watchdog device path** and pings it at every **pingInterval**. Should the pings stop, the hardware watchdog resets the system.
 

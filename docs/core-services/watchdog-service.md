@@ -40,7 +40,7 @@ In **direct** mode, a configuration update disarms and reopens the watchdog devi
 
 ## Watchdog modes
 
-### systemd mode
+### Systemd mode
 
 In this mode, Kura does not access the hardware watchdog device. At each **pingInterval**, it sends a keep-alive notification to systemd via the `sd_notify` protocol using the `systemd-notify` command. If the notifications stop (for example, because Kura hangs), systemd terminates the Kura service once the service watchdog timeout expires, and the Kura unit reboots the system.
 

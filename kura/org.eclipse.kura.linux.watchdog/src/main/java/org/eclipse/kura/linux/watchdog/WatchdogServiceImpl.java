@@ -78,10 +78,6 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 
         final ScheduledExecutorService executor = this.pollExecutor;
-        if (executor.isShutdown()) {
-            logger.debug("Watchdog executor is not running. Skipping update");
-            return;
-        }
 
         try {
             executor.submit(() -> {

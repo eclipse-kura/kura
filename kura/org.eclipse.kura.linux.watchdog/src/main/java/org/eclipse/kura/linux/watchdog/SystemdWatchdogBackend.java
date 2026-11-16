@@ -34,7 +34,6 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
 
     static final String NOTIFY_SOCKET_ENV = "NOTIFY_SOCKET";
     static final String WATCHDOG_USEC_ENV = "WATCHDOG_USEC";
-    static final String WATCHDOG_PID_ENV = "WATCHDOG_PID";
 
     private static final String[] SYSTEMD_NOTIFY_PATHS = { "/usr/bin/systemd-notify", "/bin/systemd-notify" };
 
@@ -110,22 +109,6 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
         if (!isSystemdNotifyAvailable()) {
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE,
                     "systemd-notify binary not found in standard locations " + Arrays.toString(SYSTEMD_NOTIFY_PATHS));
-        }
-
-        Optional<String> watchdogPidStr = getEnvVar(WATCHDOG_PID_ENV);
-        if (watchdogPidStr.isPresent()) {
-            try {
-                long expectedPid = Long.parseLong(watchdogPidStr.get());
-                long currentPid = ProcessHandle.current().pid();
-                if (expectedPid != currentPid) {
-                    logger.debug("WATCHDOG_PID ({}) does not match current PID ({}). "
-                            + "This is expected for forking services. "
-                            + "systemd-notify will be used for watchdog pings.", expectedPid, currentPid);
-                }
-            } catch (NumberFormatException e) {
-                logger.debug("WATCHDOG_PID environment variable is not a valid number: '{}'. Ignoring.", watchdogPidStr,
-                        e);
-            }
         }
 
         this.usecFromEnvironment = false;

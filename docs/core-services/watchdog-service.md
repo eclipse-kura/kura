@@ -17,7 +17,7 @@ This service provides the following configuration parameters:
 
 - **enabled** - sets whether or not this service is enabled or disabled. (Required field)
 
-- **pingInterval** - defines the time interval (in milliseconds) between two watchdog refreshes. (Required field) The value can be set between 1 and 60 seconds. The service reads the **watchdog timeout** of the selected watchdog: if the interval is greater than half of that timeout, the service logs a warning and refreshes the watchdog every half of the timeout instead, so that a misconfigured interval does not result in a system reboot.
+- **pingInterval** — Required field. Specifies the interval (in milliseconds) between two consecutive watchdog refreshes. The accepted range is 1 to 60 seconds. The service compares this interval against the timeout of the selected watchdog. If the configured interval exceeds half of that timeout, the service logs a warning and instead refreshes the watchdog at half the timeout value. This prevents a misconfigured interval from causing an unintended system reboot.
     - In **systemd** mode this parameter defines the interval between two keep-alive notifications sent to systemd. The timeout is the `WatchdogSec` value of the Kura unit if set, otherwise three times this interval; see [systemd mode](#systemd-mode) for more details.
     - In **direct** mode the timeout is read from the watchdog device. If it cannot be read, the configured interval is used as is. On most systems, you can check the watchdog timeout using the following command:
         ```bash

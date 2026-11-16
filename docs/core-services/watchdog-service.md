@@ -49,7 +49,7 @@ The systemd service watchdog timeout is determined as follows:
 - If the `kura.service` unit sets a `WatchdogSec=` value, that value is applied. In this configuration, systemd supervises Kura from its startup, so `WatchdogSec=` must exceed the Kura startup time.
 - Otherwise (the default for the Kura installer), the service requests a timeout of three times the **pingInterval** when it is enabled. Supervision only begins when the WatchdogService activates, so Kura's startup phase remains unsupervised.
 
-When the service is disabled by configuration, or the **Watchdog mode** is changed, Kura turns off the service watchdog that it requested. If instead the WatchdogService is stopped while it is enabled, for example because its bundle is stopped, the supervision is not turned off: the timeout is raised to 5 minutes, and the system is rebooted if the service is not running again by then.
+When the service is disabled through configuration, or when the **Watchdog mode** is modified, Kura shuts down the service watchdog it had previously initiated. In contrast, if the WatchdogService is stopped while it is still enabled (e.g. because its bundle is terminated) the supervision is not deactivated. Instead, the timeout is increased to five minutes, and the system will reboot if the service has not resumed running by that point.
 
 The hardware watchdog of the platform is managed by systemd and it is configured with the `RuntimeWatchdogSec=` option of the systemd [system configuration](https://www.freedesktop.org/software/systemd/man/latest/systemd-system.conf.html). The Kura installer does not change this option:
 

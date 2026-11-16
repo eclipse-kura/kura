@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.core.keystore.crl.CRLManager;
 import org.junit.Test;
 
 public class CrlManagerLifecycleTest extends CrlKeystoreServiceTestBase {
@@ -36,6 +37,10 @@ public class CrlManagerLifecycleTest extends CrlKeystoreServiceTestBase {
 
     private final Map<String, Set<Thread>> threadsBeforeScenario = new HashMap<>();
     private X509CRL crl;
+
+    public CrlManagerLifecycleTest() {
+        super(CRLManager.Delays.DEFAULT);
+    }
 
     @Test
     public void tenCrlOptionChangesLeaveNoStaleCrlManagerThread() throws Exception {

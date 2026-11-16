@@ -159,6 +159,8 @@ This cloud connections allows creating a Cloud Subscriber that will subscribe to
 
 ![](./images/sparkplugSubscriber.png)
 
+The **Topic Filter** follows the MQTT matching rules: a filter ending with `#` also matches its parent level, for example `A/+/#` matches `A/B`. Before Kura 6.0.0, a filter with a `+` wildcard before `#` did not receive the messages published on its parent level.
+
 It is assumed that the payloads received by this Cloud Connection are encoded using the [Sparkplug B Protobuf definition](https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto). Users of this Cloud Subscriber should expect to receive `KuraMessage`s containing a `KuraPayload` such that:
 
 - If non null, the [Sparkplug body](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) is used to set [`KuraPayload.setBody()`](https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L124)

@@ -40,7 +40,7 @@ A [CloudSubscriber](https://download.eclipse.org/kura/docs/api/5.5.0/apidocs/org
 
 The `RawMqttSubscriber` provides the following configuration options:
 
-* **Topic Filter**: The MQTT subscription topic filter. For example `foo/bar/baz`, `foo/+/bar`, `#`, `foo/#`.
+* **Topic Filter**: The MQTT subscription topic filter. For example `foo/bar/baz`, `foo/+/bar`, `#`, `foo/#`. A filter ending with `#` also matches its parent level: `foo/#` matches `foo` and `foo/+/#` matches `foo/bar`. Before Kura 6.0.0, a filter with a `+` wildcard before `#`, such as `foo/+/#`, did not receive the messages published on its parent level.
 
 * **Qos**: The desired quality of service for the subscription messages.
 

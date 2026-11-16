@@ -15,6 +15,8 @@ package org.eclipse.kura.core.keystore.crl;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URI;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +29,7 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +45,18 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.DistributionPoint;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.eclipse.kura.core.keystore.util.CRLUtil;
 import org.eclipse.kura.core.keystore.util.MappingCollection;
 import org.slf4j.Logger;
@@ -86,39 +100,57 @@ public class CRLManager implements Closeable {
         this.listener = listener;
     }
 
-    public synchronized boolean addDistributionPoint(final Set<URI> uris) {
+    public boolean addDistributionPoint(final Set<URI> uris) {
+        return addDistributionPoint(uris, Collections.emptySet());
+    }
+
+    public boolean removeDistributionPoint(final Set<URI> uris) {
+        return removeDistributionPoint(uris, Collections.emptySet());
+    }
+
+    private synchronized boolean addDistributionPoint(final Set<URI> uris,
+            final Set<X500Principal> expectedIssuers) {
         if (this.closed) {
             return false;
         }
 
-        logger.info("referencing distribution points: {}", uris);
+        logger.info("referencing distribution points: {}, expected CRL issuers: {}", uris, expectedIssuers);
 
-        final Optional<DistributionPointState> existing = this.referencedDistributionPoints.stream()
-                .filter(p -> p.distributionPoints.equals(uris)).findAny();
+        final Optional<DistributionPointState> existing = findDistributionPoint(uris);
 
         if (existing.isPresent()) {
-            existing.get().ref();
+            existing.get().ref(expectedIssuers);
             return false;
         } else {
-            this.referencedDistributionPoints.add(new DistributionPointState(uris));
+            final DistributionPointState state = new DistributionPointState(uris);
+            state.ref(expectedIssuers);
+            this.referencedDistributionPoints.add(state);
             requestUpdate();
             return true;
         }
     }
 
-    public synchronized boolean removeDistributionPoint(final Set<URI> uris) {
+    private synchronized boolean removeDistributionPoint(final Set<URI> uris,
+            final Set<X500Principal> expectedIssuers) {
         if (this.closed) {
             return false;
         }
 
         logger.info("unreferencing distribution points: {}", uris);
 
-        if (this.referencedDistributionPoints.removeIf(p -> p.distributionPoints.equals(uris) && p.unref() <= 0)) {
+        final Optional<DistributionPointState> existing = findDistributionPoint(uris);
+
+        if (existing.isPresent() && existing.get().unref(expectedIssuers)) {
+            this.referencedDistributionPoints.remove(existing.get());
             requestUpdate();
             return true;
         } else {
             return false;
         }
+    }
+
+    private Optional<DistributionPointState> findDistributionPoint(final Set<URI> uris) {
+        return this.referencedDistributionPoints.stream().filter(p -> p.distributionPoints.equals(uris)).findAny();
     }
 
     public boolean addTrustedCertificate(final X509Certificate entry) {
@@ -137,7 +169,7 @@ public class CRLManager implements Closeable {
             return false;
         }
 
-        return addDistributionPoint(distributionPoints);
+        return addDistributionPoint(distributionPoints, getExpectedIssuers(entry));
     }
 
     public boolean removeTrustedCertificate(final X509Certificate entry) {
@@ -145,7 +177,7 @@ public class CRLManager implements Closeable {
         try {
             final Set<URI> distributionPoints = CRLUtil.getCrlURIs(entry);
 
-            return removeDistributionPoint(distributionPoints);
+            return removeDistributionPoint(distributionPoints, getExpectedIssuers(entry));
 
         } catch (final Exception e) {
             logger.warn("failed to get distribution points for {}", entry.getSubjectX500Principal(), e);
@@ -412,6 +444,10 @@ public class CRLManager implements Closeable {
             final Optional<StoredCRL> storedCrl, final X509CRL newCrl) {
 
         try {
+            if (!isIssuedByExpectedIssuer(state, newCrl)) {
+                return false;
+            }
+
             if (storedCrl.isPresent()) {
                 final StoredCRL stored = storedCrl.get();
 
@@ -421,8 +457,7 @@ public class CRLManager implements Closeable {
                     return false;
                 }
 
-                if (!stored.getIssuer().equals(newCrl.getIssuerX500Principal())) {
-                    logger.warn("CRL issuer differs, not updating CRL");
+                if (!canReplace(state, stored, newCrl)) {
                     return false;
                 }
             }
@@ -447,6 +482,116 @@ public class CRLManager implements Closeable {
         }
     }
 
+    private static boolean isIssuedByExpectedIssuer(final DistributionPointState state, final X509CRL crl) {
+        final Set<X500Principal> expectedIssuers = state.getExpectedIssuers();
+
+        if (expectedIssuers.isEmpty() || expectedIssuers.contains(crl.getIssuerX500Principal())) {
+            return true;
+        }
+
+        logger.warn("CRL verification failed: the CRL downloaded from {} is issued by {}, expected {}",
+                state.distributionPoints, crl.getIssuerX500Principal(), expectedIssuers);
+        return false;
+    }
+
+    private static boolean canReplace(final DistributionPointState state, final StoredCRL stored,
+            final X509CRL newCrl) {
+        if (!stored.getIssuer().equals(newCrl.getIssuerX500Principal())) {
+            if (state.getExpectedIssuers().isEmpty()) {
+                logger.warn("CRL issuer differs, not updating CRL");
+                return false;
+            }
+            return true;
+        }
+
+        if (isOlder(newCrl, stored)) {
+            logger.warn("CRL verification failed: the CRL downloaded from {} is older than the stored one",
+                    state.distributionPoints);
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean isOlder(final X509CRL candidate, final StoredCRL stored) {
+        final X509CRL current;
+
+        try {
+            current = stored.getCrl();
+        } catch (final IllegalStateException e) {
+            logger.warn("failed to read the stored CRL for {}", stored.getDistributionPoints(), e);
+            return false;
+        }
+
+        final Optional<BigInteger> candidateNumber = getCrlNumber(candidate);
+        final Optional<BigInteger> currentNumber = getCrlNumber(current);
+
+        if (candidateNumber.isPresent() && currentNumber.isPresent()
+                && candidateNumber.get().compareTo(currentNumber.get()) < 0) {
+            return true;
+        }
+
+        return candidate.getThisUpdate().before(current.getThisUpdate());
+    }
+
+    private static Optional<BigInteger> getCrlNumber(final X509CRL crl) {
+        final byte[] value = crl.getExtensionValue(Extension.cRLNumber.getId());
+
+        if (value == null) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(ASN1Integer.getInstance(JcaX509ExtensionUtils.parseExtensionValue(value)).getValue());
+        } catch (final IOException | IllegalArgumentException e) {
+            logger.warn("failed to parse the CRL number of the CRL issued by {}", crl.getIssuerX500Principal(), e);
+            return Optional.empty();
+        }
+    }
+
+    private static Set<X500Principal> getExpectedIssuers(final X509Certificate certificate) {
+        final byte[] value = certificate.getExtensionValue(Extension.cRLDistributionPoints.getId());
+
+        if (value == null) {
+            return Collections.singleton(certificate.getIssuerX500Principal());
+        }
+
+        final Set<X500Principal> result = new HashSet<>();
+
+        try {
+            final DistributionPoint[] distributionPoints = CRLDistPoint
+                    .getInstance(JcaX509ExtensionUtils.parseExtensionValue(value)).getDistributionPoints();
+
+            for (final DistributionPoint distributionPoint : distributionPoints) {
+                result.addAll(getCrlIssuers(distributionPoint, certificate));
+            }
+        } catch (final IOException | IllegalArgumentException e) {
+            logger.warn("failed to parse the CRL distribution points of {}", certificate.getSubjectX500Principal(), e);
+            return Collections.singleton(certificate.getIssuerX500Principal());
+        }
+
+        return result;
+    }
+
+    private static Set<X500Principal> getCrlIssuers(final DistributionPoint distributionPoint,
+            final X509Certificate certificate) throws IOException {
+        final GeneralNames crlIssuer = distributionPoint.getCRLIssuer();
+
+        if (crlIssuer == null) {
+            return Collections.singleton(certificate.getIssuerX500Principal());
+        }
+
+        final Set<X500Principal> result = new HashSet<>();
+
+        for (final GeneralName name : crlIssuer.getNames()) {
+            if (name.getTagNo() == GeneralName.directoryName) {
+                result.add(new X500Principal(X500Name.getInstance(name.getName()).getEncoded()));
+            }
+        }
+
+        return result;
+    }
+
     private class ServedCRLs extends AbstractCollection<StoredCRL> {
 
         @Override
@@ -460,9 +605,9 @@ public class CRLManager implements Closeable {
         }
     }
 
-    private class DistributionPointState {
+    private static class DistributionPointState {
 
-        private int refCnt = 1;
+        private final List<Set<X500Principal>> references = new ArrayList<>();
         private OptionalLong lastDownloadInstantNanos = OptionalLong.empty();
         private final Set<URI> distributionPoints;
 
@@ -470,14 +615,17 @@ public class CRLManager implements Closeable {
             this.distributionPoints = distributionPoints;
         }
 
-        int ref() {
-            this.refCnt++;
-            return this.refCnt;
+        void ref(final Set<X500Principal> expectedIssuers) {
+            this.references.add(expectedIssuers);
         }
 
-        int unref() {
-            this.refCnt--;
-            return this.refCnt;
+        boolean unref(final Set<X500Principal> expectedIssuers) {
+            this.references.remove(expectedIssuers);
+            return this.references.isEmpty();
+        }
+
+        Set<X500Principal> getExpectedIssuers() {
+            return this.references.stream().flatMap(Set::stream).collect(Collectors.toSet());
         }
     }
 

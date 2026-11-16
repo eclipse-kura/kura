@@ -18,8 +18,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -50,6 +53,7 @@ public abstract class CrlKeystoreServiceTestBase {
     protected final EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
 
     private final Map<String, Object> properties = new HashMap<>();
+    private final List<X509Certificate> trustedCertificates = new ArrayList<>();
     private boolean active;
 
     protected CrlKeystoreServiceTestBase() {
@@ -68,10 +72,18 @@ public abstract class CrlKeystoreServiceTestBase {
         }
     }
 
+    protected void givenTrustedCertificate(final X509Certificate certificate) {
+        this.trustedCertificates.add(certificate);
+    }
+
     protected void givenKeystoreServiceWithCrlManagement(final Map<String, Object> crlOptions) throws Exception {
         final File keystoreFile = new File(this.temporaryFolder.getRoot(), "keystore.ks");
         final KeyStore keystore = KeyStore.getInstance("jks");
         keystore.load(null, null);
+
+        for (int i = 0; i < this.trustedCertificates.size(); i++) {
+            keystore.setCertificateEntry("trusted" + i, this.trustedCertificates.get(i));
+        }
 
         try (final FileOutputStream out = new FileOutputStream(keystoreFile)) {
             keystore.store(out, KEYSTORE_PASSWORD.toCharArray());

@@ -578,6 +578,8 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     protected CRLVerifier getCRLVerifier(final CRLManagerOptions options) {
         if (!options.isCRLVerificationEnabled()) {
+            logger.warn("CRL signature verification is disabled for {}: downloaded CRLs are not authenticated",
+                    this.ownPid);
             return crl -> true;
         }
 
@@ -590,7 +592,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
                     final TrustedCertificateEntry trustedCertEntry = (TrustedCertificateEntry) e;
 
-                    if (verifyCRL(crl, trustedCertEntry)) {
+                    if (isIssuerOf(crl, trustedCertEntry) && verifyCRL(crl, trustedCertEntry)) {
                         return true;
                     }
                 }
@@ -607,6 +609,13 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             this.crlManager.get().close();
             this.crlManager = Optional.empty();
         }
+    }
+
+    private static boolean isIssuerOf(final X509CRL crl, final TrustedCertificateEntry trustedCertEntry) {
+        final Certificate certificate = trustedCertEntry.getTrustedCertificate();
+
+        return certificate instanceof X509Certificate
+                && ((X509Certificate) certificate).getSubjectX500Principal().equals(crl.getIssuerX500Principal());
     }
 
     protected boolean verifyCRL(X509CRL crl, final TrustedCertificateEntry trustedCertEntry) {

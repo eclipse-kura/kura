@@ -2,7 +2,7 @@
 
 The WatchdogService supervises the gateway and triggers a reboot whenever Kura or an application registered as a [CriticalComponent](../java-application-development/how-to-use-watchdog.md) stops functioning. Once enabled, the service must continuously refresh its watchdog timer; failure to do so results in a system reboot.
 
-The service can rely on two different watchdog backends, selected with the **Watchdog mode** parameter:
+The service supports two distinct watchdog backends, selectable via the **Watchdog mode** parameter:
 
 - **systemd** (default) - Kura sends regular keep-alive notifications to the systemd service manager, which supervises the Kura service.
 - **direct** - Kura opens the hardware watchdog device and refreshes it itself.

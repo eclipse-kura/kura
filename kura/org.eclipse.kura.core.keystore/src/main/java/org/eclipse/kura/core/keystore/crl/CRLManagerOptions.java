@@ -40,12 +40,14 @@ public class CRLManagerOptions {
     private static final Property<String[]> CRL_URLS = new Property<>("crl.urls", new String[0]);
     private static final Property<String> CRL_STORE_PATH = new Property<>("crl.store.path", String.class);
     private static final Property<Boolean> CRL_VERIFICATION_ENABLED = new Property<>("verify.crl", true);
+    private static final Property<Boolean> CRL_REJECT_EXPIRED = new Property<>("crl.reject.expired", true);
     private final boolean crlManagementEnabled;
     private final long crlUpdateIntervalMs;
     private final long crlCheckIntervalMs;
     private final Set<URI> crlURIs;
     private final Optional<File> crlStore;
     private final boolean verifyCRL;
+    private final boolean rejectExpiredCRLs;
 
     public CRLManagerOptions(final Map<String, Object> properties) {
         this.crlManagementEnabled = CRL_MANAGEMENT_ENABLED.get(properties);
@@ -54,6 +56,7 @@ public class CRLManagerOptions {
         this.crlURIs = extractCrlURIs(properties);
         this.crlStore = CRL_STORE_PATH.getOptional(properties).filter(s -> !s.trim().isEmpty()).map(File::new);
         this.verifyCRL = CRL_VERIFICATION_ENABLED.get(properties);
+        this.rejectExpiredCRLs = CRL_REJECT_EXPIRED.get(properties);
     }
 
     public boolean isCrlManagementEnabled() {
@@ -78,6 +81,10 @@ public class CRLManagerOptions {
 
     public boolean isCRLVerificationEnabled() {
         return this.verifyCRL;
+    }
+
+    public boolean isRejectExpiredCRLs() {
+        return this.rejectExpiredCRLs;
     }
 
     private static long extractInterval(final Map<String, Object> properties, final Property<Long> valueProperty,
@@ -111,7 +118,7 @@ public class CRLManagerOptions {
     @Override
     public int hashCode() {
         return Objects.hash(this.crlCheckIntervalMs, this.crlManagementEnabled, this.crlStore,
-                this.crlURIs, this.crlUpdateIntervalMs, this.verifyCRL);
+                this.crlURIs, this.crlUpdateIntervalMs, this.verifyCRL, this.rejectExpiredCRLs);
     }
 
     @Override
@@ -126,7 +133,8 @@ public class CRLManagerOptions {
         return this.crlCheckIntervalMs == other.crlCheckIntervalMs
                 && this.crlManagementEnabled == other.crlManagementEnabled
                 && Objects.equals(this.crlStore, other.crlStore) && Objects.equals(this.crlURIs, other.crlURIs)
-                && this.crlUpdateIntervalMs == other.crlUpdateIntervalMs && this.verifyCRL == other.verifyCRL;
+                && this.crlUpdateIntervalMs == other.crlUpdateIntervalMs && this.verifyCRL == other.verifyCRL
+                && this.rejectExpiredCRLs == other.rejectExpiredCRLs;
     }
 
 }

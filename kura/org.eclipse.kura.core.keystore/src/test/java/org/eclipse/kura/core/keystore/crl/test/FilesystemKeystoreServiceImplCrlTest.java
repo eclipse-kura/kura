@@ -469,7 +469,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             fixture.activate();
 
             final X509CRL crl = ca.generateCRL(
-                    CRLCreationOptions.builder().withEndDate(Date.from(Instant.now().plusSeconds(4))).build());
+                    CRLCreationOptions.builder().withEndDate(Date.from(Instant.now().plusSeconds(8))).build());
             fixture.setCrl("/foo.crl", crl);
             fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
 

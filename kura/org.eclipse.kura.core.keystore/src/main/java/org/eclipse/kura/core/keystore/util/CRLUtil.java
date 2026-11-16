@@ -23,6 +23,7 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +44,8 @@ import org.slf4j.LoggerFactory;
 public class CRLUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(CRLUtil.class);
+
+    private static final Set<String> SUPPORTED_SCHEMES = Set.of("http", "https", "file");
 
     private CRLUtil() {
     }
@@ -95,6 +98,11 @@ public class CRLUtil {
 
         executor.execute(() -> {
             for (final URI uri : uris) {
+                if (!isSupportedScheme(uri)) {
+                    logger.warn("not fetching CRL from {}: only http, https and file URLs are supported", uri);
+                    continue;
+                }
+
                 logger.info("fetching CRL from: {}...", uri);
 
                 try (final InputStream in = openConnection(uri)) {
@@ -134,6 +142,12 @@ public class CRLUtil {
         }
 
         return connection.getInputStream();
+    }
+
+    private static boolean isSupportedScheme(final URI uri) {
+        final String scheme = uri.getScheme();
+
+        return scheme != null && SUPPORTED_SCHEMES.contains(scheme.toLowerCase(Locale.ROOT));
     }
 
     private static Optional<URI> parseURI(final String value) {

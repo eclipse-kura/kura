@@ -182,12 +182,6 @@ If the component declaration and metatype are structured as described below, the
 
     The CloudSubscriber will invoke the `onMessageArrived()` method when new messages are received.
 
-    !!! note
-        As defined by the [MQTT 3.1.1 specification](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html) (section 4.7.1.2), a topic filter ending with the multi-level wildcard `#` also matches its parent level: `sport/tennis/#` matches both `sport/tennis` and `sport/tennis/player1`. Starting from Kura 6.0.0, the Eclipse Kapua, Raw MQTT and Sparkplug cloud connections deliver all these messages to the `CloudSubscriberListener`. Previous versions discarded some of them, so an existing subscriber may now receive messages that it did not receive before:
-
-        - **Eclipse Kapua**: a subscriber whose **Application Topic** ends with `#` now also receives the messages published on the parent topic. For example, with the default **Application Topic** `A1/#` the listener now also receives the messages published on `<account-name>/<client-id>/<app.id>/A1`.
-        - **Raw MQTT** and **Sparkplug**: a **Topic Filter** with a `+` wildcard before `#` now also matches its parent level, for example `foo/+/#` matches `foo/bar`. A filter without `+` before `#`, such as `foo/#`, already matched `foo`.
-
 6. **Receiving connection state notifications**
 
     If an application is interested in cloud connection status change events (connected, disconnected, etc), it can implement and attach a `CloudConnectionListener` to a `CloudPublisher` or `CloudSubscriber` instance.

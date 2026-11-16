@@ -53,21 +53,21 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
 import org.eclipse.kura.certificate.CertificatesService;
-import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
 import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
-import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
@@ -105,13 +105,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -120,25 +113,27 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.Designate;
-@Component(
-    name = "org.eclipse.kura.cloud.CloudService",
-    immediate = false,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.cloud.CloudService.class,
-            org.eclipse.kura.configuration.ConfigurableComponent.class,
-            org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
-            org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
-            org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
-            org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
-            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
-    property = { "kura.ui.service.hide:Boolean=true" })
-@Designate(ocd = CloudServiceMetatype.class, factory = true)
-public class CloudServiceImpl
-        implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component(name = "org.eclipse.kura.cloud.CloudService", immediate = false, configurationPolicy = ConfigurationPolicy.REQUIRE, service = {
+        org.eclipse.kura.configuration.ConfigurableComponent.class,
+        org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
+        org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
+        org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+        org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
+        org.eclipse.kura.cloudconnection.CloudEndpoint.class }, property = { "kura.ui.service.hide:Boolean=true" })
+@Designate(ocd = KapuaCloudConnectionManagerMetatype.class, factory = true)
+public class KapuaCloudConnectionManager
+        implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
-    private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(KapuaCloudConnectionManager.class);
 
     private static final String TOPIC_BA_APP = "BA";
     private static final String TOPIC_MQTT_APP = "MQTT";
@@ -155,7 +150,7 @@ public class CloudServiceImpl
 
     private ComponentContext ctx;
 
-    private CloudServiceOptions options;
+    private KapuaCloudConnectionManagerOptions options;
 
     private DataService dataService;
     private SystemService systemService;
@@ -168,8 +163,6 @@ public class CloudServiceImpl
     private Marshaller jsonMarshaller;
     private Optional<NetworkStatusService> networkStatusService = Optional.empty();
 
-    // use a synchronized implementation for the list
-    private final List<CloudClientImpl> cloudClients;
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
     private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
@@ -186,6 +179,8 @@ public class CloudServiceImpl
     private boolean subscribed;
 
     private final AtomicInteger messageId;
+    private final Lock messageIdLock = new ReentrantLock();
+    private final Condition messagePublished = this.messageIdLock.newCondition();
 
     private ServiceRegistration<?> cloudServiceRegistration;
 
@@ -201,9 +196,9 @@ public class CloudServiceImpl
     private ScheduledFuture<?> scheduledBirthPublisherFuture;
     private final ScheduledExecutorService scheduledBirthPublisher = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean shouldPublishDelayedBirth = new AtomicBoolean();
+    private final Lock delayedBirthLock = new ReentrantLock();
 
-    public CloudServiceImpl() {
-        this.cloudClients = new CopyOnWriteArrayList<>();
+    public KapuaCloudConnectionManager() {
         this.messageId = new AtomicInteger();
         this.registeredRequestHandlers = new HashMap<>();
         this.registeredSubscribers = new ConcurrentHashMap<>();
@@ -264,11 +259,7 @@ public class CloudServiceImpl
         return this.systemService;
     }
 
-    @Reference(name = "NetworkService",
-            service = org.eclipse.kura.net.NetworkService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetNetworkService")
+    @Reference(name = "NetworkService", service = org.eclipse.kura.net.NetworkService.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, unbind = "unsetNetworkService")
     public void setNetworkService(NetworkService networkService) {
         this.networkService = Optional.of(networkService);
     }
@@ -283,11 +274,7 @@ public class CloudServiceImpl
         return this.networkService;
     }
 
-    @Reference(name = "PositionService",
-            service = org.eclipse.kura.position.PositionService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetPositionService")
+    @Reference(name = "PositionService", service = org.eclipse.kura.position.PositionService.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, unbind = "unsetPositionService")
     public void setPositionService(PositionService positionService) {
         this.positionService = Optional.of(positionService);
     }
@@ -313,10 +300,7 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "Unmarshaller",
-            service = org.eclipse.kura.marshalling.Unmarshaller.class,
-            target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
-            unbind = "unsetJsonUnmarshaller")
+    @Reference(name = "Unmarshaller", service = org.eclipse.kura.marshalling.Unmarshaller.class, target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)", unbind = "unsetJsonUnmarshaller")
     public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
         this.jsonUnmarshaller = jsonUnmarshaller;
     }
@@ -327,10 +311,7 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "Marshaller",
-            service = org.eclipse.kura.marshalling.Marshaller.class,
-            target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
-            unbind = "unsetJsonMarshaller")
+    @Reference(name = "Marshaller", service = org.eclipse.kura.marshalling.Marshaller.class, target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)", unbind = "unsetJsonMarshaller")
     public void setJsonMarshaller(Marshaller jsonMarshaller) {
         this.jsonMarshaller = jsonMarshaller;
     }
@@ -341,11 +322,7 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "TamperDetectionService",
-            service = org.eclipse.kura.security.tamper.detection.TamperDetectionService.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetTamperDetectionService")
+    @Reference(name = "TamperDetectionService", service = org.eclipse.kura.security.tamper.detection.TamperDetectionService.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind = "unsetTamperDetectionService")
     public void setTamperDetectionService(final TamperDetectionService tamperDetectionService) {
         synchronized (this.tamperDetectionServices) {
             this.tamperDetectionServices.add(tamperDetectionService);
@@ -360,11 +337,7 @@ public class CloudServiceImpl
         }
     }
 
-    @Reference(name = "NetworkStatusService",
-            service = org.eclipse.kura.net.status.NetworkStatusService.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetNetworkStatusService")
+    @Reference(name = "NetworkStatusService", service = org.eclipse.kura.net.status.NetworkStatusService.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, unbind = "unsetNetworkStatusService")
     public void setNetworkStatusService(NetworkStatusService networkStatusService) {
         this.networkStatusService = Optional.of(networkStatusService);
     }
@@ -393,7 +366,7 @@ public class CloudServiceImpl
         //
         // save the bundle context and the properties
         this.ctx = componentContext;
-        this.options = new CloudServiceOptions(properties, this.systemService);
+        this.options = new KapuaCloudConnectionManagerOptions(properties, this.systemService);
         //
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
@@ -432,7 +405,7 @@ public class CloudServiceImpl
         logger.info("updated {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         // Update properties and re-publish Birth certificate
-        this.options = new CloudServiceOptions(properties, this.systemService);
+        this.options = new KapuaCloudConnectionManagerOptions(properties, this.systemService);
         if (isConnected()) {
             try {
                 setupCloudConnection(false);
@@ -455,11 +428,6 @@ public class CloudServiceImpl
         }
 
         this.dataService.removeDataServiceListener(this);
-
-        // no need to release the cloud clients as the updated app
-        // certificate is already published due the missing dependency
-        // we only need to empty our CloudClient list
-        this.cloudClients.clear();
 
         this.dataService = null;
         this.systemService = null;
@@ -484,14 +452,14 @@ public class CloudServiceImpl
 
         if (TamperEvent.TAMPER_EVENT_TOPIC.equals(topic) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
-            logger.debug("CloudServiceImpl: received tamper event, publishing BIRTH.");
+            logger.debug("KapuaCloudConnectionManager: received tamper event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
             return;
         }
 
         if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic) || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic))
                 && this.dataService.isConnected()) {
-            logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
+            logger.debug("KapuaCloudConnectionManager: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
     }
@@ -519,28 +487,8 @@ public class CloudServiceImpl
     //
     // ----------------------------------------------------------------
 
-    @Override
-    public CloudClient newCloudClient(String applicationId) throws KuraException {
-        // create new instance
-        CloudClientImpl cloudClient = new CloudClientImpl(applicationId, this.dataService, this);
-        this.cloudClients.add(cloudClient);
-
-        // publish updated birth certificate with list of active apps
-        if (isConnected()) {
-            publishAppCertificate();
-        }
-
-        // return
-        return cloudClient;
-    }
-
-    @Override
     public String[] getCloudApplicationIdentifiers() {
         List<String> appIds = new ArrayList<>();
-        for (CloudClientImpl cloudClient : this.cloudClients) {
-            appIds.add(cloudClient.getApplicationId());
-        }
-
         for (Entry<String, RequestHandler> entry : this.registeredRequestHandlers.entrySet()) {
             appIds.add(entry.getKey());
         }
@@ -558,30 +506,23 @@ public class CloudServiceImpl
     //
     // ----------------------------------------------------------------
 
-    public CloudServiceOptions getCloudServiceOptions() {
+    public KapuaCloudConnectionManagerOptions getCloudConnectionManagerOptions() {
         return this.options;
-    }
-
-    public void removeCloudClient(CloudClientImpl cloudClient) {
-        // remove the client
-        this.cloudClients.remove(cloudClient);
-
-        // publish updated birth certificate with updated list of active apps
-        if (isConnected()) {
-            publishAppCertificate();
-        }
     }
 
     public byte[] encodePayload(KuraPayload payload) throws KuraException {
         byte[] bytes;
         CloudPayloadEncoding preferencesEncoding = this.options.getPayloadEncoding();
 
-        if (preferencesEncoding == KURA_PROTOBUF) {
-            bytes = encodeProtobufPayload(payload);
-        } else if (preferencesEncoding == SIMPLE_JSON) {
-            bytes = encodeJsonPayload(payload);
-        } else {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD);
+        switch (preferencesEncoding) {
+            case KURA_PROTOBUF:
+                bytes = encodeProtobufPayload(payload);
+                break;
+            case SIMPLE_JSON:
+                bytes = encodeJsonPayload(payload);
+                break;
+            default:
+                throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD);
         }
         return bytes;
     }
@@ -604,17 +545,18 @@ public class CloudServiceImpl
 
         postConnectionStateChangeEvent(true);
 
-        this.cloudClients.forEach(CloudClientImpl::onConnectionEstablished);
-
         this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onConnectionEstablished);
     }
 
     private void setupDeviceSubscriptions(boolean subscribe) throws KuraException {
         StringBuilder sbDeviceSubscription = new StringBuilder();
         sbDeviceSubscription.append(this.options.getTopicControlPrefix())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicAccountToken())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicClientIdToken())
-                .append(CloudServiceOptions.getTopicSeparator()).append(CloudServiceOptions.getTopicWildCard());
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(KapuaCloudConnectionManagerOptions.getTopicAccountToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(KapuaCloudConnectionManagerOptions.getTopicClientIdToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(KapuaCloudConnectionManagerOptions.getTopicWildCard());
 
         // restore or remove default subscriptions
         if (subscribe) {
@@ -647,8 +589,6 @@ public class CloudServiceImpl
         // raise event
         postConnectionStateChangeEvent(false);
 
-        this.cloudClients.forEach(CloudClientImpl::onConnectionLost);
-
         this.registeredCloudConnectionListeners.forEach(CloudConnectionListener::onConnectionLost);
     }
 
@@ -668,15 +608,15 @@ public class CloudServiceImpl
                     boolean validMessage = isValidMessage(kuraTopic, kuraPayload);
 
                     if (validMessage) {
-                        dispatchControlMessage(qos, retained, kuraTopic, kuraPayload);
+                        dispatchControlMessage(kuraTopic, kuraPayload);
                     } else {
                         logger.warn("Message verification failed! Not valid signature or message not signed.");
                     }
                 } else {
-                    dispatchDataMessage(qos, retained, kuraTopic, kuraPayload);
+                    dispatchDataMessage(kuraTopic, kuraPayload);
                 }
             } catch (Exception e) {
-                logger.error("Error during CloudClientListener notification.", e);
+                logger.error("Error during message dispatch.", e);
             }
         }
 
@@ -696,7 +636,7 @@ public class CloudServiceImpl
         return kuraPayload;
     }
 
-    private void dispatchControlMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
+    private void dispatchControlMessage(KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         String applicationId = kuraTopic.getApplicationId();
 
         RequestHandler cloudlet = this.registeredRequestHandlers.get(applicationId);
@@ -711,10 +651,6 @@ public class CloudServiceImpl
             callbackExecutor.submit(new MessageHandlerCallable(cloudlet, applicationId, kuraTopic.getApplicationTopic(),
                     kuraPayload, this));
         }
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudClient -> cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(),
-                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("deviceId", kuraTopic.getDeviceId());
@@ -727,12 +663,7 @@ public class CloudServiceImpl
                 .forEach(e -> dispatchMessage(receivedMessage, e.getValue()));
     }
 
-    private void dispatchDataMessage(int qos, boolean retained, KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .forEach(cloudClient -> cloudClient.onMessageArrived(kuraTopic.getDeviceId(),
-                        kuraTopic.getApplicationTopic(), kuraPayload, qos, retained));
-
+    private void dispatchDataMessage(KuraTopicImpl kuraTopic, KuraPayload kuraPayload) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("deviceId", kuraTopic.getDeviceId());
         properties.put("appTopic", kuraTopic.getApplicationTopic());
@@ -771,38 +702,27 @@ public class CloudServiceImpl
 
     @Override
     public void onMessagePublished(int messageId, String topic) {
-        synchronized (this.messageId) {
-            if (this.messageId.get() != -1 && this.messageId.get() == messageId) {
-                this.messageId.set(-1);
-                this.messageId.notifyAll();
-                return;
+        this.messageIdLock.lock();
+        try {
+            if (messageId != -1 && this.messageId.compareAndSet(messageId, -1)) {
+                this.messagePublished.signalAll();
             }
+        } finally {
+            this.messageIdLock.unlock();
         }
-
-        // notify listeners
-        KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .collect(Collectors.toList())
-                .forEach(cloudClient -> cloudClient.onMessagePublished(messageId, kuraTopic.getApplicationTopic()));
     }
 
     @Override
     public void onMessageConfirmed(int messageId, String topic) {
-        synchronized (this.messageId) {
-            if (this.messageId.get() != -1 && this.messageId.get() == messageId) {
-                this.messageId.set(-1);
-                this.messageId.notifyAll();
+        this.messageIdLock.lock();
+        try {
+            if (messageId != -1 && this.messageId.compareAndSet(messageId, -1)) {
+                this.messagePublished.signalAll();
                 return;
             }
+        } finally {
+            this.messageIdLock.unlock();
         }
-
-        // notify listeners
-        KuraApplicationTopic kuraTopic = new KuraTopicImpl(topic, this.options.getTopicControlPrefix());
-        this.cloudClients.stream()
-                .filter(cloudClient -> cloudClient.getApplicationId().equals(kuraTopic.getApplicationId()))
-                .collect(Collectors.toList())
-                .forEach(cloudClient -> cloudClient.onMessageConfirmed(messageId, kuraTopic.getApplicationTopic()));
 
         this.registeredCloudPublisherDeliveryListeners
                 .forEach(deliveryListener -> deliveryListener.onMessageConfirmed(String.valueOf(messageId), topic));
@@ -909,58 +829,65 @@ public class CloudServiceImpl
     }
 
     private void publishWithDelay(boolean isAppUpdate) {
-        synchronized (this.shouldPublishDelayedBirth) {
+        this.delayedBirthLock.lock();
+        try {
             if (!isAppUpdate) {
                 this.shouldPublishDelayedBirth.set(true);
             }
 
             if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
                 this.scheduledBirthPublisherFuture.cancel(false);
-                logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
+                logger.debug("KapuaCloudConnectionManager: BIRTH message cache timer restarted.");
             }
 
-            logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
+            logger.debug("KapuaCloudConnectionManager: BIRTH message cached for 30s.");
 
             this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(this::publishDelayedMessage, 30L,
                     TimeUnit.SECONDS);
+        } finally {
+            this.delayedBirthLock.unlock();
         }
     }
 
     private void publishLifeCycleMessage(LifecycleMessage message) throws KuraException {
         // track the message ID and block until the message
         // has been published (i.e. written to the socket).
-        synchronized (this.messageId) {
+        this.messageIdLock.lock();
+        try {
             this.messageId.set(-1);
             // add a timestamp to the message
             KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
             int id = this.dataService.publish(message.getTopic(), encodedPayload, message.getQos(),
-                    CloudServiceOptions.getLifeCycleMessageRetain(), CloudServiceOptions.getLifeCycleMessagePriority());
+                    KapuaCloudConnectionManagerOptions.getLifeCycleMessageRetain(),
+                    KapuaCloudConnectionManagerOptions.getLifeCycleMessagePriority());
             this.messageId.set(id);
-            try {
-                this.messageId.wait(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.info("Interrupted while waiting for the message to be published", e);
+            long remainingNanos = TimeUnit.SECONDS.toNanos(1);
+            while (this.messageId.get() == id && remainingNanos > 0) {
+                remainingNanos = this.messagePublished.awaitNanos(remainingNanos);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.info("Interrupted while waiting for the message to be published", e);
+        } finally {
+            this.messageIdLock.unlock();
         }
     }
 
     private void publishDelayedMessage() {
-        synchronized (this.shouldPublishDelayedBirth) {
-            try {
-
-                if (this.shouldPublishDelayedBirth.get()) {
-                    publishLifeCycleMessage(new LifecycleMessage(this.options, this).asBirthCertificateMessage());
-                } else {
-                    publishLifeCycleMessage(new LifecycleMessage(this.options, this).asAppCertificateMessage());
-                }
-                this.shouldPublishDelayedBirth.set(false);
-
-            } catch (KuraException e) {
-                logger.error("Error sending cached BIRTH/APP certificate.", e);
+        this.delayedBirthLock.lock();
+        try {
+            if (this.shouldPublishDelayedBirth.get()) {
+                publishLifeCycleMessage(new LifecycleMessage(this.options, this).asBirthCertificateMessage());
+            } else {
+                publishLifeCycleMessage(new LifecycleMessage(this.options, this).asAppCertificateMessage());
             }
+            this.shouldPublishDelayedBirth.set(false);
+        } catch (KuraException e) {
+            logger.error("Error sending cached BIRTH/APP certificate.", e);
+        } finally {
+            this.delayedBirthLock.unlock();
         }
     }
 
@@ -1095,7 +1022,7 @@ public class CloudServiceImpl
             String appTopic = (String) messageProps.get(APP_TOPIC.name());
             boolean isControl = (Boolean) messageProps.get(CONTROL.name());
 
-            String deviceId = CloudServiceOptions.getTopicClientIdToken();
+            String deviceId = KapuaCloudConnectionManagerOptions.getTopicClientIdToken();
 
             fullTopic = encodeTopic(appId, deviceId, appTopic, isControl);
         }
@@ -1121,7 +1048,8 @@ public class CloudServiceImpl
             return;
         }
 
-        String fullTopic = encodeTopic(appId, CloudServiceOptions.getTopicClientIdToken(), appTopic, isControl);
+        String fullTopic = encodeTopic(appId, KapuaCloudConnectionManagerOptions.getTopicClientIdToken(), appTopic,
+                isControl);
 
         CloudSubscriptionRecord subscriptionRecord = new CloudSubscriptionRecord(fullTopic, qos);
 
@@ -1192,14 +1120,16 @@ public class CloudServiceImpl
     private String encodeTopic(String appId, String deviceId, String appTopic, boolean isControl) {
         StringBuilder sb = new StringBuilder();
         if (isControl) {
-            sb.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
+            sb.append(this.options.getTopicControlPrefix())
+                    .append(KapuaCloudConnectionManagerOptions.getTopicSeparator());
         }
 
-        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(appId);
+        sb.append(KapuaCloudConnectionManagerOptions.getTopicAccountToken())
+                .append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(deviceId).append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
+            sb.append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();
@@ -1228,7 +1158,7 @@ public class CloudServiceImpl
 
     private boolean isFrameworkStopping() {
         try {
-            final Bundle ownBundle = FrameworkUtil.getBundle(CloudServiceImpl.class);
+            final Bundle ownBundle = FrameworkUtil.getBundle(KapuaCloudConnectionManager.class);
 
             if (ownBundle == null) {
                 return false; // not running in an OSGi framework? e.g. unit test
@@ -1273,7 +1203,7 @@ public class CloudServiceImpl
     }
 
     private void readModemInfos(List<ModemInterfaceStatus> modemStatuses) {
-        Collections.sort(modemStatuses, Comparator.comparing(ModemInterfaceStatus::getConnectionStatus));
+        modemStatuses.sort(Comparator.comparing(ModemInterfaceStatus::getConnectionStatus));
         ModemInterfaceStatus modemStatus = modemStatuses.get(modemStatuses.size() - 1);
         Optional<Sim> activeSim = Optional.empty();
 

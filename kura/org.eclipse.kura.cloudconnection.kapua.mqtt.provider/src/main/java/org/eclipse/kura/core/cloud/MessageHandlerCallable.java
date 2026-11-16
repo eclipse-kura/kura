@@ -71,11 +71,11 @@ public class MessageHandlerCallable implements Callable<Void> {
     private final String appId;
     private final String appTopic;
     private final KuraPayload kuraMessage;
-    private final CloudServiceImpl cloudService;
+    private final KapuaCloudConnectionManager cloudService;
     private final RequestHandlerContext requestHandlerContext;
 
     public MessageHandlerCallable(RequestHandler cloudApp, String appId, String appTopic, KuraPayload msg,
-            CloudServiceImpl cloudService) {
+            KapuaCloudConnectionManager cloudService) {
         super();
         this.cloudApp = cloudApp;
         this.appId = appId;
@@ -255,15 +255,15 @@ public class MessageHandlerCallable implements Callable<Void> {
     }
 
     private String encodeTopic(String deviceId, String appTopic) {
-        CloudServiceOptions options = this.cloudService.getCloudServiceOptions();
+        KapuaCloudConnectionManagerOptions options = this.cloudService.getCloudConnectionManagerOptions();
         StringBuilder sb = new StringBuilder();
-        sb.append(options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator());
+        sb.append(options.getTopicControlPrefix()).append(KapuaCloudConnectionManagerOptions.getTopicSeparator());
 
-        sb.append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(deviceId).append(CloudServiceOptions.getTopicSeparator()).append(this.appId);
+        sb.append(KapuaCloudConnectionManagerOptions.getTopicAccountToken()).append(KapuaCloudConnectionManagerOptions.getTopicSeparator())
+                .append(deviceId).append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(this.appId);
 
         if (appTopic != null && !appTopic.isEmpty()) {
-            sb.append(CloudServiceOptions.getTopicSeparator()).append(appTopic);
+            sb.append(KapuaCloudConnectionManagerOptions.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();

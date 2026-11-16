@@ -18,7 +18,7 @@
     <suppress checks="LineLength" files="ClockServiceOptions.java"/>
     <suppress checks="LineLength" files="CloudCatMetatype.java"/>
     <suppress checks="LineLength" files="CloudPublisherMetatype.java"/>
-    <suppress checks="LineLength" files="CloudServiceMetatype.java"/>
+    <suppress checks="LineLength" files="KapuaCloudConnectionManagerMetatype.java"/>
     <suppress checks="LineLength" files="CloudSubscriberMetatype.java"/>
     <suppress checks="LineLength" files="ConfigurationChangeManagerMetatype.java"/>
     <suppress checks="LineLength" files="ConnectionManagerOptions.java"/>

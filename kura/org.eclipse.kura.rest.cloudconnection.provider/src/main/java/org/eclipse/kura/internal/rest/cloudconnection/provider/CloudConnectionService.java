@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
@@ -64,14 +62,12 @@ import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("deprecation")
 public class CloudConnectionService {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionService.class);
 
-    private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(" + "|"
-            + "(objectClass=org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)"
-            + "(objectClass=org.eclipse.kura.cloud.factory.CloudServiceFactory)" + ")";
+    private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(objectClass="
+            + "org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)";
 
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
@@ -427,10 +423,6 @@ public class CloudConnectionService {
                 cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
             } else if (service instanceof CloudEndpoint) {
                 cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_ENDPOINT);
-            } else if (service instanceof CloudService) {
-                cloudEndpointInstance.setState(((CloudService) service).isConnected() ? CloudConnectionState.CONNECTED
-                        : CloudConnectionState.DISCONNECTED);
-                cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
             }
         });
     }
@@ -449,36 +441,6 @@ public class CloudConnectionService {
     private CloudConnectionFactory wrap(final Object o) {
         if (o instanceof CloudConnectionFactory) {
             return (CloudConnectionFactory) o;
-        } else if (o instanceof CloudServiceFactory) {
-            final CloudServiceFactory f = (CloudServiceFactory) o;
-
-            return new CloudConnectionFactory() {
-
-                @Override
-                public List<String> getStackComponentsPids(String pid) throws KuraException {
-                    return f.getStackComponentsPids(pid);
-                }
-
-                @Override
-                public Set<String> getManagedCloudConnectionPids() throws KuraException {
-                    return f.getManagedCloudServicePids();
-                }
-
-                @Override
-                public String getFactoryPid() {
-                    return f.getFactoryPid();
-                }
-
-                @Override
-                public void deleteConfiguration(String pid) throws KuraException {
-                    f.deleteConfiguration(pid);
-                }
-
-                @Override
-                public void createConfiguration(String pid) throws KuraException {
-                    f.createConfiguration(pid);
-                }
-            };
         }
         return null;
     }

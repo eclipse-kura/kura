@@ -122,6 +122,7 @@
 	org.eclipse.osgitech.rest;version='[1.2.3,1.2.4)',\
 	org.eclipse.osgitech.rest.servlet.whiteboard;version='[1.2.3,1.2.4)',\
 	org.eclipse.osgitech.rest.sse;version='[1.2.3,1.2.4)',\
+	org.eclipse.paho.client.mqttv3;version='[1.2.5,1.2.6)',\
 	org.glassfish.hk2.api;version='[3.1.1,3.1.2)',\
 	org.glassfish.hk2.external.aopalliance-repackaged;version='[3.1.1,3.1.2)',\
 	org.glassfish.hk2.locator;version='[3.1.1,3.1.2)',\

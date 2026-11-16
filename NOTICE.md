@@ -149,6 +149,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.felix/org.apache.felix.gogo.command/1.1.2, Apache-2.0, approved, #17675
 * maven/mavencentral/org.apache.felix/org.apache.felix.gogo.runtime/1.1.6, Apache-2.0 AND MIT, approved, CQ22929
 * maven/mavencentral/org.apache.felix/org.apache.felix.scr/2.2.12, Apache-2.0, approved, #15367
+* maven/mavencentral/org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.5, EPL-2.0 OR BSD-3-Clause, approved, iot.paho
 * maven/mavencentral/org.eclipse.platform/org.eclipse.core.contenttype/3.9.500, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.core.jobs/3.15.400, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.core.runtime/3.31.100, EPL-2.0, approved, eclipse.platform
@@ -198,7 +199,6 @@ This project leverages the following third party content.
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078
 * com.codeminders.hidapi 1.1, New BSD License, approved, CQ7833
 * org.moka7 1.0.2, EPL-1.0, approved, CQ12777
-* org.eclipse.paho.client.mqttv3 1.2.1.k2, EPL-1.0, approved, eclipse.platform
 
 ## Cryptography
 

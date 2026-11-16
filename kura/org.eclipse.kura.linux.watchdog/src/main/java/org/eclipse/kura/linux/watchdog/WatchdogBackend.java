@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
+ * Copyright (c) 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,9 +22,12 @@ import org.eclipse.kura.watchdog.WatchdogStatus;
 
 public interface WatchdogBackend {
 
-    long REBOOT_RETRY_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
+    public long REBOOT_RETRY_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
 
-    WatchdogMode getMode();
+    /**
+     * Returns the mode implemented by this backend. The service creates one backend per mode.
+     */
+    public WatchdogMode getMode();
 
     /**
      * Applies the given configuration. A backend is active when the watchdog is enabled and the configured mode is
@@ -34,7 +37,7 @@ public interface WatchdogBackend {
      * backend is running after the call, and throws if it should be active but could not be activated. A backend
      * that is not active releases every resource it holds.
      */
-    boolean configure(WatchdogServiceOptions options, Optional<WatchdogStatus> failedBackendStatus)
+    public boolean configure(WatchdogServiceOptions options, Optional<WatchdogStatus> failedBackendStatus)
             throws KuraException;
 
     /**
@@ -42,15 +45,26 @@ public interface WatchdogBackend {
      * component that timed out, and stays set on every following tick. The result tells the service whether the
      * refresh interval changed; the interval it carries is already limited to the hardware timeout.
      */
-    TickResult onTick(Optional<String> failedCriticalComponent);
+    public TickResult onTick(Optional<String> failedCriticalComponent);
 
-    void deactivate();
+    /**
+     * Called once when the service is deactivated, after the last tick. Unlike a configuration that disables the
+     * watchdog, this does not turn the supervision off, so that the system is reset if Kura does not start again: the
+     * direct backend closes the device without disarming it, the systemd backend raises the service watchdog timeout
+     * to the grace period. A backend that is not active does nothing.
+     */
+    public void deactivate();
 
-    int getHardwareTimeout();
+    /**
+     * Returns the timeout of the watchdog refreshed by this backend, in milliseconds: the timeout read from the
+     * device for the direct backend, the timeout of the service watchdog for the systemd backend. Returns 0 if the
+     * backend has no watchdog or the timeout is not known. The service uses it to limit the refresh interval.
+     */
+    public int getHardwareTimeout();
 
     /**
      * Returns the supervision status of this backend. A backend that is not configured reports
      * {@link org.eclipse.kura.watchdog.WatchdogState#DISABLED}.
      */
-    WatchdogStatus getStatus();
+    public WatchdogStatus getStatus();
 }

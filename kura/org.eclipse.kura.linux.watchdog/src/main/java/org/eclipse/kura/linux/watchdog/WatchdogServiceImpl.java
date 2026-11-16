@@ -282,28 +282,20 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     protected void checkCriticalComponents() {
         logger.debug("Starting critical components check...");
+
         if (this.timedOutComponent.isEmpty()) {
-            CriticalComponentRegistration ccr = getAnyTimedOutRegistration();
-            if (ccr != null) {
+            getAnyTimedOutRegistration().ifPresent(ccr -> {
                 this.timedOutComponent = Optional.of(ccr.getCriticalComponentName());
                 logger.warn("Critical component '{}' timed out. System will reboot", ccr.getCriticalComponentName());
-            }
+            });
         }
 
         tickActiveBackend();
     }
 
-    private CriticalComponentRegistration getAnyTimedOutRegistration() {
-        CriticalComponentRegistration result = null;
+    private Optional<CriticalComponentRegistration> getAnyTimedOutRegistration() {
 
-        for (CriticalComponentRegistration ccr : this.criticalComponentRegistrations) {
-            if (ccr.isTimedOut()) {
-                result = ccr;
-                break;
-            }
-        }
-
-        return result;
+        return this.criticalComponentRegistrations.stream().filter(CriticalComponentRegistration::isTimedOut).findAny();
     }
 
     private void cancelPollTask() {

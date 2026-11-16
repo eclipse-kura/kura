@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
+ * Copyright (c) 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -128,7 +128,8 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
         if (this.usecFromEnvironment) {
             logger.info("Using systemd watchdog timeout from WATCHDOG_USEC: {} usec", this.watchdogUsec);
         } else {
-            this.watchdogUsec = TimeUnit.MILLISECONDS.toMicros(options.getPingInterval() * WATCHDOG_TIMEOUT_PING_INTERVALS);
+            this.watchdogUsec = TimeUnit.MILLISECONDS
+                    .toMicros(options.getPingInterval() * WATCHDOG_TIMEOUT_PING_INTERVALS);
             logger.info("Setting systemd watchdog timeout to {} usec", this.watchdogUsec);
         }
 
@@ -271,7 +272,8 @@ public class SystemdWatchdogBackend implements WatchdogBackend {
         }
         return builder.withState(this.triggered ? WatchdogState.REBOOT_REQUESTED : WatchdogState.SUPERVISING)
                 .withLastRefreshTime(Optional.ofNullable(this.lastRefreshTime))
-                .withRefreshIntervalMs(WatchdogServiceOptions.limitPingInterval(this.pingIntervalMs, getHardwareTimeout()))
+                .withRefreshIntervalMs(
+                        WatchdogServiceOptions.limitPingInterval(this.pingIntervalMs, getHardwareTimeout()))
                 .withFailureReason(this.triggered ? Optional.of("Critical component timed out") : Optional.empty())
                 .build();
     }

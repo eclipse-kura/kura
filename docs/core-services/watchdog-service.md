@@ -31,7 +31,7 @@ This service provides the following configuration parameters:
 
 - **Reboot Cause File Path** - sets the path to the file that will contain the reboot cause information. (Required field)
 
-- **Fail on unavailable device** - only used in **direct** mode. Sets the behaviour of the service when it is enabled but the watchdog device does not exist or cannot be opened. If disabled (default), the service keeps running without hardware supervision. If enabled, the service requests a system reboot as described in [Unavailable watchdog device](#unavailable-watchdog-device). (Required field)
+- **Fail on unavailable device** — used only in **direct** mode. This setting controls how the service behaves when it is enabled but the watchdog device is missing or cannot be opened. When disabled (the default), the service continues running without hardware supervision. When enabled, the service triggers a system reboot, as described in [Unavailable watchdog device](#unavailable-watchdog-device). (Required field)
 
 When the configuration is updated in **direct** mode, the watchdog device is disarmed and reopened only if the **enabled**, the **Watchdog mode** or the **Watchdog device path** parameters change. A change to the other parameters is applied without interrupting the hardware supervision. An update that does not change any value is ignored.
 

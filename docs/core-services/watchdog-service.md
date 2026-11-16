@@ -36,7 +36,7 @@ This service provides the following configuration parameters:
 When the configuration is updated in **direct** mode, the watchdog device is disarmed and reopened only if the **enabled**, the **Watchdog mode** or the **Watchdog device path** parameters change. A change to the other parameters is applied without interrupting the hardware supervision. An update that does not change any value is ignored.
 
 !!! warning
-    The default **Watchdog mode** is `systemd`. An installation that was using the hardware watchdog device through Kura before this parameter was introduced must set **Watchdog mode** to `direct` to keep that behaviour, otherwise it is supervised through systemd.
+    The default **Watchdog mode** is `systemd`. If an existing installation previously used the hardware watchdog device directly through Kura before this parameter was introduced, it must set **Watchdog mode** to `direct` to retain that behavior. Otherwise, the watchdog will be managed by systemd.
 
 ## Watchdog modes
 

@@ -33,7 +33,7 @@ This service provides the following configuration parameters:
 
 - **Fail on unavailable device** — used only in **direct** mode. This setting controls how the service behaves when it is enabled but the watchdog device is missing or cannot be opened. When disabled (the default), the service continues running without hardware supervision. When enabled, the service triggers a system reboot, as described in [Unavailable watchdog device](#unavailable-watchdog-device). (Required field)
 
-When the configuration is updated in **direct** mode, the watchdog device is disarmed and reopened only if the **enabled**, the **Watchdog mode** or the **Watchdog device path** parameters change. A change to the other parameters is applied without interrupting the hardware supervision. An update that does not change any value is ignored.
+In **direct** mode, a configuration update disarms and reopens the watchdog device only if one of the following parameters is changed: **Enabled**, **Watchdog mode**, or **Watchdog device path**. Changes to any other parameters are applied without interrupting hardware supervision. If an update does not modify any parameter value, it is ignored.
 
 !!! warning
     The default **Watchdog mode** is `systemd`. If an existing installation previously used the hardware watchdog device directly through Kura before this parameter was introduced, it must set **Watchdog mode** to `direct` to retain that behavior. Otherwise, the watchdog will be managed by systemd.

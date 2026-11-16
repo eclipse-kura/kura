@@ -43,3 +43,26 @@ The configuration parameters are mapped to the SunPKCS11 provider parameters in 
 |**Enabled Mechanisms**|enabledMechanisms|The curly braces must be omitted|
 |**Disabled Mechanisms**|disabledMechanisms|The curly braces must be omitted.|
 |**Attributes**|attributes|The value of this field will be appended to the provider configuration.|
+
+## CRL Management
+
+Both KeystoreService factories can keep a local cache of Certificate Revocation Lists (CRLs). The cached CRLs are returned by the `getCRLs()` and `getCRLStore()` methods of the KeystoreService API, and the HTTP Service and the SSL Manager Service use them in the revocation check of the certificates they validate.
+
+The following options are available:
+
+- **CRL Cache Enabled**: enables the CRL cache. The default is `true`.
+- **CRL URLs**: up to five URLs to download CRLs from. The service also downloads the CRLs of the distribution points listed in the trusted certificates of the keystore. Only `http`, `https` and `file` URLs are downloaded: distribution points with any other scheme, for example `ldap` or `ftp`, are ignored.
+- **CRL Force Update Interval** and **CRL Force Update Interval Time Unit**: a cached CRL is downloaded again when its last successful download is older than this interval, even if its next update date has not passed. The default is 1 day.
+- **CRL Check Interval** and **CRL Check Interval Time Unit**: how often the cached CRLs are checked and downloaded again if needed. The default is 5 minutes. The service never checks more often than every 30 seconds.
+- **CRL Store Path**: the file where the cached CRLs are persisted. If it is empty, the `FilesystemKeystoreServiceImpl` adds a `.crl` suffix to the **Keystore Path**, and the `PKCS11KeystoreServiceImpl` uses `security/pkcs11.<pid>.crl` in the user configuration directory.
+- **Enable CRL Verification**: if `true`, a downloaded CRL is stored only if it is signed by the trusted certificate of its issuer in this keystore, that is the trusted certificate whose subject is the CRL issuer. The default is `false`: the certificate validation that uses a CRL verifies its signature.
+- **Reject Expired CRLs**: if `true`, a CRL whose next update date has passed is not stored when it is downloaded or added, and a cached CRL is no longer returned once it expires, so the revocation status of the certificates it covers cannot be determined until a valid CRL is downloaded. The default is `false`: an expired CRL is kept and returned until a newer one is downloaded, and the certificate validation decides how to treat it.
+
+A CRL is downloaded when the service starts or its configuration changes, when no CRL has been downloaded yet from the distribution point, when the cached CRL has expired or its next update date is closer than the **CRL Force Update Interval**, and when its last successful download is older than the **CRL Force Update Interval**.
+
+A downloaded CRL is stored only if all the following conditions hold:
+
+- if the distribution point comes from a trusted certificate, the CRL is issued by the issuer of that certificate, or by the CRL issuer named in the distribution point. Such a CRL replaces a cached CRL of another issuer;
+- if the distribution point comes from the **CRL URLs** option and a CRL is already cached for it, the new CRL has the same issuer;
+- the CRL is not older than the cached CRL of the same issuer: a CRL with a lower CRL number, or with an earlier this update date, is ignored;
+- the CRL passes the checks enabled by **Enable CRL Verification** and **Reject Expired CRLs**.

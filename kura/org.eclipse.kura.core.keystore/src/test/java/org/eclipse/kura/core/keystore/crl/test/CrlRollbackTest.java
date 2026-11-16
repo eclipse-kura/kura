@@ -82,6 +82,7 @@ public class CrlRollbackTest extends CrlKeystoreServiceTestBase {
         givenTrustedCertificate(this.ca.getCertificate());
 
         this.crlOptions.put("crl.urls", new String[] { this.server.url(CRL_PATH) });
+        this.crlOptions.put("verify.crl", true);
         this.crlOptions.put("crl.check.interval", 1L);
         this.crlOptions.put("crl.check.interval.time.unit", "SECONDS");
         this.crlOptions.put("crl.update.interval", 1L);

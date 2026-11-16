@@ -109,6 +109,7 @@ public class CrlIssuerBindingTest extends CrlKeystoreServiceTestBase {
         givenTrustedCertificate(new TestCA(caOptions(PARENT_ISSUER)).getCertificate());
         givenTrustedCertificate(new TestCA(caOptions(OTHER_ISSUER), otherKeyPair).getCertificate());
         givenCrlPublishedBy(new TestCA(caOptions(PARENT_ISSUER), otherKeyPair));
+        givenCrlVerificationEnabled();
         givenCrlUrlConfigured();
         givenKeystoreServiceWithCrlManagement(this.crlOptions);
 
@@ -138,6 +139,10 @@ public class CrlIssuerBindingTest extends CrlKeystoreServiceTestBase {
 
     private void givenCrlVerificationDisabled() {
         this.crlOptions.put("verify.crl", false);
+    }
+
+    private void givenCrlVerificationEnabled() {
+        this.crlOptions.put("verify.crl", true);
     }
 
     private void givenCrlUrlConfigured() {

@@ -25,11 +25,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.eclipse.kura.core.keystore.util.MappingCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +55,12 @@ public class CRLStore implements Closeable {
 
     private final File storeFile;
     private final Map<Set<URI>, StoredCRL> crls = new HashMap<>();
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executor = Executors
+            .newSingleThreadScheduledExecutor(r -> new Thread(r, "CRLStore"));
+    private final Object ioLock = new Object();
     private final long storeDelayMs;
     private Optional<ScheduledFuture<?>> storeTask = Optional.empty();
+    private boolean closed;
 
     public CRLStore(final File storeFile, final long storeDelayMs) {
         this.storeFile = storeFile;
@@ -79,11 +78,18 @@ public class CRLStore implements Closeable {
     }
 
     public synchronized void storeCRL(final StoredCRL crl) {
+        if (this.closed) {
+            logger.warn("CRL store closed, not storing CRL for {}", crl.getIssuer());
+            return;
+        }
         this.crls.put(crl.getDistributionPoints(), crl);
         requestStore();
     }
 
     public synchronized boolean removeCRLs(final Predicate<StoredCRL> predicate) {
+        if (this.closed) {
+            return false;
+        }
 
         boolean changed = false;
 
@@ -106,7 +112,7 @@ public class CRLStore implements Closeable {
         return changed;
     }
 
-    public Optional<StoredCRL> getCrl(final Set<URI> distributionPoints) {
+    public synchronized Optional<StoredCRL> getCrl(final Set<URI> distributionPoints) {
         return Optional.ofNullable(this.crls.get(distributionPoints));
     }
 
@@ -114,18 +120,12 @@ public class CRLStore implements Closeable {
         return new ArrayList<>(crls.values());
     }
 
-    public CertStore getCertStore() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        return CertStore.getInstance("Collection",
-                new CollectionCertStoreParameters(new MappingCollection<>(crls.values(), StoredCRL::getCrl)));
-    }
-
     private void requestStore() {
-        final Optional<ScheduledFuture<?>> currentTask = this.storeTask;
-
-        if (currentTask.isPresent()) {
-            currentTask.get().cancel(false);
+        if (this.closed) {
+            return;
         }
 
+        this.storeTask.ifPresent(t -> t.cancel(false));
         this.storeTask = Optional.of(this.executor.schedule(this::store, storeDelayMs, TimeUnit.MILLISECONDS));
     }
 
@@ -154,6 +154,12 @@ public class CRLStore implements Closeable {
     }
 
     private void store() {
+        synchronized (this.ioLock) {
+            writeStoreFile();
+        }
+    }
+
+    private void writeStoreFile() {
         try {
             logger.info("storing CRLs...");
             final List<StoredCRL> currentCrls = getCRLs();
@@ -215,8 +221,23 @@ public class CRLStore implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        executor.shutdown();
+    public void close() {
+        final boolean storePending;
+
+        synchronized (this) {
+            if (this.closed) {
+                return;
+            }
+            this.closed = true;
+            storePending = this.storeTask.map(t -> t.cancel(false)).orElse(false);
+            this.storeTask = Optional.empty();
+        }
+
+        this.executor.shutdown();
+
+        if (storePending) {
+            store();
+        }
     }
 
 }

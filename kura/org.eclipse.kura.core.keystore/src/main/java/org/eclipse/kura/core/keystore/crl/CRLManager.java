@@ -20,9 +20,14 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CRLException;
 import java.security.cert.CertStore;
+import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -30,46 +35,62 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.keystore.util.CRLUtil;
+import org.eclipse.kura.core.keystore.util.MappingCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CRLManager implements Closeable {
 
     private static final long MIN_RESCHEDULE_DELAY_MS = 30_000;
+    private static final long INITIAL_UPDATE_DELAY_MS = 5000;
+    private static final long SHUTDOWN_TIMEOUT_MS = 5000;
+    private static final int MAX_CONCURRENT_DOWNLOADS = 4;
 
     private static final Logger logger = LoggerFactory.getLogger(CRLManager.class);
 
     private final CRLStore store;
-    private final ScheduledExecutorService updateExecutor = Executors.newSingleThreadScheduledExecutor();
-    private final ExecutorService downloadExecutor = Executors.newCachedThreadPool();
+    private final ScheduledExecutorService updateExecutor = Executors
+            .newSingleThreadScheduledExecutor(r -> new Thread(r, "CRLManager-update"));
+    private final ExecutorService downloadExecutor = newDownloadExecutor();
 
     private final List<DistributionPointState> referencedDistributionPoints = new ArrayList<>();
     private final long forceUpdateIntervalMs;
     private final long periodicReckeckIntervalMs;
     private final CRLVerifier verifier;
+    private final boolean rejectExpired;
 
     private Optional<ScheduledFuture<?>> updateTask = Optional.empty();
-    private Optional<Listener> listener;
+    private Optional<Listener> listener = Optional.empty();
+    private boolean closed;
 
     public CRLManager(final File storeFile, final long storeDelayMs, final long periodicRecheckIntervalMs,
-            final long forceUpdateIntervalMs, final CRLVerifier verifier) {
+            final long forceUpdateIntervalMs, final CRLVerifier verifier, final boolean rejectExpired) {
         this.store = new CRLStore(storeFile, storeDelayMs);
         this.periodicReckeckIntervalMs = periodicRecheckIntervalMs;
         this.forceUpdateIntervalMs = forceUpdateIntervalMs;
         this.verifier = verifier;
+        this.rejectExpired = rejectExpired;
         requestUpdate();
     }
 
-    public void setListener(final Optional<Listener> listener) {
+    public synchronized void setListener(final Optional<Listener> listener) {
         this.listener = listener;
     }
 
     public synchronized boolean addDistributionPoint(final Set<URI> uris) {
+        if (this.closed) {
+            return false;
+        }
+
         logger.info("referencing distribution points: {}", uris);
 
         final Optional<DistributionPointState> existing = this.referencedDistributionPoints.stream()
@@ -86,6 +107,10 @@ public class CRLManager implements Closeable {
     }
 
     public synchronized boolean removeDistributionPoint(final Set<URI> uris) {
+        if (this.closed) {
+            return false;
+        }
+
         logger.info("unreferencing distribution points: {}", uris);
 
         if (this.referencedDistributionPoints.removeIf(p -> p.distributionPoints.equals(uris) && p.unref() <= 0)) {
@@ -128,46 +153,68 @@ public class CRLManager implements Closeable {
         }
     }
 
-    public synchronized List<X509CRL> getCrls() {
-        return this.store.getCRLs() //
-                .stream() //
+    public List<X509CRL> getCrls() {
+        return getServedCRLs().stream() //
                 .map(StoredCRL::getCrl) //
                 .toList();
     }
 
     public CertStore getCertStore() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        return this.store.getCertStore();
+        return CertStore.getInstance("Collection",
+                new CollectionCertStoreParameters(new MappingCollection<>(new ServedCRLs(), StoredCRL::getCrl)));
     }
 
-    public CRLStore getCRLStore() {
-        return this.store;
+    public void addCRL(final X509CRL crl) throws CRLException {
+        if (this.rejectExpired && isExpired(crl)) {
+            throw new CRLException("the CRL issued by " + crl.getIssuerX500Principal() + " expired on "
+                    + crl.getNextUpdate());
+        }
+
+        synchronized (this) {
+            if (this.closed) {
+                throw new CRLException("the CRL manager is closed");
+            }
+            this.store.storeCRL(new StoredCRL(Collections.emptySet(), crl));
+        }
     }
 
     @Override
     public void close() {
-        this.listener = Optional.empty();
-        this.updateTask.ifPresent(t -> t.cancel(false));
-        this.updateExecutor.shutdownNow();
-        this.downloadExecutor.shutdownNow();
-    }
-
-    private void requestUpdate() {
-        if (this.updateTask.isPresent()) {
-            this.updateTask.get().cancel(false);
+        synchronized (this) {
+            if (this.closed) {
+                return;
+            }
+            this.closed = true;
+            this.listener = Optional.empty();
+            this.updateTask.ifPresent(t -> t.cancel(false));
+            this.updateTask = Optional.empty();
         }
 
-        this.updateTask = Optional.of(this.updateExecutor.schedule(() -> {
-            try {
-                update();
-            } catch (final Exception e) {
-                logger.warn("Error during CRL update", e);
-            } finally {
-                rescheduleBasedOnNextUpdate();
-            }
-        }, 5000, TimeUnit.MILLISECONDS));
+        this.updateExecutor.shutdownNow();
+        this.downloadExecutor.shutdownNow();
+        awaitTermination(this.updateExecutor);
+        this.store.close();
     }
 
-    private void rescheduleBasedOnNextUpdate() {
+    private List<StoredCRL> getServedCRLs() {
+        final List<StoredCRL> crls = this.store.getCRLs();
+
+        if (!this.rejectExpired) {
+            return crls;
+        }
+
+        return crls.stream().filter(c -> !c.isExpired()).toList();
+    }
+
+    private synchronized void requestUpdate() {
+        scheduleUpdate(INITIAL_UPDATE_DELAY_MS);
+    }
+
+    private synchronized void rescheduleBasedOnNextUpdate() {
+        if (this.closed) {
+            return;
+        }
+
         final long nextUpdateDelayMs = this.store.getCRLs().stream().mapToLong(StoredCRL::getTimeToNextUpdateMs).min()
                 .orElse(Long.MAX_VALUE);
 
@@ -175,20 +222,27 @@ public class CRLManager implements Closeable {
                 Math.min(this.forceUpdateIntervalMs, this.periodicReckeckIntervalMs));
         final long scheduleDelayMs = Math.max(rawDelayMs, MIN_RESCHEDULE_DELAY_MS);
 
-        if (this.updateTask.isPresent()) {
-            this.updateTask.get().cancel(false);
+        logger.info("scheduling next CRL check in {} ms (nextUpdate-aligned)", scheduleDelayMs);
+        scheduleUpdate(scheduleDelayMs);
+    }
+
+    private synchronized void scheduleUpdate(final long delayMs) {
+        if (this.closed) {
+            return;
         }
 
-        logger.info("scheduling next CRL check in {} ms (nextUpdate-aligned)", scheduleDelayMs);
-        this.updateTask = Optional.of(this.updateExecutor.schedule(() -> {
-            try {
-                update();
-            } catch (final Exception e) {
-                logger.warn("Error during CRL update", e);
-            } finally {
-                rescheduleBasedOnNextUpdate();
-            }
-        }, scheduleDelayMs, TimeUnit.MILLISECONDS));
+        this.updateTask.ifPresent(t -> t.cancel(false));
+        this.updateTask = Optional.of(this.updateExecutor.schedule(this::runUpdate, delayMs, TimeUnit.MILLISECONDS));
+    }
+
+    private void runUpdate() {
+        try {
+            update();
+        } catch (final Exception e) {
+            logger.warn("Error during CRL update", e);
+        } finally {
+            rescheduleBasedOnNextUpdate();
+        }
     }
 
     private void update() {
@@ -200,20 +254,34 @@ public class CRLManager implements Closeable {
 
         final boolean changed = applyDownloadResults(results, now);
 
+        final Optional<Listener> currentListener;
+
+        synchronized (this) {
+            currentListener = this.listener;
+        }
+
         if (changed) {
-            this.listener.ifPresent(Listener::onCRLCacheChanged);
+            currentListener.ifPresent(Listener::onCRLCacheChanged);
         }
     }
 
     private synchronized List<PendingDownload> collectPendingDownloads(final long now) {
         final List<PendingDownload> pending = new ArrayList<>();
 
+        if (this.closed) {
+            return pending;
+        }
+
         for (final DistributionPointState state : this.referencedDistributionPoints) {
-            final Optional<StoredCRL> storedCrl = this.store.getCRLs().stream()
-                    .filter(c -> c.getDistributionPoints().equals(state.distributionPoints)).findAny();
+            final Optional<StoredCRL> storedCrl = this.store.getCrl(state.distributionPoints);
 
             if (storedCrl.isPresent() && storedCrl.get().isExpired()) {
-                logger.warn("CRL expired for distribution points: {}", state.distributionPoints);
+                if (this.rejectExpired) {
+                    logger.warn("CRL expired for distribution points: {}, it is no longer served",
+                            state.distributionPoints);
+                } else {
+                    logger.warn("CRL expired for distribution points: {}", state.distributionPoints);
+                }
             }
             if (!storedCrl.isPresent()) {
                 logger.warn("local CRL not accessible from distribution points: {}", state.distributionPoints);
@@ -251,6 +319,10 @@ public class CRLManager implements Closeable {
     }
 
     private synchronized boolean applyDownloadResults(final List<DownloadResult> results, final long now) {
+        if (this.closed) {
+            return false;
+        }
+
         boolean changed = false;
 
         for (final DownloadResult result : results) {
@@ -278,6 +350,34 @@ public class CRLManager implements Closeable {
             return true;
         }
         return storedCrl.get().isNearingExpiry(this.forceUpdateIntervalMs);
+    }
+
+    private static boolean isExpired(final X509CRL crl) {
+        final Date nextUpdate = crl.getNextUpdate();
+
+        return nextUpdate != null && nextUpdate.getTime() < System.currentTimeMillis();
+    }
+
+    private static void awaitTermination(final ExecutorService executor) {
+        try {
+            if (!executor.awaitTermination(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                logger.warn("CRL update task did not terminate within {} ms", SHUTDOWN_TIMEOUT_MS);
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static ExecutorService newDownloadExecutor() {
+        final AtomicInteger threadCount = new AtomicInteger();
+        final ThreadFactory threadFactory = r -> new Thread(r,
+                "CRLManager-download-" + threadCount.incrementAndGet());
+
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(MAX_CONCURRENT_DOWNLOADS, MAX_CONCURRENT_DOWNLOADS,
+                60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), threadFactory);
+        executor.allowCoreThreadTimeOut(true);
+
+        return executor;
     }
 
     private static class PendingDownload {
@@ -327,6 +427,12 @@ public class CRLManager implements Closeable {
                 }
             }
 
+            if (this.rejectExpired && isExpired(newCrl)) {
+                logger.warn("CRL verification failed: the CRL downloaded from {} expired on {}",
+                        state.distributionPoints, newCrl.getNextUpdate());
+                return false;
+            }
+
             if (this.verifier.verifyCRL(newCrl)) {
                 this.store.storeCRL(new StoredCRL(state.distributionPoints, newCrl));
                 state.lastDownloadInstantNanos = OptionalLong.of(now);
@@ -338,6 +444,19 @@ public class CRLManager implements Closeable {
         } catch (final CRLException e) {
             logger.warn("failed to encode CRL for {}", state.distributionPoints, e);
             return false;
+        }
+    }
+
+    private class ServedCRLs extends AbstractCollection<StoredCRL> {
+
+        @Override
+        public Iterator<StoredCRL> iterator() {
+            return Collections.unmodifiableList(getServedCRLs()).iterator();
+        }
+
+        @Override
+        public int size() {
+            return getServedCRLs().size();
         }
     }
 

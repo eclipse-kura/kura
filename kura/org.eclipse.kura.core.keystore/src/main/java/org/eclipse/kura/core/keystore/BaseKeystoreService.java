@@ -82,7 +82,6 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.keystore.crl.CRLManager;
 import org.eclipse.kura.core.keystore.crl.CRLManager.CRLVerifier;
 import org.eclipse.kura.core.keystore.crl.CRLManagerOptions;
-import org.eclipse.kura.core.keystore.crl.StoredCRL;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.osgi.service.component.ComponentContext;
@@ -101,7 +100,9 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     protected EventAdmin eventAdmin;
 
-    protected Optional<CRLManager> crlManager = Optional.empty();
+    private final Object crlLock = new Object();
+
+    private Optional<CRLManager> crlManager = Optional.empty();
 
     protected String ownPid;
 
@@ -135,9 +136,12 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         this.componentContext = context;
 
         this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
-        this.crlManagerOptions = new CRLManagerOptions(properties);
 
-        updateCRLManager(this.crlManagerOptions);
+        synchronized (this.crlLock) {
+            this.crlManagerOptions = new CRLManagerOptions(properties);
+
+            updateCRLManager(this.crlManagerOptions);
+        }
     }
 
     public void updated(Map<String, Object> properties) {
@@ -145,15 +149,19 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
         final CRLManagerOptions newCRLManagerOptions = new CRLManagerOptions(properties);
 
-        if (!this.crlManagerOptions.equals(newCRLManagerOptions)) {
-            this.crlManagerOptions = newCRLManagerOptions;
+        synchronized (this.crlLock) {
+            if (!this.crlManagerOptions.equals(newCRLManagerOptions)) {
+                this.crlManagerOptions = newCRLManagerOptions;
 
-            updateCRLManager(newCRLManagerOptions);
+                updateCRLManager(newCRLManagerOptions);
+            }
         }
     }
 
     public void deactivate() {
-        shutdownCRLManager();
+        synchronized (this.crlLock) {
+            shutdownCRLManager();
+        }
     }
 
     @Override
@@ -399,7 +407,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
     @Override
     public Collection<CRL> getCRLs() {
 
-        final Optional<CRLManager> currentCRLManager = this.crlManager;
+        final Optional<CRLManager> currentCRLManager = getCRLManager();
 
         if (!currentCRLManager.isPresent()) {
             return Collections.emptyList();
@@ -411,7 +419,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     @Override
     public CertStore getCRLStore() throws KuraException {
-        final Optional<CRLManager> currentCRLManager = this.crlManager;
+        final Optional<CRLManager> currentCRLManager = getCRLManager();
 
         try {
             if (!currentCRLManager.isPresent()) {
@@ -426,13 +434,15 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     @Override
     public void addCRL(X509CRL crl) throws KuraException {
-        if (!this.crlManager.isPresent()) {
-            return;
-        }
-        try {
-            this.crlManager.get().getCRLStore().storeCRL(new StoredCRL(Collections.emptySet(), crl));
-        } catch (final CRLException e) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to add the CRL");
+        synchronized (this.crlLock) {
+            if (!this.crlManager.isPresent()) {
+                return;
+            }
+            try {
+                this.crlManager.get().addCRL(crl);
+            } catch (final CRLException e) {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to add the CRL: " + e.getMessage());
+            }
         }
     }
 
@@ -494,27 +504,35 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     protected boolean tryAddToCrlManagement(final Entry entry) {
         final Optional<X509Certificate> certificate = extractCertificate(entry);
-        final Optional<CRLManager> currentCrlManager = this.crlManager;
 
-        if (certificate.isPresent() && currentCrlManager.isPresent()) {
-            return currentCrlManager.get().addTrustedCertificate(certificate.get());
-        } else {
-            return false;
+        synchronized (this.crlLock) {
+            if (certificate.isPresent() && this.crlManager.isPresent()) {
+                return this.crlManager.get().addTrustedCertificate(certificate.get());
+            } else {
+                return false;
+            }
         }
     }
 
     protected boolean tryRemoveFromCrlManagement(final Entry entry) {
         final Optional<X509Certificate> certificate = extractCertificate(entry);
-        final Optional<CRLManager> currentCrlManager = this.crlManager;
 
-        if (certificate.isPresent() && currentCrlManager.isPresent()) {
-            return currentCrlManager.get().removeTrustedCertificate(certificate.get());
-        } else {
-            return false;
+        synchronized (this.crlLock) {
+            if (certificate.isPresent() && this.crlManager.isPresent()) {
+                return this.crlManager.get().removeTrustedCertificate(certificate.get());
+            } else {
+                return false;
+            }
         }
     }
 
-    protected void updateCRLManager(final CRLManagerOptions newCRLManagerOptions) {
+    private Optional<CRLManager> getCRLManager() {
+        synchronized (this.crlLock) {
+            return this.crlManager;
+        }
+    }
+
+    private void updateCRLManager(final CRLManagerOptions newCRLManagerOptions) {
         shutdownCRLManager();
 
         if (this.crlManagerOptions.isCrlManagementEnabled()) {
@@ -522,7 +540,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             final CRLManager currentCRLManager = new CRLManager(
                     this.crlManagerOptions.getStoreFile().orElseGet(() -> new File(getCrlStorePath())), 5000,
                     newCRLManagerOptions.getCrlCheckIntervalMs(), newCRLManagerOptions.getCrlUpdateIntervalMs(),
-                    getCRLVerifier(newCRLManagerOptions));
+                    getCRLVerifier(newCRLManagerOptions), newCRLManagerOptions.isRejectExpiredCRLs());
 
             currentCRLManager.setListener(Optional.of(this::postChangedEvent));
 
@@ -579,7 +597,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         };
     }
 
-    protected void shutdownCRLManager() {
+    private void shutdownCRLManager() {
         if (this.crlManager.isPresent()) {
             this.crlManager.get().close();
             this.crlManager = Optional.empty();

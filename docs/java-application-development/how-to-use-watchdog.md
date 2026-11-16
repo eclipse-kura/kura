@@ -102,6 +102,6 @@ if (status.getState() != WatchdogState.SUPERVISING) {
 }
 ```
 
-In systemd mode the `SUPERVISING` state means that Kura is supervised by systemd: the hardware watchdog is managed by systemd and Kura cannot tell whether it is enabled. An application that needs to verify that Kura itself is refreshing the hardware watchdog device must check that the state is `SUPERVISING` and that `isDeviceOpen()` returns `true`.
+In systemd mode, the `SUPERVISING` state indicates that Kura is under systemd's supervision: the hardware watchdog is managed by systemd, and Kura cannot determine whether it is enabled. To verify that Kura itself is refreshing the hardware watchdog device, an application must check that the state is `SUPERVISING` and that `isDeviceOpen()` returns `true`.
 
-The timeout of the watchdog can be retrieved using the `getHardwareTimeout()` method. The value is expressed in milliseconds. In direct mode it is the hardware time that is programmed for the watchdog, read from the watchdog driver; the method returns 0 if the watchdog device is not open or the timeout cannot be read. In systemd mode it is the timeout of the systemd service watchdog; the method returns 0 if the supervision is not active.
+The watchdog timeout can be retrieved using the `getHardwareTimeout()` method, with the value expressed in milliseconds. In direct mode, this method returns the hardware timeout programmed for the watchdog, as read from the watchdog driver; it returns `0` if the watchdog device is not open or the timeout cannot be read. In systemd mode, it returns the timeout of the systemd service watchdog; it returns `0` if systemd supervision is not active.

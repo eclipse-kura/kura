@@ -47,7 +47,8 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     private KuraException addCrlError;
 
     @Test
-    public void expiredDownloadedCrlFailsVerification() throws Exception {
+    public void expiredDownloadedCrlFailsVerificationWhenRejectionIsEnabled() throws Exception {
+        givenExpiredCrlRejectionEnabled();
         givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(3600));
         givenPublishedCrl("expired.crl", EXPIRED_ISSUER, Instant.now().minusSeconds(3600));
         givenKeystoreServiceDownloadingThePublishedCrls();
@@ -58,8 +59,7 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     }
 
     @Test
-    public void expiredDownloadedCrlIsStoredWhenRejectionIsDisabled() throws Exception {
-        givenExpiredCrlRejectionDisabled();
+    public void expiredDownloadedCrlIsStoredByDefault() throws Exception {
         givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(3600));
         givenPublishedCrl("expired.crl", EXPIRED_ISSUER, Instant.now().minusSeconds(3600));
         givenKeystoreServiceDownloadingThePublishedCrls();
@@ -70,7 +70,8 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     }
 
     @Test
-    public void storedCrlIsNoLongerServedOnceExpired() throws Exception {
+    public void storedCrlIsNoLongerServedOnceExpiredWhenRejectionIsEnabled() throws Exception {
+        givenExpiredCrlRejectionEnabled();
         givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(5));
         givenKeystoreServiceDownloadingThePublishedCrls();
         givenCrlCacheUpdatedWith(VALID_ISSUER);
@@ -81,8 +82,7 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     }
 
     @Test
-    public void storedCrlIsStillServedOnceExpiredWhenRejectionIsDisabled() throws Exception {
-        givenExpiredCrlRejectionDisabled();
+    public void storedCrlIsStillServedOnceExpiredByDefault() throws Exception {
         givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(5));
         givenKeystoreServiceDownloadingThePublishedCrls();
         givenCrlCacheUpdatedWith(VALID_ISSUER);
@@ -93,7 +93,8 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     }
 
     @Test
-    public void expiredCrlAddedToTheKeystoreIsRejected() throws Exception {
+    public void expiredCrlAddedToTheKeystoreIsRejectedWhenRejectionIsEnabled() throws Exception {
+        givenExpiredCrlRejectionEnabled();
         givenKeystoreServiceWithCrlManagement(this.crlOptions);
 
         whenCrlIsAdded(EXPIRED_ISSUER, Instant.now().minusSeconds(3600));
@@ -103,8 +104,7 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     }
 
     @Test
-    public void expiredCrlAddedToTheKeystoreIsKeptWhenRejectionIsDisabled() throws Exception {
-        givenExpiredCrlRejectionDisabled();
+    public void expiredCrlAddedToTheKeystoreIsKeptByDefault() throws Exception {
         givenKeystoreServiceWithCrlManagement(this.crlOptions);
 
         whenCrlIsAdded(EXPIRED_ISSUER, Instant.now().minusSeconds(3600));
@@ -113,8 +113,8 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
         thenServedCrlIssuersAre(EXPIRED_ISSUER);
     }
 
-    private void givenExpiredCrlRejectionDisabled() {
-        this.crlOptions.put("crl.reject.expired", false);
+    private void givenExpiredCrlRejectionEnabled() {
+        this.crlOptions.put("crl.reject.expired", true);
     }
 
     private void givenPublishedCrl(final String fileName, final String issuer, final Instant crlNextUpdate)

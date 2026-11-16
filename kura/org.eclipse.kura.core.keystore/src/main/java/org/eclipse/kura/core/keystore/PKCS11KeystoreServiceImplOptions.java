@@ -63,7 +63,7 @@ public @interface PKCS11KeystoreServiceImplOptions {
     @AttributeDefinition(name = "CRL Check Interval Time Unit", options = { @Option(label = "SECONDS", value = "SECONDS"), @Option(label = "MINUTES", value = "MINUTES"), @Option(label = "HOURS", value = "HOURS"), @Option(label = "DAYS", value = "DAYS") }, description = "The time unit for the CRL Check Interval parameter")
     String crl_check_interval_time_unit() default "MINUTES";
 
-    @AttributeDefinition(name = "Enable CRL Verification", description = "If set to true, the downloaded CRLs will be stored only if signed with the public key of one of trusted certificates in this keystore.")
+    @AttributeDefinition(name = "Enable CRL Verification", description = "If set to true, a downloaded CRL is stored only if it is signed by the trusted certificate of its issuer in this keystore. If set to false, the CRL signature is not checked and nothing authenticates the downloaded CRLs: a CRL downloaded from the distribution point of a trusted certificate must still be issued by the issuer of that certificate.")
     boolean verify_crl() default true;
 
     @AttributeDefinition(name = "Reject Expired CRLs", description = "If set to true, a CRL whose next update date has passed fails verification: an expired CRL is not stored when downloaded or added, and a stored CRL that expires is no longer returned by the keystore, so the revocation status of the certificates it covers cannot be determined until a valid CRL is downloaded.")

@@ -71,7 +71,7 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
 
     @Test
     public void storedCrlIsNoLongerServedOnceExpired() throws Exception {
-        givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(9));
+        givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(5));
         givenKeystoreServiceDownloadingThePublishedCrls();
         givenCrlCacheUpdatedWith(VALID_ISSUER);
 
@@ -83,7 +83,7 @@ public class ExpiredCrlTest extends CrlKeystoreServiceTestBase {
     @Test
     public void storedCrlIsStillServedOnceExpiredWhenRejectionIsDisabled() throws Exception {
         givenExpiredCrlRejectionDisabled();
-        givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(9));
+        givenPublishedCrl("valid.crl", VALID_ISSUER, Instant.now().plusSeconds(5));
         givenKeystoreServiceDownloadingThePublishedCrls();
         givenCrlCacheUpdatedWith(VALID_ISSUER);
 

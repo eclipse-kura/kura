@@ -25,6 +25,7 @@ import java.util.Map;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl;
+import org.eclipse.kura.core.keystore.crl.CRLManager;
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CRLCreationOptions;
 import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
@@ -45,11 +46,19 @@ public abstract class CrlKeystoreServiceTestBase {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    protected final FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+    protected final FilesystemKeystoreServiceImpl keystoreService;
     protected final EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
 
     private final Map<String, Object> properties = new HashMap<>();
     private boolean active;
+
+    protected CrlKeystoreServiceTestBase() {
+        this(CrlTestKeystoreService.SHORT_DELAYS);
+    }
+
+    protected CrlKeystoreServiceTestBase(final CRLManager.Delays crlManagerDelays) {
+        this.keystoreService = new CrlTestKeystoreService(crlManagerDelays);
+    }
 
     @After
     public void deactivateKeystoreService() {

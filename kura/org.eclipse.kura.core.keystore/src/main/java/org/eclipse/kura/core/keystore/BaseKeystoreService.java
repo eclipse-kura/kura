@@ -538,9 +538,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         if (this.crlManagerOptions.isCrlManagementEnabled()) {
 
             final CRLManager currentCRLManager = new CRLManager(
-                    this.crlManagerOptions.getStoreFile().orElseGet(() -> new File(getCrlStorePath())), 5000,
+                    this.crlManagerOptions.getStoreFile().orElseGet(() -> new File(getCrlStorePath())),
                     newCRLManagerOptions.getCrlCheckIntervalMs(), newCRLManagerOptions.getCrlUpdateIntervalMs(),
-                    getCRLVerifier(newCRLManagerOptions), newCRLManagerOptions.isRejectExpiredCRLs());
+                    getCRLVerifier(newCRLManagerOptions), newCRLManagerOptions.isRejectExpiredCRLs(),
+                    getCRLManagerDelays());
 
             currentCRLManager.setListener(Optional.of(this::postChangedEvent));
 
@@ -569,6 +570,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
             this.crlManager = Optional.of(currentCRLManager);
         }
+    }
+
+    protected CRLManager.Delays getCRLManagerDelays() {
+        return CRLManager.Delays.DEFAULT;
     }
 
     protected CRLVerifier getCRLVerifier(final CRLManagerOptions options) {

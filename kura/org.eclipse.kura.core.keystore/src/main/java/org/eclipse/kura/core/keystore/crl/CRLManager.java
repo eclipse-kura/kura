@@ -50,8 +50,6 @@ import org.slf4j.LoggerFactory;
 
 public class CRLManager implements Closeable {
 
-    private static final long MIN_RESCHEDULE_DELAY_MS = 30_000;
-    private static final long INITIAL_UPDATE_DELAY_MS = 5000;
     private static final long SHUTDOWN_TIMEOUT_MS = 5000;
     private static final int MAX_CONCURRENT_DOWNLOADS = 4;
 
@@ -67,18 +65,20 @@ public class CRLManager implements Closeable {
     private final long periodicReckeckIntervalMs;
     private final CRLVerifier verifier;
     private final boolean rejectExpired;
+    private final Delays delays;
 
     private Optional<ScheduledFuture<?>> updateTask = Optional.empty();
     private Optional<Listener> listener = Optional.empty();
     private boolean closed;
 
-    public CRLManager(final File storeFile, final long storeDelayMs, final long periodicRecheckIntervalMs,
-            final long forceUpdateIntervalMs, final CRLVerifier verifier, final boolean rejectExpired) {
-        this.store = new CRLStore(storeFile, storeDelayMs);
+    public CRLManager(final File storeFile, final long periodicRecheckIntervalMs, final long forceUpdateIntervalMs,
+            final CRLVerifier verifier, final boolean rejectExpired, final Delays delays) {
+        this.store = new CRLStore(storeFile, delays.storeDelayMs);
         this.periodicReckeckIntervalMs = periodicRecheckIntervalMs;
         this.forceUpdateIntervalMs = forceUpdateIntervalMs;
         this.verifier = verifier;
         this.rejectExpired = rejectExpired;
+        this.delays = delays;
         requestUpdate();
     }
 
@@ -207,7 +207,7 @@ public class CRLManager implements Closeable {
     }
 
     private synchronized void requestUpdate() {
-        scheduleUpdate(INITIAL_UPDATE_DELAY_MS);
+        scheduleUpdate(this.delays.initialUpdateDelayMs);
     }
 
     private synchronized void rescheduleBasedOnNextUpdate() {
@@ -220,7 +220,7 @@ public class CRLManager implements Closeable {
 
         final long rawDelayMs = Math.min(nextUpdateDelayMs,
                 Math.min(this.forceUpdateIntervalMs, this.periodicReckeckIntervalMs));
-        final long scheduleDelayMs = Math.max(rawDelayMs, MIN_RESCHEDULE_DELAY_MS);
+        final long scheduleDelayMs = Math.max(rawDelayMs, this.delays.minRescheduleDelayMs);
 
         logger.info("scheduling next CRL check in {} ms (nextUpdate-aligned)", scheduleDelayMs);
         scheduleUpdate(scheduleDelayMs);
@@ -478,6 +478,21 @@ public class CRLManager implements Closeable {
         int unref() {
             this.refCnt--;
             return this.refCnt;
+        }
+    }
+
+    public static final class Delays {
+
+        public static final Delays DEFAULT = new Delays(5000, 30_000, 5000);
+
+        private final long initialUpdateDelayMs;
+        private final long minRescheduleDelayMs;
+        private final long storeDelayMs;
+
+        public Delays(final long initialUpdateDelayMs, final long minRescheduleDelayMs, final long storeDelayMs) {
+            this.initialUpdateDelayMs = initialUpdateDelayMs;
+            this.minRescheduleDelayMs = minRescheduleDelayMs;
+            this.storeDelayMs = storeDelayMs;
         }
     }
 

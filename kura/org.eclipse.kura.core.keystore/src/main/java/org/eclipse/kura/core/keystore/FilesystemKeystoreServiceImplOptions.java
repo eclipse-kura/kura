@@ -55,7 +55,7 @@ public @interface FilesystemKeystoreServiceImplOptions {
     boolean verify_crl() default false;
 
     @AttributeDefinition(name = "Reject Expired CRLs", description = "If set to true, a CRL whose next update date has passed fails verification: an expired CRL is not stored when downloaded or added, and a stored CRL that expires is no longer returned by the keystore, so the revocation status of the certificates it covers cannot be determined until a valid CRL is downloaded.")
-    boolean crl_reject_expired() default true;
+    boolean crl_reject_expired() default false;
 
 }
 

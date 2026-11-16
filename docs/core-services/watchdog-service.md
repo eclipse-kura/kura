@@ -76,11 +76,11 @@ If the selected mode cannot be activated (for example because the systemd notifi
 
 When a registered [CriticalComponent](../java-application-development/how-to-use-watchdog.md) does not check in within its timeout, the service writes the reboot cause to the **Reboot Cause File Path** and requests a system reboot. Then:
 
-- if the reboot command is accepted, the service keeps refreshing the watchdog for a grace period of 5 minutes to allow a clean shutdown. After that it stops refreshing, so that the system is reset if the shutdown hangs: by the hardware watchdog in **direct** mode, by systemd in **systemd** mode;
+- if the reboot command is accepted, the service continues refreshing the watchdog for a grace period of 5 minutes to allow a clean shutdown. After that, it stops refreshing, so that the system is reset if the shutdown hangs. The shutdown can be performed by the hardware watchdog in **direct** mode, or by systemd in **systemd** mode;
 - if the reboot command fails, the service stops refreshing the watchdog immediately:
-    - in **direct** mode the hardware watchdog resets the system when its timeout expires;
-    - in **systemd** mode systemd terminates Kura when the service watchdog timeout expires and the Kura unit reboots the system. Until then the reboot command is retried every minute;
-    - in [degraded mode](#degraded-mode) there is no watchdog that can enforce the reset, so the reboot command is retried every minute until it succeeds.
+    - in **direct** mode, the hardware watchdog resets the system when its timeout expires;
+    - in **systemd** mode, systemd terminates Kura when the service watchdog timeout expires, and the Kura unit reboots the system. Until then, the reboot command is retried every minute;
+    - in [degraded mode](#degraded-mode), there is no watchdog that can enforce the reset, so the reboot command is retried every minute until it succeeds.
 
 ## Unavailable watchdog device
 

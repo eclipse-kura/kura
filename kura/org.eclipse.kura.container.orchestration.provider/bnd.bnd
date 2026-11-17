@@ -22,6 +22,7 @@ Import-Package: \
     org.bouncycastle.cert.jcajce;version="1.86",\
     org.bouncycastle.jce.provider;version="1.86",\
     org.eclipse.kura;version="[1.6,2.0)",\
+    org.eclipse.kura.audit;version="[1.0,2.0)",\
     org.eclipse.kura.configuration;version="[1.2,2.0)",\
     org.eclipse.kura.container.orchestration;version="[2.0,3.0)",\
     org.eclipse.kura.container.orchestration.listener;version="[1.0,1.1)",\

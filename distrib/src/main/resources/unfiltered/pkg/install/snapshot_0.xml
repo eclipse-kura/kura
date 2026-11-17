@@ -25,6 +25,9 @@
             <esf:property name="pingInterval" array="false" encrypted="false" type="Integer">
                 <esf:value>10000</esf:value>
             </esf:property>
+            <esf:property name="watchdogMode" array="false" encrypted="false" type="String">
+                <esf:value>systemd</esf:value>
+            </esf:property>
         </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.clock.ClockService">

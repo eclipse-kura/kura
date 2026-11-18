@@ -18,7 +18,6 @@ import static java.util.Objects.isNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +42,8 @@ import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
-import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.EnforcementTarget;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +94,8 @@ import org.osgi.service.metatype.annotations.Designate;
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class })
 @Designate(ocd = ContainerOrchestrationServiceMetatype.class)
-public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
+public class ContainerOrchestrationServiceImpl
+        implements ConfigurableComponent, ContainerOrchestrationService, EnforcementTarget {
 
     private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
@@ -114,12 +115,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private DockerClient dockerClient;
     private CryptoService cryptoService;
 
-    private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
-
-    private Map<String, String> containerInstancesDigests = new HashMap<>();
+    private AllowlistEnforcement enforcement = new AllowlistEnforcement(this);
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
+    }
+
+    // Used only by unit tests
+    public void setAllowlistEnforcement(AllowlistEnforcement enforcement) {
+        this.enforcement = enforcement;
     }
 
     @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
@@ -160,9 +164,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 return;
             }
 
-            if (this.allowlistEnforcementMonitor != null) {
-                closeEnforcementMonitor();
-            }
+            this.enforcement.close();
 
             connect();
 
@@ -172,56 +174,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             }
             logger.info("Connection Successful");
 
-            if (currentConfig.isEnforcementEnabled()) {
-                try {
-                    startEnforcementMonitor();
-                } catch (Exception ex) {
-                    logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
-                    closeEnforcementMonitor();
-                    logger.warn("Enforcement won't be active.");
-                }
-                enforceAlreadyRunningContainer();
+            if (this.currentConfig.isEnforcementEnabled()) {
+                this.enforcement.startEnforcing(this.currentConfig.getEnforcementAllowlist(), this.dockerClient);
             }
         }
 
         logger.info("Bundle {} has updated with config!", APP_ID);
-    }
-
-    private void startEnforcementMonitor() {
-        logger.info("Enforcement monitor starting...");
-        this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
-                .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
-        logger.info("Enforcement monitor starting...done.");
-    }
-
-    private void closeEnforcementMonitor() {
-
-        if (this.allowlistEnforcementMonitor == null) {
-            return;
-        }
-
-        try {
-            logger.info("Enforcement monitor closing...");
-            this.allowlistEnforcementMonitor.close();
-            this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
-            this.allowlistEnforcementMonitor = null;
-            logger.info("Enforcement monitor closing...done.");
-        } catch (InterruptedException ex) {
-            logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
-            Thread.currentThread().interrupt();
-        } catch (IOException ex) {
-            logger.error("Failed to close enforcement monitor, stopping it...", ex);
-        }
-    }
-
-    private void enforceAlreadyRunningContainer() {
-        if (this.allowlistEnforcementMonitor == null) {
-            logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
-            return;
-        }
-        logger.info("Enforcement check on already running containers...");
-        this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
-        logger.info("Enforcement check on already running containers...done");
     }
 
     @Override
@@ -405,7 +363,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
-            addContainerInstanceDigest(containerId, container.getEnforcementDigest());
+            this.enforcement.register(containerId, container.getEnforcementDigest());
             startContainer(containerId);
         }
 
@@ -447,7 +405,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
 
-            removeContainerInstanceDigest(id);
+            this.enforcement.unregister(id);
 
         } catch (Exception e) {
             logger.error("Could not remove container {}", id, e);
@@ -869,10 +827,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void cleanUpDocker() {
-
-        if (this.allowlistEnforcementMonitor != null) {
-            closeEnforcementMonitor();
-        }
+        this.enforcement.close();
 
         if (testConnection()) {
             this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisabled);
@@ -1032,6 +987,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
+    @Override
     public Set<String> getImageDigestsByContainerId(String containerId) {
 
         Set<String> imageDigests = new HashSet<>();
@@ -1051,32 +1007,4 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         return imageDigests;
     }
-
-    private void addContainerInstanceDigest(String containerId, Optional<String> containerInstanceDigest) {
-
-        if (containerInstanceDigest.isPresent()) {
-            logger.info(
-                    "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
-                    containerId);
-            this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
-        } else {
-            logger.info("Container {} doesn't contain the enforcement digest. "
-                    + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
-                    containerId);
-        }
-
-    }
-
-    private void removeContainerInstanceDigest(String containerId) {
-        if (this.containerInstancesDigests.containsKey(containerId)) {
-            this.containerInstancesDigests.remove(containerId);
-            logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
-            enforceAlreadyRunningContainer();
-        }
-    }
-
-    public Set<String> getContainerInstancesAllowlist() {
-        return new HashSet<>(this.containerInstancesDigests.values());
-    }
-
 }

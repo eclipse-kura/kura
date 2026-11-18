@@ -55,11 +55,12 @@ public class CrlConcurrentAccessTest extends CrlKeystoreServiceTestBase {
 
     private void givenCrlsPublishedAtDistinctUrls(final int count) throws Exception {
         final TestCA ca = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=Test CA, dc=bar.com")).build());
+        final Instant now = Instant.now();
 
         for (int i = 0; i < count; i++) {
             final CRLCreationOptions options = CRLCreationOptions.builder()
-                    .withStartDate(Date.from(Instant.now().minusSeconds(60L + i)))
-                    .withEndDate(Date.from(Instant.now().plusSeconds(3600))).build();
+                    .withStartDate(Date.from(now.minusSeconds(60L + i)))
+                    .withEndDate(Date.from(now.plusSeconds(3600))).build();
 
             this.crlUrls.add(writeCrlFile("crl" + i + ".crl", ca.generateCRL(options)).toURI().toString());
         }

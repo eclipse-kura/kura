@@ -77,6 +77,14 @@ public class AllowlistEnforcement {
         }
     }
 
+    private void enforceSafely(String containerId) {
+        try {
+            enforce(containerId);
+        } catch (RuntimeException e) {
+            logger.error("Enforcement check on container {} failed, the container was not blocked", containerId);
+        }
+    }
+
     public synchronized void close() {
         if (this.monitor == null) {
             return;
@@ -161,7 +169,7 @@ public class AllowlistEnforcement {
     private void checkRunningContainers() {
         logger.info("Enforcement check on already running containers...");
         for (ContainerInstanceDescriptor descriptor : this.target.listContainerDescriptors()) {
-            enforce(descriptor.getContainerId());
+            enforceSafely(descriptor.getContainerId());
         }
         logger.info("Enforcement check on already running containers...done");
     }
@@ -205,7 +213,7 @@ public class AllowlistEnforcement {
             String containerId = Optional.ofNullable(item.getActor()).map(EventActor::getId)
                     .orElseGet(item::getId);
             if (containerId != null) {
-                enforce(containerId);
+                enforceSafely(containerId);
             }
         }
     }

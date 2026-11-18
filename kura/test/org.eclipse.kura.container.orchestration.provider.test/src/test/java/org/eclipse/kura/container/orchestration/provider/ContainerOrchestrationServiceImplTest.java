@@ -14,7 +14,6 @@ package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,7 +22,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +40,7 @@ import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -116,6 +115,7 @@ public class ContainerOrchestrationServiceImplTest {
 
     private Map<String, Object> properties;
     private String containerId;
+    private AllowlistEnforcement enforcement;
 
     CreateContainerCmd createContainerCmd = mock(CreateContainerCmd.class);
     CreateContainerResponse createContainerResponse = mock(CreateContainerResponse.class);
@@ -354,14 +354,14 @@ public class ContainerOrchestrationServiceImplTest {
         givenEnforcementEnabledProperty(true);
         givenDockerServiceImplSpy();
         givenDockerClient();
+        givenMockedAllowlistEnforcement();
 
         whenActivateInstance();
         whenDockerClientMockCreateContainer();
         whenMockForContainerInstancesDigestAdding();
         whenRunContainer();
 
-        thenContainerInstanceDigestIsAddedToAllowlist();
-        thenContainerInstanceDigestIsExpectedOne(CONTAINER_INSTANCE_DIGEST);
+        thenContainerInstanceDigestIsRegistered(CONTAINER_INSTANCE_DIGEST);
     }
 
     @Test
@@ -372,6 +372,7 @@ public class ContainerOrchestrationServiceImplTest {
         givenEnforcementEnabledProperty(true);
         givenDockerServiceImplSpy();
         givenDockerClient();
+        givenMockedAllowlistEnforcement();
 
         whenActivateInstance();
         whenDockerClientMockCreateContainer();
@@ -380,7 +381,7 @@ public class ContainerOrchestrationServiceImplTest {
         whenStopContainer();
         whenDeleteContainer();
 
-        thenContainerInstanceDigestIsNotInAllowlist();
+        thenContainerInstanceDigestIsUnregistered();
     }
 
     /**
@@ -389,6 +390,11 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void givenDockerServiceImpl() {
         this.dockerService = new ContainerOrchestrationServiceImpl();
+    }
+
+    private void givenMockedAllowlistEnforcement() {
+        this.enforcement = mock(AllowlistEnforcement.class);
+        this.dockerService.setAllowlistEnforcement(this.enforcement);
     }
 
     private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
@@ -749,16 +755,11 @@ public class ContainerOrchestrationServiceImplTest {
         assertEquals(new HashSet<>(Arrays.asList(digestsArray)), this.digestsList);
     }
 
-    private void thenContainerInstanceDigestIsAddedToAllowlist() {
-        assertFalse(this.dockerService.getContainerInstancesAllowlist().isEmpty());
+    private void thenContainerInstanceDigestIsRegistered(String expectedDigest) {
+        verify(this.enforcement, times(1)).register(this.containerId, Optional.of(expectedDigest));
     }
 
-    private void thenContainerInstanceDigestIsNotInAllowlist() {
-        assertTrue(this.dockerService.getContainerInstancesAllowlist().isEmpty());
-    }
-
-    private void thenContainerInstanceDigestIsExpectedOne(String expected) {
-        List<String> actualDigests = new ArrayList<>(this.dockerService.getContainerInstancesAllowlist());
-        assertEquals(actualDigests.get(0), expected);
+    private void thenContainerInstanceDigestIsUnregistered() {
+        verify(this.enforcement, times(1)).unregister(this.containerId);
     }
 }

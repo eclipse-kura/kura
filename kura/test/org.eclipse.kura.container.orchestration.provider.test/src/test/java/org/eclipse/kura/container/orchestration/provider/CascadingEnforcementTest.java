@@ -119,6 +119,7 @@ public class CascadingEnforcementTest {
 
         @Override
         public void stopContainer(String id) {
+            // nothing to do
         }
 
         @Override

@@ -52,21 +52,21 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M4, Apache-2.0, approved, #15737
 * maven/mavencentral/commons-io/commons-io/2.19.0, Apache-2.0, approved, #20657
 * maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.netty/netty-buffer/4.1.137.Final, Apache-2.0, approved, CQ21842
-* maven/mavencentral/io.netty/netty-codec-http/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-codec-mqtt/4.1.137.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
-* maven/mavencentral/io.netty/netty-codec/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-common/4.1.137.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
-* maven/mavencentral/io.netty/netty-handler/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-resolver/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-transport-classes-epoll/4.1.137.Final, Apache-2.0, approved, #6366
-* maven/mavencentral/io.netty/netty-transport-classes-kqueue/4.1.137.Final, Apache-2.0, approved, #4107
-* maven/mavencentral/io.netty/netty-transport-native-epoll/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-transport-native-kqueue/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-transport/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-codec-socks/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty/netty-handler-proxy/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-buffer/4.1.139.Final, Apache-2.0, approved, CQ21842
+* maven/mavencentral/io.netty/netty-codec-http/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-codec-mqtt/4.1.139.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
+* maven/mavencentral/io.netty/netty-codec/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-common/4.1.139.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
+* maven/mavencentral/io.netty/netty-handler/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-resolver/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-transport-classes-epoll/4.1.139.Final, Apache-2.0, approved, #6366
+* maven/mavencentral/io.netty/netty-transport-classes-kqueue/4.1.139.Final, Apache-2.0, approved, #4107
+* maven/mavencentral/io.netty/netty-transport-native-epoll/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-transport-native-kqueue/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-transport/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-codec-socks/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-handler-proxy/4.1.139.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.2, BSD-3-Clause, approved, ee4j.jaxb
 * maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/3.0.2, BSD-3-Clause, approved, ee4j.jaxws
@@ -82,9 +82,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.4.3, Apache-2.0, approved, #27052
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.6.4, Apache-2.0 AND MPL-2.0, approved, #28182
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.4.3, Apache-2.0, approved, #29518
-* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.3, Apache-2.0, approved, #21940
-* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.3, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
-* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.3, Apache-2.0, approved, #21938
+* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.5, Apache-2.0, approved, #21940
+* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.5, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
+* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.5, Apache-2.0, approved, #21938
 * maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.86, MIT AND Apache-2.0, approved, #31043
 * maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.86, MIT, approved, #31037
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.86, MIT AND CC0-1.0, approved, #31038
@@ -149,6 +149,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.felix/org.apache.felix.gogo.command/1.1.2, Apache-2.0, approved, #17675
 * maven/mavencentral/org.apache.felix/org.apache.felix.gogo.runtime/1.1.6, Apache-2.0 AND MIT, approved, CQ22929
 * maven/mavencentral/org.apache.felix/org.apache.felix.scr/2.2.12, Apache-2.0, approved, #15367
+* maven/mavencentral/org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.5, EPL-2.0 OR BSD-3-Clause, approved, iot.paho
 * maven/mavencentral/org.eclipse.platform/org.eclipse.core.contenttype/3.9.500, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.core.jobs/3.15.400, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.core.runtime/3.31.100, EPL-2.0, approved, eclipse.platform
@@ -184,9 +185,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.osgi/org.osgi.util.promise/1.3.0, Apache-2.0, approved, #5266
 * maven/mavencentral/org.osgi/org.osgi.util.pushstream/1.1.0, Apache-2.0, approved, #6026
 * maven/mavencentral/org.osgi/org.osgi.util.xml/1.0.2, Apache-2.0, approved, #15377
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.2, Apache-2.0, approved, #21909
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.2, Apache-2.0, approved, #21911
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.2, Apache-2.0 AND MIT, approved, #21916
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.21.8, Apache-2.0, approved, #25591
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.21, Apache-2.0, approved, #25587
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.21.8, Apache-2.0 AND MIT, approved, #25590
 * maven/mavencentral/tools.jackson.core/jackson-core/3.1.7, Apache-2.0 AND MIT, approved, #26415
 * maven/mavencentral/com.auth0/java-jwt/4.6.0, MIT, approved, #29896
 
@@ -198,7 +199,6 @@ This project leverages the following third party content.
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078
 * com.codeminders.hidapi 1.1, New BSD License, approved, CQ7833
 * org.moka7 1.0.2, EPL-1.0, approved, CQ12777
-* org.eclipse.paho.client.mqttv3 1.2.1.k2, EPL-1.0, approved, eclipse.platform
 
 ## Cryptography
 

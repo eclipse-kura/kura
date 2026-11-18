@@ -70,4 +70,13 @@ public interface WatchdogService {
      */
     public void checkin(CriticalComponent criticalComponent);
 
+    /**
+     * Returns a snapshot of the state of the hardware watchdog. It can be used to verify that the
+     * system is under hardware watchdog supervision.
+     *
+     * @return the current {@link WatchdogStatus}
+     * @since 2.9
+     */
+    public WatchdogStatus getWatchdogStatus();
+
 }

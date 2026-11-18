@@ -29,16 +29,17 @@
         <byte-buddy.version>1.17.7</byte-buddy.version>
         <commons-fileupload.version>2.0.0-M4</commons-fileupload.version>
         <hk2.version>3.1.1</hk2.version>
-        <io.netty.version>4.1.137.Final</io.netty.version>
-        <jackson.core.version>2.19.2</jackson.core.version>
+        <io.netty.version>4.1.139.Final</io.netty.version>
+        <jackson2.core.version>2.21.8</jackson2.core.version>
+        <jackson2.annotations.version>2.21</jackson2.annotations.version>
         <jackson3.core.version>3.1.7</jackson3.core.version>
         <jersey.version>3.1.11</jersey.version>
-        <log4j.version>2.25.3</log4j.version>
+        <log4j.version>2.25.5</log4j.version>
         <objenesis.version>3.3</objenesis.version>
         <org.bouncycastle.version>1.86</org.bouncycastle.version>
         <org.eclipse.jetty.version>12.0.33</org.eclipse.jetty.version>
         <org.eclipse.osgi-technology.rest.version>1.2.3</org.eclipse.osgi-technology.rest.version>
-        <org.eclipse.paho.client.mqttv3.version>1.2.1</org.eclipse.paho.client.mqttv3.version>
+        <org.eclipse.paho.client.mqttv3.version>1.2.5</org.eclipse.paho.client.mqttv3.version>
         <org.hamcrest.version>1.1.0.v20090501071000</org.hamcrest.version>
         <org.ow2.asm.version>9.7.1</org.ow2.asm.version>
         <protobuf.version>4.30.2</protobuf.version>
@@ -609,17 +610,17 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.core.version}</version>
+                <version>${jackson2.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.core.version}</version>
+                <version>${jackson2.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>${jackson.core.version}</version>
+                <version>${jackson2.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>tools.jackson.core</groupId>

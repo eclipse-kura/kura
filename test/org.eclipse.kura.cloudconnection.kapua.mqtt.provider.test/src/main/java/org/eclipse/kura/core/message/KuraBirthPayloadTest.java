@@ -235,7 +235,6 @@ public class KuraBirthPayloadTest {
             assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmName());
             assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmVersion());
             assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmProfile());
-            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getKuraVersion());
             // this.birthPayload.getApplicationFramework();
             assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getApplicationFrameworkVersion());
             assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getConnectionInterface());

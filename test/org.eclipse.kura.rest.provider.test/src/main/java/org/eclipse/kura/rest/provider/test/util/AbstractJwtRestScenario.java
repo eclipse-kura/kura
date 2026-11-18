@@ -18,9 +18,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
+import java.net.CookieManager;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +44,7 @@ import org.junit.BeforeClass;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
+import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
 /**
@@ -64,7 +65,7 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
     protected static final String JWT_ENABLED = "auth.jwt.enabled";
     protected static final String ACCESS_TOKEN_DURATION = "auth.jwt.access.token.duration";
     protected static final String REFRESH_TOKEN_DURATION = "auth.jwt.refresh.token.duration";
-    protected static final String USED_REFRESH_TOKEN_RETENTION = "auth.jwt.used.refresh.token.retention";
+    protected static final String REFRESH_TOKEN_FAMILY_RETENTION = "auth.jwt.refresh.token.family.retention";
     protected static final String ISSUING_SERVICE_TARGET = "TokenIssuingService.target";
     protected static final String VERIFICATION_SERVICE_TARGET = "TokenVerificationService.target";
     protected static final String DEFAULT_VERIFICATION_SERVICE_TARGET = //
@@ -84,7 +85,7 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
             JWT_ENABLED, false, //
             ACCESS_TOKEN_DURATION, 60, //
             REFRESH_TOKEN_DURATION, 900, //
-            USED_REFRESH_TOKEN_RETENTION, 300, //
+            REFRESH_TOKEN_FAMILY_RETENTION, 300, //
             ISSUING_SERVICE_TARGET, "(objectClass=org.eclipse.kura.security.token.TokenIssuingService)", //
             VERIFICATION_SERVICE_TARGET, DEFAULT_VERIFICATION_SERVICE_TARGET);
 
@@ -96,7 +97,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
     private JsonObject tokenPair;
     private String accessToken;
     private String refreshToken;
-    private final List<String> exchangedRefreshTokens = new ArrayList<>();
 
     protected AbstractJwtRestScenario() {
         super(new RestTransport("token/jwt/v1"));
@@ -160,6 +160,22 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         }
     }
 
+    protected void givenTheIdentityChangedItsPasswordTo(final String newPassword) {
+        authorizeWith(NO_AUTHORIZATION);
+        sessionRequest("POST", "login/password",
+                Json.object().add("username", IDENTITY).add("password", PASSWORD).toString(), 200);
+
+        final Response xsrfTokenResponse = sessionRequest("GET", "xsrfToken", null, 200);
+        restTransport().setHeader("X-XSRF-Token",
+                Json.parse(xsrfTokenResponse.getBody().orElseThrow()).asObject().get("xsrfToken").asString());
+
+        sessionRequest("POST", "changePassword",
+                Json.object().add("currentPassword", PASSWORD).add("newPassword", newPassword).toString(), 204);
+
+        restTransport().removeHeader("X-XSRF-Token");
+        restTransport().setCookieManager(new CookieManager());
+    }
+
     protected void givenATokenPairIssuedToTheIdentity() {
         whenATokenPairIsRequestedWith(basic(IDENTITY));
 
@@ -200,10 +216,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         restTransport().setHeader("Content-Type", "text/plain");
         whenRequestIsPerformed(new MethodSpec("POST"), "/refresh", body);
         restTransport().removeHeader("Content-Type");
-
-        if (expectResponse().getStatus() == 200) {
-            this.exchangedRefreshTokens.add(body.trim());
-        }
     }
 
     /*
@@ -237,10 +249,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         assertEquals(List.of(expectedHeaderValue), expectResponse().getHeader(headerName));
     }
 
-    protected void thenTheReturnedRefreshTokenDiffersFromTheExchangedOne() {
-        assertNotEquals(this.exchangedRefreshTokens.get(this.exchangedRefreshTokens.size() - 1), this.refreshToken);
-    }
-
     protected void thenTheReturnedAccessTokenGrantsAccessToTheProtectedResource() {
         whenTheProtectedResourceIsAccessedWith(bearer(theAccessToken()));
 
@@ -257,10 +265,6 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
 
     protected String theRefreshToken() {
         return this.refreshToken;
-    }
-
-    protected String theFirstExchangedRefreshToken() {
-        return this.exchangedRefreshTokens.get(0);
     }
 
     protected String theAccessTokenForgedFor(final String identityName) {
@@ -290,6 +294,14 @@ public abstract class AbstractJwtRestScenario extends AbstractRequestHandlerTest
         restTransport().setBasicCredentials(Optional.empty());
         authorization.ifPresentOrElse(value -> restTransport().setHeader("Authorization", value),
                 () -> restTransport().removeHeader("Authorization"));
+    }
+
+    private Response sessionRequest(final String method, final String path, final String body,
+            final int expectedStatus) {
+        final Response response = restTransport().runRequest(SERVICES_URL, "session/v1/" + path,
+                new MethodSpec(method), body);
+        assertEquals(path, expectedStatus, response.getStatus());
+        return response;
     }
 
     private static Duration lifetime(final String token) {

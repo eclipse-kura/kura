@@ -25,16 +25,60 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.watchdog.CriticalComponent;
+import org.eclipse.kura.watchdog.WatchdogState;
+import org.eclipse.kura.watchdog.WatchdogStatus;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
 public class WatchdogServiceImplTest {
+
+    @Test
+    public void statusIsDisabledWhenWatchdogIsNotEnabled() {
+        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+        ComponentContext ccMock = mock(ComponentContext.class);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enabled", false);
+        properties.put("pingInterval", 5000);
+
+        svc.activate(ccMock, properties);
+        svc.updated(properties);
+        WatchdogStatus status = svc.getWatchdogStatus();
+        svc.deactivate(ccMock);
+
+        assertEquals(WatchdogState.DISABLED, status.getState());
+        assertFalse(status.isDeviceOpen());
+        assertEquals(Optional.empty(), status.getDevicePath());
+        assertEquals(Optional.empty(), status.getLastRefreshTime());
+        assertEquals(Optional.empty(), status.getFailureReason());
+    }
+
+    @Test
+    public void statusIsDeviceUnavailableWhenWatchdogIsEnabled() {
+        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+        ComponentContext ccMock = mock(ComponentContext.class);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enabled", true);
+        properties.put("pingInterval", 5000);
+
+        svc.activate(ccMock, properties);
+        svc.updated(properties);
+        WatchdogStatus status = svc.getWatchdogStatus();
+        svc.deactivate(ccMock);
+
+        assertEquals(WatchdogState.DEVICE_UNAVAILABLE, status.getState());
+        assertFalse(status.isDeviceOpen());
+        assertEquals(Optional.empty(), status.getDevicePath());
+        assertEquals(Optional.empty(), status.getLastRefreshTime());
+        assertEquals(5000, status.getRefreshIntervalMs());
+        assertTrue(status.getFailureReason().isPresent());
+    }
 
     @Test
     public void testActivateDeactivate() throws NoSuchFieldException {

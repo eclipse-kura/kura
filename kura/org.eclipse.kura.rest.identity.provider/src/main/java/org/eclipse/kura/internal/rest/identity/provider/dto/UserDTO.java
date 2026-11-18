@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,10 +16,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.kura.internal.rest.identity.provider.util.StrictBooleanAdapter;
+
+import com.google.gson.annotations.JsonAdapter;
+
 public class UserDTO {
 
     private String userName;
+    @JsonAdapter(StrictBooleanAdapter.class)
     private Boolean passwordAuthEnabled;
+    @JsonAdapter(StrictBooleanAdapter.class)
     private Boolean passwordChangeNeeded;
     private Set<String> permissions;
     private String password;

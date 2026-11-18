@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.ws.rs.core.Response.Status;
+
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.identity.AdditionalConfigurations;
@@ -34,6 +36,7 @@ import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordConfigura
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordStrenghtRequirementsDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionDTO;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
 
@@ -133,6 +136,9 @@ public class IdentityDTOUtils {
 
     public static PasswordConfiguration toPasswordConfiguration(PasswordConfigurationDTO passwordConfigurationDTO) {
 
+        requireField("passwordChangeNeeded", passwordConfigurationDTO.isPasswordChangeNeeded());
+        requireField("passwordAuthEnabled", passwordConfigurationDTO.isPasswordAuthEnabled());
+
         Optional<char[]> password = Optional.empty();
 
         if (passwordConfigurationDTO.getPassword() != null) {
@@ -198,4 +204,10 @@ public class IdentityDTOUtils {
                 passwordStrengthRequirements.bothCasesRequired());
     }
 
+    private static void requireField(String propertyName, Object value) {
+        if (value == null) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Missing '" + propertyName + "' property");
+        }
+    }
 }

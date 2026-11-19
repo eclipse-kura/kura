@@ -55,7 +55,6 @@ import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
-import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
@@ -364,6 +363,8 @@ public class ContainerOrchestrationServiceImpl
                 this.dockerClient.stopContainerCmd(id).exec();
             }
 
+        } catch (NotModifiedException e) {
+            logger.debug("Container {} already stopped", id);
         } catch (Exception e) {
             logger.error("Could not stop container {}. Caused by {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);

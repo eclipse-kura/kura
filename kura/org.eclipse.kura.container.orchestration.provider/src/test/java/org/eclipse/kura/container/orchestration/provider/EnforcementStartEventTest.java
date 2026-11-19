@@ -94,6 +94,6 @@ public class EnforcementStartEventTest {
     }
 
     private void thenContainerWasDeleted(String containerId) throws KuraException {
-        verify(this.target, times(1)).deleteContainer(containerId);
+        verify(this.target, times(1)).forceDeleteContainer(containerId);
     }
 }

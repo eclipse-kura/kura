@@ -355,7 +355,7 @@ public class ContainerOrchestrationServiceImpl
         } else {
             if (existingInstance.isPresent()) {
                 logger.info("Found already exisiting not running container, recreating it..");
-                deleteContainer(existingInstance.get().getContainerId());
+                forceDeleteContainer(existingInstance.get().getContainerId());
             } else {
                 logger.info("Creating new container instance");
             }
@@ -399,11 +399,20 @@ public class ContainerOrchestrationServiceImpl
 
     @Override
     public void deleteContainer(String id) throws KuraException {
+        deleteContainer(id, false);
+    }
+
+    @Override
+    public void forceDeleteContainer(String id) throws KuraException {
+        deleteContainer(id, true);
+    }
+
+    private void deleteContainer(String id, boolean forceDeletion) throws KuraException {
         checkRequestEnv(id);
         try {
 
             if (listContainersIds().contains(id)) {
-                this.dockerClient.removeContainerCmd(id).exec();
+                this.dockerClient.removeContainerCmd(id).withForce(forceDeletion).exec();
             }
 
             this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));

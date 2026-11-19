@@ -175,10 +175,10 @@ public class EnforcementLifecycleTest {
     }
 
     private void thenContainerWasDeleted() throws KuraException {
-        verify(this.target, times(1)).deleteContainer(CONTAINER_ID);
+        verify(this.target, times(1)).forceDeleteContainer(CONTAINER_ID);
     }
 
     private void thenContainerWasNotDeleted() throws KuraException {
-        verify(this.target, never()).deleteContainer(any(String.class));
+        verify(this.target, never()).forceDeleteContainer(any(String.class));
     }
 }

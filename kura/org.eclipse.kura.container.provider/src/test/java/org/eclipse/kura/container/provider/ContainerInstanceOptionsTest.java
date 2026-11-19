@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -83,6 +84,8 @@ public class ContainerInstanceOptionsTest {
     private static final String CONTAINER_GPUS = "container.gpus";
     private static final String CONTAINER_RUNTIME = "container.runtime";
     private static final String ENFORCEMENT_DIGEST = "container.signature.enforcement.digest";
+    private static final String JWT_ACCESS_TOKEN_DURATION = "container.identity.jwt.access.token.duration";
+    private static final String JWT_REFRESH_TOKEN_DURATION = "container.identity.jwt.refresh.token.duration";
 
     private Map<String, Object> properties;
 
@@ -764,6 +767,36 @@ public class ContainerInstanceOptionsTest {
         thenEnforcementDigestIs("sha256:test");
     }
 
+    @Test
+    public void testJwtTokenDurationsDefault() {
+        givenDefaultProperties();
+
+        whenConfigurableGenericDockerServiceOptionsCreated();
+
+        thenJwtTokenDurationsAre(Duration.ofSeconds(60), Duration.ofSeconds(900));
+    }
+
+    @Test
+    public void testJwtTokenDurations() {
+        givenDefaultProperties();
+        givenJwtTokenDurations(30, 600);
+
+        whenConfigurableGenericDockerServiceOptionsCreated();
+
+        thenJwtTokenDurationsAre(Duration.ofSeconds(30), Duration.ofSeconds(600));
+    }
+
+    @Test
+    public void testJwtTokenDurationsAreComparedInEquals() {
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+        givenJwtTokenDurations(30, 600);
+
+        whenGetEquals(new ContainerInstanceOptions(this.properties));
+
+        thenIsNotEqual();
+    }
+
     private void testMemoryOption(String stringValue, Long longValue) {
         givenDefaultProperties();
         givenMemoryProperty(stringValue);
@@ -864,6 +897,11 @@ public class ContainerInstanceOptionsTest {
         if (this.properties != null) {
             this.properties.put(ENFORCEMENT_DIGEST, digest);
         }
+    }
+
+    private void givenJwtTokenDurations(int accessTokenDuration, int refreshTokenDuration) {
+        this.properties.put(JWT_ACCESS_TOKEN_DURATION, accessTokenDuration);
+        this.properties.put(JWT_REFRESH_TOKEN_DURATION, refreshTokenDuration);
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
@@ -1175,6 +1213,11 @@ public class ContainerInstanceOptionsTest {
 
     private void thenContainerRuntimeIs(String value) {
         assertEquals(this.containerDescriptor.getRuntime().get(), value);
+    }
+
+    private void thenJwtTokenDurationsAre(Duration accessTokenDuration, Duration refreshTokenDuration) {
+        assertEquals(accessTokenDuration, this.cgdso.getJwtAccessTokenDuration());
+        assertEquals(refreshTokenDuration, this.cgdso.getJwtRefreshTokenDuration());
     }
 
     private void thenEnforcementDigestIsNotEmpty() {

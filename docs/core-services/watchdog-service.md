@@ -1,6 +1,13 @@
 # Watchdog Service
 
-The WatchdogService provides methods for starting, stopping, and updating a hardware watchdog if it is present on the system. Once started, the watchdog must be updated to prevent the system from rebooting.
+The WatchdogService supervises the gateway and triggers a reboot whenever Kura or an application registered as a [CriticalComponent](../java-application-development/how-to-use-watchdog.md) stops functioning. Once enabled, the service must continuously refresh its watchdog timer; failure to do so results in a system reboot.
+
+The service supports two distinct watchdog backends, selectable via the **Watchdog mode** parameter:
+
+- **systemd** (default) - Kura sends regular keep-alive notifications to the systemd service manager, which supervises the Kura service.
+- **direct** - Kura opens the hardware watchdog device and refreshes it itself.
+
+Refer to [Watchdog modes](#watchdog-modes) for the details.
 
 To use this service, select the **WatchdogService** option located in the **Services** area as shown in the screen capture below.
 
@@ -10,28 +17,74 @@ This service provides the following configuration parameters:
 
 - **enabled** - sets whether or not this service is enabled or disabled. (Required field)
 
-- **pingInterval** - defines the time interval (in milliseconds) between two watchdog refreshes. (Required field) The value can be set between 1 and 60 seconds. The service reads the **watchdog timeout** from the watchdog device: if the interval is greater than half of that timeout, the service logs a warning and refreshes the device every half of the timeout instead, so that a misconfigured interval does not result in a system reboot. If the timeout cannot be read from the device, the configured interval is used as is. On most systems, you can check the watchdog timeout using the following command:
-    ```bash
-    wdctl <watchdog-device>
-    ```
-    The `wdctl` tool allows to change the default timeout value. Refer to specific [man page](https://man7.org/linux/man-pages/man8/wdctl.8.html) for details.
+- **pingInterval** — Required field. Specifies the interval (in milliseconds) between two consecutive watchdog refreshes. The accepted range is 1 to 60 seconds. The service compares this interval against the timeout of the selected watchdog. If the configured interval exceeds half of that timeout, the service logs a warning and instead refreshes the watchdog at half the timeout value. This prevents a misconfigured interval from causing an unintended system reboot.
+    - In **systemd** mode this parameter defines the interval between two keep-alive notifications sent to systemd. The timeout is the `WatchdogSec` value of the Kura unit if set, otherwise three times this interval; see [systemd mode](#systemd-mode) for more details.
+    - In **direct** mode the timeout is read from the watchdog device. If it cannot be read, the configured interval is used as is. On most systems, you can check the watchdog timeout using the following command:
+        ```bash
+        wdctl <watchdog-device>
+        ```
+        The `wdctl` tool allows to change the default timeout value. Refer to specific [man page](https://man7.org/linux/man-pages/man8/wdctl.8.html) for details.
 
-- **Watchdog device path** - sets the watchdog device path. (Required field)
+- **Watchdog mode** - selects the watchdog used by the service: `systemd` (default) or `direct`. (Required field)
+
+- **Watchdog device path** - sets the watchdog device path. Only used in **direct** mode. (Required field)
 
 - **Reboot Cause File Path** - sets the path to the file that will contain the reboot cause information. (Required field)
 
-- **Fail on unavailable device** - sets the behaviour of the service when it is enabled but the watchdog device does not exist or cannot be opened. If disabled (default), the service keeps running without hardware supervision. If enabled, the service requests a system reboot as described in [Unavailable watchdog device](#unavailable-watchdog-device). (Required field)
+- **Fail on unavailable device** — used only in **direct** mode. This setting controls how the service behaves when it is enabled but the watchdog device is missing or cannot be opened. When disabled (the default), the service continues running without hardware supervision. When enabled, the service triggers a system reboot, as described in [Unavailable watchdog device](#unavailable-watchdog-device). (Required field)
 
-When the configuration is updated, the watchdog device is disarmed and reopened only if the **enabled** or the **Watchdog device path** parameters change. A change to the other parameters is applied without interrupting the hardware supervision. An update that does not change any value is ignored.
+In **direct** mode, a configuration update disarms and reopens the watchdog device only if one of the following parameters is changed: **Enabled**, **Watchdog mode**, or **Watchdog device path**. Changes to any other parameters are applied without interrupting hardware supervision. If an update does not modify any parameter value, it is ignored.
+
+!!! warning
+    The default **Watchdog mode** is `systemd`. If an existing installation previously used the hardware watchdog device directly through Kura before this parameter was introduced, it must set **Watchdog mode** to `direct` to retain that behavior. Otherwise, the watchdog will be managed by systemd.
+
+## Watchdog modes
+
+### Systemd mode
+
+In this mode, Kura does not access the hardware watchdog device. At each **pingInterval**, it sends a keep-alive notification to systemd via the `sd_notify` protocol using the `systemd-notify` command. If the notifications stop (for example, because Kura hangs), systemd terminates the Kura service once the service watchdog timeout expires, and the Kura unit reboots the system.
+
+The systemd service watchdog timeout is determined as follows:
+
+- If the `kura.service` unit sets a `WatchdogSec=` value, that value is applied. In this configuration, systemd supervises Kura from its startup, so `WatchdogSec=` must exceed the Kura startup time.
+- Otherwise (the default for the Kura installer), the service requests a timeout of three times the **pingInterval** when it is enabled. Supervision only begins when the WatchdogService activates, so Kura's startup phase remains unsupervised.
+
+When the service is disabled through configuration, or when the **Watchdog mode** is modified, Kura shuts down the service watchdog it had previously initiated. In contrast, if the WatchdogService is stopped while it is still enabled (e.g. because its bundle is terminated) the supervision is not deactivated. Instead, the timeout is increased to five minutes, and the system will reboot if the service has not resumed running by that point.
+
+The hardware watchdog of the platform is managed by systemd and it is configured with the `RuntimeWatchdogSec=` option of the systemd [system configuration](https://www.freedesktop.org/software/systemd/man/latest/systemd-system.conf.html). The Kura installer does not change this option:
+
+- if it is set, the hardware watchdog resets the system when systemd itself or the kernel hang;
+- if it is not set, the system is still rebooted when Kura hangs or a critical component times out, but it is not protected by the hardware watchdog.
+
+This mode requires Kura to be started by systemd as a service and the `systemd-notify` command to be installed. If one of them is missing the service runs in [degraded mode](#degraded-mode).
+
+### Direct mode
+
+In this mode, Kura opens the device specified in the **Watchdog device path** and pings it at every **pingInterval**. Should the pings stop, the hardware watchdog resets the system.
+
+The watchdog device can only be opened by a single process at a time, so it must not be used by other programs. In particular, systemd must not be configured to manage the same device with `RuntimeWatchdogSec=`. The Kura installer leaves the systemd watchdog configuration unchanged.
+
+When Kura is stopped while the service is enabled, the device is closed without being disarmed, ensuring the system resets if Kura does not start again. Consequently, restarting Kura resets the system if Kura takes longer to start and reopen the device than the hardware watchdog timeout allows.
+
+If the device does not exist or cannot be opened, the service behaves as described in [Unavailable watchdog device](#unavailable-watchdog-device).
+
+### Degraded mode
+
+If the selected mode cannot be activated (for example because the systemd notification socket or the watchdog device is unavailable) the service runs in degraded mode. In this mode, it still requests a system reboot when a critical component times out, but it does not reboot the system if Kura itself hangs. This degraded condition is reported in the log and through the [watchdog status](#watchdog-status).
 
 ## Reboot on critical component timeout
 
 When a registered [CriticalComponent](../java-application-development/how-to-use-watchdog.md) does not check in within its timeout, the service writes the reboot cause to the **Reboot Cause File Path** and requests a system reboot. Then:
 
-- if the reboot command is accepted, the service keeps refreshing the watchdog device for a grace period of 5 minutes to allow a clean shutdown. After that it stops refreshing, so that the hardware watchdog resets the system if the shutdown hangs;
-- if the reboot command fails, the service stops refreshing the watchdog device immediately and the hardware watchdog resets the system when its timeout expires.
+- if the reboot command is accepted, the service continues refreshing the watchdog for a grace period of 5 minutes to allow a clean shutdown. After that, it stops refreshing, so that the system is reset if the shutdown hangs. The shutdown can be performed by the hardware watchdog in **direct** mode, or by systemd in **systemd** mode;
+- if the reboot command fails, the service stops refreshing the watchdog immediately:
+    - in **direct** mode, the failed reboot is not retried and the hardware watchdog is no longer refreshed, so it resets the system when its timeout expires. The reboot requested because the watchdog device is unavailable behaves differently, see [Unavailable watchdog device](#unavailable-watchdog-device);
+    - in **systemd** mode, systemd terminates Kura when the service watchdog timeout expires, and the Kura unit reboots the system. Until then, the reboot command is retried every minute;
+    - in [degraded mode](#degraded-mode), there is no watchdog that can enforce the reset, so the reboot command is retried every minute until it succeeds.
 
 ## Unavailable watchdog device
+
+This section applies to the **direct** mode.
 
 If the service is enabled but the watchdog device does not exist or cannot be opened, the system is not under hardware watchdog supervision. The service reports this condition in the log and through the [watchdog status](#watchdog-status).
 
@@ -42,13 +95,13 @@ If **Fail on unavailable device** is enabled, the service additionally checks th
 
 ## Watchdog status
 
-The state of the hardware supervision is available to the applications through the `getWatchdogStatus()` method of the `WatchdogService` API. The supervision can be in one of the following states:
+The state of the supervision is available to the applications through the `getWatchdogStatus()` method of the `WatchdogService` API. The supervision can be in one of the following states:
 
 | State | Description |
 | - | - |
 | `DISABLED` | The service is disabled by configuration and does not supervise the system. |
-| `SUPERVISING` | The watchdog device is open and it is periodically refreshed. This is the only state in which the system is under hardware watchdog supervision. |
-| `DEVICE_UNAVAILABLE` | The service is enabled but the watchdog device does not exist or cannot be opened. If **Fail on unavailable device** is enabled, this is also the state during the grace period that precedes the reboot request. |
+| `SUPERVISING` | The watchdog is periodically refreshed. In **direct** mode the watchdog device is open and the system is under hardware watchdog supervision. In **systemd** mode Kura is sending keep-alive notifications to systemd; whether the system is also under hardware watchdog supervision depends on the systemd configuration. |
+| `DEVICE_UNAVAILABLE` | The service is enabled but the selected watchdog cannot be used: in **direct** mode the watchdog device does not exist or cannot be opened, in **systemd** mode the notification socket or the `systemd-notify` command is not available. If **Fail on unavailable device** is enabled, this is also the state during the grace period that precedes the reboot request. |
 | `REBOOT_REQUESTED` | A system reboot has been requested, either because a critical component timed out or because the watchdog device is still unavailable at the end of the grace period. The state is kept while a failed reboot is being retried. |
 
 Refer to [How to use watchdog](../java-application-development/how-to-use-watchdog.md#watchdog-status) for the details on the information reported by the status and for a code example.

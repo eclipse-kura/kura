@@ -1,6 +1,6 @@
 # Built-in Publisher and Subscriber
 
-The default cloud connection of Eclipse Kura, used to connect to Eclipse Kapua&trade; and Eurotech Everyware Cloud&trade;, provides a `CloudPublisher` and a `CloudSubscriber` implementation:
+The default cloud connection of Eclipse Kura, used to connect to Eclipse Kapua&trade;, provides a `CloudPublisher` and a `CloudSubscriber` implementation:
 
 - `org.eclipse.kura.cloud.publisher.CloudPublisher`, which publishes the messages of the applications attached to it;
 - `org.eclipse.kura.cloud.subscriber.CloudSubscriber`, which subscribes to a topic and delivers the received messages to the applications attached to it.

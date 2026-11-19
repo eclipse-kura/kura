@@ -61,8 +61,7 @@ public class EnforcementSecurityTest {
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
-        thenStopContainerWasNeverCalled();
-        thenDeleteContainerWasNeverCalled();
+        thenContainerWasNotDeleted();
     }
 
     @Test
@@ -72,8 +71,7 @@ public class EnforcementSecurityTest {
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
-        thenStopContainerWasNeverCalled();
-        thenDeleteContainerWasNeverCalled();
+        thenContainerWasNotDeleted();
     }
 
     @Test
@@ -84,20 +82,18 @@ public class EnforcementSecurityTest {
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
-        thenStopContainerWasNeverCalled();
-        thenDeleteContainerWasNeverCalled();
+        thenContainerWasNotDeleted();
     }
 
     @Test
-    public void shouldStopContainerRelyingOnUnregisteredDigest() throws KuraException {
+    public void shouldForceDeleteContainerRelyingOnUnregisteredDigest() throws KuraException {
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
         givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
         givenRegisteredContainerDigest(CONTAINER_ID, CORRECT_DIGEST);
 
         whenContainerDigestIsUnregistered(CONTAINER_ID);
 
-        thenStopContainerWasCalledFor(CONTAINER_ID);
-        thenDeleteContainerWasCalledFor(CONTAINER_ID);
+        thenContainerWasForceDeleted(CONTAINER_ID);
     }
 
     @Test
@@ -107,8 +103,7 @@ public class EnforcementSecurityTest {
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
-        thenStopContainerWasCalledFor(CONTAINER_ID);
-        thenDeleteContainerWasCalledFor(CONTAINER_ID);
+        thenContainerWasForceDeleted(CONTAINER_ID);
     }
 
     @Test
@@ -118,28 +113,34 @@ public class EnforcementSecurityTest {
 
         whenContainerStartEventArrives(CONTAINER_ID);
 
-        thenStopContainerWasCalledFor(CONTAINER_ID);
-        thenDeleteContainerWasCalledFor(CONTAINER_ID);
+        thenContainerWasForceDeleted(CONTAINER_ID);
     }
 
     @Test
-    public void shouldStopAndDeleteContainerWithWrongDigestAndActiveState() throws KuraException {
+    public void shouldForceDeleteContainerWithWrongDigestAndActiveState() throws KuraException {
         givenContainer(CONTAINER_ID, ContainerState.ACTIVE, CORRECT_DIGEST);
 
         whenEnforcementStarts(EMPTY_ALLOWLIST_CONTENT);
 
-        thenStopContainerWasCalledFor(CONTAINER_ID);
-        thenDeleteContainerWasCalledFor(CONTAINER_ID);
+        thenContainerWasForceDeleted(CONTAINER_ID);
     }
 
     @Test
-    public void shouldOnlyDeleteContainerWithWrongDigestAndFailedState() throws KuraException {
+    public void shouldForceDeleteContainerWithWrongDigestAndPausedState() throws KuraException {
+        givenContainer(CONTAINER_ID, ContainerState.STOPPING, CORRECT_DIGEST);
+
+        whenEnforcementStarts(EMPTY_ALLOWLIST_CONTENT);
+
+        thenContainerWasForceDeleted(CONTAINER_ID);
+    }
+
+    @Test
+    public void shouldForceDeleteContainerWithWrongDigestAndFailedState() throws KuraException {
         givenContainer(CONTAINER_ID, ContainerState.FAILED, CORRECT_DIGEST);
 
         whenEnforcementStarts(EMPTY_ALLOWLIST_CONTENT);
 
-        thenStopContainerWasNeverCalled();
-        thenDeleteContainerWasCalledFor(CONTAINER_ID);
+        thenContainerWasForceDeleted(CONTAINER_ID);
     }
 
     private void givenContainer(String containerId, ContainerState containerState, String imageDigest) {
@@ -182,19 +183,11 @@ public class EnforcementSecurityTest {
         givenAllowlistEnforcement(rawAllowlistContent);
     }
 
-    private void thenStopContainerWasNeverCalled() throws KuraException {
-        verify(this.target, never()).stopContainer(any(String.class));
+    private void thenContainerWasNotDeleted() throws KuraException {
+        verify(this.target, never()).forceDeleteContainer(any(String.class));
     }
 
-    private void thenStopContainerWasCalledFor(String containerId) throws KuraException {
-        verify(this.target, times(1)).stopContainer(containerId);
-    }
-
-    private void thenDeleteContainerWasNeverCalled() throws KuraException {
-        verify(this.target, never()).deleteContainer(any(String.class));
-    }
-
-    private void thenDeleteContainerWasCalledFor(String containerId) throws KuraException {
-        verify(this.target, times(1)).deleteContainer(containerId);
+    private void thenContainerWasForceDeleted(String containerId) throws KuraException {
+        verify(this.target, times(1)).forceDeleteContainer(containerId);
     }
 }

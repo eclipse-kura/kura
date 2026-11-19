@@ -2495,6 +2495,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/built-in-publisher-subscriber/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Publisher and Subscriber
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -6095,7 +6123,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The <code>RawMqttSubscriber</code> provides the following configuration options:</p>
 <ul>
 <li>
-<p><strong>Topic Filter</strong>: The MQTT subscription topic filter. For example <code>foo/bar/baz</code>, <code>foo/+/bar</code>, <code>#</code>, <code>foo/#</code>.</p>
+<p><strong>Topic Filter</strong>: The MQTT subscription topic filter. For example <code>foo/bar/baz</code>, <code>foo/+/bar</code>, <code>#</code>, <code>foo/#</code>. A filter ending with <code>#</code> also matches its parent level: <code>foo/#</code> matches <code>foo</code> and <code>foo/+/#</code> matches <code>foo/bar</code>. Before Kura 6.0.0, a filter with a <code>+</code> wildcard before <code>#</code>, such as <code>foo/+/#</code>, did not receive the messages published on its parent level.</p>
 </li>
 <li>
 <p><strong>Qos</strong>: The desired quality of service for the subscription messages.</p>

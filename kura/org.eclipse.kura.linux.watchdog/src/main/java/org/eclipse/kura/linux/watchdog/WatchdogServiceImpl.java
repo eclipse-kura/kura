@@ -26,6 +26,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -51,8 +52,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private static final long EXECUTOR_TERMINATION_TIMEOUT_SEC = 30;
 
+    private static final long UNREGISTERED_CHECKIN_WARNING_INTERVAL_NS = TimeUnit.MINUTES.toNanos(1);
+
+    private static final String SUPERVISION_FAILURE_CAUSE_PREFIX = "watchdog-poll-failure: ";
+
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
+    private final Object registrationLock = new Object();
+    private final AtomicLong nextUnregisteredCheckinWarningNs = new AtomicLong(System.nanoTime());
     private Optional<String> timedOutComponent = Optional.empty();
     private List<CriticalComponentRegistration> criticalComponentRegistrations;
     private final ScheduledExecutorService pollExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -229,9 +236,26 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private void doTick() {
-        if (this.options != null && this.options.isEnabled()) {
-            checkCriticalComponents();
+        if (this.options == null || !this.options.isEnabled()) {
+            return;
         }
+
+        try {
+            checkCriticalComponents();
+        } catch (RuntimeException e) {
+            onSupervisionFailure(e);
+        }
+    }
+
+    private void onSupervisionFailure(final RuntimeException e) {
+        if (this.timedOutComponent.isEmpty()) {
+            this.timedOutComponent = Optional.of(SUPERVISION_FAILURE_CAUSE_PREFIX + e.getClass().getName());
+            logger.error("Critical component supervision failed. System will reboot", e);
+        } else {
+            logger.debug("Critical component supervision failed after a reboot was requested", e);
+        }
+
+        tickActiveBackend();
     }
 
     @Override
@@ -246,19 +270,23 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public void registerCriticalComponent(CriticalComponent criticalComponent) {
-        boolean found = this.criticalComponentRegistrations.stream()
-                .anyMatch(ccr -> ccr.getCriticalComponent() == criticalComponent);
-        if (found) {
-            logger.warn("Critical component '{}' already registered", criticalComponent.getCriticalComponentName());
-            return;
+        final CriticalComponentRegistration ccr = new CriticalComponentRegistration(criticalComponent);
+        synchronized (this.registrationLock) {
+            boolean found = this.criticalComponentRegistrations.stream()
+                    .anyMatch(existing -> existing.getCriticalComponent() == criticalComponent);
+            if (found) {
+                logger.warn("Critical component '{}' already registered", ccr.getCriticalComponentName());
+                return;
+            }
+            this.criticalComponentRegistrations.add(ccr);
         }
-        CriticalComponentRegistration ccr = new CriticalComponentRegistration(criticalComponent);
-        this.criticalComponentRegistrations.add(ccr);
     }
 
     @Override
     public void unregisterCriticalComponent(CriticalComponent criticalComponent) {
-        this.criticalComponentRegistrations.removeIf(ccr -> ccr.getCriticalComponent() == criticalComponent);
+        synchronized (this.registrationLock) {
+            this.criticalComponentRegistrations.removeIf(ccr -> ccr.getCriticalComponent() == criticalComponent);
+        }
     }
 
     @Override
@@ -275,9 +303,32 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         for (CriticalComponentRegistration ccr : this.criticalComponentRegistrations) {
             if (ccr.getCriticalComponent() == criticalComponent) {
                 ccr.update();
-                break;
+                return;
             }
         }
+
+        reportUnregisteredCheckin(criticalComponent);
+    }
+
+    private void reportUnregisteredCheckin(final CriticalComponent criticalComponent) {
+        final long now = System.nanoTime();
+        final long nextWarning = this.nextUnregisteredCheckinWarningNs.get();
+        if (now - nextWarning >= 0 && this.nextUnregisteredCheckinWarningNs.compareAndSet(nextWarning,
+                now + getUnregisteredCheckinWarningIntervalNs())) {
+            logUnregisteredCheckin(criticalComponent);
+        }
+    }
+
+    protected void logUnregisteredCheckin(final CriticalComponent criticalComponent) {
+        final String componentType = criticalComponent == null ? "null" : criticalComponent.getClass().getName();
+        logger.warn(
+                "Ignoring check-in from a critical component that is not registered ({}). "
+                        + "Further occurrences are not reported for {} s",
+                componentType, TimeUnit.NANOSECONDS.toSeconds(getUnregisteredCheckinWarningIntervalNs()));
+    }
+
+    protected long getUnregisteredCheckinWarningIntervalNs() {
+        return UNREGISTERED_CHECKIN_WARNING_INTERVAL_NS;
     }
 
     protected void checkCriticalComponents() {

@@ -38,6 +38,12 @@ public interface WatchdogService {
      * Register a critical component with the WatchdogService Check-in.
      * Once registered, the critical component must call the checkin()
      * method (at a frequency higher than 1/timeout) to prevent a system reboot.
+     * <p>
+     * The name and the timeout of the critical component are read once, during this call, and are not read again
+     * while the component stays registered. To apply a different name or timeout, the component must be
+     * unregistered and registered again. An exception thrown by
+     * {@link CriticalComponent#getCriticalComponentName()} or {@link CriticalComponent#getCriticalComponentTimeout()}
+     * is propagated to the caller and the component is not registered.
      *
      * @param criticalComponent
      *            The CriticalComponent to be registered.
@@ -64,6 +70,9 @@ public interface WatchdogService {
     /**
      * This method is used to notify the Watchdog Service that a critical service
      * has 'checked in' and the reboot timer should be reset.
+     * <p>
+     * A check-in from a critical component that is not registered has no effect: the component is not supervised
+     * until it is registered with {@link #registerCriticalComponent(CriticalComponent)}.
      *
      * @param criticalComponent
      *            The criticalComponent to be updated.

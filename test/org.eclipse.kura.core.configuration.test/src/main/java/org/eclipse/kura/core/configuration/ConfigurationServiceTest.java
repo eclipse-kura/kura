@@ -643,9 +643,9 @@ public class ConfigurationServiceTest {
     public void testUpdateDoesNotAlterAnUntouchedPasswordProperty() {
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_untouched_pid", null, true);
 
-        whenUpdateConfiguration("pwd_untouched_pid", map(TEST_COMPONENT_PROPERTY_KEY, 42), true);
+        whenUpdateConfiguration("pwd_untouched_pid", map(TEST_COMPONENT_PROPERTY_KEY, 15), true);
 
-        thenUpdatedConfigurationPropertiesContains(map(TEST_COMPONENT_PROPERTY_KEY, 42));
+        thenUpdatedConfigurationPropertiesContains(map(TEST_COMPONENT_PROPERTY_KEY, 15));
         thenLatestSnapshotPropertyIsAPassword("pwd_untouched_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
                 TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
         thenNoExceptionOccurred();

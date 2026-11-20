@@ -25,7 +25,5 @@ public interface EnforcementTarget {
 
     List<ContainerInstanceDescriptor> listContainerDescriptors();
 
-    void stopContainer(String id) throws KuraException;
-
-    void deleteContainer(String id) throws KuraException;
+    void forceDeleteContainer(String id) throws KuraException;
 }

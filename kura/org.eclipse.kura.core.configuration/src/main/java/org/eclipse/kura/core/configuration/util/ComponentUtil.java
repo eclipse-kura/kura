@@ -387,7 +387,13 @@ public class ComponentUtil {
         Scalar type = attrDef.getType();
         if (type != null) {
             // convert string values into object values
-            objectValues = getObjectValue(type, defaultValues, ctx);
+            try {
+                objectValues = getObjectValue(type, defaultValues, ctx);
+            } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+                logger.error("Ignoring the default value '{}' of attribute {}: it is not a valid {}",
+                        attrDef.getDefault(), attrDef.getId(), type.value());
+                return null;
+            }
             if (objectValues != null && isSingleValued(attrDef)) {
 
                 // return one single object

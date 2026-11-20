@@ -944,6 +944,37 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void userStoreConfigurationIsListedForAdminAndCloudRequests() throws KuraException {
+        givenConfigurations(configurationBuilder(USER_STORE_PID).build(), configurationBuilder("foo").build());
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
+
+        thenRequestSucceeds();
+        thenResponseConfigurationPidsAre(USER_STORE_PID, "foo");
+    }
+
+    @Test
+    public void userStoreConfigurationIsReturnedByPidForAdminAndCloudRequests() throws KuraException {
+        givenConfigurations(configurationBuilder(USER_STORE_PID).build(), configurationBuilder("foo").build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"" + USER_STORE_PID + "\"]}");
+
+        thenRequestSucceeds();
+        thenResponseConfigurationPidsAre(USER_STORE_PID);
+    }
+
+    @Test
+    public void userStoreConfigurationIsReturnedInSnapshotForAdminAndCloudRequests() throws KuraException {
+        givenConfigurations(configurationBuilder(USER_STORE_PID).build(), configurationBuilder("foo").build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":10000}");
+
+        thenRequestSucceeds();
+        thenResponseConfigurationPidsAre(USER_STORE_PID, "foo");
+    }
+
+    @Test
     public void testADIdAndType() throws KuraException {
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
@@ -1310,6 +1341,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 self().field("configs").arrayItem(0));
     }
 
+    private static final String USER_STORE_PID = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl";
+
     private static ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
     private final CryptoService cryptoService;
 
@@ -1358,6 +1391,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
+    }
+
+    private void thenResponseConfigurationPidsAre(final String... expectedPids) {
+        final JsonValue root = Json
+                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
+        final Set<String> actualPids = root.asObject().get("configs").asArray().values().stream()
+                .map(c -> c.asObject().get("pid").asString()).collect(Collectors.toSet());
+
+        assertEquals(new HashSet<>(Arrays.asList(expectedPids)), actualPids);
     }
 
     private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {

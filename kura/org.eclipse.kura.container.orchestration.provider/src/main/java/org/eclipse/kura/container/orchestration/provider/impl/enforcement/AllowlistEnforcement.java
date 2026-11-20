@@ -77,7 +77,7 @@ public class AllowlistEnforcement {
         try {
             enforce(containerId);
         } catch (RuntimeException e) {
-            logger.error("Enforcement check on container {} failed, the container was not blocked", containerId);
+            logger.error("Enforcement check on container {} failed, the container was not blocked", containerId, e);
         }
     }
 
@@ -87,10 +87,9 @@ public class AllowlistEnforcement {
         }
 
         try {
-            logger.info("Enforcement monitor closing...");
             this.monitor.shutdown();
             this.monitor.awaitCompletion(5, TimeUnit.SECONDS);
-            logger.info("Enforcement monitor closing...done.");
+            logger.info("Enforcement monitor closed.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
@@ -104,13 +103,13 @@ public class AllowlistEnforcement {
 
     public void register(String containerId, Optional<String> digest) {
         if (digest.isPresent()) {
-            logger.info(
+            logger.debug(
                     "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
                     containerId);
             this.containerDigests.put(containerId, digest.get());
             EnforcementAudit.digestRegistered(digest.get(), containerId);
         } else {
-            logger.info("Container {} doesn't contain the enforcement digest. "
+            logger.debug("Container {} doesn't contain the enforcement digest. "
                     + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
                     containerId);
         }
@@ -121,7 +120,7 @@ public class AllowlistEnforcement {
         if (digest == null) {
             return;
         }
-        logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
+        logger.debug("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
         EnforcementAudit.digestUnregistered(digest, containerId);
         enforceAll();
     }
@@ -132,16 +131,14 @@ public class AllowlistEnforcement {
 
     private synchronized void start(String allowlistContent, DockerClient dockerClient) {
         try {
-            logger.info("Enforcement monitor starting...");
             setAllowlist(allowlistContent);
             this.monitor = dockerClient.eventsCmd().withEventFilter("start")
                     .exec(new ContainerStartMonitor());
-            logger.info("Enforcement monitor starting...done.");
+            logger.info("Enforcement monitor started.");
             EnforcementAudit.enforcementStarted(this.allowlist.get().size());
         } catch (Exception ex) {
-            logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
+            logger.error("Error starting enforcement monitor, enforcement won't be active", ex);
             close();
-            logger.warn("Enforcement won't be active.");
             EnforcementAudit.enforcementStartFailed();
         }
     }
@@ -153,7 +150,7 @@ public class AllowlistEnforcement {
 
     private void enforceAll() {
         if (!isActive()) {
-            logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
+            logger.debug("Enforcement wasn't started. Check on running containers will not be performed.");
             return;
         }
         if (this.pendingChecks.getAndIncrement() > 0) {
@@ -169,11 +166,11 @@ public class AllowlistEnforcement {
     }
 
     private void checkRunningContainers() {
-        logger.info("Enforcement check on already running containers...");
+        logger.debug("Enforcement check on already running containers...");
         for (ContainerInstanceDescriptor descriptor : this.target.listContainerDescriptors()) {
             enforceSafely(descriptor.getContainerId());
         }
-        logger.info("Enforcement check on already running containers...done");
+        logger.debug("Enforcement check on already running containers...done");
     }
 
     private synchronized boolean isActive() {

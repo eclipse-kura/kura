@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,6 @@ import com.github.dockerjava.api.model.EventActor;
 public class AllowlistEnforcement {
 
     private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcement.class);
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private final EnforcementTarget target;
     private final AtomicReference<Set<String>> allowlist = new AtomicReference<>(Collections.emptySet());
@@ -68,11 +66,9 @@ public class AllowlistEnforcement {
         }
 
         if (!allowedDigests.isEmpty()) {
-            auditLogger.info(AuditMessages.ENFORCEMENT_CHECK_SUCCESS, AuditContext.currentOrInternal(), containerId,
-                    allowedDigests);
+            EnforcementAudit.containerAllowed(containerId, allowedDigests);
         } else {
-            auditLogger.warn(AuditMessages.ENFORCEMENT_CHECK_FAILURE, AuditContext.currentOrInternal(), containerId,
-                    imageDigests);
+            EnforcementAudit.containerRejected(containerId, imageDigests);
             forceDeleteContainer(containerId);
         }
     }
@@ -102,7 +98,7 @@ public class AllowlistEnforcement {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);
         } finally {
             this.monitor = null;
-            auditLogger.info(AuditMessages.ENFORCEMENT_STOP_SUCCESS, AuditContext.currentOrInternal());
+            EnforcementAudit.enforcementStopped();
         }
     }
 
@@ -112,8 +108,7 @@ public class AllowlistEnforcement {
                     "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
                     containerId);
             this.containerDigests.put(containerId, digest.get());
-            auditLogger.info(AuditMessages.DIGEST_REGISTERED, AuditContext.currentOrInternal(), digest.get(),
-                    containerId);
+            EnforcementAudit.digestRegistered(digest.get(), containerId);
         } else {
             logger.info("Container {} doesn't contain the enforcement digest. "
                     + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
@@ -127,7 +122,7 @@ public class AllowlistEnforcement {
             return;
         }
         logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
-        auditLogger.info(AuditMessages.DIGEST_UNREGISTERED, AuditContext.currentOrInternal(), digest, containerId);
+        EnforcementAudit.digestUnregistered(digest, containerId);
         enforceAll();
     }
 
@@ -142,13 +137,12 @@ public class AllowlistEnforcement {
             this.monitor = dockerClient.eventsCmd().withEventFilter("start")
                     .exec(new ContainerStartMonitor());
             logger.info("Enforcement monitor starting...done.");
-            auditLogger.info(AuditMessages.ENFORCEMENT_START_SUCCESS, AuditContext.currentOrInternal(),
-                    this.allowlist.get().size());
+            EnforcementAudit.enforcementStarted(this.allowlist.get().size());
         } catch (Exception ex) {
             logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
             close();
             logger.warn("Enforcement won't be active.");
-            auditLogger.warn(AuditMessages.ENFORCEMENT_START_FAILURE, AuditContext.currentOrInternal());
+            EnforcementAudit.enforcementStartFailed();
         }
     }
 
@@ -193,10 +187,10 @@ public class AllowlistEnforcement {
     private void forceDeleteContainer(String containerId) {
         try {
             this.target.forceDeleteContainer(containerId);
-            auditLogger.info(AuditMessages.ENFORCEMENT_REMOVAL_SUCCESS, AuditContext.currentOrInternal(), containerId);
+            EnforcementAudit.containerRemoved(containerId);
         } catch (KuraException ex) {
             logger.error("Error during container forced deleting process of {}:", containerId, ex);
-            auditLogger.warn(AuditMessages.ENFORCEMENT_DELETE_FAILURE, AuditContext.currentOrInternal(), containerId);
+            EnforcementAudit.containerRemovalFailed(containerId);
         }
     }
 
@@ -232,7 +226,7 @@ public class AllowlistEnforcement {
 
         private void auditUnexpectedTermination() {
             if (this.terminated.compareAndSet(false, true)) {
-                auditLogger.warn(AuditMessages.ENFORCEMENT_MONITOR_TERMINATED, AuditContext.currentOrInternal());
+                EnforcementAudit.monitorTerminated();
             }
         }
     }

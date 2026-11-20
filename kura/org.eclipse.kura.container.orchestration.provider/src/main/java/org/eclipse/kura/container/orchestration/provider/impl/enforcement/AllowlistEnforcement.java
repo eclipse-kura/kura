@@ -28,20 +28,20 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.model.Event;
+import com.github.dockerjava.api.model.EventActor;
 
 public class AllowlistEnforcement {
 
     private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcement.class);
 
     private static final String ENFORCEMENT_CHECK_SUCCESS = "Enforcement allowlist contains image digests {}... container {} is starting";
-    private static final String ENFORCEMENT_CHECK_FAILURE = "Enforcement allowlist doesn't contain image digests... container {} will be stopped";
+    private static final String ENFORCEMENT_CHECK_FAILURE = "Enforcement allowlist doesn't contain image digests... container {} will be deleted";
 
     private final EnforcementTarget target;
     private final AtomicReference<Set<String>> allowlist = new AtomicReference<>(Collections.emptySet());
@@ -71,8 +71,15 @@ public class AllowlistEnforcement {
             logger.info(ENFORCEMENT_CHECK_SUCCESS, allowedDigests, containerId);
         } else {
             logger.info(ENFORCEMENT_CHECK_FAILURE, containerId);
-            stopContainer(containerId);
-            deleteContainer(containerId);
+            forceDeleteContainer(containerId);
+        }
+    }
+
+    private void enforceSafely(String containerId) {
+        try {
+            enforce(containerId);
+        } catch (RuntimeException e) {
+            logger.error("Enforcement check on container {} failed, the container was not blocked", containerId);
         }
     }
 
@@ -85,13 +92,14 @@ public class AllowlistEnforcement {
             logger.info("Enforcement monitor closing...");
             this.monitor.close();
             this.monitor.awaitCompletion(5, TimeUnit.SECONDS);
-            this.monitor = null;
             logger.info("Enforcement monitor closing...done.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);
+        } finally {
+            this.monitor = null;
         }
     }
 
@@ -159,7 +167,7 @@ public class AllowlistEnforcement {
     private void checkRunningContainers() {
         logger.info("Enforcement check on already running containers...");
         for (ContainerInstanceDescriptor descriptor : this.target.listContainerDescriptors()) {
-            enforce(descriptor.getContainerId());
+            enforceSafely(descriptor.getContainerId());
         }
         logger.info("Enforcement check on already running containers...done");
     }
@@ -172,27 +180,11 @@ public class AllowlistEnforcement {
         return allowedDigests.stream().filter(imageDigests::contains).collect(Collectors.toSet());
     }
 
-    private void stopContainer(String containerId) {
-        this.target.listContainerDescriptors().stream()
-                .filter(descriptor -> descriptor.getContainerId().equals(containerId)).findFirst()
-                .ifPresent(descriptor -> {
-                    if (descriptor.getContainerState().equals(ContainerState.ACTIVE)
-                            || descriptor.getContainerState().equals(ContainerState.STARTING)) {
-                        try {
-                            this.target.stopContainer(descriptor.getContainerId());
-                        } catch (KuraException ex) {
-                            logger.error("Error during container stopping process of {}:", descriptor.getContainerId(),
-                                    ex);
-                        }
-                    }
-                });
-    }
-
-    private void deleteContainer(String containerId) {
+    private void forceDeleteContainer(String containerId) {
         try {
-            this.target.deleteContainer(containerId);
+            this.target.forceDeleteContainer(containerId);
         } catch (KuraException ex) {
-            logger.error("Error during container deleting process of {}:", containerId, ex);
+            logger.error("Error during container forced deleting process of {}:", containerId, ex);
         }
     }
 
@@ -200,7 +192,11 @@ public class AllowlistEnforcement {
 
         @Override
         public void onNext(Event item) {
-            enforce(item.getId());
+            String containerId = Optional.ofNullable(item.getActor()).map(EventActor::getId)
+                    .orElseGet(item::getId);
+            if (containerId != null) {
+                enforceSafely(containerId);
+            }
         }
     }
 }

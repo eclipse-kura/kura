@@ -118,11 +118,7 @@ public class CascadingEnforcementTest {
         }
 
         @Override
-        public void stopContainer(String id) {
-        }
-
-        @Override
-        public void deleteContainer(String id) {
+        public void forceDeleteContainer(String id) {
             this.imageDigestByContainerId.remove(id);
             this.deletedContainerIds.add(id);
             this.deletesRunning++;

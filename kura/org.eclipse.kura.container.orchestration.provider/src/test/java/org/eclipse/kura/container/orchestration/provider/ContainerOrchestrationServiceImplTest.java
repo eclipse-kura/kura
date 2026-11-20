@@ -26,12 +26,10 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
@@ -61,8 +59,6 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String CONTAINER_INSTANCE_DIGEST = "sha256:test";
     private static final String[] REPO_DIGESTS_ARRAY = new String[] {
             "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
-    private static final String[] EXPECTED_DIGESTS_ARRAY = new String[] {
-            "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
     private static final String IMAGE_TAG_LATEST = "latest";
     private static final String IMAGE_NAME_NGINX = "nginx";
     private static final String CONTAINER_NAME_FRANK = "frank";
@@ -121,7 +117,6 @@ public class ContainerOrchestrationServiceImplTest {
     CreateContainerCmd createContainerCmd = mock(CreateContainerCmd.class);
     CreateContainerResponse createContainerResponse = mock(CreateContainerResponse.class);
 
-    Set<String> digestsList;
 
     @Test
     public void testServiceActivateEmptyProperties() {
@@ -333,19 +328,6 @@ public class ContainerOrchestrationServiceImplTest {
         whenImagesAreListed();
 
         thenCheckIfImagesWereListed();
-    }
-
-    @Test
-    public void testImageDigestsByContainerName() throws KuraException, InterruptedException {
-        givenFullProperties(true);
-        givenDockerServiceImplSpy();
-        givenDockerClient();
-
-        whenMockForImageDigestsListing();
-        whenDockerClientMockSomeContainers();
-        whenGetImageDigestsByContainerId(CONTAINER_ID_1);
-
-        thenDigestsListEqualsExpectedOne(EXPECTED_DIGESTS_ARRAY);
     }
 
     @Test
@@ -615,28 +597,6 @@ public class ContainerOrchestrationServiceImplTest {
 
     }
 
-    private void whenMockForImageDigestsListing() {
-        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
-                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
-                .build();
-
-        List<Image> images = new LinkedList<>();
-        Image mockImage = mock(Image.class);
-
-        when(mockImage.getId()).thenReturn("ngnix");
-        when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
-        when(mockImage.getRepoDigests()).thenReturn(REPO_DIGESTS_ARRAY);
-        images.add(mockImage);
-
-        when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
-        when(this.localDockerClient.listImagesCmd().withImageNameFilter(anyString()))
-                .thenReturn(mock(ListImagesCmd.class));
-        when(this.localDockerClient.listImagesCmd().withImageNameFilter(anyString()).exec()).thenReturn(images);
-
-    }
-
     private void whenMockForContainerInstancesDigestAdding() {
 
         // Build Respective CD's
@@ -679,10 +639,6 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void whenImagesAreListed() {
         this.dockerService.listImageInstanceDescriptors();
-    }
-
-    private void whenGetImageDigestsByContainerId(String containerName) {
-        this.digestsList = this.dockerService.getImageDigestsByContainerId(containerName);
     }
 
     /**
@@ -750,10 +706,6 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void thenCheckIfImagesWereListed() {
         verify(this.localDockerClient, times(1)).inspectImageCmd(any(String.class));
-    }
-
-    private void thenDigestsListEqualsExpectedOne(String[] digestsArray) {
-        assertEquals(new HashSet<>(Arrays.asList(digestsArray)), this.digestsList);
     }
 
     private void thenContainerInstanceDigestIsRegistered(String expectedDigest) {

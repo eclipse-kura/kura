@@ -100,7 +100,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "WAL", //
                 "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.wal.checkpoint.interval.seconds", 5L //
+                "db.wal.checkpoint.interval.seconds", 60L //
         ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
@@ -109,7 +109,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenExecutedQuery("INSERT INTO FOO VALUES (2);");
         givenExecutedQuery("INSERT INTO FOO VALUES (3);");
 
-        whenTimePasses(10, TimeUnit.SECONDS);
+        whenTimePasses(70, TimeUnit.SECONDS);
 
         thenFileExists(temporaryDirectory() + "/test.sqlite-wal");
         thenFileSizeIs(temporaryDirectory() + "/test.sqlite-wal", 0);
@@ -122,7 +122,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "WAL", //
                 "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.wal.checkpoint.interval.seconds", 5L, //
+                "db.wal.checkpoint.interval.seconds", 60L, //
                 "db.wal.checkpoint.enabled", false));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
@@ -131,7 +131,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenExecutedQuery("INSERT INTO FOO VALUES (2);");
         givenExecutedQuery("INSERT INTO FOO VALUES (3);");
 
-        whenTimePasses(10, TimeUnit.SECONDS);
+        whenTimePasses(70, TimeUnit.SECONDS);
 
         thenFileExists(temporaryDirectory() + "/test.sqlite-wal");
         thenFileSizeIsNotZero(temporaryDirectory() + "/test.sqlite-wal");
@@ -144,7 +144,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "ROLLBACK_JOURNAL", //
                 "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.defrag.interval.seconds", 5L //
+                "db.defrag.interval.seconds", 60L //
         ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
@@ -155,7 +155,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenInitialFileSize(temporaryDirectory() + "/test.sqlite");
         givenExecutedQuery("DELETE FROM FOO;");
 
-        whenTimePasses(10, TimeUnit.SECONDS);
+        whenTimePasses(70, TimeUnit.SECONDS);
 
         thenFileSizeDecreased(temporaryDirectory() + "/test.sqlite");
     }
@@ -167,7 +167,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "ROLLBACK_JOURNAL", //
                 "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.defrag.interval.seconds", 5L, //
+                "db.defrag.interval.seconds", 60L, //
                 "db.defrag.enabled", false //
         ));
 
@@ -179,7 +179,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenInitialFileSize(temporaryDirectory() + "/test.sqlite");
         givenExecutedQuery("DELETE FROM FOO;");
 
-        whenTimePasses(10, TimeUnit.SECONDS);
+        whenTimePasses(70, TimeUnit.SECONDS);
 
         thenFileSizeDidNotChange(temporaryDirectory() + "/test.sqlite");
     }
@@ -191,7 +191,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "WAL", //
                 "db.path", temporaryDirectory() + "/waldefrag.sqlite", //
-                "db.defrag.interval.seconds", 5L, //
+                "db.defrag.interval.seconds", 60L, //
                 "db.defrag.enabled", false //
         ));
 
@@ -205,7 +205,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenExecutedQuery("DELETE FROM FOO;");
         givenExecutedQuery("PRAGMA wal_checkpoint(TRUNCATE);");
 
-        whenTimePasses(10, TimeUnit.SECONDS);
+        whenTimePasses(70, TimeUnit.SECONDS);
 
         thenFileSizeDidNotChange(temporaryDirectory() + "/waldefrag.sqlite");
     }
@@ -217,7 +217,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "WAL", //
                 "db.path", temporaryDirectory() + "/waldefrag.sqlite", //
-                "db.defrag.interval.seconds", 5L //
+                "db.defrag.interval.seconds", 60L //
         ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
@@ -230,7 +230,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         givenExecutedQuery("DELETE FROM FOO;");
         givenExecutedQuery("PRAGMA wal_checkpoint(TRUNCATE);");
 
-        whenTimePasses(10, TimeUnit.SECONDS);
+        whenTimePasses(70, TimeUnit.SECONDS);
 
         thenFileSizeDecreased(temporaryDirectory() + "/waldefrag.sqlite");
     }

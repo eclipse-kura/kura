@@ -26,13 +26,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.testcomponent.ExternalComponent;
@@ -165,14 +163,9 @@ public class ExternalBundleValidationTest {
     }
 
     private void thenUpdateIsRejectedWith(final KuraErrorCode code) {
-        assertTrue("expected a KuraPartialSuccessException but got " + this.occurredException,
-                this.occurredException instanceof KuraPartialSuccessException);
-
-        final List<Throwable> causes = ((KuraPartialSuccessException) this.occurredException).getCauses();
-
-        assertEquals(1, causes.size());
-        assertTrue(causes.get(0) instanceof KuraException);
-        assertEquals(code, ((KuraException) causes.get(0)).getCode());
+        assertTrue("expected a KuraException but got " + this.occurredException,
+                this.occurredException instanceof KuraException);
+        assertEquals(code, ((KuraException) this.occurredException).getCode());
     }
 
     private void thenComponentReceives(final String pid, final String attribute, final Object value) {

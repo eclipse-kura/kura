@@ -374,7 +374,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         List<ComponentConfiguration> configs = new ArrayList<>();
         ComponentConfigurationImpl cci = new ComponentConfigurationImpl(pidToUpdate, null, propertiesToUpdate);
         configs.add(cci);
-        updateConfigurations(configs, takeSnapshot);
+        try {
+            updateConfigurations(configs, takeSnapshot);
+        } catch (KuraPartialSuccessException e) {
+            throw getSingleCause(e);
+        }
+    }
+
+    private static KuraException getSingleCause(final KuraPartialSuccessException e) {
+        final List<Throwable> causes = e.getCauses();
+
+        if (causes != null && causes.size() == 1 && causes.get(0) instanceof KuraException) {
+            return (KuraException) causes.get(0);
+        }
+
+        return e;
     }
 
     // Don't perform internal calls to this method

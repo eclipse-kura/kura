@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -483,7 +482,7 @@ public class ConfigurationServiceTest {
             }
         });
 
-        thenKuraPartialSuccessExceptionOccurred();
+        thenKuraExceptionOccurred(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
     }
 
     @Test
@@ -1031,11 +1030,6 @@ public class ConfigurationServiceTest {
     private void thenNPExceptionOccurred() {
         assertTrue(this.exceptionOccurred.isPresent());
         assertTrue(this.exceptionOccurred.get() instanceof NullPointerException);
-    }
-
-    private void thenKuraPartialSuccessExceptionOccurred() {
-        assertTrue(this.exceptionOccurred.isPresent());
-        assertTrue(this.exceptionOccurred.get() instanceof KuraPartialSuccessException);
     }
 
     private void thenNoExceptionOccurred() {

@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -39,9 +40,6 @@ import com.github.dockerjava.api.model.EventActor;
 public class AllowlistEnforcement {
 
     private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcement.class);
-
-    private static final String ENFORCEMENT_CHECK_SUCCESS = "Enforcement allowlist contains image digests {}... container {} is starting";
-    private static final String ENFORCEMENT_CHECK_FAILURE = "Enforcement allowlist doesn't contain image digests... container {} will be deleted";
 
     private final EnforcementTarget target;
     private final AtomicReference<Set<String>> allowlist = new AtomicReference<>(Collections.emptySet());
@@ -68,9 +66,9 @@ public class AllowlistEnforcement {
         }
 
         if (!allowedDigests.isEmpty()) {
-            logger.info(ENFORCEMENT_CHECK_SUCCESS, allowedDigests, containerId);
+            EnforcementAudit.containerAllowed(containerId, allowedDigests);
         } else {
-            logger.info(ENFORCEMENT_CHECK_FAILURE, containerId);
+            EnforcementAudit.containerRejected(containerId, imageDigests);
             forceDeleteContainer(containerId);
         }
     }
@@ -79,7 +77,7 @@ public class AllowlistEnforcement {
         try {
             enforce(containerId);
         } catch (RuntimeException e) {
-            logger.error("Enforcement check on container {} failed, the container was not blocked", containerId);
+            logger.error("Enforcement check on container {} failed, the container was not blocked", containerId, e);
         }
     }
 
@@ -89,10 +87,9 @@ public class AllowlistEnforcement {
         }
 
         try {
-            logger.info("Enforcement monitor closing...");
-            this.monitor.close();
+            this.monitor.shutdown();
             this.monitor.awaitCompletion(5, TimeUnit.SECONDS);
-            logger.info("Enforcement monitor closing...done.");
+            logger.info("Enforcement monitor closed.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
@@ -100,27 +97,31 @@ public class AllowlistEnforcement {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);
         } finally {
             this.monitor = null;
+            EnforcementAudit.enforcementStopped();
         }
     }
 
     public void register(String containerId, Optional<String> digest) {
         if (digest.isPresent()) {
-            logger.info(
+            logger.debug(
                     "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
                     containerId);
             this.containerDigests.put(containerId, digest.get());
+            EnforcementAudit.digestRegistered(digest.get(), containerId);
         } else {
-            logger.info("Container {} doesn't contain the enforcement digest. "
+            logger.debug("Container {} doesn't contain the enforcement digest. "
                     + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
                     containerId);
         }
     }
 
     public void unregister(String containerId) {
-        if (this.containerDigests.remove(containerId) == null) {
+        String digest = this.containerDigests.remove(containerId);
+        if (digest == null) {
             return;
         }
-        logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
+        logger.debug("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
+        EnforcementAudit.digestUnregistered(digest, containerId);
         enforceAll();
     }
 
@@ -130,15 +131,15 @@ public class AllowlistEnforcement {
 
     private synchronized void start(String allowlistContent, DockerClient dockerClient) {
         try {
-            logger.info("Enforcement monitor starting...");
             setAllowlist(allowlistContent);
             this.monitor = dockerClient.eventsCmd().withEventFilter("start")
                     .exec(new ContainerStartMonitor());
-            logger.info("Enforcement monitor starting...done.");
+            logger.info("Enforcement monitor started.");
+            EnforcementAudit.enforcementStarted(this.allowlist.get().size());
         } catch (Exception ex) {
-            logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
+            logger.error("Error starting enforcement monitor, enforcement won't be active", ex);
             close();
-            logger.warn("Enforcement won't be active.");
+            EnforcementAudit.enforcementStartFailed();
         }
     }
 
@@ -149,7 +150,7 @@ public class AllowlistEnforcement {
 
     private void enforceAll() {
         if (!isActive()) {
-            logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
+            logger.debug("Enforcement wasn't started. Check on running containers will not be performed.");
             return;
         }
         if (this.pendingChecks.getAndIncrement() > 0) {
@@ -165,11 +166,11 @@ public class AllowlistEnforcement {
     }
 
     private void checkRunningContainers() {
-        logger.info("Enforcement check on already running containers...");
+        logger.debug("Enforcement check on already running containers...");
         for (ContainerInstanceDescriptor descriptor : this.target.listContainerDescriptors()) {
             enforceSafely(descriptor.getContainerId());
         }
-        logger.info("Enforcement check on already running containers...done");
+        logger.debug("Enforcement check on already running containers...done");
     }
 
     private synchronized boolean isActive() {
@@ -183,12 +184,16 @@ public class AllowlistEnforcement {
     private void forceDeleteContainer(String containerId) {
         try {
             this.target.forceDeleteContainer(containerId);
+            EnforcementAudit.containerRemoved(containerId);
         } catch (KuraException ex) {
             logger.error("Error during container forced deleting process of {}:", containerId, ex);
+            EnforcementAudit.containerRemovalFailed(containerId);
         }
     }
 
     private class ContainerStartMonitor extends ResultCallbackTemplate<ContainerStartMonitor, Event> {
+
+        private final AtomicBoolean terminated = new AtomicBoolean();
 
         @Override
         public void onNext(Event item) {
@@ -196,6 +201,29 @@ public class AllowlistEnforcement {
                     .orElseGet(item::getId);
             if (containerId != null) {
                 enforceSafely(containerId);
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            auditUnexpectedTermination();
+            super.onError(throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            auditUnexpectedTermination();
+            super.onComplete();
+        }
+
+        private void shutdown() throws IOException {
+            this.terminated.set(true);
+            super.close();
+        }
+
+        private void auditUnexpectedTermination() {
+            if (this.terminated.compareAndSet(false, true)) {
+                EnforcementAudit.monitorTerminated();
             }
         }
     }

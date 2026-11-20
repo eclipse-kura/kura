@@ -369,7 +369,13 @@ public class ComponentUtil {
 
             // convert string values into object values
             int cardinality = attrDef.getCardinality();
-            objectValues = getObjectValue(type, defaultValues, ctx);
+            try {
+                objectValues = getObjectValue(type, defaultValues, ctx);
+            } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+                logger.error("Ignoring the default value '{}' of attribute {}: it is not a valid {}",
+                        attrDef.getDefault(), attrDef.getId(), type.value());
+                return null;
+            }
             if (objectValues != null && (cardinality == 0 || cardinality == 1 || cardinality == -1)) {
 
                 // return one single object

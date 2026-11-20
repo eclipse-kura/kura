@@ -34,6 +34,7 @@ final class ExternalMetatypeBundle {
     static final String SYMBOLIC_NAME = "org.eclipse.kura.core.configuration.test.external";
     static final String VALIDATED_PID = SYMBOLIC_NAME + ".ValidatedComponent";
     static final String REQUIRED_PID = SYMBOLIC_NAME + ".RequiredAttributeComponent";
+    static final String FACTORY_PID = SYMBOLIC_NAME + ".FactoryComponent";
 
     static final String INT_ATTR = "int.attr";
     static final String OPTION_ATTR = "option.attr";
@@ -69,15 +70,18 @@ final class ExternalMetatypeBundle {
         attributes.putValue("Bundle-Version", "1.0.0");
         attributes.putValue("Import-Package",
                 "org.eclipse.kura.configuration," + ExternalComponent.class.getPackage().getName());
-        attributes.putValue("Service-Component", "OSGI-INF/validated.xml,OSGI-INF/required.xml");
+        attributes.putValue("Service-Component",
+                "OSGI-INF/validated.xml,OSGI-INF/required.xml,OSGI-INF/factory.xml");
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try (JarOutputStream jar = new JarOutputStream(out, manifest)) {
-            addEntry(jar, "OSGI-INF/validated.xml", component(VALIDATED_PID));
-            addEntry(jar, "OSGI-INF/required.xml", component(REQUIRED_PID));
+            addEntry(jar, "OSGI-INF/validated.xml", component(VALIDATED_PID, true));
+            addEntry(jar, "OSGI-INF/required.xml", component(REQUIRED_PID, true));
+            addEntry(jar, "OSGI-INF/factory.xml", component(FACTORY_PID, false));
             addEntry(jar, "OSGI-INF/metatype/" + VALIDATED_PID + ".xml", validatedMetatype());
             addEntry(jar, "OSGI-INF/metatype/" + REQUIRED_PID + ".xml", requiredMetatype());
+            addEntry(jar, "OSGI-INF/metatype/" + FACTORY_PID + ".xml", factoryMetatype());
         }
 
         return out.toByteArray();
@@ -90,13 +94,14 @@ final class ExternalMetatypeBundle {
         jar.closeEntry();
     }
 
-    private static String component(final String pid) {
+    private static String component(final String pid, final boolean declaresServicePid) {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 + "<scr:component xmlns:scr=\"http://www.osgi.org/xmlns/scr/v1.1.0\" name=\"" + pid + "\"\n"
                 + "    activate=\"activate\" modified=\"updated\" deactivate=\"deactivate\"\n"
                 + "    immediate=\"true\" configuration-policy=\"require\">\n"
                 + "  <implementation class=\"" + ExternalComponent.class.getName() + "\"/>\n"
-                + "  <property name=\"service.pid\" type=\"String\" value=\"" + pid + "\"/>\n"
+                + (declaresServicePid ? "  <property name=\"service.pid\" type=\"String\" value=\"" + pid + "\"/>\n"
+                        : "")
                 + "  <service>\n"
                 + "    <provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"/>\n"
                 + "  </service>\n"
@@ -104,14 +109,22 @@ final class ExternalMetatypeBundle {
     }
 
     private static String validatedMetatype() {
-        return metatype(VALIDATED_PID,
-                "  <AD id=\"" + INT_ATTR + "\" name=\"" + INT_ATTR + "\" type=\"Integer\" cardinality=\"0\""
-                        + " required=\"true\" default=\"" + INT_DEFAULT + "\" min=\"1\" max=\"10\"/>\n"
-                        + "  <AD id=\"" + OPTION_ATTR + "\" name=\"" + OPTION_ATTR + "\" type=\"String\""
-                        + " cardinality=\"0\" required=\"true\" default=\"" + OPTION_DEFAULT + "\">\n"
-                        + "    <Option label=\"first\" value=\"first\"/>\n"
-                        + "    <Option label=\"second\" value=\"second\"/>\n"
-                        + "  </AD>\n");
+        return metatype(VALIDATED_PID, validatedAttributes(), "pid=\"" + VALIDATED_PID + "\"");
+    }
+
+    private static String factoryMetatype() {
+        return metatype(FACTORY_PID, validatedAttributes(),
+                "pid=\"" + FACTORY_PID + "\" factoryPid=\"" + FACTORY_PID + "\"");
+    }
+
+    private static String validatedAttributes() {
+        return "  <AD id=\"" + INT_ATTR + "\" name=\"" + INT_ATTR + "\" type=\"Integer\" cardinality=\"0\""
+                + " required=\"true\" default=\"" + INT_DEFAULT + "\" min=\"1\" max=\"10\"/>\n"
+                + "  <AD id=\"" + OPTION_ATTR + "\" name=\"" + OPTION_ATTR + "\" type=\"String\""
+                + " cardinality=\"0\" required=\"true\" default=\"" + OPTION_DEFAULT + "\">\n"
+                + "    <Option label=\"first\" value=\"first\"/>\n"
+                + "    <Option label=\"second\" value=\"second\"/>\n"
+                + "  </AD>\n";
     }
 
     private static String requiredMetatype() {
@@ -119,16 +132,17 @@ final class ExternalMetatypeBundle {
                 "  <AD id=\"" + REQUIRED_ATTR + "\" name=\"" + REQUIRED_ATTR + "\" type=\"String\" cardinality=\"0\""
                         + " required=\"true\"/>\n"
                         + "  <AD id=\"" + OPTIONAL_ATTR + "\" name=\"" + OPTIONAL_ATTR + "\" type=\"String\""
-                        + " cardinality=\"0\" required=\"false\" default=\"" + OPTIONAL_DEFAULT + "\"/>\n");
+                        + " cardinality=\"0\" required=\"false\" default=\"" + OPTIONAL_DEFAULT + "\"/>\n",
+                "pid=\"" + REQUIRED_PID + "\"");
     }
 
-    private static String metatype(final String pid, final String attributes) {
+    private static String metatype(final String pid, final String attributes, final String designate) {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 + "<MetaData xmlns=\"http://www.osgi.org/xmlns/metatype/v1.2.0\" localization=\"en_us\">\n"
                 + "<OCD id=\"" + pid + "\" name=\"" + pid + "\" description=\"test\">\n"
                 + attributes
                 + "</OCD>\n"
-                + "<Designate pid=\"" + pid + "\">\n"
+                + "<Designate " + designate + ">\n"
                 + "  <Object ocdref=\"" + pid + "\"/>\n"
                 + "</Designate>\n"
                 + "</MetaData>\n";

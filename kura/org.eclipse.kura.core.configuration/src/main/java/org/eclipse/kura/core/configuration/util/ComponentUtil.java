@@ -194,7 +194,11 @@ public class ComponentUtil {
      * @param ctx
      * @param pid
      * @return
+     * @deprecated it only looks up the metatype of the bundle that owns {@code ctx}, so it returns {@code null} for
+     *             the components of the other bundles. Use {@link #getObjectClassDefinition(BundleContext, Bundle)}
+     *             with the bundle that declares the component.
      */
+    @Deprecated
     public static ObjectClassDefinition getObjectClassDefinition(BundleContext ctx, String pid) {
         //
         ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);

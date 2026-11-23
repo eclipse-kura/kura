@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -502,6 +503,7 @@ public class ConfigurationRestService {
         }
 
         final FailureHandler handler = new FailureHandler();
+        final AtomicBoolean anyUpdateApplied = new AtomicBoolean();
 
         for (ComponentConfigurationDTO ccr : request.getComponentConfigurations()) {
 
@@ -509,10 +511,11 @@ public class ConfigurationRestService {
                 final Map<String, Object> configurationProperties = DTOUtil
                         .dtosToConfigurationProperties(ccr.getProperties());
                 this.configurationService.updateConfiguration(ccr.getPid(), configurationProperties, false);
+                anyUpdateApplied.set(true);
             });
         }
 
-        if (request.isTakeSnapshot()) {
+        if (request.isTakeSnapshot() && anyUpdateApplied.get()) {
             handler.runFallibleSubtask(SNAPSHOT_SUBTASK_ID, () -> this.configurationService.snapshot());
         }
 

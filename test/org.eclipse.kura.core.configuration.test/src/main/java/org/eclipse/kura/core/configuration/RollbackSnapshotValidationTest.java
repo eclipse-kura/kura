@@ -14,9 +14,10 @@
 package org.eclipse.kura.core.configuration;
 
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_ATTR;
+import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_DEFAULT;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.VALIDATED_PID;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
@@ -25,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -37,18 +37,30 @@ public class RollbackSnapshotValidationTest {
 
     private IsolatedConfigurationService isolated;
     private long targetSnapshotId;
-    private int updateCountBeforeRollback;
     private KuraException occurredException;
 
     @Test
-    public void rollbackToASnapshotWithAnInvalidValueChangesNothing() throws Throwable {
+    public void rollbackReplacesAnInvalidValueWithTheDefault() throws Throwable {
         givenIsolatedConfigurationServiceStartedWith(5);
         givenTargetSnapshotHolding(11);
 
         whenRollingBackToTheTargetSnapshot();
 
-        thenRollbackIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
-        thenConfigurationAdminIsNotChanged();
+        thenNoExceptionOccurred();
+        thenComponentNeverReceives(11);
+        thenComponentHolds(INT_DEFAULT);
+    }
+
+    @Test
+    public void snapshotWrittenByTheRollbackHoldsTheDefault() throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5);
+        givenTargetSnapshotHolding(11);
+        givenLaterSnapshotHolding(7);
+
+        whenRollingBackToTheTargetSnapshot();
+
+        thenNoExceptionOccurred();
+        thenLatestSnapshotHolds(INT_DEFAULT);
     }
 
     @Test
@@ -80,9 +92,11 @@ public class RollbackSnapshotValidationTest {
         this.targetSnapshotId = this.isolated.saveSnapshot(snapshotHolding(value));
     }
 
-    private void whenRollingBackToTheTargetSnapshot() {
-        this.updateCountBeforeRollback = this.isolated.getUpdateCount();
+    private void givenLaterSnapshotHolding(final int value) throws Throwable {
+        this.isolated.saveSnapshot(snapshotHolding(value));
+    }
 
+    private void whenRollingBackToTheTargetSnapshot() {
         try {
             this.isolated.getService().rollback(this.targetSnapshotId);
         } catch (final KuraException e) {
@@ -90,17 +104,27 @@ public class RollbackSnapshotValidationTest {
         }
     }
 
-    private void thenRollbackIsRejectedWith(final KuraErrorCode code) {
-        assertNotNull(this.occurredException);
-        assertEquals(code, this.occurredException.getCode());
-    }
-
     private void thenNoExceptionOccurred() {
         assertNull(this.occurredException);
     }
 
-    private void thenConfigurationAdminIsNotChanged() {
-        assertEquals(this.updateCountBeforeRollback, this.isolated.getUpdateCount());
+    private void thenComponentNeverReceives(final int value) {
+        for (final Dictionary<String, Object> update : this.isolated.getUpdates(VALIDATED_PID)) {
+            assertFalse("ConfigurationAdmin received " + value, Integer.valueOf(value).equals(update.get(INT_ATTR)));
+        }
+    }
+
+    private void thenLatestSnapshotHolds(final int value) throws KuraException {
+        final long latestId = Collections.max(this.isolated.getService().getSnapshots());
+
+        for (final ComponentConfiguration configuration : this.isolated.getService().getSnapshot(latestId)) {
+            if (VALIDATED_PID.equals(configuration.getPid())) {
+                assertEquals(value, configuration.getConfigurationProperties().get(INT_ATTR));
+                return;
+            }
+        }
+
+        throw new AssertionError("snapshot " + latestId + " does not contain " + VALIDATED_PID);
     }
 
     private void thenComponentHolds(final int value) {

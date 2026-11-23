@@ -43,7 +43,6 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -65,18 +64,12 @@ final class IsolatedConfigurationService {
 
         ExternalMetatypeBundle.install(bundleContext);
 
-        final ServiceReference<ConfigurationService> reference = bundleContext
-                .getServiceReference(ConfigurationService.class);
-        final Object running = bundleContext.getService(reference);
+        final Object running = WaitUtil.waitForService(ConfigurationService.class);
 
-        try {
-            this.service.setMetaTypeService((MetaTypeService) TestUtil.getFieldValue(running, "metaTypeService"));
-            this.service.setCryptoService((CryptoService) TestUtil.getFieldValue(running, "cryptoService"));
-            this.service.setXmlMarshaller((Marshaller) TestUtil.getFieldValue(running, "xmlMarshaller"));
-            this.service.setXmlUnmarshaller((Unmarshaller) TestUtil.getFieldValue(running, "xmlUnmarshaller"));
-        } finally {
-            bundleContext.ungetService(reference);
-        }
+        this.service.setMetaTypeService((MetaTypeService) TestUtil.getFieldValue(running, "metaTypeService"));
+        this.service.setCryptoService((CryptoService) TestUtil.getFieldValue(running, "cryptoService"));
+        this.service.setXmlMarshaller((Marshaller) TestUtil.getFieldValue(running, "xmlMarshaller"));
+        this.service.setXmlUnmarshaller((Unmarshaller) TestUtil.getFieldValue(running, "xmlUnmarshaller"));
 
         final SystemService systemService = mock(SystemService.class);
         when(systemService.getKuraSnapshotsDirectory()).thenReturn(this.snapshotDirectory.toString());
@@ -113,10 +106,6 @@ final class IsolatedConfigurationService {
 
     List<Dictionary<String, Object>> getUpdates(final String kuraServicePid) {
         return this.updates.getOrDefault(kuraServicePid, Collections.emptyList());
-    }
-
-    int getUpdateCount() {
-        return this.updates.values().stream().mapToInt(List::size).sum();
     }
 
     private void mockConfigurationAdmin() throws Exception {

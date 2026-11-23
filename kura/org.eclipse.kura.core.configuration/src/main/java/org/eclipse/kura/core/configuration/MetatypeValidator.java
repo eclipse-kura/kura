@@ -42,9 +42,10 @@ final class MetatypeValidator {
     private MetatypeValidator() {
     }
 
-    static void validate(final OCD ocd, final Map<String, Object> properties) throws KuraException {
+    static void validate(final OCD ocd, final Map<String, Object> properties,
+            final Map<String, Object> requestedProperties) throws KuraException {
         validateValues(ocd, properties);
-        validateRequiredAttributes(ocd, properties);
+        validateRequiredAttributes(ocd, requestedProperties);
     }
 
     static void validateValues(final OCD ocd, final Map<String, Object> properties) throws KuraException {
@@ -57,10 +58,11 @@ final class MetatypeValidator {
         }
     }
 
-    static void validateRequiredAttributes(final OCD ocd, final Map<String, Object> properties)
+    static void validateRequiredAttributes(final OCD ocd, final Map<String, Object> requestedProperties)
             throws KuraException {
         for (final AD ad : getAttributeDefinitions(ocd)) {
-            if (ad.isRequired() && properties.get(ad.getId()) == null) {
+            if (ad.isRequired() && requestedProperties.containsKey(ad.getId())
+                    && requestedProperties.get(ad.getId()) == null) {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, ad.getId());
             }
         }
@@ -129,12 +131,10 @@ final class MetatypeValidator {
             return cardinalityViolation;
         }
 
-        for (final String token : tokens) {
-            String violation = findOptionViolation(ad, token);
+        final AttributeRules rules = new AttributeRules(ad);
 
-            if (violation == null) {
-                violation = findTypeViolation(ad, token);
-            }
+        for (final String token : tokens) {
+            final String violation = rules.findViolation(token);
 
             if (violation != null) {
                 return violation;
@@ -145,68 +145,203 @@ final class MetatypeValidator {
     }
 
     private static String findCardinalityViolation(final int cardinality, final int size) {
-        final int maxSize = Math.abs(cardinality);
-
-        if (maxSize == 0 && size != 1) {
-            return "exactly one value is expected, found " + size;
+        if (cardinality == 0) {
+            return size == 1 ? null : "exactly one value is expected, found " + size;
         }
 
-        if (maxSize != 0 && size > maxSize) {
+        if (cardinality == Integer.MIN_VALUE || cardinality == Integer.MAX_VALUE) {
+            return null;
+        }
+
+        final int maxSize = Math.abs(cardinality);
+
+        if (size > maxSize) {
             return "at most " + maxSize + " values are allowed, found " + size;
         }
 
         return null;
     }
 
-    private static String findOptionViolation(final AD ad, final String token) {
-        final List<Option> options = ad.getOption();
+    private static final class AttributeRules {
 
-        if (options == null || options.isEmpty()) {
+        private final AD ad;
+        private final Function<String, Object> parser;
+        private final Object min;
+        private final Object max;
+        private final List<String> optionTokens = new ArrayList<>();
+        private final List<Object> optionValues = new ArrayList<>();
+
+        AttributeRules(final AD ad) {
+            this.ad = ad;
+            this.parser = getParser(ad.getType());
+
+            final Function<String, Object> boundParser = ad.getType() == Scalar.STRING ? Integer::valueOf
+                    : getRangeParser(ad.getType());
+
+            this.min = parseBound("min", ad.getMin(), boundParser);
+            this.max = parseBound("max", ad.getMax(), boundParser);
+
+            if (ad.getOption() != null) {
+                for (final Option option : ad.getOption()) {
+                    this.optionTokens.add(option.getValue());
+                    this.optionValues.add(parseOption(option));
+                }
+            }
+        }
+
+        String findViolation(final String token) {
+            Object value = token;
+            boolean isValidForType = true;
+
+            if (this.parser != null) {
+                try {
+                    value = this.parser.apply(token);
+                } catch (final IllegalArgumentException e) {
+                    isValidForType = false;
+                }
+            }
+
+            if (!isAmongTheOptions(token, isValidForType ? value : null)) {
+                return "the value is not one of the allowed options";
+            }
+
+            if (!isValidForType) {
+                return "the value is not a valid " + this.ad.getType().value();
+            }
+
+            if (this.ad.getType() == Scalar.STRING) {
+                return findLengthViolation(token);
+            }
+
+            return findRangeViolation(value);
+        }
+
+        private boolean isAmongTheOptions(final String token, final Object value) {
+            if (this.optionTokens.isEmpty()) {
+                return true;
+            }
+
+            for (int i = 0; i < this.optionTokens.size(); i++) {
+                final Object optionValue = this.optionValues.get(i);
+
+                if (token.equals(this.optionTokens.get(i))
+                        || value != null && optionValue != null && isSameValue(value, optionValue)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private String findLengthViolation(final String token) {
+            if (token.isEmpty() && !this.ad.isRequired()) {
+                return null;
+            }
+
+            if (this.min != null && token.length() < (Integer) this.min) {
+                return "the value is shorter than the minimum length " + this.min;
+            }
+
+            if (this.max != null && token.length() > (Integer) this.max) {
+                return "the value is longer than the maximum length " + this.max;
+            }
+
             return null;
         }
 
-        for (final Option option : options) {
-            if (token.equals(option.getValue())) {
+        private String findRangeViolation(final Object value) {
+            if (this.min == null && this.max == null) {
+                return null;
+            }
+
+            if (!isComparable(value)) {
+                return null;
+            }
+
+            if (isNaN(value)) {
+                return "the value is not a number";
+            }
+
+            if (this.min != null && compare(value, this.min) < 0) {
+                return "the value is lower than the minimum " + this.ad.getMin();
+            }
+
+            if (this.max != null && compare(value, this.max) > 0) {
+                return "the value is greater than the maximum " + this.ad.getMax();
+            }
+
+            return null;
+        }
+
+        private Object parseOption(final Option option) {
+            if (this.parser == null || option.getValue() == null) {
+                return null;
+            }
+
+            try {
+                return this.parser.apply(option.getValue());
+            } catch (final IllegalArgumentException e) {
                 return null;
             }
         }
 
-        return "the value is not one of the allowed options";
+        private Object parseBound(final String boundName, final String bound, final Function<String, Object> boundParser) {
+            if (bound == null || bound.isEmpty() || boundParser == null) {
+                return null;
+            }
+
+            try {
+                return boundParser.apply(bound);
+            } catch (final IllegalArgumentException e) {
+                logger.error("Ignoring the {} bound '{}' of attribute {}: it is not valid for type {}", boundName,
+                        bound, this.ad.getId(), this.ad.getType());
+                return null;
+            }
+        }
     }
 
-    private static String findTypeViolation(final AD ad, final String token) {
-        final Scalar type = ad.getType();
+    private static Function<String, Object> getParser(final Scalar type) {
+        if (type == Scalar.BOOLEAN) {
+            return MetatypeValidator::parseBoolean;
+        }
 
+        return getRangeParser(type);
+    }
+
+    private static Function<String, Object> getRangeParser(final Scalar type) {
         if (type == null) {
             return null;
         }
 
         switch (type) {
-        case STRING:
-            return findLengthViolation(ad, token);
-        case BOOLEAN:
-            return "true".equalsIgnoreCase(token) || "false".equalsIgnoreCase(token) ? null
-                    : "the value is not a valid Boolean";
         case CHAR:
-            return findRangeViolation(ad, token, MetatypeValidator::parseChar);
+            return MetatypeValidator::parseChar;
         case BYTE:
-            return findRangeViolation(ad, token, Byte::valueOf);
+            return Byte::valueOf;
         case SHORT:
-            return findRangeViolation(ad, token, Short::valueOf);
+            return Short::valueOf;
         case INTEGER:
-            return findRangeViolation(ad, token, Integer::valueOf);
+            return Integer::valueOf;
         case LONG:
-            return findRangeViolation(ad, token, Long::valueOf);
+            return Long::valueOf;
         case FLOAT:
-            return findRangeViolation(ad, token, Float::valueOf);
+            return Float::valueOf;
         case DOUBLE:
-            return findRangeViolation(ad, token, Double::valueOf);
+            return Double::valueOf;
         default:
             return null;
         }
     }
 
-    private static Character parseChar(final String token) {
+    private static Object parseBoolean(final String token) {
+        if ("true".equalsIgnoreCase(token) || "false".equalsIgnoreCase(token)) {
+            return Boolean.valueOf(token);
+        }
+
+        throw new IllegalArgumentException(token);
+    }
+
+    private static Object parseChar(final String token) {
         if (token.length() != 1) {
             throw new IllegalArgumentException(token);
         }
@@ -214,57 +349,42 @@ final class MetatypeValidator {
         return token.charAt(0);
     }
 
-    private static <T extends Comparable<T>> String findRangeViolation(final AD ad, final String token,
-            final Function<String, T> parser) {
-        final T value;
-
-        try {
-            value = parser.apply(token);
-        } catch (final IllegalArgumentException e) {
-            return "the value is not a valid " + ad.getType().value();
-        }
-
-        final T min = parseBound(ad, "min", ad.getMin(), parser);
-        final T max = parseBound(ad, "max", ad.getMax(), parser);
-
-        if (min != null && value.compareTo(min) < 0) {
-            return "the value is lower than the minimum " + ad.getMin();
-        }
-
-        if (max != null && value.compareTo(max) > 0) {
-            return "the value is greater than the maximum " + ad.getMax();
-        }
-
-        return null;
+    private static boolean isComparable(final Object value) {
+        return value instanceof Number || value instanceof Character;
     }
 
-    private static String findLengthViolation(final AD ad, final String token) {
-        final Integer min = parseBound(ad, "min", ad.getMin(), Integer::valueOf);
-        final Integer max = parseBound(ad, "max", ad.getMax(), Integer::valueOf);
-
-        if (min != null && token.length() < min) {
-            return "the value is shorter than the minimum length " + min;
-        }
-
-        if (max != null && token.length() > max) {
-            return "the value is longer than the maximum length " + max;
-        }
-
-        return null;
+    private static boolean isFloatingPoint(final Object value) {
+        return value instanceof Float || value instanceof Double;
     }
 
-    private static <T> T parseBound(final AD ad, final String boundName, final String bound,
-            final Function<String, T> parser) {
-        if (bound == null || bound.isEmpty()) {
-            return null;
+    private static boolean isNaN(final Object value) {
+        return isFloatingPoint(value) && Double.isNaN(((Number) value).doubleValue());
+    }
+
+    private static boolean isSameValue(final Object value, final Object other) {
+        if (isComparable(value) && isComparable(other)) {
+            return !isNaN(value) && compare(value, other) == 0;
         }
 
-        try {
-            return parser.apply(bound);
-        } catch (final IllegalArgumentException e) {
-            logger.error("Ignoring the {} bound '{}' of attribute {}: it is not valid for type {}", boundName, bound,
-                    ad.getId(), ad.getType());
-            return null;
+        return value.equals(other);
+    }
+
+    private static int compare(final Object value, final Object other) {
+        if (value instanceof Character) {
+            return Character.compare((Character) value, (Character) other);
         }
+
+        if (isFloatingPoint(value)) {
+            final double first = ((Number) value).doubleValue();
+            final double second = ((Number) other).doubleValue();
+
+            if (first < second) {
+                return -1;
+            }
+
+            return first > second ? 1 : 0;
+        }
+
+        return Long.compare(((Number) value).longValue(), ((Number) other).longValue());
     }
 }

@@ -119,7 +119,7 @@ final class ExternalMetatypeBundle {
                 "  <AD id=\"" + REQUIRED_ATTR + "\" name=\"" + REQUIRED_ATTR + "\" type=\"String\" cardinality=\"0\""
                         + " required=\"true\"/>\n"
                         + "  <AD id=\"" + OPTIONAL_ATTR + "\" name=\"" + OPTIONAL_ATTR + "\" type=\"String\""
-                        + " cardinality=\"0\" required=\"false\" default=\"" + OPTIONAL_DEFAULT + "\"/>\n");
+                        + " cardinality=\"0\" required=\"false\" default=\"" + OPTIONAL_DEFAULT + "\" min=\"1\"/>\n");
     }
 
     private static String metatype(final String pid, final String attributes) {

@@ -271,13 +271,24 @@ public class MetatypeValidatorTest {
     }
 
     @Test
-    public void missingRequiredAttributeIsRejected() {
+    public void requiredAttributeSetToNullIsRejected() {
+        givenAttribute(Tscalar.STRING, 0);
+        givenRequired(true);
+        givenProperty(ATTRIBUTE, null);
+
+        whenPropertiesAreValidated();
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
+    }
+
+    @Test
+    public void requiredAttributeLeftOutOfTheUpdateIsAccepted() {
         givenAttribute(Tscalar.STRING, 0);
         givenRequired(true);
 
         whenPropertiesAreValidated();
 
-        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
+        thenValueIsAccepted();
     }
 
     @Test
@@ -291,9 +302,10 @@ public class MetatypeValidatorTest {
     }
 
     @Test
-    public void missingRequiredAttributeIsAcceptedWhenOnlyValuesAreValidated() {
+    public void requiredAttributeSetToNullIsAcceptedWhenOnlyValuesAreValidated() {
         givenAttribute(Tscalar.STRING, 0);
         givenRequired(true);
+        givenProperty(ATTRIBUTE, null);
 
         whenOnlyValuesAreValidated();
 
@@ -309,6 +321,151 @@ public class MetatypeValidatorTest {
         whenPropertiesAreValidated();
 
         thenValueIsAccepted();
+    }
+
+    @Test
+    public void emptyStringIsAcceptedForAnOptionalAttributeWithAMinimumLength() {
+        givenAttribute(Tscalar.STRING, 0);
+        givenRequired(false);
+        givenRange("1", "64");
+
+        whenValueIsValidated("");
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void emptyStringIsRejectedForARequiredAttributeWithAMinimumLength() {
+        givenAttribute(Tscalar.STRING, 0);
+        givenRequired(true);
+        givenRange("1", "64");
+
+        whenValueIsValidated("");
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("minimum length 1");
+    }
+
+    @Test
+    public void unboundedListCardinalityAcceptsAnyNumberOfValues() {
+        givenAttribute(Tscalar.STRING, Integer.MIN_VALUE);
+
+        whenValueIsValidated(new String[] { "a", "b", "c" });
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void unboundedArrayCardinalityAcceptsAnyNumberOfValues() {
+        givenAttribute(Tscalar.STRING, Integer.MAX_VALUE);
+
+        whenValueIsValidated(new String[] { "a", "b", "c" });
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void numericOptionIsMatchedByValue() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenOptions("1", "2.5");
+
+        whenValueIsValidated(1.0);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void largeNumericOptionIsMatchedByValue() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenOptions("10000000");
+
+        whenValueIsValidated(1.0E7);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void integerOptionWithALeadingZeroIsMatchedByValue() {
+        givenAttribute(Tscalar.INTEGER, 0);
+        givenOptions("01", "02");
+
+        whenValueIsValidated(2);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void booleanOptionIsMatchedRegardlessOfCase() {
+        givenAttribute(Tscalar.BOOLEAN, 0);
+        givenOptions("True");
+
+        whenValueIsValidated(true);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void numericValueOutsideTheOptionsIsRejected() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenOptions("1", "2.5");
+
+        whenValueIsValidated(2.0);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("allowed options");
+    }
+
+    @Test
+    public void notANumberIsRejectedWhenTheAttributeHasABound() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenRange("0", null);
+
+        whenValueIsValidated(Double.NaN);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a number");
+    }
+
+    @Test
+    public void negativeZeroIsAcceptedAtAZeroMinimum() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenRange("0", "1");
+
+        whenValueIsValidated(-0.0);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void floatAboveTheUpperBoundIsRejected() {
+        givenAttribute(Tscalar.FLOAT, 0);
+        givenRange("0.5", "1.5");
+
+        whenValueIsValidated(1.6f);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("maximum 1.5");
+    }
+
+    @Test
+    public void charOutsideTheRangeIsRejected() {
+        givenAttribute(Tscalar.CHAR, 0);
+        givenRange("a", "f");
+
+        whenValueIsValidated('z');
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+    }
+
+    @Test
+    public void malformedBoundIsIgnoredForEveryArrayElement() {
+        givenAttribute(Tscalar.INTEGER, 3);
+        givenRange("one", "10");
+
+        whenValueIsValidated(new Integer[] { -5, 3, 11 });
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("maximum 10");
     }
 
     private void givenAttribute(final Tscalar type, final int cardinality) {
@@ -352,7 +509,7 @@ public class MetatypeValidatorTest {
 
     private void whenPropertiesAreValidated() {
         try {
-            MetatypeValidator.validate(ocd(), this.properties);
+            MetatypeValidator.validate(ocd(), this.properties, this.properties);
         } catch (final KuraException e) {
             this.occurredException = e;
         }

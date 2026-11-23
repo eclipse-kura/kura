@@ -16,6 +16,7 @@ package org.eclipse.kura.core.configuration;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_ATTR;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.OPTIONAL_ATTR;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.OPTION_ATTR;
+import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.REQUIRED_ATTR;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.REQUIRED_PID;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.VALIDATED_PID;
 import static org.junit.Assert.assertEquals;
@@ -27,7 +28,8 @@ import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -37,18 +39,15 @@ import org.eclipse.kura.core.configuration.testcomponent.ExternalComponent;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.util.tracker.ServiceTracker;
 
 public class ExternalBundleValidationTest {
-
-    private static final long TIMEOUT_MS = 30000;
-    private static final long POLL_INTERVAL_MS = 100;
 
     private final BundleContext bundleContext = FrameworkUtil.getBundle(ExternalBundleValidationTest.class)
             .getBundleContext();
 
     private ConfigurationService configurationService;
     private Exception occurredException;
+    private Set<Long> snapshotsBeforeUpdate;
 
     @Test
     public void valueAtTheLowerBoundIsApplied() throws Exception {
@@ -123,31 +122,104 @@ public class ExternalBundleValidationTest {
     }
 
     @Test
-    public void missingRequiredAttributeIsRejected() throws Exception {
+    public void requiredAttributeSetToNullIsRejected() throws Exception {
+        givenExternalBundleComponents();
+
+        whenValueIsUpdated(REQUIRED_PID, REQUIRED_ATTR, null);
+
+        thenUpdateIsRejectedWith(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
+    }
+
+    @Test
+    public void rejectedUpdateTakesNoSnapshot() throws Exception {
+        givenExternalBundleComponents();
+        givenIntegerValue(5);
+        givenSnapshotsAreRemembered();
+
+        whenValueIsUpdated(VALIDATED_PID, INT_ATTR, 11);
+
+        thenUpdateIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenNoSnapshotIsTaken();
+    }
+
+    @Test
+    public void componentWithoutAValueForARequiredAttributeStaysUpdatable() throws Exception {
         givenExternalBundleComponents();
 
         whenValueIsUpdated(REQUIRED_PID, OPTIONAL_ATTR, "y");
 
+        thenNoExceptionOccurred();
+        thenComponentReceives(REQUIRED_PID, OPTIONAL_ATTR, "y");
+    }
+
+    @Test
+    public void emptyValueIsAcceptedForAnOptionalAttributeWithAMinimumLength() throws Exception {
+        givenExternalBundleComponents();
+
+        whenValueIsUpdated(REQUIRED_PID, OPTIONAL_ATTR, "");
+
+        thenNoExceptionOccurred();
+        thenComponentReceives(REQUIRED_PID, OPTIONAL_ATTR, "");
+    }
+
+    @Test
+    public void preliminaryValidationRejectsAnInvalidValue() throws Exception {
+        givenExternalBundleComponents();
+        givenIntegerValue(5);
+
+        whenConfigurationIsValidated(VALIDATED_PID, INT_ATTR, 11);
+
+        thenUpdateIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenConfigurationHolds(VALIDATED_PID, INT_ATTR, 5);
+    }
+
+    @Test
+    public void preliminaryValidationReportsAMissingRequiredAttribute() throws Exception {
+        givenExternalBundleComponents();
+
+        whenConfigurationIsValidated(REQUIRED_PID, REQUIRED_ATTR, null);
+
         thenUpdateIsRejectedWith(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
-        thenConfigurationDoesNotHold(REQUIRED_PID, OPTIONAL_ATTR, "y");
+    }
+
+    @Test
+    public void preliminaryValidationAppliesNothing() throws Exception {
+        givenExternalBundleComponents();
+        givenIntegerValue(5);
+
+        whenConfigurationIsValidated(VALIDATED_PID, INT_ATTR, 7);
+
+        thenNoExceptionOccurred();
+        thenConfigurationHolds(VALIDATED_PID, INT_ATTR, 5);
     }
 
     private void givenExternalBundleComponents() throws Exception {
         ExternalMetatypeBundle.install(this.bundleContext);
-        this.configurationService = waitForService(ConfigurationService.class);
+        this.configurationService = WaitUtil.waitForService(ConfigurationService.class);
 
         assertNotNull(this.configurationService);
 
-        await(() -> isTracked(VALIDATED_PID) && isTracked(REQUIRED_PID));
+        WaitUtil.waitUntil("external components are not tracked",
+                () -> isTracked(VALIDATED_PID) && isTracked(REQUIRED_PID));
+    }
 
-        assertTrue(isTracked(VALIDATED_PID));
-        assertTrue(isTracked(REQUIRED_PID));
+    private void givenSnapshotsAreRemembered() throws KuraException {
+        this.snapshotsBeforeUpdate = new TreeSet<>(this.configurationService.getSnapshots());
     }
 
     private void givenIntegerValue(final int value) throws KuraException {
         this.configurationService.updateConfiguration(VALIDATED_PID, Collections.singletonMap(INT_ATTR, value), true);
 
         thenComponentReceives(VALIDATED_PID, INT_ATTR, value);
+    }
+
+    private void whenConfigurationIsValidated(final String pid, final String attribute, final Object value) {
+        try {
+            ((ConfigurationServiceImpl) this.configurationService).validateConfigurations(Collections
+                    .singletonList(new ComponentConfigurationImpl(pid, null, Collections.singletonMap(attribute, value))));
+        } catch (final Exception e) {
+            this.occurredException = e;
+        }
     }
 
     private void whenValueIsUpdated(final String pid, final String attribute, final Object value) {
@@ -168,10 +240,13 @@ public class ExternalBundleValidationTest {
         assertEquals(code, ((KuraException) this.occurredException).getCode());
     }
 
-    private void thenComponentReceives(final String pid, final String attribute, final Object value) {
-        await(() -> value.equals(receivedValue(pid, attribute)));
+    private void thenNoSnapshotIsTaken() throws KuraException {
+        assertEquals(this.snapshotsBeforeUpdate, new TreeSet<>(this.configurationService.getSnapshots()));
+    }
 
-        assertEquals(value, receivedValue(pid, attribute));
+    private void thenComponentReceives(final String pid, final String attribute, final Object value) {
+        WaitUtil.waitUntil(pid + " did not receive " + attribute + "=" + value,
+                () -> value.equals(receivedValue(pid, attribute)));
     }
 
     private void thenConfigurationHolds(final String pid, final String attribute, final Object value)
@@ -224,29 +299,5 @@ public class ExternalBundleValidationTest {
 
     private boolean isTracked(final String pid) {
         return this.configurationService.getConfigurableComponentPids().contains(pid);
-    }
-
-    private <T> T waitForService(final Class<T> service) throws InterruptedException {
-        final ServiceTracker<T, T> tracker = new ServiceTracker<>(this.bundleContext, service, null);
-        tracker.open();
-
-        try {
-            return tracker.waitForService(TIMEOUT_MS);
-        } finally {
-            tracker.close();
-        }
-    }
-
-    private static void await(final BooleanSupplier condition) {
-        final long deadline = System.currentTimeMillis() + TIMEOUT_MS;
-
-        while (!condition.getAsBoolean() && System.currentTimeMillis() < deadline) {
-            try {
-                Thread.sleep(POLL_INTERVAL_MS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
     }
 }

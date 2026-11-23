@@ -783,7 +783,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         List<Throwable> causes = new ArrayList<>();
         List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
-        updateConfigurationInternal(configsToUpdate, configs, causes);
+        boolean anyChangeApplied = updateConfigurationInternal(configsToUpdate, configs, causes);
 
         // this step creates any not yet existing factory configuration present in
         // configsToUpdate
@@ -800,13 +800,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 try {
                     createFactoryConfigurationInternal(factoryPid, pid, properties, false);
                     configs.add(config);
+                    anyChangeApplied = true;
                 } catch (KuraException e) {
                     logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
                 }
             }
         }
 
-        if (takeSnapshot && configs != null && !configs.isEmpty()) {
+        if (takeSnapshot && configs != null && !configs.isEmpty() && (causes.isEmpty() || anyChangeApplied)) {
             saveSnapshot(configs);
         }
 
@@ -815,14 +816,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private void updateConfigurationInternal(List<ComponentConfiguration> configsToUpdate,
+    private boolean updateConfigurationInternal(List<ComponentConfiguration> configsToUpdate,
             List<ComponentConfiguration> configs, List<Throwable> causes) {
+        boolean anyChangeApplied = false;
+
         for (int i = 0; i < configs.size(); i++) {
             final ComponentConfiguration config = configs.get(i);
             for (ComponentConfiguration configToUpdate : configsToUpdate) {
                 if (config.getPid().equals(configToUpdate.getPid())) {
                     try {
                         updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), false);
+                        anyChangeApplied = true;
                     } catch (KuraException e) {
                         logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
                         causes.add(e);
@@ -832,6 +836,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 }
             }
         }
+
+        return anyChangeApplied;
     }
 
     private void restoreCurrentConfiguration(List<ComponentConfiguration> configs, int index) {
@@ -1450,15 +1456,44 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return;
         }
 
+        Map<String, Object> mergedProperties = mergeWithCurrentProperties(pid, registerdOCD, properties);
+
+        try {
+            updateComponentConfiguration(pid, registerdOCD, mergedProperties, properties, snapshotOnConfirmation);
+            logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+        }
+    }
+
+    synchronized void validateConfigurations(final List<ComponentConfiguration> configs) throws KuraException {
+        for (final ComponentConfiguration config : configs) {
+            final String pid = config.getPid();
+            final Map<String, Object> properties = config.getConfigurationProperties();
+
+            if (properties == null || !this.allActivatedPids.contains(pid)) {
+                continue;
+            }
+
+            final OCD ocd = getRegisteredOCD(pid);
+
+            if (ocd != null) {
+                validateConfiguration(pid, ocd, mergeWithCurrentProperties(pid, ocd, properties), properties);
+            }
+        }
+    }
+
+    private Map<String, Object> mergeWithCurrentProperties(String pid, OCD ocd, Map<String, Object> properties)
+            throws KuraException {
         Map<String, Object> mergedProperties = new HashMap<>();
-        mergeWithDefaults(registerdOCD, mergedProperties);
+        mergeWithDefaults(ocd, mergedProperties);
 
         if (!this.activatedSelfConfigComponents.contains(pid)) {
             try {
                 // get the current running configuration for the selected component
                 Configuration config = this.configurationAdmin.getConfiguration(this.servicePidByPid.get(pid), "?");
-                Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(),
-                        registerdOCD, getPasswordPropertiesForPid(pid));
+                Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), ocd,
+                        getPasswordPropertiesForPid(pid));
 
                 mergedProperties.putAll(runningProps);
             } catch (IOException e) {
@@ -1473,21 +1508,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
         }
 
-        try {
-            updateComponentConfiguration(pid, registerdOCD, mergedProperties, snapshotOnConfirmation);
-            logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+        return mergedProperties;
+    }
+
+    private void validateConfiguration(String pid, OCD ocd, Map<String, Object> mergedProperties,
+            Map<String, Object> requestedProperties) throws KuraException {
+        if (this.activatedSelfConfigComponents.contains(pid)) {
+            MetatypeValidator.validateValues(ocd, mergedProperties);
+        } else {
+            MetatypeValidator.validate(ocd, mergedProperties, requestedProperties);
         }
     }
 
     private void updateComponentConfiguration(String pid, OCD ocd, Map<String, Object> mergedProperties,
-            boolean snapshotOnConfirmation) throws KuraException, IOException {
-        if (this.activatedSelfConfigComponents.contains(pid)) {
-            MetatypeValidator.validateValues(ocd, mergedProperties);
-        } else {
-            MetatypeValidator.validate(ocd, mergedProperties);
-        }
+            Map<String, Object> requestedProperties, boolean snapshotOnConfirmation) throws KuraException, IOException {
+        validateConfiguration(pid, ocd, mergedProperties, requestedProperties);
 
         // Update the new properties
         // use ConfigurationAdmin to do the update

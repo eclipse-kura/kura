@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.configuration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -24,7 +23,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -39,15 +37,12 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 
 public class DeclaredServicePidComponentTest {
 
     private static final String FACTORY_PID = "org.eclipse.kura.core.configuration.ServicePidFactoryComponent";
     private static final String SINGLETON_PID = "org.eclipse.kura.core.configuration.ServicePidSingletonConfiguration";
     private static final String FIELD = "field.test";
-    private static final long TIMEOUT_MS = 30000;
-    private static final long POLL_INTERVAL_MS = 100;
 
     private final BundleContext bundleContext = FrameworkUtil.getBundle(DeclaredServicePidComponentTest.class)
             .getBundleContext();
@@ -112,9 +107,9 @@ public class DeclaredServicePidComponentTest {
         }
     }
 
-    private void givenServices() throws InterruptedException {
-        this.configurationService = waitForService(ConfigurationService.class);
-        this.configurationAdmin = waitForService(ConfigurationAdmin.class);
+    private void givenServices() throws Exception {
+        this.configurationService = WaitUtil.waitForService(ConfigurationService.class);
+        this.configurationAdmin = WaitUtil.waitForService(ConfigurationAdmin.class);
 
         assertNotNull(this.configurationService);
         assertNotNull(this.configurationAdmin);
@@ -135,7 +130,7 @@ public class DeclaredServicePidComponentTest {
     }
 
     private void givenServicePidWithSeveralValues(final String pid) {
-        await(() -> getComponentReference(pid) != null);
+        WaitUtil.waitUntil(pid + " is not registered", () -> getComponentReference(pid) != null);
 
         final ServiceReference<ConfigurableComponent> reference = getComponentReference(pid);
 
@@ -145,13 +140,13 @@ public class DeclaredServicePidComponentTest {
     }
 
     private void whenConfigurationIsUpdated(final String pid, final int value) throws KuraException {
-        await(() -> isTracked(pid));
+        WaitUtil.waitUntil(pid + " is not tracked", () -> isTracked(pid));
 
         this.configurationService.updateConfiguration(pid, Collections.singletonMap(FIELD, value), false);
     }
 
     private void whenConfigurationIsDeletedFromConfigurationAdmin(final String pid) throws Exception {
-        await(() -> isTracked(pid));
+        WaitUtil.waitUntil(pid + " is not tracked", () -> isTracked(pid));
 
         final Configuration[] configurations = this.configurationAdmin
                 .listConfigurations("(" + ConfigurationService.KURA_SERVICE_PID + "=" + pid + ")");
@@ -168,15 +163,11 @@ public class DeclaredServicePidComponentTest {
     }
 
     private void thenComponentIsNotTracked(final String pid) {
-        await(() -> !isTracked(pid));
-
-        assertFalse(isTracked(pid));
+        WaitUtil.waitUntil(pid + " is still tracked", () -> !isTracked(pid));
     }
 
     private void thenComponentReceives(final String pid, final int value) {
-        await(() -> receivedValue(pid) == value);
-
-        assertEquals(value, receivedValue(pid));
+        WaitUtil.waitUntil(pid + " did not receive " + value, () -> receivedValue(pid) == value);
     }
 
     private void thenComponentConfigurationContains(final String pid, final int value) throws KuraException {
@@ -208,30 +199,6 @@ public class DeclaredServicePidComponentTest {
                     .stream().findFirst().orElse(null);
         } catch (final InvalidSyntaxException e) {
             throw new IllegalArgumentException(e);
-        }
-    }
-
-    private <T> T waitForService(final Class<T> service) throws InterruptedException {
-        final ServiceTracker<T, T> tracker = new ServiceTracker<>(this.bundleContext, service, null);
-        tracker.open();
-
-        try {
-            return tracker.waitForService(TIMEOUT_MS);
-        } finally {
-            tracker.close();
-        }
-    }
-
-    private static void await(final BooleanSupplier condition) {
-        final long deadline = System.currentTimeMillis() + TIMEOUT_MS;
-
-        while (!condition.getAsBoolean() && System.currentTimeMillis() < deadline) {
-            try {
-                Thread.sleep(POLL_INTERVAL_MS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
         }
     }
 }

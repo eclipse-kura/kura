@@ -392,10 +392,24 @@ public class CloudConfigurationHandler implements RequestHandler {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
+        validateConfigurations(pid, xmlConfigs);
+
         this.executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, this.configurationService), 1000,
                 TimeUnit.MILLISECONDS);
 
         return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+    }
+
+    private void validateConfigurations(final String pid, final XmlComponentConfigurations xmlConfigs)
+            throws KuraException {
+        final List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
+
+        if (configs == null || !(this.configurationService instanceof ConfigurationServiceImpl)) {
+            return;
+        }
+
+        ((ConfigurationServiceImpl) this.configurationService).validateConfigurations(configs.stream()
+                .filter(config -> pid == null || pid.equals(config.getPid())).collect(Collectors.toList()));
     }
 
     private KuraPayload doExecRollback(List<String> resources) throws KuraException {

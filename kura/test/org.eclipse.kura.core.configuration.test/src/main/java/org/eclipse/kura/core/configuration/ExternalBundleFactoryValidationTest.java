@@ -19,13 +19,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -36,12 +35,8 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 
 public class ExternalBundleFactoryValidationTest {
-
-    private static final long TIMEOUT_MS = 30000;
-    private static final long POLL_INTERVAL_MS = 100;
 
     private final BundleContext bundleContext = FrameworkUtil.getBundle(ExternalBundleFactoryValidationTest.class)
             .getBundleContext();
@@ -81,6 +76,46 @@ public class ExternalBundleFactoryValidationTest {
         thenInstanceReceives("factoryAtUpperBound", 10);
     }
 
+    @Test
+    public void newInstanceWithAnInvalidValueIsReportedByUpdateConfiguration() throws Exception {
+        givenExternalBundleFactory();
+
+        whenInstanceIsUpdatedWith("factoryUpdateAboveUpperBound", 11);
+
+        thenCreationIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenNoInstanceExists("factoryUpdateAboveUpperBound");
+    }
+
+    @Test
+    public void newInstanceWithAValidValueIsCreatedByUpdateConfiguration() throws Exception {
+        givenExternalBundleFactory();
+
+        whenInstanceIsUpdatedWith("factoryUpdateAtUpperBound", 10);
+
+        thenNoExceptionOccurred();
+        thenInstanceReceives("factoryUpdateAtUpperBound", 10);
+    }
+
+    @Test
+    public void preliminaryValidationRejectsAnInvalidNewInstance() throws Exception {
+        givenExternalBundleFactory();
+
+        whenNewInstanceIsValidatedWith("factoryValidationAboveUpperBound", 11);
+
+        thenCreationIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenNoInstanceExists("factoryValidationAboveUpperBound");
+    }
+
+    @Test
+    public void preliminaryValidationCreatesNoInstance() throws Exception {
+        givenExternalBundleFactory();
+
+        whenNewInstanceIsValidatedWith("factoryValidationAtUpperBound", 10);
+
+        thenNoExceptionOccurred();
+        thenNoInstanceExists("factoryValidationAtUpperBound");
+    }
+
     @After
     public void deleteCreatedInstances() throws KuraException {
         for (final String pid : this.createdPids) {
@@ -90,15 +125,14 @@ public class ExternalBundleFactoryValidationTest {
 
     private void givenExternalBundleFactory() throws Exception {
         ExternalMetatypeBundle.install(this.bundleContext);
-        this.configurationService = waitForService(ConfigurationService.class);
-        this.configurationAdmin = waitForService(ConfigurationAdmin.class);
+        this.configurationService = WaitUtil.waitForService(ConfigurationService.class);
+        this.configurationAdmin = WaitUtil.waitForService(ConfigurationAdmin.class);
 
         assertNotNull(this.configurationService);
         assertNotNull(this.configurationAdmin);
 
-        await(() -> this.configurationService.getFactoryComponentPids().contains(FACTORY_PID));
-
-        assertTrue(this.configurationService.getFactoryComponentPids().contains(FACTORY_PID));
+        WaitUtil.waitUntil(FACTORY_PID + " is not tracked",
+                () -> this.configurationService.getFactoryComponentPids().contains(FACTORY_PID));
     }
 
     private void whenInstanceIsCreatedWith(final String pid, final Object value) {
@@ -107,6 +141,25 @@ public class ExternalBundleFactoryValidationTest {
         try {
             this.configurationService.createFactoryConfiguration(FACTORY_PID, pid,
                     Collections.singletonMap(INT_ATTR, value), false);
+        } catch (final KuraException e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenInstanceIsUpdatedWith(final String pid, final Object value) {
+        this.createdPids.add(pid);
+
+        try {
+            this.configurationService.updateConfiguration(pid, factoryProperties(value));
+        } catch (final KuraException e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenNewInstanceIsValidatedWith(final String pid, final Object value) {
+        try {
+            ((ConfigurationServiceImpl) this.configurationService).validateConfigurations(
+                    Collections.singletonList(new ComponentConfigurationImpl(pid, null, factoryProperties(value))));
         } catch (final KuraException e) {
             this.occurredException = e;
         }
@@ -128,38 +181,19 @@ public class ExternalBundleFactoryValidationTest {
     }
 
     private void thenInstanceReceives(final String pid, final Object value) {
-        await(() -> value.equals(receivedValue(pid)));
+        WaitUtil.waitUntil(pid + " did not receive " + value, () -> value.equals(receivedValue(pid)));
+    }
 
-        assertEquals(value, receivedValue(pid));
+    private static Map<String, Object> factoryProperties(final Object value) {
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put(ConfigurationAdmin.SERVICE_FACTORYPID, FACTORY_PID);
+        properties.put(INT_ATTR, value);
+        return properties;
     }
 
     private static Object receivedValue(final String pid) {
         final Map<String, Object> properties = ExternalComponent.getProperties(pid);
 
         return properties == null ? null : properties.get(INT_ATTR);
-    }
-
-    private <T> T waitForService(final Class<T> service) throws InterruptedException {
-        final ServiceTracker<T, T> tracker = new ServiceTracker<>(this.bundleContext, service, null);
-        tracker.open();
-
-        try {
-            return tracker.waitForService(TIMEOUT_MS);
-        } finally {
-            tracker.close();
-        }
-    }
-
-    private static void await(final BooleanSupplier condition) {
-        final long deadline = System.currentTimeMillis() + TIMEOUT_MS;
-
-        while (!condition.getAsBoolean() && System.currentTimeMillis() < deadline) {
-            try {
-                Thread.sleep(POLL_INTERVAL_MS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
     }
 }

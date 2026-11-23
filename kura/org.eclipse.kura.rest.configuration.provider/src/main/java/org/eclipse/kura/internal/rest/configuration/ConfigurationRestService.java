@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.rest.configuration;
 
 import static java.util.Objects.isNull;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,8 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.request.handler.jaxrs.annotation.EXEC;
@@ -61,6 +64,9 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -87,11 +93,20 @@ public class ConfigurationRestService {
     private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.configuration";
     private static final String SNAPSHOT_SUBTASK_ID = "snapshot";
 
+    private static final String ADMIN_PERMISSION = "kura.admin";
+    private static final String USER_STORE_PID = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl";
+
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
     private ConfigurationService configurationService;
     private OCDService ocdService;
     private CryptoService cryptoService;
+    private IdentityService identityService;
+
+    @Reference(name = "IdentityService", service = org.eclipse.kura.identity.IdentityService.class, unbind = "-")
+    public void setIdentityService(final IdentityService identityService) {
+        this.identityService = identityService;
+    }
 
     @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void setUserAdmin(UserAdmin userAdmin) {
@@ -309,7 +324,8 @@ public class ConfigurationRestService {
     @RolesAllowed("configuration")
     @Path("/configurableComponents/pidsWithFactory")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidAndFactoryPidSet listConfigurableComponentsPidAndFactoryPid() {
+    public PidAndFactoryPidSet listConfigurableComponentsPidAndFactoryPid(
+            @Context final ContainerRequestContext requestContext) {
 
         final List<ComponentConfiguration> ccs;
 
@@ -319,7 +335,7 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        final Set<PidAndFactoryPid> result = ccs.stream().map(c -> {
+        final Set<PidAndFactoryPid> result = filterUserStore(ccs, requestContext).stream().map(c -> {
             final String pid = c.getPid();
 
             final Optional<String> factoryPid = Optional.ofNullable(c.getConfigurationProperties())
@@ -355,9 +371,11 @@ public class ConfigurationRestService {
     @RolesAllowed("configuration")
     @Path("/configurableComponents")
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet listConfigurableComponentsPids() {
-        return new PidSet(
-                this.configurationService.getConfigurableComponentPids().stream().collect(Collectors.toSet()));
+    public PidSet listConfigurableComponentsPids(@Context final ContainerRequestContext requestContext) {
+        final boolean isAdmin = isAdmin(requestContext);
+
+        return new PidSet(this.configurationService.getConfigurableComponentPids().stream()
+                .filter(pid -> isAdmin || !USER_STORE_PID.equals(pid)).collect(Collectors.toSet()));
     }
 
     /**
@@ -375,7 +393,8 @@ public class ConfigurationRestService {
     @RolesAllowed("configuration")
     @Path("/configurableComponents/configurations")
     @Produces(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationList listComponentConfigurations() {
+    public ComponentConfigurationList listComponentConfigurations(
+            @Context final ContainerRequestContext requestContext) {
 
         final List<ComponentConfiguration> ccs;
 
@@ -385,7 +404,8 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false).replacePasswordsWithPlaceholder();
+        return DTOUtil.toComponentConfigurationList(filterUserStore(ccs, requestContext), this.cryptoService, false)
+                .replacePasswordsWithPlaceholder();
 
     }
 
@@ -406,7 +426,8 @@ public class ConfigurationRestService {
     @Path("/configurableComponents/configurations/byPid")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationList listComponentConfigurations(final PidSet pids) {
+    public ComponentConfigurationList listComponentConfigurations(final PidSet pids,
+            @Context final ContainerRequestContext requestContext) {
         pids.validate();
 
         final List<ComponentConfiguration> configs = new ArrayList<>();
@@ -422,7 +443,7 @@ public class ConfigurationRestService {
             }
         });
 
-        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false)
+        return DTOUtil.toComponentConfigurationList(filterUserStore(configs, requestContext), this.cryptoService, false)
                 .replacePasswordsWithPlaceholder();
     }
 
@@ -441,12 +462,16 @@ public class ConfigurationRestService {
     @Path("/configurableComponents/configurations/byPid/_default")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationList listDefaultComponentConfiguration(final PidSet pids) {
+    public ComponentConfigurationList listDefaultComponentConfiguration(final PidSet pids,
+            @Context final ContainerRequestContext requestContext) {
         pids.validate();
 
         final List<ComponentConfigurationDTO> result = new ArrayList<>();
+        final boolean isAdmin = isAdmin(requestContext);
+        final Set<String> requestedPids = pids.getPids().stream()
+                .filter(pid -> isAdmin || !USER_STORE_PID.equals(pid)).collect(Collectors.toSet());
 
-        for (final String pid : pids.getPids()) {
+        for (final String pid : requestedPids) {
             try {
                 final ComponentConfiguration cc = this.configurationService.getDefaultComponentConfiguration(pid);
 
@@ -476,8 +501,13 @@ public class ConfigurationRestService {
     @Path("/configurableComponents/configurations/_update")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateComponentConfigurations(UpdateComponentConfigurationRequest request) {
+    public Response updateComponentConfigurations(UpdateComponentConfigurationRequest request,
+            @Context final ContainerRequestContext requestContext) {
         request.validate();
+
+        if (request.getComponentConfigurations().stream().anyMatch(c -> USER_STORE_PID.equals(c.getPid()))) {
+            requireAdmin(requestContext, "update the user store configuration");
+        }
 
         final FailureHandler handler = new FailureHandler();
 
@@ -511,7 +541,8 @@ public class ConfigurationRestService {
     @Path("/snapshots/byId")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationList getSnapshot(final SnapshotId id) {
+    public ComponentConfigurationList getSnapshot(final SnapshotId id,
+            @Context final ContainerRequestContext requestContext) {
         id.validate();
 
         try {
@@ -521,7 +552,8 @@ public class ConfigurationRestService {
 
             List<ComponentConfiguration> configs = this.configurationService.getSnapshot(id.getId());
 
-            return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false);
+            return DTOUtil.toComponentConfigurationList(filterUserStore(configs, requestContext), this.cryptoService,
+                    false);
         } catch (KuraException e) {
             if (e.getCode() == KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND,
@@ -564,7 +596,9 @@ public class ConfigurationRestService {
     @RolesAllowed("configuration")
     @Path("/snapshots/_rollback")
     @Produces(MediaType.APPLICATION_JSON)
-    public SnapshotId rollbackSnapshot() {
+    public SnapshotId rollbackSnapshot(@Context final ContainerRequestContext requestContext) {
+        requireAdmin(requestContext, "rollback a snapshot");
+
         try {
             return new SnapshotId(this.configurationService.rollback());
         } catch (KuraException e) {
@@ -585,8 +619,9 @@ public class ConfigurationRestService {
     @Path("/snapshots/byId/_rollback")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response rollbackSnapshot(final SnapshotId id) {
+    public Response rollbackSnapshot(final SnapshotId id, @Context final ContainerRequestContext requestContext) {
         id.validate();
+        requireAdmin(requestContext, "rollback a snapshot");
 
         try {
             this.configurationService.rollback(id.getId());
@@ -595,6 +630,47 @@ public class ConfigurationRestService {
         }
 
         return Response.ok().build();
+    }
+
+    private boolean isAdmin(final ContainerRequestContext requestContext) {
+        if (requestContext == null) {
+            return true;
+        }
+
+        final Optional<Principal> principal = getPrincipal(requestContext);
+
+        if (!principal.isPresent() || this.identityService == null) {
+            return false;
+        }
+
+        try {
+            this.identityService.checkPermission(principal.get().getName(), new Permission(ADMIN_PERMISSION));
+            return true;
+        } catch (final KuraException e) {
+            return false;
+        }
+    }
+
+    private void requireAdmin(final ContainerRequestContext requestContext, final String operation) {
+        if (!isAdmin(requestContext)) {
+            logger.warn("Identity {} is not allowed to {}: kura.admin permission is required",
+                    getPrincipal(requestContext).map(Principal::getName).orElse(null), operation);
+            throw new WebApplicationException(Status.FORBIDDEN);
+        }
+    }
+
+    private static Optional<Principal> getPrincipal(final ContainerRequestContext requestContext) {
+        return Optional.ofNullable(requestContext).map(ContainerRequestContext::getSecurityContext)
+                .map(c -> c.getUserPrincipal());
+    }
+
+    private List<ComponentConfiguration> filterUserStore(final List<ComponentConfiguration> configs,
+            final ContainerRequestContext requestContext) {
+        if (isAdmin(requestContext)) {
+            return configs;
+        }
+
+        return configs.stream().filter(c -> !USER_STORE_PID.equals(c.getPid())).collect(Collectors.toList());
     }
 
 }

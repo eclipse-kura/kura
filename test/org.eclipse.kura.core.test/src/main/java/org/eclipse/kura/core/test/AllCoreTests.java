@@ -20,6 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.internal.linux.executor.ExecutorUtilFailureReportingTest;
+import org.eclipse.kura.core.internal.linux.executor.ExecutorUtilTimeoutTest;
+import org.eclipse.kura.core.linux.executor.ExecutorServiceNullArgumentsTest;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.AfterClass;
@@ -37,7 +40,8 @@ import io.moquette.broker.config.IConfig;
 @RunWith(Suite.class)
 @SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class,
         KuraExceptionMessageTest.class, KuraBirthPayloadModemEidTest.class, ConfigurationServiceTest.class,
-        NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class })
+        NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class,
+        ExecutorUtilFailureReportingTest.class, ExecutorUtilTimeoutTest.class, ExecutorServiceNullArgumentsTest.class })
 public class AllCoreTests {
 
     private static final Logger logger = LoggerFactory.getLogger(AllCoreTests.class);

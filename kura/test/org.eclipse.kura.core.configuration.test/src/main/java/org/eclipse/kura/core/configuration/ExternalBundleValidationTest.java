@@ -49,6 +49,7 @@ public class ExternalBundleValidationTest {
 
     private ConfigurationService configurationService;
     private Exception occurredException;
+    private long snapshotId;
 
     @Test
     public void valueAtTheLowerBoundIsApplied() throws Exception {
@@ -132,6 +133,16 @@ public class ExternalBundleValidationTest {
         thenConfigurationDoesNotHold(REQUIRED_PID, OPTIONAL_ATTR, "y");
     }
 
+    @Test
+    public void rollbackIsNotBlockedByAMissingRequiredAttribute() throws Exception {
+        givenExternalBundleComponents();
+        givenSnapshotIdIsRemembered();
+
+        whenRollingBackToTheRememberedSnapshot();
+
+        thenNoExceptionOccurred();
+    }
+
     private void givenExternalBundleComponents() throws Exception {
         ExternalMetatypeBundle.install(this.bundleContext);
         this.configurationService = waitForService(ConfigurationService.class);
@@ -148,6 +159,18 @@ public class ExternalBundleValidationTest {
         this.configurationService.updateConfiguration(VALIDATED_PID, Collections.singletonMap(INT_ATTR, value), true);
 
         thenComponentReceives(VALIDATED_PID, INT_ATTR, value);
+    }
+
+    private void givenSnapshotIdIsRemembered() throws KuraException {
+        this.snapshotId = this.configurationService.snapshot();
+    }
+
+    private void whenRollingBackToTheRememberedSnapshot() {
+        try {
+            this.configurationService.rollback(this.snapshotId);
+        } catch (final Exception e) {
+            this.occurredException = e;
+        }
     }
 
     private void whenValueIsUpdated(final String pid, final String attribute, final Object value) {

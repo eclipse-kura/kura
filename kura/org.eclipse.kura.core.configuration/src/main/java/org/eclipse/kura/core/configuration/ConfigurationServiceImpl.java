@@ -1663,7 +1663,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         try {
-            updateComponentConfiguration(pid, registerdOCD, mergedProperties, snapshotOnConfirmation);
+            updateComponentConfiguration(pid, registerdOCD, mergedProperties, snapshotOnConfirmation, true);
             logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
         } catch (IOException e) {
             logger.warn("Error updating Configuration of ConfigurableComponent with pid {}", pid, e);
@@ -1701,7 +1701,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         try {
-            updateComponentConfiguration(pid, registerdOCD, mergedProperties, snapshotOnConfirmation);
+            updateComponentConfiguration(pid, registerdOCD, mergedProperties, snapshotOnConfirmation, false);
             logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
         } catch (IOException e) {
             logger.warn("Error updating Configuration of ConfigurableComponent with pid {}", pid, e);
@@ -1710,8 +1710,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private void updateComponentConfiguration(String pid, OCD ocd, Map<String, Object> mergedProperties,
-            boolean snapshotOnConfirmation) throws KuraException, IOException {
-        if (this.activatedSelfConfigComponents.contains(pid)) {
+            boolean snapshotOnConfirmation, boolean checkRequiredAttributes) throws KuraException, IOException {
+        if (!checkRequiredAttributes || this.activatedSelfConfigComponents.contains(pid)) {
             MetatypeValidator.validateValues(ocd, mergedProperties);
         } else {
             MetatypeValidator.validate(ocd, mergedProperties);

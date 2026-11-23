@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -226,10 +226,9 @@ public interface ConfigurationService {
      * <br>
      * If the component to be updated is not yet registered with the ConfigurationService,
      * it is first registered and then it is updated with the specified properties.
-     * Before updating the component, the specified properties are validated against
-     * the ObjectClassDefinition associated to the Component. The Configuration Service
-     * is fully compliant with the OSGi MetaType Information and the validation happens
-     * through the OSGi MetaType Service.
+     * Before updating the component, the specified properties, merged with the current
+     * configuration of the Component, are validated by the Configuration Service against
+     * the ObjectClassDefinition associated to the Component.
      * <br>
      * The Configuration Service is compliant with the OSGi MetaType Service so
      * it accepts all attribute types defined in the OSGi Compendium Specifications.
@@ -252,10 +251,9 @@ public interface ConfigurationService {
      * <br>
      * If the component to be updated is not yet registered with the ConfigurationService,
      * it is first registered and then it is updated with the specified properties.
-     * Before updating the component, the specified properties are validated against
-     * the ObjectClassDefinition associated to the Component. The Configuration Service
-     * is fully compliant with the OSGi MetaType Information and the validation happens
-     * through the OSGi MetaType Service.
+     * Before updating the component, the specified properties, merged with the current
+     * configuration of the Component, are validated by the Configuration Service against
+     * the ObjectClassDefinition associated to the Component.
      * <br>
      * The Configuration Service is compliant with the OSGi MetaType Service so
      * it accepts all attribute types defined in the OSGi Compendium Specifications.
@@ -283,10 +281,9 @@ public interface ConfigurationService {
      * <br>
      * If the component to be updated is not yet registered with the ConfigurationService,
      * it is first registered and then it is updated with the specified properties.
-     * Before updating the component, the specified properties are validated against
-     * the ObjectClassDefinition associated to the Component. The Configuration Service
-     * is fully compliant with the OSGi MetaType Information and the validation happens
-     * through the OSGi MetaType Service.
+     * Before updating the component, the specified properties, merged with the current
+     * configuration of the Component, are validated by the Configuration Service against
+     * the ObjectClassDefinition associated to the Component.
      * <br>
      * The Configuration Service is compliant with the OSGi MetaType Service so
      * it accepts all attribute types defined in the OSGi Compendium Specifications.
@@ -307,10 +304,9 @@ public interface ConfigurationService {
      * <br>
      * If the component to be updated is not yet registered with the ConfigurationService,
      * it is first registered and then it is updated with the specified properties.
-     * Before updating the component, the specified properties are validated against
-     * the ObjectClassDefinition associated to the Component. The Configuration Service
-     * is fully compliant with the OSGi MetaType Information and the validation happens
-     * through the OSGi MetaType Service.
+     * Before updating the component, the specified properties, merged with the current
+     * configuration of the Component, are validated by the Configuration Service against
+     * the ObjectClassDefinition associated to the Component.
      * <br>
      * The Configuration Service is compliant with the OSGi MetaType Service so
      * it accepts all attribute types defined in the OSGi Compendium Specifications.

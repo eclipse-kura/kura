@@ -103,6 +103,7 @@ public class KuraException extends Exception {
      * @param message
      *            the message
      * @return the kura exception
+     * @deprecated since 2.9
      */
     public static KuraException internalError(final String message) {
         return new KuraException(KuraErrorCode.INTERNAL_ERROR, null, message);
@@ -118,6 +119,7 @@ public class KuraException extends Exception {
      * @param cause
      *            the cause
      * @return the kura exception
+     * @deprecated since 2.9
      */
     public static KuraException internalError(final Throwable cause) {
         return new KuraException(KuraErrorCode.INTERNAL_ERROR, cause, "");
@@ -135,6 +137,7 @@ public class KuraException extends Exception {
      * @param message
      *            the message
      * @return the kura exception
+     * @deprecated since 2.9
      */
     public static KuraException internalError(final Throwable cause, final String message) {
         return new KuraException(KuraErrorCode.INTERNAL_ERROR, cause, message);

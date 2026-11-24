@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 @Component(name = "org.eclipse.kura.executor.UnprivilegedExecutorService")
 public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService {
 
+    private static final String COMMAND_LINE = "commandLine";
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
 
@@ -100,7 +101,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
 
     @Override
     public boolean kill(String[] commandLine, Signal signal) {
-        ExecutorUtil.requireNonNullArgument(commandLine, "commandLine");
+        ExecutorUtil.requireNonNullArgument(commandLine, COMMAND_LINE);
         boolean isKilled = false;
         if (signal == null) {
             isKilled = this.executorUtil.killUnprivileged(commandLine, DEFAULT_SIGNAL);
@@ -118,13 +119,13 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
 
     @Override
     public boolean isRunning(String[] commandLine) {
-        ExecutorUtil.requireNonNullArgument(commandLine, "commandLine");
+        ExecutorUtil.requireNonNullArgument(commandLine, COMMAND_LINE);
         return this.executorUtil.isRunning(commandLine);
     }
 
     @Override
     public Map<String, Pid> getPids(String[] commandLine) {
-        ExecutorUtil.requireNonNullArgument(commandLine, "commandLine");
+        ExecutorUtil.requireNonNullArgument(commandLine, COMMAND_LINE);
         return this.executorUtil.getPids(commandLine);
     }
 

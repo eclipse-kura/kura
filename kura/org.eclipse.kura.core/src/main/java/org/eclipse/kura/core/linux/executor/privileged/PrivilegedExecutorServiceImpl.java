@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
         name = "org.eclipse.kura.executor.PrivilegedExecutorService")
 public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService {
 
+    private static final String COMMAND_LINE = "commandLine";
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
 
@@ -99,7 +100,7 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
 
     @Override
     public boolean kill(String[] commandLine, Signal signal) {
-        ExecutorUtil.requireNonNullArgument(commandLine, "commandLine");
+        ExecutorUtil.requireNonNullArgument(commandLine, COMMAND_LINE);
         boolean isKilled = false;
         if (signal == null) {
             isKilled = this.executorUtil.killPrivileged(commandLine, DEFAULT_SIGNAL);
@@ -117,13 +118,13 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
 
     @Override
     public boolean isRunning(String[] commandLine) {
-        ExecutorUtil.requireNonNullArgument(commandLine, "commandLine");
+        ExecutorUtil.requireNonNullArgument(commandLine, COMMAND_LINE);
         return this.executorUtil.isRunning(commandLine);
     }
 
     @Override
     public Map<String, Pid> getPids(String[] commandLine) {
-        ExecutorUtil.requireNonNullArgument(commandLine, "commandLine");
+        ExecutorUtil.requireNonNullArgument(commandLine, COMMAND_LINE);
         return this.executorUtil.getPids(commandLine);
     }
 

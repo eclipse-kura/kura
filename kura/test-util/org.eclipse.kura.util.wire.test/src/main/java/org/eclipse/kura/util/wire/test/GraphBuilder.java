@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,8 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -33,11 +37,14 @@ import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class GraphBuilder {
 
     private static final String TEST_EMITTER_RECEIVER_FACTORY_PID = "org.eclipse.kura.util.wire.test.TestEmitterReceiver";
+    private static final String WIRE_GRAPH_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
+    private static final long WIRE_GRAPH_SERVICE_MODIFIED_TIMEOUT_SECONDS = 30;
 
     private static final String PROP_WIRE_COMP_POS_X = "position.x";
     private static final String PROP_WIRE_COMP_POS_Y = "position.y";
@@ -126,17 +133,57 @@ public class GraphBuilder {
         final WireGraphConfiguration wireGraph = new WireGraphConfiguration(this.configurations,
                 new ArrayList<>(this.wires));
 
-        wireGraphService.delete();
+        // WireGraphService.delete() and update() persist the graph through the ConfigurationService, which causes
+        // WireGraphServiceImpl.updated() to be invoked asynchronously with the persisted graph. Wait for each of these
+        // callbacks before proceeding, otherwise a late callback can overwrite the in-memory graph with stale content.
+        final CompletableFuture<Void> deleted = wireGraphServiceModified();
+
+        try {
+            wireGraphService.delete();
+        } catch (final KuraException e) {
+            deleted.cancel(false);
+            throw e;
+        }
+
+        awaitWireGraphServiceModified(deleted);
 
         final Set<String> expectedPids = this.configurations.stream().map(c -> c.getConfiguration().getPid())
                 .collect(Collectors.toSet());
 
-        final CompletableFuture<Void> result = wiresConnected(context, this.wires)
+        final CompletableFuture<Void> componentsReady = wiresConnected(context, this.wires)
                 .thenCompose(ok -> componentsActivated(context, expectedPids, trackedObjects::put));
 
-        wireGraphService.update(wireGraph);
+        final CompletableFuture<Void> updated = wireGraphServiceModified();
 
-        return result;
+        try {
+            wireGraphService.update(wireGraph);
+        } catch (final KuraException e) {
+            updated.cancel(false);
+            throw e;
+        }
+
+        return CompletableFuture.allOf(componentsReady, updated);
+    }
+
+    private static CompletableFuture<Void> wireGraphServiceModified() throws KuraException {
+        try {
+            return WireTestUtil.modified("(kura.service.pid=" + WIRE_GRAPH_SERVICE_PID + ")");
+        } catch (final InvalidSyntaxException e) {
+            throw KuraException.internalError(e);
+        }
+    }
+
+    private static void awaitWireGraphServiceModified(final CompletableFuture<Void> modified) throws KuraException {
+        try {
+            modified.get(WIRE_GRAPH_SERVICE_MODIFIED_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw KuraException.internalError(e);
+        } catch (final ExecutionException e) {
+            throw KuraException.internalError(e.getCause());
+        } catch (final TimeoutException e) {
+            throw new KuraException(KuraErrorCode.TIMED_OUT, e);
+        }
     }
 
     @SuppressWarnings("unchecked")

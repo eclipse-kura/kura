@@ -39,7 +39,7 @@ public class CRLManagerOptions {
             TimeUnit.MINUTES.name());
     private static final Property<String[]> CRL_URLS = new Property<>("crl.urls", new String[0]);
     private static final Property<String> CRL_STORE_PATH = new Property<>("crl.store.path", String.class);
-    private static final Property<Boolean> CRL_VERIFICATION_ENABLED = new Property<>("verify.crl", false);
+    private static final Property<Boolean> CRL_VERIFICATION_ENABLED = new Property<>("verify.crl", true);
     private static final Property<Boolean> CRL_REJECT_EXPIRED = new Property<>("crl.reject.expired", false);
     private final boolean crlManagementEnabled;
     private final long crlUpdateIntervalMs;

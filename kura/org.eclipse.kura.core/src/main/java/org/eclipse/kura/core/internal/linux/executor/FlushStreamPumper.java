@@ -20,28 +20,27 @@ import java.util.function.Consumer;
 
 import org.apache.commons.exec.StreamPumper;
 import org.apache.commons.exec.util.DebugUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FlushStreamPumper extends StreamPumper {
 
-    private static final Logger logger = LoggerFactory.getLogger(FlushStreamPumper.class);
     private static final int DEFAULT_SIZE = 1024;
     private final InputStream is;
     private final OutputStream os;
     private final int size;
     private boolean finished;
     private final boolean closeWhenExhausted;
-    private final Consumer<Exception> failureListener;
+    private final Consumer<Exception> readFailureListener;
+    private final Consumer<Exception> writeFailureListener;
 
     public FlushStreamPumper(InputStream is, OutputStream os, boolean closeWhenExhausted,
-            Consumer<Exception> failureListener) {
+            Consumer<Exception> readFailureListener, Consumer<Exception> writeFailureListener) {
         super(is, os, closeWhenExhausted);
         this.is = is;
         this.os = os;
         this.size = DEFAULT_SIZE;
         this.closeWhenExhausted = closeWhenExhausted;
-        this.failureListener = failureListener;
+        this.readFailureListener = readFailureListener;
+        this.writeFailureListener = writeFailureListener;
     }
 
     @Override
@@ -53,15 +52,11 @@ public class FlushStreamPumper extends StreamPumper {
 
         final byte[] buf = new byte[this.size];
 
-        int length;
         try {
-            while ((length = this.is.read(buf)) > 0) {
-                this.os.write(buf, 0, length);
-                this.os.flush();
+            int length = read(buf);
+            while (length > 0 && write(buf, length)) {
+                length = read(buf);
             }
-        } catch (final Exception e) {
-            logger.warn("Failed to pump the process stream", e);
-            this.failureListener.accept(e);
         } finally {
             if (this.closeWhenExhausted) {
                 try {
@@ -81,6 +76,26 @@ public class FlushStreamPumper extends StreamPumper {
     @Override
     public synchronized boolean isFinished() {
         return this.finished;
+    }
+
+    private int read(final byte[] buf) {
+        try {
+            return this.is.read(buf);
+        } catch (final Exception e) {
+            this.readFailureListener.accept(e);
+            return -1;
+        }
+    }
+
+    private boolean write(final byte[] buf, final int length) {
+        try {
+            this.os.write(buf, 0, length);
+            this.os.flush();
+            return true;
+        } catch (final Exception e) {
+            this.writeFailureListener.accept(e);
+            return false;
+        }
     }
 
 }

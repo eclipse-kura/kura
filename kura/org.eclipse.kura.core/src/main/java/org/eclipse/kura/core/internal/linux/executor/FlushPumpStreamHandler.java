@@ -21,8 +21,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import org.apache.commons.exec.PumpStreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FlushPumpStreamHandler extends PumpStreamHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(FlushPumpStreamHandler.class);
 
     private final List<Exception> outputFailures = new CopyOnWriteArrayList<>();
     private final List<Exception> inputFailures = new CopyOnWriteArrayList<>();
@@ -34,8 +38,12 @@ public class FlushPumpStreamHandler extends PumpStreamHandler {
     @Override
     protected Thread createPump(final InputStream is, final OutputStream os, final boolean closeWhenExhausted) {
         final boolean isOutputPump = os == getOut() || os == getErr();
-        final Consumer<Exception> failureListener = isOutputPump ? this.outputFailures::add : this.inputFailures::add;
-        final Thread result = new Thread(new FlushStreamPumper(is, os, closeWhenExhausted, failureListener),
+        final Consumer<Exception> readFailureListener = isOutputPump ? this::onProcessOutputReadFailure
+                : this::onInputFailure;
+        final Consumer<Exception> writeFailureListener = isOutputPump ? this::onOutputWriteFailure
+                : this::onInputFailure;
+        final Thread result = new Thread(
+                new FlushStreamPumper(is, os, closeWhenExhausted, readFailureListener, writeFailureListener),
                 "Exec Stream Pumper");
         result.setDaemon(true);
         return result;
@@ -47,6 +55,20 @@ public class FlushPumpStreamHandler extends PumpStreamHandler {
 
     public List<Exception> getInputFailures() {
         return Collections.unmodifiableList(this.inputFailures);
+    }
+
+    private void onProcessOutputReadFailure(final Exception e) {
+        logger.debug("Stopped reading the process output stream", e);
+    }
+
+    private void onOutputWriteFailure(final Exception e) {
+        logger.warn("Failed to write the process output to the caller stream", e);
+        this.outputFailures.add(e);
+    }
+
+    private void onInputFailure(final Exception e) {
+        logger.warn("Failed to pump the input stream to the process", e);
+        this.inputFailures.add(e);
     }
 
 }

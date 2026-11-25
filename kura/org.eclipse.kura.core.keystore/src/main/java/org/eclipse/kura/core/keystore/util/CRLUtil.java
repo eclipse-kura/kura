@@ -204,7 +204,7 @@ public class CRLUtil {
                 if (statusCode < 200 || statusCode >= 300) {
                     throw new IOException("HTTP " + statusCode + " while fetching CRL from " + uri);
                 }
-                return parseCrl(new ByteArrayInputStream(response.body()));
+                return parseCrl(response.body());
             } catch (final InterruptedException e) {
                 abortAction.run();
                 Thread.currentThread().interrupt();
@@ -255,6 +255,10 @@ public class CRLUtil {
         } finally {
             cancellation.clearAbortAction(abortAction);
         }
+    }
+
+    private static X509CRL parseCrl(final byte[] encoded) throws CertificateException, CRLException {
+        return parseCrl(new ByteArrayInputStream(encoded));
     }
 
     private static X509CRL parseCrl(final InputStream in) throws CertificateException, CRLException {

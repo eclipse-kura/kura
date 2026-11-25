@@ -918,7 +918,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private ComponentConfiguration getConfigurableComponentDefaultConfiguration(String pid) {
         Tocd ocd = getOCDForPid(pid);
-        Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+        Map<String, Object> props = getDefaultProperties(ocd);
         return new ComponentConfigurationImpl(pid, ocd, props);
     }
 
@@ -958,7 +958,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
                 OCD ocd = tempCc.getDefinition();
                 if (ocd != null) {
-                    Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+                    Map<String, Object> props = getDefaultProperties(ocd);
                     cc = new ComponentConfigurationImpl(pid, (Tocd) ocd, props);
                 }
             } catch (KuraException e) {
@@ -1422,13 +1422,19 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         final List<String> bundlePids = new ArrayList<>();
-        bundlePids.addAll(Arrays.asList(information.getPids()));
-        bundlePids.addAll(Arrays.asList(information.getFactoryPids()));
+        addAll(bundlePids, information.getPids());
+        addAll(bundlePids, information.getFactoryPids());
 
         for (final String metatypePid : bundlePids) {
             if (metatypePids.contains(metatypePid)) {
                 addInstalledOCD(bundle, metatypePid, result);
             }
+        }
+    }
+
+    private static void addAll(final List<String> target, final String[] values) {
+        if (values != null) {
+            target.addAll(Arrays.asList(values));
         }
     }
 
@@ -1482,7 +1488,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private void replaceInvalidSnapshotValues(final Collection<ComponentConfiguration> configs) {
+        if (configs == null) {
+            return;
+        }
+
         for (final ComponentConfiguration config : configs) {
+            if (config == null) {
+                continue;
+            }
+
             final Map<String, Object> properties = config.getConfigurationProperties();
 
             if (properties != null) {
@@ -1949,7 +1963,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         Map<String, Object> defaultProperties = new HashMap<>();
         if (ocd != null) {
             try {
-                defaultProperties = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+                defaultProperties = getDefaultProperties(ocd);
             } catch (Exception e) {
                 logger.warn("Failed to get default properties for component: {}", pid, e);
             }

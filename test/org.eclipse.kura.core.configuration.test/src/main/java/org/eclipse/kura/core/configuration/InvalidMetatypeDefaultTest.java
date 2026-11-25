@@ -15,17 +15,21 @@ package org.eclipse.kura.core.configuration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
 
 import java.util.Map;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
 
 public class InvalidMetatypeDefaultTest {
 
+    private static final String PID = "ocd";
     private static final String ATTRIBUTE = "attribute";
     private static final String OTHER_ATTRIBUTE = "other";
 
@@ -61,6 +65,28 @@ public class InvalidMetatypeDefaultTest {
         thenDefaultIs(ATTRIBUTE, "second");
     }
 
+    @Test
+    public void defaultComponentConfigurationOmitsInvalidDefaults() throws KuraException {
+        givenIntegerAttribute(ATTRIBUTE, "0");
+        givenIntegerAttribute(OTHER_ATTRIBUTE, "5");
+
+        whenDefaultComponentConfigurationIsRequested();
+
+        thenDefaultIsAbsent(ATTRIBUTE);
+        thenDefaultIs(OTHER_ATTRIBUTE, 5);
+    }
+
+    @Test
+    public void factoryComponentOcdOmitsInvalidDefaults() throws KuraException {
+        givenIntegerAttribute(ATTRIBUTE, "0");
+        givenIntegerAttribute(OTHER_ATTRIBUTE, "5");
+
+        whenFactoryComponentOcdIsRequested();
+
+        thenDefaultIsAbsent(ATTRIBUTE);
+        thenDefaultIs(OTHER_ATTRIBUTE, 5);
+    }
+
     private void givenIntegerAttribute(final String id, final String defaultValue) {
         final Tad attribute = attribute(id, Tscalar.INTEGER, defaultValue);
         attribute.setMin("1");
@@ -82,8 +108,22 @@ public class InvalidMetatypeDefaultTest {
     }
 
     private void whenDefaultsAreComputed() {
-        this.ocd.setId("ocd");
+        this.ocd.setId(PID);
         this.defaults = new ConfigurationServiceImpl().getDefaultProperties(this.ocd);
+    }
+
+    private void whenDefaultComponentConfigurationIsRequested() throws KuraException {
+        this.ocd.setId(PID);
+        final ConfigurationServiceImpl service = new ConfigurationServiceImpl();
+        service.registerComponentOCD(PID, this.ocd, true, mock(Bundle.class));
+        this.defaults = service.getDefaultComponentConfiguration(PID).getConfigurationProperties();
+    }
+
+    private void whenFactoryComponentOcdIsRequested() throws KuraException {
+        this.ocd.setId(PID);
+        final ConfigurationServiceImpl service = new ConfigurationServiceImpl();
+        service.registerComponentOCD(PID, this.ocd, true, mock(Bundle.class));
+        this.defaults = service.getFactoryComponentOCD(PID).getConfigurationProperties();
     }
 
     private void thenDefaultIsAbsent(final String id) {

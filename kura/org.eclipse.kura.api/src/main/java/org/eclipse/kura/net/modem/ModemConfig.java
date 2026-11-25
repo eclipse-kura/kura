@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -78,17 +78,17 @@ public class ModemConfig implements NetConfig {
      * PDP config constructor
      *
      * @param apn
-     *            - access point name as {@link String}
+     *                         - access point name as {@link String}
      * @param ipAddress
-     *            - IP address as {@link String}
+     *                         - IP address as {@link String}
      * @param profileID
-     *            - PDP profile ID as {@link int}
+     *                         - PDP profile ID as {@link int}
      * @param pdpType
-     *            - PDP type as {@link PdpType}
+     *                         - PDP type as {@link PdpType}
      * @param dataCompression
-     *            - PDP data compression as {@link int}
+     *                         - PDP data compression as {@link int}
      * @param headerCompresion
-     *            - PDP header compression as {@link int}
+     *                         - PDP header compression as {@link int}
      */
     public ModemConfig(int profileID, PdpType pdpType, String apn, IPAddress ipAddress, int dataCompression,
             int headerCompresion) {
@@ -114,7 +114,7 @@ public class ModemConfig implements NetConfig {
      * Sets the enabled setting.
      *
      * @param enabled
-     *            - enabled status as {@link boolean}
+     *                - enabled status as {@link boolean}
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -133,7 +133,7 @@ public class ModemConfig implements NetConfig {
      * Sets the dial string.
      *
      * @param dialString
-     *            - dial string as {@link String}
+     *                   - dial string as {@link String}
      */
     public void setDialString(String dialString) {
         this.dialString = dialString;
@@ -152,7 +152,7 @@ public class ModemConfig implements NetConfig {
      * Sets authentication type.
      *
      * @param authType
-     *            - authentication type as {@link AuthType}
+     *                 - authentication type as {@link AuthType}
      */
     public void setAuthType(AuthType authType) {
         this.authType = authType;
@@ -171,7 +171,7 @@ public class ModemConfig implements NetConfig {
      * Sets user name.
      *
      * @param username
-     *            - user name as {@link String}
+     *                 - user name as {@link String}
      */
     public void setUsername(String username) {
         this.username = username;
@@ -202,7 +202,7 @@ public class ModemConfig implements NetConfig {
      * Sets password.
      *
      * @param password
-     *            - password as {@link String}
+     *                 - password as {@link String}
      */
     public void setPassword(String password) {
         this.password = new Password(password);
@@ -212,7 +212,7 @@ public class ModemConfig implements NetConfig {
      * Sets password.
      *
      * @param password
-     *            - password as {@link Password}
+     *                 - password as {@link Password}
      * @since 1.3
      */
     public void setPassword(Password password) {
@@ -229,18 +229,21 @@ public class ModemConfig implements NetConfig {
     }
 
     /**
-     * Sets 'persist' flag to instruct pppd if it needs to exit after a connection is terminated.
+     * Sets 'persist' flag to instruct pppd if it needs to exit after a connection
+     * is terminated.
      *
      * @param persist
-     *            as {@link boolean}
+     *                as {@link boolean}
      */
     public void setPersist(boolean persist) {
         this.persist = persist;
     }
 
     /**
-     * Returns the 'holdoff' parameter that instruct pppd on how many seconds to wait before re-initiating the link
-     * after it terminates. This option only has any effect if the persist or demand option is used. The holdoff period
+     * Returns the 'holdoff' parameter that instruct pppd on how many seconds to
+     * wait before re-initiating the link
+     * after it terminates. This option only has any effect if the persist or demand
+     * option is used. The holdoff period
      * is not
      * applied if the link was terminated because it was idle.
      *
@@ -252,12 +255,14 @@ public class ModemConfig implements NetConfig {
     }
 
     /**
-     * Sets 'holdoff' parameter to instruct pppd on how many seconds to wait before re-initiating the link after it
-     * terminates. This option only has any effect if the persist or demand option is used. The holdoff period is not
+     * Sets 'holdoff' parameter to instruct pppd on how many seconds to wait before
+     * re-initiating the link after it
+     * terminates. This option only has any effect if the persist or demand option
+     * is used. The holdoff period is not
      * applied if the link was terminated because it was idle.
      *
      * @param holdoff
-     *            as {@link integer}
+     *                as {@link integer}
      * @since 2.5
      */
     public void setHoldoff(int holdoff) {
@@ -277,7 +282,7 @@ public class ModemConfig implements NetConfig {
      * Sets maximum number of failed connection attempts
      *
      * @param maxFail
-     *            - maximum number of failed connection attempts as {@link int}
+     *                - maximum number of failed connection attempts as {@link int}
      */
     public void setMaxFail(int maxFail) {
         this.maxFail = maxFail;
@@ -285,41 +290,55 @@ public class ModemConfig implements NetConfig {
 
     /**
      * Reports value of the 'idle' option.
-     * The 'idle' option specifies that pppd should disconnect if the link is idle for n seconds.
+     * The 'idle' option specifies that pppd should disconnect if the link is idle
+     * for n seconds.
      *
      * @return value of the 'idle' option as {@link int}
+     * @deprecated since 2.9
      */
+    @Deprecated
     public int getIdle() {
         return this.idle;
     }
 
     /**
      * Sets value of the 'idle' option.
-     * The 'idle' option specifies that pppd should disconnect if the link is idle for n seconds.
+     * The 'idle' option specifies that pppd should disconnect if the link is idle
+     * for n seconds.
      *
      * @param idle
+     * @deprecated since 2.9
      */
+    @Deprecated
     public void setIdle(int idle) {
         this.idle = idle;
     }
 
     /**
-     * Reports the value of the 'active-filter' option that specifies a packet filter to be
-     * applied to data packets to determine which packets are to be regarded as link activity.
+     * Reports the value of the 'active-filter' option that specifies a packet
+     * filter to be
+     * applied to data packets to determine which packets are to be regarded as link
+     * activity.
      *
      * @return value of the 'active-filter' option as {@link String}
+     * @deprecated since 2.9
      */
+    @Deprecated
     public String getActiveFilter() {
         return this.activeFilter;
     }
 
     /**
-     * Sets the value of the 'active-filter' option that specifies a packet filter to be
-     * applied to data packets to determine which packets are to be regarded as link activity.
+     * Sets the value of the 'active-filter' option that specifies a packet filter
+     * to be
+     * applied to data packets to determine which packets are to be regarded as link
+     * activity.
      *
      * @param activeFilter
-     *            - active filter as {@link String}
+     *                     - active filter as {@link String}
+     * @deprecated since 2.9
      */
+    @Deprecated
     public void setActiveFilter(String activeFilter) {
         this.activeFilter = activeFilter;
     }
@@ -337,7 +356,7 @@ public class ModemConfig implements NetConfig {
      * Sets LCP echo interval
      *
      * @param lcpEchoInterval
-     *            - LCP Echo interval as {@link int}
+     *                        - LCP Echo interval as {@link int}
      */
     public void setLcpEchoInterval(int lcpEchoInterval) {
         this.lcpEchoInterval = lcpEchoInterval;
@@ -354,7 +373,8 @@ public class ModemConfig implements NetConfig {
 
     /**
      * Sets number of failed LCP echo requests
-     * (unacknowledged LCP echo requests to be sent for pppd to presume the peer to be dead)
+     * (unacknowledged LCP echo requests to be sent for pppd to presume the peer to
+     * be dead)
      *
      * @param lcpEchoFailure
      */
@@ -375,7 +395,7 @@ public class ModemConfig implements NetConfig {
      * Sets PPP number (i.e. '0' for ppp0).
      *
      * @param pppNumber
-     *            - PPP number as {@link int}
+     *                  - PPP number as {@link int}
      */
     public void setPppNumber(int pppNumber) {
         this.pppNumber = pppNumber;
@@ -394,7 +414,7 @@ public class ModemConfig implements NetConfig {
      * Sets PDP profile ID.
      *
      * @param id
-     *            - PDP profile ID as {@link int}
+     *           - PDP profile ID as {@link int}
      */
     public void setProfileID(int id) {
         this.profileID = id;
@@ -413,7 +433,7 @@ public class ModemConfig implements NetConfig {
      * Sets PDP type.
      *
      * @param pdpType
-     *            - PDP type as {@link PdpType}
+     *                - PDP type as {@link PdpType}
      */
     public void setPdpType(PdpType pdpType) {
         this.pdpType = pdpType;
@@ -451,7 +471,7 @@ public class ModemConfig implements NetConfig {
      * Sets PDP IP address.
      *
      * @param address
-     *            - IP address as {@link IPAddress}
+     *                - IP address as {@link IPAddress}
      */
     public void setIpAddress(IPAddress address) {
         this.ipAddress = address;
@@ -470,7 +490,7 @@ public class ModemConfig implements NetConfig {
      * Sets a value of numeric parameter that supports PDP data compression.
      *
      * @param dataCompression
-     *            - PDP data compression as {@link int}
+     *                        - PDP data compression as {@link int}
      */
     public void setDataCompression(int dataCompression) {
         this.dataCompression = dataCompression;
@@ -489,7 +509,8 @@ public class ModemConfig implements NetConfig {
      * Sets a value of numeric parameter that supports PDP header compression.
      *
      * @param headerCompression
-     *            headerCompression PDP header compression as {@link int}
+     *                          headerCompression PDP header compression as
+     *                          {@link int}
      */
     public void setHeaderCompression(int headerCompression) {
         this.headerCompression = headerCompression;

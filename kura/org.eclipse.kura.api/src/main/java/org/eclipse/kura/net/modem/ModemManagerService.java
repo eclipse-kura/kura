@@ -14,7 +14,6 @@ package org.eclipse.kura.net.modem;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ConsumerType;

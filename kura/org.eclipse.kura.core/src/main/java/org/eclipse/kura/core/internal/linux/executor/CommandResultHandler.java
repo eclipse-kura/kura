@@ -102,7 +102,8 @@ public class CommandResultHandler implements ExecuteResultHandler {
     }
 
     private void reportPumpFailures() {
-        if (this.executor.getStreamHandler() instanceof FlushPumpStreamHandler streamHandler) {
+        if (this.executor.getStreamHandler() instanceof FlushPumpStreamHandler) {
+            final FlushPumpStreamHandler streamHandler = (FlushPumpStreamHandler) this.executor.getStreamHandler();
             this.commandStatus.setOutputIncomplete(!streamHandler.getOutputFailures().isEmpty());
             streamHandler.getOutputFailures()
                     .forEach(e -> appendToErrorStream("Output may be incomplete: " + e.getMessage()));
@@ -125,7 +126,7 @@ public class CommandResultHandler implements ExecuteResultHandler {
             }
         }
         ByteArrayOutputStream fallback = new ByteArrayOutputStream();
-        fallback.writeBytes(line);
+        fallback.write(line, 0, line.length);
         this.commandStatus.setErrorStream(fallback);
     }
 

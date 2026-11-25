@@ -101,10 +101,19 @@ public class ExecutorUtilTimeoutTest {
     }
 
     @Test
-    public void publicLinuxResultHandlerAppliesThePrivilegedRule() {
+    public void publicLinuxResultHandlerKeepsTimeoutExitAsTimedOut() {
         givenWatchdogKilledProcess(false);
 
         whenLinuxResultHandlerReceivesExit(TIMEOUT_COMMAND_EXIT_VALUE);
+
+        thenTimedOutIs(true);
+    }
+
+    @Test
+    public void publicLinuxResultHandlerSigtermExitWithoutWatchdogKillIsNotTimedOut() {
+        givenWatchdogKilledProcess(false);
+
+        whenLinuxResultHandlerReceivesExit(SIGTERM_EXIT_VALUE);
 
         thenTimedOutIs(false);
     }

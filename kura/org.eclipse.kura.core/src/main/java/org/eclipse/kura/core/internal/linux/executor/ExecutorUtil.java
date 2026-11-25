@@ -341,7 +341,7 @@ public class ExecutorUtil {
     private CommandLine buildUnprivilegedCommand(Command command) {
         // Build the command as follows:
         // su <command_user> -c "VARS... timeout -s <signal> <timeout> <command>"
-        // or su <command_user> c "VARS... sh -c <command>"
+        // When the command is executed in a shell, <command> is replaced by /bin/sh -c '<command>'
         // The timeout command is added because the commons-exec doesn't allow to set the signal to send for killing a
         // process after a timeout
         CommandLine commandLine = new CommandLine("su");
@@ -362,10 +362,20 @@ public class ExecutorUtil {
             c.add(Integer.toString(timeout));
         }
 
-        Arrays.asList(command.getCommandLine()).stream().forEach(c::add);
+        if (command.isExecutedInAShell()) {
+            c.add("/bin/sh");
+            c.add("-c");
+            c.add(quoteForShell(command.toString()));
+        } else {
+            c.addAll(Arrays.asList(command.getCommandLine()));
+        }
         commandLine.addArgument(String.join(" ", c), false);
 
         return commandLine;
+    }
+
+    private static String quoteForShell(String value) {
+        return "'" + value.replace("'", "'\\''") + "'";
     }
 
     private CommandLine buildPrivilegedCommand(Command command) {

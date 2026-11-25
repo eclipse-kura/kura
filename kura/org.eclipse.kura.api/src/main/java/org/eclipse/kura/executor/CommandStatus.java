@@ -111,7 +111,7 @@ public class CommandStatus {
      * writing to the provided stream failed.
      *
      * @return true if the collected output may be incomplete
-     * @since 3.0
+     * @since 2.9
      */
     public boolean isOutputIncomplete() {
         return this.isOutputIncomplete;
@@ -122,7 +122,7 @@ public class CommandStatus {
      *
      * @param isOutputIncomplete
      *            true if the collected output may be incomplete
-     * @since 3.0
+     * @since 2.9
      */
     public void setOutputIncomplete(boolean isOutputIncomplete) {
         this.isOutputIncomplete = isOutputIncomplete;

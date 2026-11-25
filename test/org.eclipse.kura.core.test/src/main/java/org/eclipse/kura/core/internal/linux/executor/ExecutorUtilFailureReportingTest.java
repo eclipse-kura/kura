@@ -202,7 +202,8 @@ public class ExecutorUtilFailureReportingTest {
 
     private void givenCallerErrorStream(String content) {
         this.callerErrorStream = new ByteArrayOutputStream();
-        this.callerErrorStream.writeBytes(content.getBytes(UTF_8));
+        byte[] bytes = content.getBytes(UTF_8);
+        this.callerErrorStream.write(bytes, 0, bytes.length);
         this.command.setErrorStream(this.callerErrorStream);
     }
 

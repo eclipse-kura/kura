@@ -26,7 +26,7 @@ public class LinuxResultHandler implements ExecuteResultHandler {
     private final CommandResultHandler delegate;
 
     public LinuxResultHandler(Consumer<CommandStatus> callback, Executor executor) {
-        this.delegate = new CommandResultHandler(callback, executor, false);
+        this.delegate = new CommandResultHandler(callback, executor, true);
     }
 
     public CommandStatus getStatus() {

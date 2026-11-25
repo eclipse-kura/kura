@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1078,7 +1078,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport("networkStatus/v1"), new MqttTransport("NET-STATUS-V1"));
+        return Arrays.asList(new RestTransport("networkStatus/v1").withReadinessProbePath(INTERFACE_IDS_PATH),
+                new MqttTransport("NET-STATUS-V1"));
     }
 
     private void givenInterfaceIds(final String... interfaceIds) {

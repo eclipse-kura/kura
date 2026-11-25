@@ -332,15 +332,14 @@ public class CRLManager implements Closeable {
     private List<DownloadResult> executeDownloads(final List<PendingDownload> pendingDownloads) {
         final List<DownloadResult> results = new ArrayList<>();
 
-        for (int i = 0; i < pendingDownloads.size(); i++) {
-            final PendingDownload pending = pendingDownloads.get(i);
+        for (final PendingDownload pending : pendingDownloads) {
             try {
                 final X509CRL crl = pending.future.get(this.delays.downloadTimeoutMs, TimeUnit.MILLISECONDS);
                 results.add(new DownloadResult(pending, crl, null));
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.warn("failed to download CRL from {}", pending.state.distributionPoints, e);
-                cancelDownloads(pendingDownloads, i);
+                pendingDownloads.forEach(p -> p.future.cancel(true));
                 results.add(new DownloadResult(pending, null, e));
                 break;
             } catch (final Exception e) {
@@ -351,12 +350,6 @@ public class CRLManager implements Closeable {
         }
 
         return results;
-    }
-
-    private static void cancelDownloads(final List<PendingDownload> pendingDownloads, final int startIndex) {
-        for (int i = startIndex; i < pendingDownloads.size(); i++) {
-            pendingDownloads.get(i).future.cancel(true);
-        }
     }
 
     private synchronized boolean applyDownloadResults(final List<DownloadResult> results, final long now) {

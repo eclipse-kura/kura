@@ -20,23 +20,84 @@ import org.osgi.annotation.versioning.ProviderType;
  * The GPIOService is used to access available GPIO resources on the system.<br>
  * {@link KuraGPIOPin}s can be accessed by name or by terminal index.<br>
  * <br>
- * Operations on the pins can be done using the acquired {@link KuraGPIOPin} class.
+ * Operations on the pins can be done using the acquired {@link KuraGPIOPin}
+ * class.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
 public interface GPIOService {
 
+    /**
+     * Get a GPIO pin by its name.
+     * 
+     * For example, to get the pin named "GPIO22", call:
+     * 
+     * <pre>
+     * KuraGPIOPin pin = gpioService.getPinByName("GPIO22");
+     * </pre>
+     * 
+     * @param pinName the name of the pin
+     * 
+     * @return the KuraGPIOPin instance
+     * @deprecated since 2.9
+     */
     public KuraGPIOPin getPinByName(String pinName);
 
+    /**
+     * Get a GPIO pin by its name, with the specified direction, mode and trigger.
+     * 
+     * For example, to get an output open-drain pin with no trigger named "GPIO22",
+     * call:
+     * 
+     * <pre>
+     * KuraGPIOPin pin = gpioService.getPinByName("GPIO22", KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN,
+     *         KuraGPIOTrigger.NONE);
+     * </pre>
+     * 
+     * @param pinName   the name of the pin
+     * @param direction the direction of the pin
+     * @param mode      the mode of the pin
+     * @param trigger   the trigger of the pin
+     * 
+     * @return the KuraGPIOPin instance
+     * @deprecated since 2.9
+     */
     public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger);
 
+    /**
+     * Get a GPIO pin by its terminal index.
+     * 
+     * @param terminal the terminal index of the pin
+     * 
+     * @return the KuraGPIOPin instance
+     * @deprecated since 2.9
+     */
     public KuraGPIOPin getPinByTerminal(int terminal);
 
+    /**
+     * Get a GPIO pin by its terminal index, with the specified direction, mode and
+     * trigger.
+     * 
+     * @param terminal  the terminal index of the pin
+     * @param direction the direction of the pin
+     * @param mode      the mode of the pin
+     * @param trigger   the trigger of the pin
+     * 
+     * @return the KuraGPIOPin instance
+     * @deprecated since 2.9
+     */
     public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger);
 
+    /**
+     * Get a map of available GPIO pins.
+     * 
+     * @return a map of available GPIO pins, where the key is the terminal index and
+     *         the value is the pin name
+     * @deprecated since 2.9
+     */
     public Map<Integer, String> getAvailablePins();
 
 }

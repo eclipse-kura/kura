@@ -20,7 +20,9 @@ import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.OPTION_
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.VALIDATED_PID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -38,6 +40,8 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.metatype.MetaTypeInformation;
+import org.osgi.service.metatype.MetaTypeService;
 
 public class StartupSnapshotValidationTest {
 
@@ -110,6 +114,18 @@ public class StartupSnapshotValidationTest {
         thenComponentHolds(LATE_PID, INT_ATTR, INT_DEFAULT);
     }
 
+    @Test
+    public void nullPidsFromMetaTypeInformationDoNotBreakStartup() throws Throwable {
+        givenIsolatedConfigurationService();
+        givenMetaTypeInformationWithNullPids();
+        givenSnapshotConfiguration(VALIDATED_PID, null, INT_ATTR, 7);
+        givenSnapshotIsSaved();
+
+        whenServiceIsActivated();
+
+        thenComponentHolds(VALIDATED_PID, INT_ATTR, 7);
+    }
+
     @After
     public void closeIsolatedConfigurationService() throws Exception {
         if (this.isolated != null) {
@@ -120,6 +136,17 @@ public class StartupSnapshotValidationTest {
     private void givenIsolatedConfigurationService() throws Throwable {
         this.isolated = new IsolatedConfigurationService(
                 FrameworkUtil.getBundle(StartupSnapshotValidationTest.class).getBundleContext());
+    }
+
+    private void givenMetaTypeInformationWithNullPids() {
+        final MetaTypeInformation information = mock(MetaTypeInformation.class);
+        when(information.getPids()).thenReturn(null);
+        when(information.getFactoryPids()).thenReturn(null);
+
+        final MetaTypeService metaTypeService = mock(MetaTypeService.class);
+        when(metaTypeService.getMetaTypeInformation(any(Bundle.class))).thenReturn(information);
+
+        this.isolated.getService().setMetaTypeService(metaTypeService);
     }
 
     private void givenSnapshotConfiguration(final String pid, final String factoryPid, final String attribute,

@@ -25,6 +25,14 @@ final class UrlCredentials {
     private UrlCredentials() {
     }
 
+    static URL parse(String urlSpec) throws MalformedURLException {
+        try {
+            return new URL(urlSpec);
+        } catch (MalformedURLException e) {
+            throw new MalformedURLException("Invalid deployment package URL: " + redact(urlSpec));
+        }
+    }
+
     static URL withoutUserInfo(URL url) throws MalformedURLException {
         if (url.getUserInfo() == null) {
             return url;
@@ -44,12 +52,48 @@ final class UrlCredentials {
     }
 
     static String redact(String urlSpec) {
+        if (urlSpec == null) {
+            return null;
+        }
         try {
             URL url = new URL(urlSpec);
-            return url.getUserInfo() == null ? urlSpec : withoutUserInfo(url).toExternalForm();
+            if (url.getUserInfo() != null) {
+                return withoutUserInfo(url).toExternalForm();
+            }
+            if (hasCleanAuthority(url)) {
+                return urlSpec;
+            }
         } catch (MalformedURLException e) {
+            return redactFallback(urlSpec);
+        }
+        return redactFallback(urlSpec);
+    }
+
+    private static boolean hasCleanAuthority(URL url) {
+        String authority = url.getAuthority();
+        if (authority != null && authority.indexOf('@') >= 0) {
+            return false;
+        }
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
+            String file = url.getFile();
+            return file == null || !file.contains("://");
+        }
+        return url.getHost() != null && !url.getHost().isEmpty();
+    }
+
+    private static String redactFallback(String urlSpec) {
+        int lastAt = urlSpec.lastIndexOf('@');
+        if (lastAt < 0) {
             return urlSpec;
         }
+        int schemeEnd = urlSpec.indexOf("://");
+        if (schemeEnd >= 0) {
+            if (lastAt > schemeEnd + 2) {
+                return urlSpec.substring(0, schemeEnd + 3) + "***@" + urlSpec.substring(lastAt + 1);
+            }
+            return urlSpec;
+        }
+        return "***@" + urlSpec.substring(lastAt + 1);
     }
 
     private static String decodedUserInfo(URL url) {

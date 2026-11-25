@@ -18,29 +18,44 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.Properties;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.logging.MockServerLogger;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.socket.PortFactory;
+import org.mockserver.socket.tls.KeyStoreFactory;
+import org.slf4j.Logger;
 
 public class PackageUrlCredentialsTest {
 
@@ -50,33 +65,56 @@ public class PackageUrlCredentialsTest {
     private static final String AUTHORIZATION = "Authorization";
 
     private static ClientAndServer mockServer;
+    private static SSLSocketFactory sslSocketFactory;
+    private static String previousMockServerLogLevel;
 
     private final DeploymentAgent deploymentAgent = new DeploymentAgent();
+    private Logger originalLogger;
+    private Logger mockLogger;
     private File downloadedFile;
     private Throwable downloadError;
     private String redactedUrl;
 
     @BeforeClass
     public static void startServer() {
+        previousMockServerLogLevel = ConfigurationProperties.logLevel().name();
+        ConfigurationProperties.logLevel("WARN");
         mockServer = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
+        sslSocketFactory = new KeyStoreFactory(new MockServerLogger()).sslContext().getSocketFactory();
     }
 
     @AfterClass
     public static void stopServer() {
         mockServer.stop();
+        ConfigurationProperties.logLevel(previousMockServerLogLevel);
     }
 
     @Before
-    public void setup() {
+    public void setup() throws GeneralSecurityException, IOException, ReflectiveOperationException {
         final SystemService systemServiceMock = mock(SystemService.class);
         final Properties properties = new Properties();
         properties.put("file.transfer.size.max", "-1");
         when(systemServiceMock.getProperties()).thenReturn(properties);
         this.deploymentAgent.setSystemService(systemServiceMock);
+
+        final SslManagerService sslManagerService = mock(SslManagerService.class);
+        when(sslManagerService.getSSLSocketFactory()).thenReturn(sslSocketFactory);
+        this.deploymentAgent.setSslManagerService(sslManagerService);
+
+        final Field loggerField = DeploymentAgent.class.getDeclaredField("logger");
+        loggerField.setAccessible(true);
+        this.originalLogger = (Logger) loggerField.get(null);
+        this.mockLogger = mock(Logger.class);
+        loggerField.set(null, this.mockLogger);
     }
 
     @After
-    public void cleanUp() throws IOException {
+    public void cleanUp() throws IOException, ReflectiveOperationException {
+        if (this.originalLogger != null) {
+            final Field loggerField = DeploymentAgent.class.getDeclaredField("logger");
+            loggerField.setAccessible(true);
+            loggerField.set(null, this.originalLogger);
+        }
         mockServer.reset();
         if (this.downloadedFile != null) {
             Files.deleteIfExists(this.downloadedFile.toPath());
@@ -91,19 +129,20 @@ public class PackageUrlCredentialsTest {
     public void credentialsInUrlAreSentAsBasicAuthentication() {
         givenServerProtectedWithBasicAuthentication("username", "password");
 
-        whenDownloadingPackageWithUserInfo("username:password@");
+        whenDownloadingPackage("https", "username:password@");
 
         thenPackageIsDownloaded();
         thenAuthorizationHeaderContains("username:password");
+        thenNoPlainHttpWarningIsLogged();
     }
 
     @Test
     public void wrongCredentialsAreRejectedWithoutExposingThePassword() {
         givenServerProtectedWithBasicAuthentication("username", "password");
 
-        whenDownloadingPackageWithUserInfo("username:wrongSecret@");
+        whenDownloadingPackage("https", "username:wrongSecret@");
 
-        thenDownloadFailsWith("401");
+        thenDownloadFailsWith(IOException.class, "401");
         thenDownloadErrorDoesNotContain("wrongSecret");
     }
 
@@ -111,7 +150,7 @@ public class PackageUrlCredentialsTest {
     public void percentEncodedCredentialsAreDecoded() {
         givenServerProtectedWithBasicAuthentication("user name", "p@ss:word");
 
-        whenDownloadingPackageWithUserInfo("user%20name:p%40ss:word@");
+        whenDownloadingPackage("https", "user%20name:p%40ss:word@");
 
         thenPackageIsDownloaded();
         thenAuthorizationHeaderContains("user name:p@ss:word");
@@ -121,7 +160,7 @@ public class PackageUrlCredentialsTest {
     public void userWithoutPasswordIsSentWithEmptyPassword() {
         givenServerProtectedWithBasicAuthentication("username", "");
 
-        whenDownloadingPackageWithUserInfo("username@");
+        whenDownloadingPackage("https", "username@");
 
         thenPackageIsDownloaded();
         thenAuthorizationHeaderContains("username:");
@@ -131,21 +170,72 @@ public class PackageUrlCredentialsTest {
     public void urlWithoutCredentialsSendsNoAuthorizationHeader() {
         givenServerWithoutAuthentication();
 
-        whenDownloadingPackageWithUserInfo("");
+        whenDownloadingPackage("https", "");
 
         thenPackageIsDownloaded();
         thenNoAuthorizationHeaderIsSent();
     }
 
     @Test
-    public void credentialsAreNotForwardedWhenFollowingRedirect() {
+    public void plainHttpUrlWithoutCredentialsIsAllowed() {
         givenServerWithoutAuthentication();
-        givenServerRedirectingToPackage();
 
-        whenDownloadingWithUserInfo("username:password@", REDIRECT_PATH);
+        whenDownloadingPackage("http", "");
 
         thenPackageIsDownloaded();
         thenNoAuthorizationHeaderIsSent();
+    }
+
+    @Test
+    public void credentialsOverPlainHttpLogWarningWithoutExposingPassword() {
+        givenServerProtectedWithBasicAuthentication("username", "secret");
+
+        whenDownloadingPackage("http", "username:secret@");
+
+        thenPackageIsDownloaded();
+        thenAuthorizationHeaderContains("username:secret");
+        thenPlainHttpWarningIsLoggedWithout("secret");
+    }
+
+    @Test
+    public void credentialsAreNotForwardedWhenFollowingRedirect() {
+        givenServerWithoutAuthentication();
+        givenServerRedirectingToPackage("https");
+
+        whenDownloadingPackageFromPath("https", "username:password@", REDIRECT_PATH);
+
+        thenPackageIsDownloaded();
+        thenNoAuthorizationHeaderIsSent();
+    }
+
+    @Test
+    public void malformedUrlWithUnencodedAtIsRejectedWithoutConnecting() {
+        givenServerWithoutAuthentication();
+
+        whenInstallingFromUrl("https://user:p@ss@localhost:" + mockServer.getLocalPort() + PACKAGE_PATH);
+
+        thenDownloadFailsWith(MalformedURLException.class, "host");
+        thenDownloadErrorDoesNotContain("p@ss");
+        thenDownloadErrorDoesNotContain("user");
+        thenNoRequestsWereReceived();
+    }
+
+    @Test
+    public void malformedUrlWithSlashInPasswordDoesNotLeakPasswordInException() {
+        whenInstallingFromUrl("https://user:s3cr/3t@repo/p.dp");
+
+        thenDownloadFailsWith(MalformedURLException.class, "https://***@repo/p.dp");
+        thenDownloadErrorDoesNotContain("s3cr");
+        thenDownloadErrorDoesNotContain("3t");
+    }
+
+    @Test
+    public void unsupportedProtocolWithCredentialsIsRejectedWithoutConnecting() {
+        whenInstallingFromUrl("jar:https://user:s3cret@repo/p.jar!/x.dp");
+
+        thenDownloadFailsWith(MalformedURLException.class, "Unsupported");
+        thenDownloadErrorDoesNotContain("s3cret");
+        thenDownloadErrorDoesNotContain("user");
     }
 
     @Test
@@ -160,6 +250,90 @@ public class PackageUrlCredentialsTest {
         whenRedacting("file:///opt/eclipse/kura/data/packages/package1.dp");
 
         thenRedactedUrlIs("file:///opt/eclipse/kura/data/packages/package1.dp");
+    }
+
+    @Test
+    public void cleanUrlWithAtSignInQueryIsLoggedUnchanged() {
+        whenRedacting("https://repository.example.com/packages/package1.dp?email=a@b.com");
+
+        thenRedactedUrlIs("https://repository.example.com/packages/package1.dp?email=a@b.com");
+    }
+
+    @Test
+    public void cleanFileUrlWithAtSignInPathIsLoggedUnchanged() {
+        whenRedacting("file:///tmp/a@b.dp");
+
+        thenRedactedUrlIs("file:///tmp/a@b.dp");
+    }
+
+    @Test
+    public void redactMasksMalformedUrlWithUnencodedAtInPassword() {
+        whenRedacting("https://user:p@ss@repo/p.dp");
+
+        thenRedactedUrlIs("https://***@repo/p.dp");
+    }
+
+    @Test
+    public void redactMasksMalformedUrlWithSlashInPassword() {
+        whenRedacting("https://user:pa/ss@repo/p.dp");
+
+        thenRedactedUrlIs("https://***@repo/p.dp");
+    }
+
+    @Test
+    public void redactMasksMalformedUrlWithHashInPassword() {
+        whenRedacting("https://user:pa#ss@repo/p.dp");
+
+        thenRedactedUrlIs("https://***@repo/p.dp");
+    }
+
+    @Test
+    public void redactMasksMalformedUrlWithQuestionMarkInPassword() {
+        whenRedacting("https://user:pa?ss@repo/p.dp");
+
+        thenRedactedUrlIs("https://***@repo/p.dp");
+    }
+
+    @Test
+    public void redactMasksMalformedUrlWithUnknownScheme() {
+        whenRedacting("htps://user:s3cret@repo/p.dp");
+
+        thenRedactedUrlIs("htps://***@repo/p.dp");
+    }
+
+    @Test
+    public void redactMasksNestedJarUrlWithCredentials() {
+        whenRedacting("jar:https://user:s3cret@repo/p.jar!/x.dp");
+
+        thenRedactedUrlIs("jar:https://***@repo/p.jar!/x.dp");
+    }
+
+    @Test
+    public void redactMasksNestedFileUrlWithCredentials() {
+        whenRedacting("file:https://user:s3cret@repo/p.dp");
+
+        thenRedactedUrlIs("file:https://***@repo/p.dp");
+    }
+
+    @Test
+    public void redactMasksSchemeLessMalformedUrlWithCredentials() {
+        whenRedacting("user:s3cret@repo/p.dp");
+
+        thenRedactedUrlIs("***@repo/p.dp");
+    }
+
+    @Test
+    public void redactLeavesMalformedUrlWithoutCredentialsUnchanged() {
+        whenRedacting("htps://repo/p.dp");
+
+        thenRedactedUrlIs("htps://repo/p.dp");
+    }
+
+    @Test
+    public void redactReturnsNullForNullInput() {
+        whenRedacting(null);
+
+        thenRedactedUrlIs(null);
     }
 
     /*
@@ -177,20 +351,29 @@ public class PackageUrlCredentialsTest {
                 .respond(response().withStatusCode(200).withBody(PACKAGE_CONTENT));
     }
 
-    private void givenServerRedirectingToPackage() {
+    private void givenServerRedirectingToPackage(String targetScheme) {
         mockServer.when(request().withPath(REDIRECT_PATH)).respond(response().withStatusCode(302)
-                .withHeader("Location", "http://localhost:" + mockServer.getLocalPort() + PACKAGE_PATH));
+                .withHeader("Location", targetScheme + "://localhost:" + mockServer.getLocalPort() + PACKAGE_PATH));
     }
 
-    private void whenDownloadingPackageWithUserInfo(String userInfo) {
-        whenDownloadingWithUserInfo(userInfo, PACKAGE_PATH);
+    private void whenDownloadingPackage(String scheme, String userInfo) {
+        whenDownloadingPackageFromPath(scheme, userInfo, PACKAGE_PATH);
     }
 
-    private void whenDownloadingWithUserInfo(String userInfo, String path) {
+    private void whenDownloadingPackageFromPath(String scheme, String userInfo, String path) {
         try {
-            final URL url = new URL("http://" + userInfo + "localhost:" + mockServer.getLocalPort() + path);
+            final URL url = new URL(scheme + "://" + userInfo + "localhost:" + mockServer.getLocalPort() + path);
             this.downloadedFile = (File) TestUtil.invokePrivate(this.deploymentAgent, "getFileFromRemote",
                     new Class<?>[] { URL.class }, url);
+        } catch (Throwable e) {
+            this.downloadError = e;
+        }
+    }
+
+    private void whenInstallingFromUrl(String url) {
+        try {
+            TestUtil.invokePrivate(this.deploymentAgent, "installDeploymentPackageInternal",
+                    new Class<?>[] { String.class }, url);
         } catch (Throwable e) {
             this.downloadError = e;
         }
@@ -219,10 +402,29 @@ public class PackageUrlCredentialsTest {
         assertFalse(recordedPackageRequest().containsHeader(AUTHORIZATION));
     }
 
-    private void thenDownloadFailsWith(String statusCode) {
+    private void thenNoRequestsWereReceived() {
+        assertEquals(0, mockServer.retrieveRecordedRequests(request()).length);
+    }
+
+    private void thenPlainHttpWarningIsLoggedWithout(String secret) {
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Object> urlCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(this.mockLogger).warn(messageCaptor.capture(), urlCaptor.capture());
+        assertTrue(messageCaptor.getValue().contains("HTTP"));
+        assertFalse(String.valueOf(urlCaptor.getValue()).contains(secret));
+    }
+
+    private void thenNoPlainHttpWarningIsLogged() {
+        verify(this.mockLogger, never()).warn(anyString(), any(Object.class));
+    }
+
+    private void thenDownloadFailsWith(Class<? extends Throwable> expectedType, String messageFragment) {
         assertNull(this.downloadedFile);
-        assertTrue(this.downloadError instanceof IOException);
-        assertTrue(this.downloadError.getMessage().contains(statusCode));
+        assertNotNull(this.downloadError);
+        assertTrue("Expected " + expectedType.getName() + " but got " + this.downloadError.getClass().getName(),
+                expectedType.isInstance(this.downloadError));
+        assertTrue("Expected message containing '" + messageFragment + "' but got: " + this.downloadError.getMessage(),
+                this.downloadError.getMessage().contains(messageFragment));
     }
 
     private void thenDownloadErrorDoesNotContain(String secret) {

@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -524,7 +525,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private DeploymentPackage installDeploymentPackageInternal(String urlSpec)
             throws DeploymentException, IOException, GeneralSecurityException {
-        URL url = new URL(urlSpec);
+        URL url = UrlCredentials.parse(urlSpec);
         File dpFile = null;
         final boolean download = !"file".equals(url.getProtocol());
         if (download) {
@@ -581,7 +582,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             if (++redirects > MAX_REDIRECTS) {
                 throw new IOException("Too many redirects, the maximum allowed is " + MAX_REDIRECTS);
             }
-            urlConnection = openRemoteConnection(new URL(newLocation));
+            urlConnection = openRemoteConnection(UrlCredentials.parse(newLocation));
         }
 
         final long maxBytes = getFileDownloadSizeMaxBytes();
@@ -625,17 +626,34 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private HttpURLConnection openRemoteConnection(URL url) throws GeneralSecurityException, IOException {
+        validateRemoteUrl(url);
+
         URLConnection urlConnection = UrlCredentials.withoutUserInfo(url).openConnection();
         urlConnection.setConnectTimeout(this.connTimeout);
         urlConnection.setReadTimeout(this.readTimeout);
-        UrlCredentials.basicAuthorization(url)
-                .ifPresent(authorization -> urlConnection.setRequestProperty("Authorization", authorization));
+        UrlCredentials.basicAuthorization(url).ifPresent(authorization -> {
+            if (!"https".equalsIgnoreCase(url.getProtocol())) {
+                logger.warn("Sending credentials over unencrypted HTTP for package URL {}",
+                        UrlCredentials.redact(url.toExternalForm()));
+            }
+            urlConnection.setRequestProperty("Authorization", authorization);
+        });
 
         if (urlConnection instanceof HttpsURLConnection) {
             ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
         }
 
         return (HttpURLConnection) urlConnection;
+    }
+
+    private static void validateRemoteUrl(URL url) throws MalformedURLException {
+        String protocol = url.getProtocol();
+        if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
+            throw new MalformedURLException("Unsupported deployment package URL protocol: " + protocol);
+        }
+        if (url.getHost() == null || url.getHost().isEmpty()) {
+            throw new MalformedURLException("Deployment package URL must specify a host");
+        }
     }
 
     private static boolean isRedirect(int responseCode) {

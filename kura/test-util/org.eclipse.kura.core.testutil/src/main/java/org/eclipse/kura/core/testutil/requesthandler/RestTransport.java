@@ -56,6 +56,7 @@ public class RestTransport implements Transport {
 
     private boolean initialized = false;
     private int timeoutMs = 0;
+    private Optional<String> readinessProbePath = Optional.empty();
 
     private Optional<String> basicCredentials = Optional.of("admin:admin");
     private Optional<SSLContext> sslContext = Optional.empty();
@@ -69,6 +70,27 @@ public class RestTransport implements Transport {
 
     public RestTransport(final String urlPrefix, final String servicePath) {
         this.baseURL = urlPrefix + servicePath;
+    }
+
+    /**
+     * Makes {@link #init()} wait until a GET request on the given resource, appended to the service path, no longer
+     * returns 404.
+     * <p>
+     * The JAX-RS publisher adds resources to the Jersey container asynchronously, after the corresponding OSGi
+     * service has been registered. Without a readiness probe path, {@link #init()} only waits for the Jersey
+     * container to be up, and requests performed right after it can still get a 404 because the resource under
+     * test has not been published yet.
+     * <p>
+     * The resource must exist and handle GET requests without side effects that affect the tests. Any status code
+     * other than 404, including 4xx errors such as 401 or 405, is taken as evidence that the resource is published.
+     *
+     * @param relativeUri
+     *            the resource to probe, appended to the service path, for example {@code "/interfaceIds"}
+     * @return this transport
+     */
+    public RestTransport withReadinessProbePath(final String relativeUri) {
+        this.readinessProbePath = Optional.of(relativeUri);
+        return this;
     }
 
     @Override
@@ -133,8 +155,10 @@ public class RestTransport implements Transport {
 
             this.timeoutMs = READINESS_PROBE_TIMEOUT_MS;
 
+            final String probePath = this.readinessProbePath.orElse("");
+
             try {
-                response = runRequest("", new MethodSpec("GET"));
+                response = runRequest(probePath, new MethodSpec("GET"));
             } catch (final Exception e) {
                 logger.warn("failed to probe Jersey readiness, proceeding", e);
                 return;
@@ -142,16 +166,19 @@ public class RestTransport implements Transport {
                 this.timeoutMs = 0;
             }
 
-            if (!isJerseyNotReady(response)) {
+            if (isJerseyNotReady(response)) {
+                logger.info("Jersey is not ready yet");
+            } else if (this.readinessProbePath.isPresent() && response.getStatus() == 404) {
+                logger.info("resource {}{} is not published yet", this.baseURL, probePath);
+            } else {
                 return;
             }
-
-            logger.info("Jersey is not ready yet");
 
             Thread.sleep(1000);
         }
 
-        logger.warn("Jersey did not report readiness within {} {}, proceeding", timeout, timeoutUnit);
+        logger.warn("{}{} did not report readiness within {} {}, proceeding", this.baseURL,
+                this.readinessProbePath.orElse(""), timeout, timeoutUnit);
     }
 
     private static boolean isJerseyNotReady(final Response response) {

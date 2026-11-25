@@ -29,16 +29,19 @@ public class FlushStreamPumper extends StreamPumper {
     private final int size;
     private boolean finished;
     private final boolean closeWhenExhausted;
+    private final boolean drainAfterWriteFailure;
     private final Consumer<Exception> readFailureListener;
     private final Consumer<Exception> writeFailureListener;
 
     public FlushStreamPumper(InputStream is, OutputStream os, boolean closeWhenExhausted,
-            Consumer<Exception> readFailureListener, Consumer<Exception> writeFailureListener) {
+            boolean drainAfterWriteFailure, Consumer<Exception> readFailureListener,
+            Consumer<Exception> writeFailureListener) {
         super(is, os, closeWhenExhausted);
         this.is = is;
         this.os = os;
         this.size = DEFAULT_SIZE;
         this.closeWhenExhausted = closeWhenExhausted;
+        this.drainAfterWriteFailure = drainAfterWriteFailure;
         this.readFailureListener = readFailureListener;
         this.writeFailureListener = writeFailureListener;
     }
@@ -53,9 +56,11 @@ public class FlushStreamPumper extends StreamPumper {
         final byte[] buf = new byte[this.size];
 
         try {
+            boolean writable = true;
             int length = read(buf);
-            while (length > 0 && write(buf, length)) {
-                length = read(buf);
+            while (length > 0) {
+                writable = writable && write(buf, length);
+                length = writable || this.drainAfterWriteFailure ? read(buf) : -1;
             }
         } finally {
             if (this.closeWhenExhausted) {

@@ -36,19 +36,17 @@ public class CommandResultHandler implements ExecuteResultHandler {
     private static final Logger logger = LoggerFactory.getLogger(CommandResultHandler.class);
     private static final int START_FAILURE_EXIT_VALUE = 1;
     private static final int TIMEOUT_COMMAND_EXIT_VALUE = 124;
-    private static final int NOT_EXECUTABLE_EXIT_VALUE = 126;
-    private static final int NOT_FOUND_EXIT_VALUE = 127;
 
     private final Consumer<CommandStatus> callback;
     private final Executor executor;
-    private final boolean unprivileged;
+    private final boolean timeoutCommandUsed;
     private final AtomicBoolean completed = new AtomicBoolean(false);
     private CommandStatus commandStatus;
 
-    public CommandResultHandler(Consumer<CommandStatus> callback, Executor executor, boolean unprivileged) {
+    public CommandResultHandler(Consumer<CommandStatus> callback, Executor executor, boolean timeoutCommandUsed) {
         this.callback = callback;
         this.executor = executor;
-        this.unprivileged = unprivileged;
+        this.timeoutCommandUsed = timeoutCommandUsed;
     }
 
     public CommandStatus getStatus() {
@@ -89,7 +87,6 @@ public class CommandResultHandler implements ExecuteResultHandler {
             appendToErrorStream("Failed to start command: " + startFailure.getMessage());
         } else if (exitValue != 0) {
             logger.debug("Command {} returned error code {}", this.commandStatus.getCommand(), exitValue);
-            appendToErrorStream(exitFailureMessage(exitValue));
         }
         reportPumpFailures();
         this.callback.accept(this.commandStatus);
@@ -98,7 +95,7 @@ public class CommandResultHandler implements ExecuteResultHandler {
     private boolean isTimedOut(int exitValue) {
         ExecuteWatchdog watchdog = this.executor.getWatchdog();
         boolean killedByWatchdog = watchdog != null && watchdog.killedProcess();
-        return killedByWatchdog || (this.unprivileged && exitValue == TIMEOUT_COMMAND_EXIT_VALUE);
+        return killedByWatchdog || (this.timeoutCommandUsed && exitValue == TIMEOUT_COMMAND_EXIT_VALUE);
     }
 
     private void reportPumpFailures() {
@@ -107,8 +104,8 @@ public class CommandResultHandler implements ExecuteResultHandler {
             this.commandStatus.setOutputIncomplete(!streamHandler.getOutputFailures().isEmpty());
             streamHandler.getOutputFailures()
                     .forEach(e -> appendToErrorStream("Output may be incomplete: " + e.getMessage()));
-            streamHandler.getInputFailures()
-                    .forEach(e -> appendToErrorStream("Failed to write input to process: " + e.getMessage()));
+            streamHandler.getInputReadFailures()
+                    .forEach(e -> appendToErrorStream("Failed to read the input for the process: " + e.getMessage()));
         }
     }
 
@@ -133,16 +130,5 @@ public class CommandResultHandler implements ExecuteResultHandler {
             logger.warn("Failed to flush the failure cause of command {}", this.commandStatus.getCommand(), e);
         }
         this.commandStatus.setErrorStream(fallback);
-    }
-
-    private static String exitFailureMessage(int exitValue) {
-        String message = "Command exited with code " + exitValue;
-        if (exitValue == NOT_FOUND_EXIT_VALUE) {
-            return message + " (command not found)";
-        }
-        if (exitValue == NOT_EXECUTABLE_EXIT_VALUE) {
-            return message + " (command not executable)";
-        }
-        return message;
     }
 }

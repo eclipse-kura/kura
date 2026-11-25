@@ -77,12 +77,12 @@ public class ExecutorUtil {
 
     public CommandStatus executeUnprivileged(Command command) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
-        return executeSync(command, commandLine, true);
+        return executeSync(command, commandLine, usesTimeoutCommand(command));
     }
 
     public void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
-        executeAsync(command, commandLine, callback, true);
+        executeAsync(command, commandLine, callback, usesTimeoutCommand(command));
     }
 
     public CommandStatus executePrivileged(Command command) {
@@ -235,7 +235,7 @@ public class ExecutorUtil {
         return Arrays.stream(tokens).parallel().allMatch(line::contains);
     }
 
-    private CommandStatus executeSync(Command command, CommandLine commandLine, boolean unprivileged) {
+    private CommandStatus executeSync(Command command, CommandLine commandLine, boolean timeoutCommandUsed) {
         CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
@@ -244,7 +244,7 @@ public class ExecutorUtil {
         Executor executor = configureExecutor(command);
 
         CommandResultHandler resultHandler = new CommandResultHandler(status -> {
-        }, executor, unprivileged);
+        }, executor, timeoutCommandUsed);
         resultHandler.setStatus(commandStatus);
 
         int exitStatus = 0;
@@ -304,7 +304,7 @@ public class ExecutorUtil {
     }
 
     private void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback,
-            boolean unprivileged) {
+            boolean timeoutCommandUsed) {
         CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
@@ -312,7 +312,7 @@ public class ExecutorUtil {
 
         Executor executor = configureExecutor(command);
 
-        CommandResultHandler resultHandler = new CommandResultHandler(callback, executor, unprivileged);
+        CommandResultHandler resultHandler = new CommandResultHandler(callback, executor, timeoutCommandUsed);
         resultHandler.setStatus(commandStatus);
 
         logger.debug("Executing: {}", commandLine);
@@ -372,6 +372,10 @@ public class ExecutorUtil {
         commandLine.addArgument(String.join(" ", c), false);
 
         return commandLine;
+    }
+
+    private static boolean usesTimeoutCommand(Command command) {
+        return command.getTimeout() > 0;
     }
 
     private static String quoteForShell(String value) {

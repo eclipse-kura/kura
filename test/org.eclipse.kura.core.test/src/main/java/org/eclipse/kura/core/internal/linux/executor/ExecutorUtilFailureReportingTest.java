@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.concurrent.CountDownLatch;
@@ -47,6 +48,9 @@ public class ExecutorUtilFailureReportingTest {
     private static final String MISSING_EXECUTABLE = "/nonexistent/kura-missing-command";
     private static final String CALL_SITE_FAILURE_MESSAGE = "Working directory does not exist";
     private static final String WRITE_FAILURE_MESSAGE = "write failed";
+    private static final String READ_FAILURE_MESSAGE = "read failed";
+    private static final String LARGE_OUTPUT_BYTES = Integer.toString(1 << 20);
+    private static final int COMMAND_TIMEOUT_SECONDS = 10;
     private static final String PREVIOUS_STDERR = "previous stderr\n";
 
     private final DefaultExecutor executor = mock(DefaultExecutor.class);
@@ -108,7 +112,7 @@ public class ExecutorUtilFailureReportingTest {
     }
 
     @Test
-    public void nonZeroExitAppendsCauseToCallerErrorStream() {
+    public void nonZeroExitLeavesCallerErrorStreamUntouched() {
         givenMockedExecutor();
         givenSyncExitCode(127);
         givenCommand("ls");
@@ -117,7 +121,7 @@ public class ExecutorUtilFailureReportingTest {
         whenExecutedSync();
 
         thenExitCodeIs(127);
-        thenCallerErrorStreamIs(PREVIOUS_STDERR + "Command exited with code 127 (command not found)\n");
+        thenCallerErrorStreamIs(PREVIOUS_STDERR);
     }
 
     @Test
@@ -133,16 +137,43 @@ public class ExecutorUtilFailureReportingTest {
     }
 
     @Test
-    public void unreadInputIsReportedWithoutMarkingOutputIncomplete() {
+    public void failingOutputStreamDoesNotBlockTheProcess() {
+        givenRealExecutor();
+        givenCommand("head", "-c", LARGE_OUTPUT_BYTES, "/dev/zero");
+        givenTimeout(COMMAND_TIMEOUT_SECONDS);
+        givenFailingOutputStream();
+
+        whenExecutedSync();
+
+        thenTimedOutIs(false);
+        thenExitCodeIs(0);
+        thenOutputIncompleteIs(true);
+    }
+
+    @Test
+    public void unreadInputIsNotReported() {
         givenRealExecutor();
         givenCommand("true");
+        givenCallerErrorStream("");
         givenInputTheCommandDoesNotRead();
 
         whenExecutedSync();
 
         thenExitCodeIs(0);
         thenOutputIncompleteIs(false);
-        thenErrorStreamContains("Failed to write input to process: ");
+        thenCallerErrorStreamIs("");
+    }
+
+    @Test
+    public void unreadableInputIsReported() {
+        givenRealExecutor();
+        givenCommand("cat");
+        givenUnreadableInput();
+
+        whenExecutedSync();
+
+        thenOutputIncompleteIs(false);
+        thenErrorStreamContains("Failed to read the input for the process: " + READ_FAILURE_MESSAGE);
     }
 
     @Test
@@ -221,6 +252,20 @@ public class ExecutorUtilFailureReportingTest {
         this.command.setInputStream(new ByteArrayInputStream(new byte[1 << 20]));
     }
 
+    private void givenUnreadableInput() {
+        this.command.setInputStream(new InputStream() {
+
+            @Override
+            public int read() throws IOException {
+                throw new IOException(READ_FAILURE_MESSAGE);
+            }
+        });
+    }
+
+    private void givenTimeout(int seconds) {
+        this.command.setTimeout(seconds);
+    }
+
     private void whenExecutedSync() {
         this.status = this.executorUtil.executePrivileged(this.command);
     }
@@ -250,6 +295,10 @@ public class ExecutorUtilFailureReportingTest {
     private void thenErrorStreamContains(String expected) {
         String errorOutput = this.status.getErrorStream().toString();
         assertTrue("'" + errorOutput + "' does not contain '" + expected + "'", errorOutput.contains(expected));
+    }
+
+    private void thenTimedOutIs(boolean expected) {
+        assertEquals(expected, this.status.isTimedout());
     }
 
     private void thenOutputIncompleteIs(boolean expected) {

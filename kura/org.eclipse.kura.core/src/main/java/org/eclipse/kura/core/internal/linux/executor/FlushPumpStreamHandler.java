@@ -29,7 +29,7 @@ public class FlushPumpStreamHandler extends PumpStreamHandler {
     private static final Logger logger = LoggerFactory.getLogger(FlushPumpStreamHandler.class);
 
     private final List<Exception> outputFailures = new CopyOnWriteArrayList<>();
-    private final List<Exception> inputFailures = new CopyOnWriteArrayList<>();
+    private final List<Exception> inputReadFailures = new CopyOnWriteArrayList<>();
 
     public FlushPumpStreamHandler(final OutputStream out, final OutputStream err, final InputStream input) {
         super(out, err, input);
@@ -39,12 +39,11 @@ public class FlushPumpStreamHandler extends PumpStreamHandler {
     protected Thread createPump(final InputStream is, final OutputStream os, final boolean closeWhenExhausted) {
         final boolean isOutputPump = os == getOut() || os == getErr();
         final Consumer<Exception> readFailureListener = isOutputPump ? this::onProcessOutputReadFailure
-                : this::onInputFailure;
+                : this::onInputReadFailure;
         final Consumer<Exception> writeFailureListener = isOutputPump ? this::onOutputWriteFailure
-                : this::onInputFailure;
-        final Thread result = new Thread(
-                new FlushStreamPumper(is, os, closeWhenExhausted, readFailureListener, writeFailureListener),
-                "Exec Stream Pumper");
+                : this::onProcessInputWriteFailure;
+        final Thread result = new Thread(new FlushStreamPumper(is, os, closeWhenExhausted, isOutputPump,
+                readFailureListener, writeFailureListener), "Exec Stream Pumper");
         result.setDaemon(true);
         return result;
     }
@@ -53,8 +52,8 @@ public class FlushPumpStreamHandler extends PumpStreamHandler {
         return Collections.unmodifiableList(this.outputFailures);
     }
 
-    public List<Exception> getInputFailures() {
-        return Collections.unmodifiableList(this.inputFailures);
+    public List<Exception> getInputReadFailures() {
+        return Collections.unmodifiableList(this.inputReadFailures);
     }
 
     private void onProcessOutputReadFailure(final Exception e) {
@@ -66,9 +65,13 @@ public class FlushPumpStreamHandler extends PumpStreamHandler {
         this.outputFailures.add(e);
     }
 
-    private void onInputFailure(final Exception e) {
-        logger.warn("Failed to pump the input stream to the process", e);
-        this.inputFailures.add(e);
+    private void onInputReadFailure(final Exception e) {
+        logger.warn("Failed to read the input stream for the process", e);
+        this.inputReadFailures.add(e);
+    }
+
+    private void onProcessInputWriteFailure(final Exception e) {
+        logger.debug("Stopped writing to the process input stream", e);
     }
 
 }

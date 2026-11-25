@@ -30,6 +30,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.linux.executor.LinuxResultHandler;
+import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
@@ -38,6 +39,7 @@ public class ExecutorUtilTimeoutTest {
 
     private static final int TIMEOUT_COMMAND_EXIT_VALUE = 124;
     private static final int SIGTERM_EXIT_VALUE = 143;
+    private static final int COMMAND_TIMEOUT_SECONDS = 5;
 
     private final DefaultExecutor executor = mock(DefaultExecutor.class);
     private final ExecutorUtil executorUtil = new ExecutorUtil() {
@@ -82,6 +84,7 @@ public class ExecutorUtilTimeoutTest {
 
     @Test
     public void unprivilegedTimeoutExitWithoutWatchdogKillIsTimedOut() {
+        givenCommandTimeout();
         givenWatchdogKilledProcess(false);
         givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
 
@@ -92,12 +95,33 @@ public class ExecutorUtilTimeoutTest {
 
     @Test
     public void unprivilegedAsyncTimeoutExitWithoutWatchdogKillIsTimedOut() {
+        givenCommandTimeout();
         givenWatchdogKilledProcess(false);
         givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
 
         whenExecutedUnprivilegedAsync();
 
         thenTimedOutIs(true);
+    }
+
+    @Test
+    public void unprivilegedTimeoutExitWithoutCommandTimeoutIsNotTimedOut() {
+        givenWatchdogKilledProcess(false);
+        givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
+
+        whenExecutedUnprivileged();
+
+        thenTimedOutIs(false);
+    }
+
+    @Test
+    public void unprivilegedAsyncTimeoutExitWithoutCommandTimeoutIsNotTimedOut() {
+        givenWatchdogKilledProcess(false);
+        givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
+
+        whenExecutedUnprivilegedAsync();
+
+        thenTimedOutIs(false);
     }
 
     @Test
@@ -116,6 +140,11 @@ public class ExecutorUtilTimeoutTest {
         whenLinuxResultHandlerReceivesExit(SIGTERM_EXIT_VALUE);
 
         thenTimedOutIs(false);
+    }
+
+    private void givenCommandTimeout() {
+        this.command.setTimeout(COMMAND_TIMEOUT_SECONDS);
+        this.command.setSignal(LinuxSignal.SIGTERM);
     }
 
     private void givenWatchdogKilledProcess(boolean killed) {

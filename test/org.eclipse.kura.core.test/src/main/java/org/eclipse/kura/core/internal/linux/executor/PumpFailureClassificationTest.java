@@ -16,6 +16,7 @@ package org.eclipse.kura.core.internal.linux.executor;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public class PumpFailureClassificationTest {
+
+    private static final int LARGE_SOURCE_SIZE = 64 * 1024;
 
     private final OutputStream callerErrorStream = new ByteArrayOutputStream();
     private OutputStream callerOutputStream = new ByteArrayOutputStream();
@@ -72,7 +75,20 @@ public class PumpFailureClassificationTest {
     }
 
     @Test
-    public void failingProcessInputIsReportedAsInputFailure() {
+    public void failingCallerStreamKeepsDrainingProcessOutput() {
+        givenFailingCallerOutputStream();
+        givenHandler();
+        givenLargeSource();
+        givenCallerOutputAsDestination();
+
+        whenPumpRuns();
+
+        thenOutputFailuresAre(1);
+        thenSourceIsFullyRead();
+    }
+
+    @Test
+    public void failingProcessInputIsNotReportedAsFailure() {
         givenHandler();
         givenSourceWithData();
         givenFailingProcessInputAsDestination();
@@ -80,7 +96,19 @@ public class PumpFailureClassificationTest {
         whenPumpRuns();
 
         thenOutputFailuresAre(0);
-        thenInputFailuresAre(1);
+        thenInputFailuresAre(0);
+    }
+
+    @Test
+    public void failingProcessInputStopsReadingCallerInput() {
+        givenHandler();
+        givenLargeSource();
+        givenFailingProcessInputAsDestination();
+
+        whenPumpRuns();
+
+        thenInputFailuresAre(0);
+        thenSourceIsNotFullyRead();
     }
 
     @Test
@@ -117,6 +145,10 @@ public class PumpFailureClassificationTest {
         this.source = new ByteArrayInputStream("hello".getBytes(UTF_8));
     }
 
+    private void givenLargeSource() {
+        this.source = new ByteArrayInputStream(new byte[LARGE_SOURCE_SIZE]);
+    }
+
     private void givenCallerOutputAsDestination() {
         this.destination = this.callerOutputStream;
     }
@@ -150,7 +182,23 @@ public class PumpFailureClassificationTest {
     }
 
     private void thenInputFailuresAre(int expected) {
-        assertEquals(expected, this.handler.getInputFailures().size());
+        assertEquals(expected, this.handler.getInputReadFailures().size());
+    }
+
+    private void thenSourceIsFullyRead() {
+        assertEquals(0, sourceRemainingBytes());
+    }
+
+    private void thenSourceIsNotFullyRead() {
+        assertTrue("The caller input was read to the end", sourceRemainingBytes() > 0);
+    }
+
+    private int sourceRemainingBytes() {
+        try {
+            return this.source.available();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static final class FailingOutputStream extends OutputStream {

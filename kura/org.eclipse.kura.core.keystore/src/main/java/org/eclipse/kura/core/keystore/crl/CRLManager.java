@@ -224,7 +224,8 @@ public class CRLManager implements Closeable {
 
         this.updateExecutor.shutdownNow();
         this.downloadExecutor.shutdownNow();
-        awaitTermination(this.updateExecutor);
+        awaitTermination(this.updateExecutor, "CRL update task");
+        awaitTermination(this.downloadExecutor, "CRL download tasks");
         this.store.close();
     }
 
@@ -331,15 +332,17 @@ public class CRLManager implements Closeable {
     private List<DownloadResult> executeDownloads(final List<PendingDownload> pendingDownloads) {
         final List<DownloadResult> results = new ArrayList<>();
 
-        for (final PendingDownload pending : pendingDownloads) {
+        for (int i = 0; i < pendingDownloads.size(); i++) {
+            final PendingDownload pending = pendingDownloads.get(i);
             try {
-                final X509CRL crl = pending.future.get(1, TimeUnit.MINUTES);
+                final X509CRL crl = pending.future.get(this.delays.downloadTimeoutMs, TimeUnit.MILLISECONDS);
                 results.add(new DownloadResult(pending, crl, null));
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.warn("failed to download CRL from {}", pending.state.distributionPoints, e);
-                pending.future.cancel(true);
+                cancelDownloads(pendingDownloads, i);
                 results.add(new DownloadResult(pending, null, e));
+                break;
             } catch (final Exception e) {
                 logger.warn("failed to download CRL from {}", pending.state.distributionPoints, e);
                 pending.future.cancel(true);
@@ -348,6 +351,12 @@ public class CRLManager implements Closeable {
         }
 
         return results;
+    }
+
+    private static void cancelDownloads(final List<PendingDownload> pendingDownloads, final int startIndex) {
+        for (int i = startIndex; i < pendingDownloads.size(); i++) {
+            pendingDownloads.get(i).future.cancel(true);
+        }
     }
 
     private synchronized boolean applyDownloadResults(final List<DownloadResult> results, final long now) {
@@ -390,10 +399,10 @@ public class CRLManager implements Closeable {
         return nextUpdate != null && nextUpdate.getTime() < System.currentTimeMillis();
     }
 
-    private static void awaitTermination(final ExecutorService executor) {
+    private static void awaitTermination(final ExecutorService executor, final String taskName) {
         try {
             if (!executor.awaitTermination(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                logger.warn("CRL update task did not terminate within {} ms", SHUTDOWN_TIMEOUT_MS);
+                logger.warn("{} did not terminate within {} ms", taskName, SHUTDOWN_TIMEOUT_MS);
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -631,16 +640,25 @@ public class CRLManager implements Closeable {
 
     public static final class Delays {
 
-        public static final Delays DEFAULT = new Delays(5000, 30_000, 5000);
+        private static final long DEFAULT_DOWNLOAD_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(1);
+
+        public static final Delays DEFAULT = new Delays(5000, 30_000, 5000, DEFAULT_DOWNLOAD_TIMEOUT_MS);
 
         private final long initialUpdateDelayMs;
         private final long minRescheduleDelayMs;
         private final long storeDelayMs;
+        private final long downloadTimeoutMs;
 
         public Delays(final long initialUpdateDelayMs, final long minRescheduleDelayMs, final long storeDelayMs) {
+            this(initialUpdateDelayMs, minRescheduleDelayMs, storeDelayMs, DEFAULT_DOWNLOAD_TIMEOUT_MS);
+        }
+
+        public Delays(final long initialUpdateDelayMs, final long minRescheduleDelayMs, final long storeDelayMs,
+                final long downloadTimeoutMs) {
             this.initialUpdateDelayMs = initialUpdateDelayMs;
             this.minRescheduleDelayMs = minRescheduleDelayMs;
             this.storeDelayMs = storeDelayMs;
+            this.downloadTimeoutMs = downloadTimeoutMs;
         }
     }
 

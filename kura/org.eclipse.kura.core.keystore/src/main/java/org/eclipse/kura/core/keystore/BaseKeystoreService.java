@@ -614,8 +614,8 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
     private static boolean isIssuerOf(final X509CRL crl, final TrustedCertificateEntry trustedCertEntry) {
         final Certificate certificate = trustedCertEntry.getTrustedCertificate();
 
-        return certificate instanceof X509Certificate
-                && ((X509Certificate) certificate).getSubjectX500Principal().equals(crl.getIssuerX500Principal());
+        return certificate instanceof X509Certificate x509Certificate
+                && x509Certificate.getSubjectX500Principal().equals(crl.getIssuerX500Principal());
     }
 
     protected boolean verifyCRL(X509CRL crl, final TrustedCertificateEntry trustedCertEntry) {

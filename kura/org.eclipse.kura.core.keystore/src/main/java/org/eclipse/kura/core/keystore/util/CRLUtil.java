@@ -194,6 +194,7 @@ public class CRLUtil {
             };
 
             if (!cancellation.setAbortAction(abortAction)) {
+                abortAction.run();
                 throw new InterruptedException("CRL download cancelled");
             }
 
@@ -222,7 +223,6 @@ public class CRLUtil {
                 throw new IOException("failed to fetch CRL from " + uri, cause);
             } finally {
                 cancellation.clearAbortAction(abortAction);
-                client.shutdownNow();
             }
         }
     }
@@ -245,7 +245,7 @@ public class CRLUtil {
 
     private static X509CRL readInterruptibleStream(final InputStream in, final Closeable closeable,
             final FetchCancellation cancellation)
-            throws IOException, CertificateException, CRLException, InterruptedException {
+            throws CertificateException, CRLException, InterruptedException {
         final Runnable abortAction = () -> closeQuietly(closeable);
         if (!cancellation.setAbortAction(abortAction)) {
             throw new InterruptedException("CRL download cancelled");

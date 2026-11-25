@@ -79,7 +79,7 @@ final class PackageInstallationTracker implements EventHandler, ServiceListener 
     @Override
     public void serviceChanged(ServiceEvent event) {
         if (event.getType() == ServiceEvent.UNREGISTERING) {
-            logger.warn("DeploymentAgentService unregistered while installing package at URL {}", this.packageUrl);
+            logger.warn("DeploymentAgentService unregistered while installing package");
             this.completion.complete(null);
         }
     }

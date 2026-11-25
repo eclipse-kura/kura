@@ -1468,6 +1468,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     synchronized void validateConfigurations(final List<ComponentConfiguration> configs) throws KuraException {
         for (final ComponentConfiguration config : configs) {
+            if (config == null) {
+                continue;
+            }
+
             final String pid = config.getPid();
             final Map<String, Object> properties = config.getConfigurationProperties();
 

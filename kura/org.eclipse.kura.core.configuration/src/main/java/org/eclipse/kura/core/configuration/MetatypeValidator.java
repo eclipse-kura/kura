@@ -69,6 +69,17 @@ final class MetatypeValidator {
     }
 
     static void validateValue(final AD ad, final Object value) throws KuraException {
+        if (ad.getType() == Scalar.PASSWORD) {
+            final String cardinalityViolation = findCardinalityViolation(ad.getCardinality(), countNonNull(value));
+
+            if (cardinalityViolation != null) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ad.getId(), HIDDEN_VALUE,
+                        cardinalityViolation);
+            }
+
+            return;
+        }
+
         final List<String> tokens = toTokens(value);
         final String violation = findViolation(ad, tokens);
 
@@ -84,6 +95,27 @@ final class MetatypeValidator {
         }
 
         return ocd.getAD();
+    }
+
+    private static int countNonNull(final Object value) {
+        if (value instanceof Collection<?>) {
+            return (int) ((Collection<?>) value).stream().filter(Objects::nonNull).count();
+        }
+
+        if (value.getClass().isArray()) {
+            int count = 0;
+            final int length = Array.getLength(value);
+
+            for (int i = 0; i < length; i++) {
+                if (Array.get(value, i) != null) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        return 1;
     }
 
     private static List<String> toTokens(final Object value) {
@@ -110,7 +142,8 @@ final class MetatypeValidator {
         }
 
         if (element instanceof Password) {
-            return new String(((Password) element).getPassword());
+            final char[] password = ((Password) element).getPassword();
+            return password == null ? "" : new String(password);
         }
 
         return element.toString();
@@ -127,7 +160,7 @@ final class MetatypeValidator {
     private static String findViolation(final AD ad, final List<String> tokens) {
         final String cardinalityViolation = findCardinalityViolation(ad.getCardinality(), tokens.size());
 
-        if (cardinalityViolation != null || ad.getType() == Scalar.PASSWORD) {
+        if (cardinalityViolation != null) {
             return cardinalityViolation;
         }
 
@@ -291,7 +324,13 @@ final class MetatypeValidator {
             }
 
             try {
-                return boundParser.apply(bound);
+                final Object parsed = boundParser.apply(bound);
+
+                if (isNaN(parsed)) {
+                    throw new IllegalArgumentException(bound);
+                }
+
+                return parsed;
             } catch (final IllegalArgumentException e) {
                 logger.error("Ignoring the {} bound '{}' of attribute {}: it is not valid for type {}", boundName,
                         bound, this.ad.getId(), this.ad.getType());
@@ -363,7 +402,7 @@ final class MetatypeValidator {
 
     private static boolean isSameValue(final Object value, final Object other) {
         if (isComparable(value) && isComparable(other)) {
-            return !isNaN(value) && compare(value, other) == 0;
+            return !isNaN(value) && !isNaN(other) && compare(value, other) == 0;
         }
 
         return value.equals(other);

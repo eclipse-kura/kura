@@ -409,7 +409,8 @@ public class CloudConfigurationHandler implements RequestHandler {
         }
 
         ((ConfigurationServiceImpl) this.configurationService).validateConfigurations(configs.stream()
-                .filter(config -> pid == null || pid.equals(config.getPid())).collect(Collectors.toList()));
+                .filter(config -> config != null && (pid == null || pid.equals(config.getPid())))
+                .collect(Collectors.toList()));
     }
 
     private KuraPayload doExecRollback(List<String> resources) throws KuraException {

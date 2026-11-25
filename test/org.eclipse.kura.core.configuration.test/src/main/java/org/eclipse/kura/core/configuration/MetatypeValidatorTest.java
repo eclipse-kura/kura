@@ -468,6 +468,58 @@ public class MetatypeValidatorTest {
         thenErrorMessageContains("maximum 10");
     }
 
+    @Test
+    public void passwordWithNullCharactersIsAccepted() {
+        givenAttribute(Tscalar.PASSWORD, 0);
+
+        whenValueIsValidated(new Password((String) null));
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void passwordWithNullCharactersOnStringAttributeIsTreatedAsEmpty() {
+        givenAttribute(Tscalar.STRING, 0);
+        givenRequired(false);
+        givenRange("1", "10");
+
+        whenValueIsValidated(new Password((char[]) null));
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void notANumberOptionDoesNotMatchOtherNumbers() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenOptions("NaN");
+
+        whenValueIsValidated(1.0);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("allowed options");
+    }
+
+    @Test
+    public void notANumberBoundIsIgnored() {
+        givenAttribute(Tscalar.DOUBLE, 0);
+        givenRange("NaN", "10.0");
+
+        whenValueIsValidated(-5.0);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void floatNotANumberIsRejectedWhenTheAttributeHasABound() {
+        givenAttribute(Tscalar.FLOAT, 0);
+        givenRange("0", null);
+
+        whenValueIsValidated(Float.NaN);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a number");
+    }
+
     private void givenAttribute(final Tscalar type, final int cardinality) {
         this.attribute = new Tad();
         this.attribute.setId(ATTRIBUTE);

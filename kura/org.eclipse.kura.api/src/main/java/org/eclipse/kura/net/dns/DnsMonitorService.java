@@ -18,8 +18,10 @@ import org.osgi.annotation.versioning.ProviderType;
  * Marker interface for dns server monitoring service
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated since 2.9
  */
 @ProviderType
+@Deprecated
 public interface DnsMonitorService {
 
 }

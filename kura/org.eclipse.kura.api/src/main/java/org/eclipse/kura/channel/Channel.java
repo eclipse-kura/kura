@@ -84,16 +84,17 @@ public class Channel {
      * Instantiates a new channel.
      *
      * @param name
-     *            the name for this channel
+     *                  the name for this channel
      * @param type
-     *            the type
+     *                  the type
      * @param valueType
-     *            the value type
+     *                  the value type
      * @param config
-     *            the configuration
+     *                  the configuration
      * @throws NullPointerException
-     *             if any of the arguments is null
-     * @deprecated Use {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
+     *                              if any of the arguments is null
+     * @deprecated Use
+     *             {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
      */
 
     @Deprecated
@@ -115,21 +116,24 @@ public class Channel {
      * Instantiates a new channel.
      *
      * @param name
-     *            the name for this channel
+     *                    the name for this channel
      * @param type
-     *            the type
+     *                    the type
      * @param valueType
-     *            the value type
+     *                    the value type
      * @param valueScale
-     *            the value used to scale the value, must have the same {@link DataType} as valueOffset
+     *                    the value used to scale the value, must have the same
+     *                    {@link DataType} as valueOffset
      * @param valueOffset
-     *            the value used as offset of the value, must have the same {@link DataType} as valueScale
+     *                    the value used as offset of the value, must have the same
+     *                    {@link DataType} as valueScale
      * @param config
-     *            the configuration
+     *                    the configuration
      * @throws NullPointerException
-     *             if any of the arguments is null
+     *                                  if any of the arguments is null
      * @throws IllegalArgumentException
-     *             if any of the valueScale and valueOffset have different types
+     *                                  if any of the valueScale and valueOffset
+     *                                  have different types
      *
      * @since 2.8
      */
@@ -216,9 +220,11 @@ public class Channel {
     }
 
     /**
-     * Returns a double that represents the scale factor to be applied to the read value
+     * Returns a double that represents the scale factor to be applied to the read
+     * value
      *
-     * @return a double that represents the scale factor to be applied to the read value
+     * @return a double that represents the scale factor to be applied to the read
+     *         value
      *
      * @since 2.3
      *
@@ -230,10 +236,12 @@ public class Channel {
     }
 
     /**
-     * Returns a {@link Number} that represents the scale factor to be applied to the read
+     * Returns a {@link Number} that represents the scale factor to be applied to
+     * the read
      * value
      *
-     * @return a {@link Number} that represents the scale factor to be applied to the read value
+     * @return a {@link Number} that represents the scale factor to be applied to
+     *         the read value
      *
      * @since 2.8
      */
@@ -256,10 +264,12 @@ public class Channel {
     }
 
     /**
-     * Returns a {@link TypedValue} that represents the offset factor to be applied to the read
+     * Returns a {@link TypedValue} that represents the offset factor to be applied
+     * to the read
      * value
      *
-     * @return a {@link TypedValue} that represents the offset factor to be applied to the read value
+     * @return a {@link TypedValue} that represents the offset factor to be applied
+     *         to the read value
      *
      * @since 2.8
      */
@@ -278,9 +288,9 @@ public class Channel {
      * Sets the name.
      *
      * @param name
-     *            the new name
+     *             the new name
      * @throws NullPointerException
-     *             if the argument is null
+     *                              if the argument is null
      */
     public void setName(final String name) {
         requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
@@ -291,9 +301,9 @@ public class Channel {
      * Sets the type.
      *
      * @param type
-     *            the new type
+     *             the new type
      * @throws NullPointerException
-     *             if the argument is null
+     *                              if the argument is null
      */
     public void setType(final ChannelType type) {
         requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
@@ -304,9 +314,9 @@ public class Channel {
      * Sets the value type.
      *
      * @param valueType
-     *            the new value type
+     *                  the new value type
      * @throws NullPointerException
-     *             if the argument is null
+     *                              if the argument is null
      */
     public void setValueType(final DataType valueType) {
         requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
@@ -317,9 +327,9 @@ public class Channel {
      * Set the type of the scale/offset.
      *
      * @param scaleOffsetType
-     *            the scale/offset type
+     *                        the scale/offset type
      * @throws NullPointerException
-     *             if the argument is null
+     *                              if the argument is null
      *
      * @since 2.8
      */
@@ -333,7 +343,7 @@ public class Channel {
      *
      * @since 1.4
      * @param isEnabled
-     *            a boolean indicating if this channel is enabled or not
+     *                  a boolean indicating if this channel is enabled or not
      */
     public void setEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
@@ -343,8 +353,10 @@ public class Channel {
      * Specifies the scale to be applied to the channel value
      *
      * @param scale
-     *            a double value that specifies the scale to be applied to the channel value
+     *              a double value that specifies the scale to be applied to the
+     *              channel value
      * @since 2.3
+     * @deprecated since 2.9. Use {@link Channel#setScale(Number)}
      */
     public void setScale(double scale) {
         this.valueScale = scale;
@@ -354,7 +366,8 @@ public class Channel {
      * Specifies the scale to be applied to the channel value
      *
      * @param scale
-     *            a {@link Number} value that specifies the scale to be applied to the channel value
+     *              a {@link Number} value that specifies the scale to be applied to
+     *              the channel value
      * @since 2.8
      */
     public void setScale(Number scale) {
@@ -365,8 +378,10 @@ public class Channel {
      * Specifies the offset to be applied to the channel value
      *
      * @param offset
-     *            a double value that specifies the offset to be applied to the channel value
+     *               a double value that specifies the offset to be applied to the
+     *               channel value
      * @since 2.3
+     * @deprecated since 2.9. Use {@link Channel#setOffset(Number)}
      */
     public void setOffset(double offset) {
         this.valueOffset = offset;
@@ -376,7 +391,8 @@ public class Channel {
      * Specifies the offset to be applied to the channel value
      *
      * @param offset
-     *            a {@link Number} value that specifies the offset to be applied to the channel value
+     *               a {@link Number} value that specifies the offset to be applied
+     *               to the channel value
      * @since 2.8
      */
     public void setOffset(Number offset) {
@@ -417,12 +433,13 @@ public class Channel {
      * {@code Channel}.
      *
      * @param vlaue
-     *            The value to be written.
+     *              The value to be written.
      * @throws IllegalArgumentException
-     *             If the {@link DataType} of the provided value differs from the data type
-     *             of this channel
+     *                                  If the {@link DataType} of the provided
+     *                                  value differs from the data type
+     *                                  of this channel
      * @throws NullPointerException
-     *             If the provided value is null
+     *                                  If the provided value is null
      * @return
      *         the {@link CheannelRecord}
      */

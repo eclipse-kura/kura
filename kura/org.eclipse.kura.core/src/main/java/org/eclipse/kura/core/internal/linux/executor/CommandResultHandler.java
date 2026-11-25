@@ -127,6 +127,11 @@ public class CommandResultHandler implements ExecuteResultHandler {
         }
         ByteArrayOutputStream fallback = new ByteArrayOutputStream();
         fallback.write(line, 0, line.length);
+        try {
+            fallback.flush();
+        } catch (IOException e) {
+            logger.warn("Failed to flush the failure cause of command {}", this.commandStatus.getCommand(), e);
+        }
         this.commandStatus.setErrorStream(fallback);
     }
 

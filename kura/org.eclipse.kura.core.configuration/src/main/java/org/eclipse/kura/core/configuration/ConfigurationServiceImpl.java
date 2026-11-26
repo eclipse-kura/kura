@@ -845,7 +845,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         boolean anyChangeApplied = applyComponentUpdates(configsToUpdate, configs, previousConfigs, causes);
 
-        if (takeSnapshot && configs != null && !configs.isEmpty() && (causes.isEmpty() || anyChangeApplied)) {
+        if (takeSnapshot && !configs.isEmpty() && (causes.isEmpty() || anyChangeApplied)) {
             saveSnapshot(configs);
         }
 
@@ -864,50 +864,65 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             final int configIndex = indexOfPid(configs, pid);
 
             if (this.allActivatedPids.contains(pid)) {
-                final Map<String, Object> propertiesToApply = configIndex >= 0
-                        ? configs.get(configIndex).getConfigurationProperties()
-                        : configToUpdate.getConfigurationProperties();
-                try {
-                    updateConfigurationInternal(pid, propertiesToApply, false);
-                    anyChangeApplied = true;
-                } catch (KuraException e) {
-                    logger.warn("Error during updateConfigurations for component {}", pid, e);
-                    causes.add(e);
-                    if (configIndex >= 0) {
-                        restoreCurrentConfiguration(configs, configIndex, previousConfigs);
-                    }
-                }
+                anyChangeApplied |= applyTrackedComponentUpdate(configToUpdate, configs, configIndex, previousConfigs,
+                        causes);
             } else {
-                final Map<String, Object> properties = configToUpdate.getConfigurationProperties();
-                final Object rawFactoryPid = properties != null ? properties.get(ConfigurationAdmin.SERVICE_FACTORYPID)
-                        : null;
-                final String factoryPid = rawFactoryPid instanceof String ? (String) rawFactoryPid : null;
-
-                if (factoryPid != null) {
-                    ConfigurationUpgrade.upgrade(configToUpdate, this.bundleContext);
-                    logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
-                    try {
-                        createFactoryConfigurationInternal(factoryPid, pid, configToUpdate.getConfigurationProperties(),
-                                false);
-                        if (configIndex >= 0) {
-                            configs.set(configIndex, configToUpdate);
-                        } else {
-                            configs.add(configToUpdate);
-                        }
-                        anyChangeApplied = true;
-                    } catch (KuraException e) {
-                        logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid,
-                                e);
-                        causes.add(e);
-                    }
-                } else {
-                    logger.warn("Cannot update configuration: ConfigurableComponent {} is NOT tracked.", pid);
-                    causes.add(new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, pid));
-                }
+                anyChangeApplied |= applyUntrackedComponentUpdate(configToUpdate, configs, configIndex, causes);
             }
         }
 
         return anyChangeApplied;
+    }
+
+    private boolean applyTrackedComponentUpdate(ComponentConfiguration configToUpdate,
+            List<ComponentConfiguration> configs, int configIndex, Map<String, ComponentConfiguration> previousConfigs,
+            List<Throwable> causes) {
+        final String pid = configToUpdate.getPid();
+        final Map<String, Object> propertiesToApply = configIndex >= 0
+                ? configs.get(configIndex).getConfigurationProperties()
+                : configToUpdate.getConfigurationProperties();
+
+        try {
+            updateConfigurationInternal(pid, propertiesToApply, false);
+            return true;
+        } catch (KuraException e) {
+            logger.warn("Error during updateConfigurations for component {}", pid, e);
+            causes.add(e);
+            if (configIndex >= 0) {
+                restoreCurrentConfiguration(configs, configIndex, previousConfigs);
+            }
+            return false;
+        }
+    }
+
+    private boolean applyUntrackedComponentUpdate(ComponentConfiguration configToUpdate,
+            List<ComponentConfiguration> configs, int configIndex, List<Throwable> causes) {
+        final String pid = configToUpdate.getPid();
+        final Map<String, Object> properties = configToUpdate.getConfigurationProperties();
+        final Object rawFactoryPid = properties != null ? properties.get(ConfigurationAdmin.SERVICE_FACTORYPID) : null;
+
+        if (!(rawFactoryPid instanceof String factoryPid)) {
+            logger.warn("Cannot update configuration: ConfigurableComponent {} is NOT tracked.", pid);
+            causes.add(new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, pid));
+            return false;
+        }
+
+        ConfigurationUpgrade.upgrade(configToUpdate, this.bundleContext);
+        logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
+
+        try {
+            createFactoryConfigurationInternal(factoryPid, pid, configToUpdate.getConfigurationProperties(), false);
+            if (configIndex >= 0) {
+                configs.set(configIndex, configToUpdate);
+            } else {
+                configs.add(configToUpdate);
+            }
+            return true;
+        } catch (KuraException e) {
+            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
+            causes.add(e);
+            return false;
+        }
     }
 
     private static int indexOfPid(final List<ComponentConfiguration> configs, final String pid) {

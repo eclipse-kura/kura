@@ -64,6 +64,7 @@ public class CrlDownloadCancellationTest {
     private static final Logger logger = LoggerFactory.getLogger(CrlDownloadCancellationTest.class);
     private static final long ABORT_TIMEOUT_MS = 5000;
     private static final String DOWNLOAD_THREAD_PREFIX = "CRLManager-download-";
+    private static final String HTTP_CLIENT_THREAD_PREFIX = "HttpClient-";
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -76,7 +77,7 @@ public class CrlDownloadCancellationTest {
     private CompletableFuture<X509CRL> secondFetch;
     private CRLManager crlManager;
     private X509CRL validCrl;
-    private Set<Thread> downloadThreadsBefore;
+    private Set<Thread> trackedThreadsBefore;
 
     @After
     public void tearDown() throws Exception {
@@ -100,18 +101,18 @@ public class CrlDownloadCancellationTest {
 
         whenFetchWithTwoUrisIsStartedAndCancelledAfterFirstHit();
 
-        thenFirstConnectionIsClosedByClient();
+        thenHangingConnectionsAreClosedByClient();
         thenSecondUriIsNeverRequested();
         thenExecutorWorkerIsFree();
     }
 
     @Test
     public void cancellingFetchAbortsTricklingHttpBodyDownload() throws Exception {
-        givenTricklingHttpServer();
+        givenTricklingHttpServer(1);
 
         whenSingleUriFetchIsStartedAndCancelledDuringBodyTransfer();
 
-        thenFirstConnectionIsClosedByClient();
+        thenHangingConnectionsAreClosedByClient();
         thenExecutorWorkerIsFree();
     }
 
@@ -121,9 +122,21 @@ public class CrlDownloadCancellationTest {
 
         whenTwoFetchesAreQueuedAndBothAreCancelled();
 
-        thenFirstConnectionIsClosedByClient();
+        thenHangingConnectionsAreClosedByClient();
         thenSecondUriIsNeverRequested();
         thenExecutorWorkerIsFree();
+    }
+
+    @Test
+    public void shuttingDownExecutorAbortsActiveHttpDownload() throws Exception {
+        givenExistingTrackedThreadsRecorded();
+        givenTricklingHttpServer(1);
+
+        whenSingleUriFetchIsStartedAndExecutorIsShutDown();
+
+        thenHangingConnectionsAreClosedByClient();
+        thenExecutorTerminatesPromptly();
+        thenNoNewTrackedThreadsRemainAlive();
     }
 
     @Test
@@ -135,20 +148,32 @@ public class CrlDownloadCancellationTest {
         whenTricklingDistributionPointTimesOut();
         whenValidDistributionPointIsAdded();
 
-        thenFirstConnectionIsClosedByClient();
+        thenHangingConnectionsAreClosedByClient();
         thenCrlManagerStoresValidCrl();
     }
 
     @Test
     public void closingCrlManagerAbortsActiveDownloadAndStopsDownloadThreads() throws Exception {
-        givenExistingDownloadThreadsRecorded();
-        givenTricklingHttpServer();
+        givenExistingTrackedThreadsRecorded();
+        givenTricklingHttpServer(1);
         givenCrlManagerWithLongDownloadTimeout();
 
         whenTricklingDownloadStartsAndManagerIsClosed();
 
-        thenFirstConnectionIsClosedByClient();
-        thenNoNewDownloadThreadsRemainAlive();
+        thenHangingConnectionsAreClosedByClient();
+        thenNoNewTrackedThreadsRemainAlive();
+    }
+
+    @Test
+    public void closingCrlManagerAbortsMultipleConcurrentDownloadsAndStopsThreads() throws Exception {
+        givenExistingTrackedThreadsRecorded();
+        givenTricklingHttpServer(2);
+        givenCrlManagerWithLongDownloadTimeout();
+
+        whenTwoTricklingDownloadsStartAndManagerIsClosed();
+
+        thenHangingConnectionsAreClosedByClient();
+        thenNoNewTrackedThreadsRemainAlive();
     }
 
     private void givenValidCrl() throws Exception {
@@ -160,24 +185,24 @@ public class CrlDownloadCancellationTest {
     }
 
     private void givenSilentHttpServer() throws IOException {
-        this.server = new HangingHttpServer(HangingHttpServer.Mode.SILENT, null);
+        this.server = new HangingHttpServer(HangingHttpServer.Mode.SILENT, 1, null);
         this.resources.add(this.server);
     }
 
-    private void givenTricklingHttpServer() throws IOException {
-        this.server = new HangingHttpServer(HangingHttpServer.Mode.TRICKLE, null);
+    private void givenTricklingHttpServer(final int expectedHangingRequests) throws IOException {
+        this.server = new HangingHttpServer(HangingHttpServer.Mode.TRICKLE, expectedHangingRequests, null);
         this.resources.add(this.server);
     }
 
     private void givenTricklingAndValidHttpServer() throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         TestCA.encodeToPEM(this.validCrl, out);
-        this.server = new HangingHttpServer(HangingHttpServer.Mode.TRICKLE, out.toByteArray());
+        this.server = new HangingHttpServer(HangingHttpServer.Mode.TRICKLE, 1, out.toByteArray());
         this.resources.add(this.server);
     }
 
-    private void givenExistingDownloadThreadsRecorded() {
-        this.downloadThreadsBefore = aliveDownloadThreads();
+    private void givenExistingTrackedThreadsRecorded() {
+        this.trackedThreadsBefore = aliveTrackedThreads();
     }
 
     private void givenCrlManagerWithShortDownloadTimeout() {
@@ -198,29 +223,35 @@ public class CrlDownloadCancellationTest {
         uris.add(this.server.uri("/second.crl"));
 
         this.firstFetch = CRLUtil.fetchCRL(uris, this.executor);
-        assertTrue(this.server.awaitFirstRequest(ABORT_TIMEOUT_MS));
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
         assertTrue(this.firstFetch.cancel(true));
     }
 
     private void whenSingleUriFetchIsStartedAndCancelledDuringBodyTransfer() throws Exception {
         this.firstFetch = CRLUtil.fetchCRL(Collections.singleton(this.server.uri("/first.crl")), this.executor);
-        assertTrue(this.server.awaitFirstRequest(ABORT_TIMEOUT_MS));
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
         assertTrue(this.firstFetch.cancel(true));
     }
 
     private void whenTwoFetchesAreQueuedAndBothAreCancelled() throws Exception {
         this.firstFetch = CRLUtil.fetchCRL(Collections.singleton(this.server.uri("/first.crl")), this.executor);
-        assertTrue(this.server.awaitFirstRequest(ABORT_TIMEOUT_MS));
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
 
         this.secondFetch = CRLUtil.fetchCRL(Collections.singleton(this.server.uri("/second.crl")), this.executor);
         assertTrue(this.secondFetch.cancel(true));
         assertTrue(this.firstFetch.cancel(true));
     }
 
+    private void whenSingleUriFetchIsStartedAndExecutorIsShutDown() throws Exception {
+        this.firstFetch = CRLUtil.fetchCRL(Collections.singleton(this.server.uri("/first.crl")), this.executor);
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
+        this.executor.shutdownNow();
+    }
+
     private void whenTricklingDistributionPointTimesOut() throws Exception {
         this.crlManager.addDistributionPoint(Collections.singleton(this.server.uri("/first.crl")));
-        assertTrue(this.server.awaitFirstRequest(ABORT_TIMEOUT_MS));
-        assertTrue(this.server.awaitFirstConnectionClosed(ABORT_TIMEOUT_MS));
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
+        assertTrue(this.server.awaitHangingConnectionsClosed(ABORT_TIMEOUT_MS));
     }
 
     private void whenValidDistributionPointIsAdded() {
@@ -229,13 +260,20 @@ public class CrlDownloadCancellationTest {
 
     private void whenTricklingDownloadStartsAndManagerIsClosed() throws Exception {
         this.crlManager.addDistributionPoint(Collections.singleton(this.server.uri("/first.crl")));
-        assertTrue(this.server.awaitFirstRequest(ABORT_TIMEOUT_MS));
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
         this.crlManager.close();
     }
 
-    private void thenFirstConnectionIsClosedByClient() throws InterruptedException {
+    private void whenTwoTricklingDownloadsStartAndManagerIsClosed() throws Exception {
+        this.crlManager.addDistributionPoint(Collections.singleton(this.server.uri("/first.crl")));
+        this.crlManager.addDistributionPoint(Collections.singleton(this.server.uri("/third.crl")));
+        assertTrue(this.server.awaitHangingRequestsStarted(ABORT_TIMEOUT_MS));
+        this.crlManager.close();
+    }
+
+    private void thenHangingConnectionsAreClosedByClient() throws InterruptedException {
         assertTrue("expected client to close the HTTP connection promptly on cancellation",
-                this.server.awaitFirstConnectionClosed(ABORT_TIMEOUT_MS));
+                this.server.awaitHangingConnectionsClosed(ABORT_TIMEOUT_MS));
     }
 
     private void thenSecondUriIsNeverRequested() throws Exception {
@@ -249,6 +287,11 @@ public class CrlDownloadCancellationTest {
         assertTrue(probe.get(ABORT_TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
+    private void thenExecutorTerminatesPromptly() throws InterruptedException {
+        assertTrue("expected executor to terminate promptly on shutdownNow",
+                this.executor.awaitTermination(ABORT_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+    }
+
     private void thenCrlManagerStoresValidCrl() throws InterruptedException {
         final long deadline = System.currentTimeMillis() + ABORT_TIMEOUT_MS;
         while (this.crlManager.getCrls().isEmpty() && System.currentTimeMillis() < deadline) {
@@ -258,24 +301,25 @@ public class CrlDownloadCancellationTest {
         assertEquals(this.validCrl, this.crlManager.getCrls().get(0));
     }
 
-    private void thenNoNewDownloadThreadsRemainAlive() throws InterruptedException {
+    private void thenNoNewTrackedThreadsRemainAlive() throws InterruptedException {
         final long deadline = System.currentTimeMillis() + ABORT_TIMEOUT_MS;
-        Set<Thread> remaining = startedDownloadThreads();
+        Set<Thread> remaining = startedTrackedThreads();
         while (!remaining.isEmpty() && System.currentTimeMillis() < deadline) {
             Thread.sleep(50);
-            remaining = startedDownloadThreads();
+            remaining = startedTrackedThreads();
         }
-        assertTrue("download threads still alive after close: " + remaining, remaining.isEmpty());
+        assertTrue("download or HttpClient threads still alive after close: " + remaining, remaining.isEmpty());
     }
 
-    private Set<Thread> startedDownloadThreads() {
-        return aliveDownloadThreads().stream().filter(t -> !this.downloadThreadsBefore.contains(t))
+    private Set<Thread> startedTrackedThreads() {
+        return aliveTrackedThreads().stream().filter(t -> !this.trackedThreadsBefore.contains(t))
                 .collect(Collectors.toSet());
     }
 
-    private static Set<Thread> aliveDownloadThreads() {
+    private static Set<Thread> aliveTrackedThreads() {
         return Thread.getAllStackTraces().keySet().stream()
-                .filter(t -> t.isAlive() && t.getName().startsWith(DOWNLOAD_THREAD_PREFIX))
+                .filter(t -> t.isAlive() && (t.getName().startsWith(DOWNLOAD_THREAD_PREFIX)
+                        || t.getName().startsWith(HTTP_CLIENT_THREAD_PREFIX)))
                 .collect(Collectors.toSet());
     }
 
@@ -292,13 +336,16 @@ public class CrlDownloadCancellationTest {
         private final AtomicBoolean closed = new AtomicBoolean(false);
         private final List<String> requestedPaths = new CopyOnWriteArrayList<>();
         private final List<Socket> openSockets = new CopyOnWriteArrayList<>();
-        private final CountDownLatch firstRequest = new CountDownLatch(1);
-        private final CountDownLatch firstConnectionClosed = new CountDownLatch(1);
+        private final CountDownLatch hangingRequestsStarted;
+        private final CountDownLatch hangingConnectionsClosed;
         private final ExecutorService handlers = Executors.newCachedThreadPool();
 
-        HangingHttpServer(final Mode mode, final byte[] validCrlBytes) throws IOException {
+        HangingHttpServer(final Mode mode, final int expectedHangingRequests, final byte[] validCrlBytes)
+                throws IOException {
             this.mode = mode;
             this.validCrlBytes = validCrlBytes;
+            this.hangingRequestsStarted = new CountDownLatch(expectedHangingRequests);
+            this.hangingConnectionsClosed = new CountDownLatch(expectedHangingRequests);
             this.serverSocket = new ServerSocket(0, 50, InetAddress.getLoopbackAddress());
             this.handlers.submit(this::acceptLoop);
         }
@@ -307,12 +354,12 @@ public class CrlDownloadCancellationTest {
             return URI.create("http://127.0.0.1:" + this.serverSocket.getLocalPort() + path);
         }
 
-        boolean awaitFirstRequest(final long timeoutMs) throws InterruptedException {
-            return this.firstRequest.await(timeoutMs, TimeUnit.MILLISECONDS);
+        boolean awaitHangingRequestsStarted(final long timeoutMs) throws InterruptedException {
+            return this.hangingRequestsStarted.await(timeoutMs, TimeUnit.MILLISECONDS);
         }
 
-        boolean awaitFirstConnectionClosed(final long timeoutMs) throws InterruptedException {
-            return this.firstConnectionClosed.await(timeoutMs, TimeUnit.MILLISECONDS);
+        boolean awaitHangingConnectionsClosed(final long timeoutMs) throws InterruptedException {
+            return this.hangingConnectionsClosed.await(timeoutMs, TimeUnit.MILLISECONDS);
         }
 
         List<String> getRequestedPaths() {
@@ -343,7 +390,7 @@ public class CrlDownloadCancellationTest {
                     return;
                 }
 
-                if ("/first.crl".equals(path)) {
+                if ("/first.crl".equals(path) || "/third.crl".equals(path)) {
                     if (this.mode == Mode.SILENT) {
                         handleSilent(socket);
                     } else {
@@ -354,7 +401,7 @@ public class CrlDownloadCancellationTest {
 
                 socket.close();
             } catch (final IOException e) {
-                this.firstConnectionClosed.countDown();
+                this.hangingConnectionsClosed.countDown();
             } finally {
                 try {
                     socket.close();
@@ -374,10 +421,10 @@ public class CrlDownloadCancellationTest {
         }
 
         private void handleSilent(final Socket socket) throws IOException {
-            this.firstRequest.countDown();
+            this.hangingRequestsStarted.countDown();
             while (!this.closed.get()) {
                 if (socket.getInputStream().read() == -1) {
-                    this.firstConnectionClosed.countDown();
+                    this.hangingConnectionsClosed.countDown();
                     return;
                 }
             }
@@ -390,7 +437,7 @@ public class CrlDownloadCancellationTest {
             out.write(headers.getBytes(StandardCharsets.US_ASCII));
             out.write('A');
             out.flush();
-            this.firstRequest.countDown();
+            this.hangingRequestsStarted.countDown();
 
             while (!this.closed.get()) {
                 try {

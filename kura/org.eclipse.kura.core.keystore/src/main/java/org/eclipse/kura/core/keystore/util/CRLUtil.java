@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.keystore.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -37,7 +36,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -113,24 +111,20 @@ public class CRLUtil {
 
     public static CompletableFuture<X509CRL> fetchCRL(final Set<URI> uris, final ExecutorService executor) {
         final CompletableFuture<X509CRL> result = new CompletableFuture<>();
-        final FetchCancellation cancellation = new FetchCancellation();
+        final Future<?> task = executor.submit(() -> runFetch(uris, result));
 
         result.whenComplete((crl, error) -> {
             if (result.isCancelled()) {
-                cancellation.cancel();
+                task.cancel(true);
             }
         });
-
-        final Future<?> task = executor.submit(() -> runFetch(uris, result, cancellation));
-        cancellation.setTask(task);
 
         return result;
     }
 
-    private static void runFetch(final Set<URI> uris, final CompletableFuture<X509CRL> result,
-            final FetchCancellation cancellation) {
+    private static void runFetch(final Set<URI> uris, final CompletableFuture<X509CRL> result) {
         for (final URI uri : uris) {
-            if (isAborted(cancellation)) {
+            if (Thread.currentThread().isInterrupted()) {
                 logger.warn("interrupted");
                 result.completeExceptionally(new InterruptedException());
                 return;
@@ -144,7 +138,7 @@ public class CRLUtil {
             logger.info("fetching CRL from: {}...", uri);
 
             try {
-                final X509CRL crl = fetchFromUri(uri, cancellation);
+                final X509CRL crl = fetchFromUri(uri);
                 logger.info("fetching CRL from: {}...done", uri);
                 result.complete(crl);
                 return;
@@ -154,7 +148,7 @@ public class CRLUtil {
                 result.completeExceptionally(e);
                 return;
             } catch (final Exception e) {
-                if (isAborted(cancellation)) {
+                if (Thread.currentThread().isInterrupted()) {
                     logger.warn("interrupted while fetching CRL from {}", uri);
                     result.completeExceptionally(new InterruptedException());
                     return;
@@ -165,15 +159,15 @@ public class CRLUtil {
         result.completeExceptionally(new IOException("failed to download CRL from: " + uris));
     }
 
-    private static X509CRL fetchFromUri(final URI uri, final FetchCancellation cancellation)
+    private static X509CRL fetchFromUri(final URI uri)
             throws IOException, CertificateException, CRLException, InterruptedException {
         if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return fetchFile(uri, cancellation);
+            return fetchFile(uri);
         }
-        return fetchHttp(uri, cancellation);
+        return fetchHttp(uri);
     }
 
-    private static X509CRL fetchHttp(final URI uri, final FetchCancellation cancellation)
+    private static X509CRL fetchHttp(final URI uri)
             throws IOException, CertificateException, CRLException, InterruptedException {
         try (final HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
@@ -188,16 +182,6 @@ public class CRLUtil {
 
             final CompletableFuture<HttpResponse<byte[]>> responseFuture = client.sendAsync(request,
                     HttpResponse.BodyHandlers.ofByteArray());
-            final Runnable abortAction = () -> {
-                responseFuture.cancel(true);
-                client.shutdownNow();
-            };
-
-            if (!cancellation.setAbortAction(abortAction)) {
-                abortAction.run();
-                throw new InterruptedException("CRL download cancelled");
-            }
-
             try {
                 final HttpResponse<byte[]> response = responseFuture.get(READ_TIMEOUT_MS, TimeUnit.MILLISECONDS);
                 final int statusCode = response.statusCode();
@@ -206,54 +190,36 @@ public class CRLUtil {
                 }
                 return parseCrl(response.body());
             } catch (final InterruptedException e) {
-                abortAction.run();
+                responseFuture.cancel(true);
+                client.shutdownNow();
                 Thread.currentThread().interrupt();
                 throw e;
             } catch (final TimeoutException e) {
-                abortAction.run();
+                responseFuture.cancel(true);
+                client.shutdownNow();
                 throw new IOException("timed out while fetching CRL from " + uri, e);
-            } catch (final CancellationException e) {
-                abortAction.run();
-                throw new InterruptedException("CRL download cancelled");
             } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException ioException) {
                     throw ioException;
                 }
                 throw new IOException("failed to fetch CRL from " + uri, cause);
-            } finally {
-                cancellation.clearAbortAction(abortAction);
             }
         }
     }
 
-    private static X509CRL fetchFile(final URI uri, final FetchCancellation cancellation)
-            throws IOException, CertificateException, CRLException, InterruptedException {
+    private static X509CRL fetchFile(final URI uri) throws IOException, CertificateException, CRLException {
         if (uri.getAuthority() == null || uri.getAuthority().isEmpty()) {
             try (final FileChannel channel = FileChannel.open(Path.of(uri), StandardOpenOption.READ);
                     final InputStream in = Channels.newInputStream(channel)) {
-                return readInterruptibleStream(in, channel, cancellation);
+                return parseCrl(in);
             }
         }
         final URLConnection connection = uri.toURL().openConnection();
         connection.setConnectTimeout(CONNECTION_TIMEOUT_MS);
         connection.setReadTimeout(READ_TIMEOUT_MS);
         try (final InputStream in = connection.getInputStream()) {
-            return readInterruptibleStream(in, in, cancellation);
-        }
-    }
-
-    private static X509CRL readInterruptibleStream(final InputStream in, final Closeable closeable,
-            final FetchCancellation cancellation)
-            throws CertificateException, CRLException, InterruptedException {
-        final Runnable abortAction = () -> closeQuietly(closeable);
-        if (!cancellation.setAbortAction(abortAction)) {
-            throw new InterruptedException("CRL download cancelled");
-        }
-        try {
             return parseCrl(in);
-        } finally {
-            cancellation.clearAbortAction(abortAction);
         }
     }
 
@@ -270,18 +236,6 @@ public class CRLUtil {
         return crl;
     }
 
-    private static boolean isAborted(final FetchCancellation cancellation) {
-        return cancellation.isCancelled() || Thread.currentThread().isInterrupted();
-    }
-
-    private static void closeQuietly(final Closeable closeable) {
-        try {
-            closeable.close();
-        } catch (final IOException e) {
-            logger.debug("failed to close CRL download resource on cancellation", e);
-        }
-    }
-
     private static boolean isSupportedScheme(final URI uri) {
         final String scheme = uri.getScheme();
 
@@ -294,71 +248,6 @@ public class CRLUtil {
         } catch (final Exception e) {
             logger.warn("failed to parse distribution point URL", e);
             return Optional.empty();
-        }
-    }
-
-    private static final class FetchCancellation {
-
-        private boolean cancelled;
-        private Runnable abortAction;
-        private Future<?> task;
-
-        void setTask(final Future<?> task) {
-            final boolean alreadyCancelled;
-            synchronized (this) {
-                this.task = task;
-                alreadyCancelled = this.cancelled;
-            }
-            if (alreadyCancelled) {
-                task.cancel(true);
-            }
-        }
-
-        boolean setAbortAction(final Runnable action) {
-            final boolean alreadyCancelled;
-            synchronized (this) {
-                alreadyCancelled = this.cancelled;
-                if (!alreadyCancelled) {
-                    this.abortAction = action;
-                }
-            }
-            if (alreadyCancelled) {
-                action.run();
-                return false;
-            }
-            return true;
-        }
-
-        synchronized void clearAbortAction(final Runnable action) {
-            if (this.abortAction == action) {
-                this.abortAction = null;
-            }
-        }
-
-        void cancel() {
-            final Runnable action;
-            final Future<?> currentTask;
-
-            synchronized (this) {
-                if (this.cancelled) {
-                    return;
-                }
-                this.cancelled = true;
-                action = this.abortAction;
-                this.abortAction = null;
-                currentTask = this.task;
-            }
-
-            if (action != null) {
-                action.run();
-            }
-            if (currentTask != null) {
-                currentTask.cancel(true);
-            }
-        }
-
-        synchronized boolean isCancelled() {
-            return this.cancelled;
         }
     }
 }

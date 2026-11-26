@@ -842,7 +842,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
-        boolean anyChangeApplied = updateConfigurationInternal(configsToUpdate, configs, causes);
+        boolean anyChangeApplied = updateComponentsInternal(configsToUpdate, configs, causes);
 
         // this step creates any not yet existing factory configuration present in configsToUpdate
         for (ComponentConfiguration config : configsToUpdate) {
@@ -874,7 +874,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private boolean updateConfigurationInternal(List<ComponentConfiguration> configsToUpdate,
+    private boolean updateComponentsInternal(List<ComponentConfiguration> configsToUpdate,
             List<ComponentConfiguration> configs, List<Throwable> causes) {
         boolean anyChangeApplied = false;
 
@@ -1660,22 +1660,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     synchronized void validateConfigurations(final List<ComponentConfiguration> configs) throws KuraException {
         for (final ComponentConfiguration config : configs) {
-            if (config == null) {
-                continue;
-            }
+            validateConfigurationEntry(config);
+        }
+    }
 
-            final String pid = config.getPid();
-            final Map<String, Object> properties = config.getConfigurationProperties();
+    private void validateConfigurationEntry(final ComponentConfiguration config) throws KuraException {
+        if (config == null) {
+            return;
+        }
 
-            if (properties == null || !this.allActivatedPids.contains(pid)) {
-                continue;
-            }
+        final String pid = config.getPid();
+        final Map<String, Object> properties = config.getConfigurationProperties();
 
-            final OCD ocd = getRegisteredOCD(pid);
+        if (properties == null || !this.allActivatedPids.contains(pid)) {
+            return;
+        }
 
-            if (ocd != null) {
-                validateConfiguration(pid, ocd, mergeWithCurrentProperties(pid, ocd, properties), properties);
-            }
+        final OCD ocd = getRegisteredOCD(pid);
+
+        if (ocd != null) {
+            validateConfiguration(pid, ocd, mergeWithCurrentProperties(pid, ocd, properties), properties);
         }
     }
 

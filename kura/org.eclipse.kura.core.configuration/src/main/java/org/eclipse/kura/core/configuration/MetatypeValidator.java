@@ -15,6 +15,7 @@ package org.eclipse.kura.core.configuration;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -69,23 +70,11 @@ final class MetatypeValidator {
     }
 
     static void validateValue(final AD ad, final Object value) throws KuraException {
-        if (ad.getType() == Scalar.PASSWORD) {
-            final String cardinalityViolation = findCardinalityViolation(ad.getCardinality(), countNonNull(value));
-
-            if (cardinalityViolation != null) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ad.getId(), HIDDEN_VALUE,
-                        cardinalityViolation);
-            }
-
-            return;
-        }
-
-        final List<String> tokens = toTokens(value);
-        final String violation = findViolation(ad, tokens);
+        final String violation = findValueViolation(ad, value);
 
         if (violation != null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ad.getId(),
-                    describe(ad, value, tokens), violation);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ad.getId(), describe(ad, value),
+                    violation);
         }
     }
 
@@ -97,77 +86,84 @@ final class MetatypeValidator {
         return ocd.getAD();
     }
 
-    private static int countNonNull(final Object value) {
-        if (value instanceof Collection<?>) {
-            return (int) ((Collection<?>) value).stream().filter(Objects::nonNull).count();
+    private static String findValueViolation(final AD ad, final Object value) {
+        final String containerViolation = findContainerViolation(ad, value);
+
+        if (containerViolation != null) {
+            return containerViolation;
         }
 
-        if (value.getClass().isArray()) {
-            int count = 0;
-            final int length = Array.getLength(value);
-
-            for (int i = 0; i < length; i++) {
-                if (Array.get(value, i) != null) {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-        return 1;
-    }
-
-    private static List<String> toTokens(final Object value) {
-        final List<String> tokens = new ArrayList<>();
-
-        if (value instanceof Collection<?>) {
-            ((Collection<?>) value).forEach(element -> tokens.add(toToken(element)));
-        } else if (value.getClass().isArray()) {
-            final int length = Array.getLength(value);
-
-            for (int i = 0; i < length; i++) {
-                tokens.add(toToken(Array.get(value, i)));
-            }
-        } else {
-            tokens.add(toToken(value));
-        }
-
-        return tokens.stream().filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
-    private static String toToken(final Object element) {
-        if (element == null) {
-            return null;
-        }
-
-        if (element instanceof Password) {
-            final char[] password = ((Password) element).getPassword();
-            return password == null ? "" : new String(password);
-        }
-
-        return element.toString();
-    }
-
-    private static String describe(final AD ad, final Object value, final List<String> tokens) {
-        if (ad.getType() == Scalar.PASSWORD || value instanceof Password || value instanceof Password[]) {
-            return HIDDEN_VALUE;
-        }
-
-        return String.join(",", tokens);
-    }
-
-    private static String findViolation(final AD ad, final List<String> tokens) {
-        final String cardinalityViolation = findCardinalityViolation(ad.getCardinality(), tokens.size());
+        final List<Object> elements = extractElements(value);
+        final String cardinalityViolation = findCardinalityViolation(ad.getCardinality(), elements.size());
 
         if (cardinalityViolation != null) {
             return cardinalityViolation;
         }
 
-        final AttributeRules rules = new AttributeRules(ad);
+        return findElementsViolation(ad, elements);
+    }
 
-        for (final String token : tokens) {
-            final String violation = rules.findViolation(token);
+    private static String findContainerViolation(final AD ad, final Object value) {
+        final int cardinality = ad.getCardinality();
+        final boolean isArray = value.getClass().isArray();
+        final boolean isCollection = value instanceof Collection<?>;
+
+        if (cardinality == 0) {
+            return isArray || isCollection ? "a single value is expected, found " + value.getClass().getSimpleName()
+                    : null;
+        }
+
+        if (isArray) {
+            return findArrayTypeViolation(ad.getType(), value.getClass().getComponentType());
+        }
+
+        if (isCollection) {
+            return cardinality > 0 ? "an array is expected, found " + value.getClass().getSimpleName() : null;
+        }
+
+        if (cardinality != 1 && cardinality != -1) {
+            return "a multi-valued property is expected, found " + value.getClass().getSimpleName();
+        }
+
+        return null;
+    }
+
+    private static String findArrayTypeViolation(final Scalar type, final Class<?> componentType) {
+        if (type == null || isMatchingType(type, componentType)) {
+            return null;
+        }
+
+        return "the value is not a valid " + type.value() + " array";
+    }
+
+    private static List<Object> extractElements(final Object value) {
+        final List<Object> elements = new ArrayList<>();
+
+        if (value instanceof Collection<?>) {
+            for (final Object element : (Collection<?>) value) {
+                if (element != null) {
+                    elements.add(element);
+                }
+            }
+        } else if (value instanceof Object[]) {
+            for (final Object element : (Object[]) value) {
+                if (element != null) {
+                    elements.add(element);
+                }
+            }
+        } else {
+            elements.add(value);
+        }
+
+        return elements;
+    }
+
+    private static String findElementsViolation(final AD ad, final List<Object> elements) {
+        final Scalar type = ad.getType();
+        final AttributeRules rules = type == Scalar.PASSWORD ? null : new AttributeRules(ad);
+
+        for (final Object element : elements) {
+            final String violation = findElementViolation(type, rules, element);
 
             if (violation != null) {
                 return violation;
@@ -177,12 +173,69 @@ final class MetatypeValidator {
         return null;
     }
 
-    private static String findCardinalityViolation(final int cardinality, final int size) {
-        if (cardinality == 0) {
-            return size == 1 ? null : "exactly one value is expected, found " + size;
+    private static String findElementViolation(final Scalar type, final AttributeRules rules, final Object element) {
+        if (type != null && !isMatchingType(type, element.getClass())) {
+            return "the value is not a valid " + type.value();
         }
 
-        if (cardinality == Integer.MIN_VALUE || cardinality == Integer.MAX_VALUE) {
+        if (rules == null) {
+            return null;
+        }
+
+        return rules.findViolation(element);
+    }
+
+    private static String describe(final AD ad, final Object value) {
+        if (ad.getType() == Scalar.PASSWORD || containsPassword(value)) {
+            return HIDDEN_VALUE;
+        }
+
+        if (value instanceof Collection<?>) {
+            return ((Collection<?>) value).stream().filter(Objects::nonNull).map(Object::toString)
+                    .collect(Collectors.joining(","));
+        }
+
+        if (value instanceof Object[]) {
+            return Arrays.stream((Object[]) value).filter(Objects::nonNull).map(Object::toString)
+                    .collect(Collectors.joining(","));
+        }
+
+        if (value.getClass().isArray()) {
+            return describePrimitiveArray(value);
+        }
+
+        return value.toString();
+    }
+
+    private static String describePrimitiveArray(final Object array) {
+        final int length = Array.getLength(array);
+        final List<String> parts = new ArrayList<>(length);
+
+        for (int i = 0; i < length; i++) {
+            parts.add(String.valueOf(Array.get(array, i)));
+        }
+
+        return String.join(",", parts);
+    }
+
+    private static boolean containsPassword(final Object value) {
+        if (value instanceof Password || value instanceof Password[]) {
+            return true;
+        }
+
+        if (value instanceof Collection<?>) {
+            return ((Collection<?>) value).stream().anyMatch(Password.class::isInstance);
+        }
+
+        if (value instanceof Object[]) {
+            return Arrays.stream((Object[]) value).anyMatch(Password.class::isInstance);
+        }
+
+        return false;
+    }
+
+    private static String findCardinalityViolation(final int cardinality, final int size) {
+        if (cardinality == 0 || cardinality == Integer.MIN_VALUE || cardinality == Integer.MAX_VALUE) {
             return null;
         }
 
@@ -195,13 +248,51 @@ final class MetatypeValidator {
         return null;
     }
 
+    private static boolean isMatchingType(final Scalar type, final Class<?> clazz) {
+        if (type == Scalar.PASSWORD) {
+            return Password.class.isAssignableFrom(clazz) || clazz == String.class;
+        }
+
+        final Class<?> expected = getExpectedClass(type);
+        return expected == null || clazz == expected;
+    }
+
+    private static Class<?> getExpectedClass(final Scalar type) {
+        if (type == null) {
+            return null;
+        }
+
+        switch (type) {
+        case STRING:
+            return String.class;
+        case BOOLEAN:
+            return Boolean.class;
+        case BYTE:
+            return Byte.class;
+        case SHORT:
+            return Short.class;
+        case INTEGER:
+            return Integer.class;
+        case LONG:
+            return Long.class;
+        case FLOAT:
+            return Float.class;
+        case DOUBLE:
+            return Double.class;
+        case CHAR:
+            return Character.class;
+        default:
+            return null;
+        }
+    }
+
     private static final class AttributeRules {
 
         private final AD ad;
         private final Function<String, Object> parser;
         private final Object min;
         private final Object max;
-        private final List<String> optionTokens = new ArrayList<>();
+        private final boolean hasOptions;
         private final List<Object> optionValues = new ArrayList<>();
 
         AttributeRules(final AD ad) {
@@ -214,51 +305,35 @@ final class MetatypeValidator {
             this.min = parseBound("min", ad.getMin(), boundParser);
             this.max = parseBound("max", ad.getMax(), boundParser);
 
-            if (ad.getOption() != null) {
-                for (final Option option : ad.getOption()) {
-                    this.optionTokens.add(option.getValue());
+            final List<Option> options = ad.getOption();
+            this.hasOptions = options != null && !options.isEmpty();
+
+            if (this.hasOptions) {
+                for (final Option option : options) {
                     this.optionValues.add(parseOption(option));
                 }
             }
         }
 
-        String findViolation(final String token) {
-            Object value = token;
-            boolean isValidForType = true;
-
-            if (this.parser != null) {
-                try {
-                    value = this.parser.apply(token);
-                } catch (final IllegalArgumentException e) {
-                    isValidForType = false;
-                }
-            }
-
-            if (!isAmongTheOptions(token, isValidForType ? value : null)) {
+        String findViolation(final Object value) {
+            if (!isAmongTheOptions(value)) {
                 return "the value is not one of the allowed options";
             }
 
-            if (!isValidForType) {
-                return "the value is not a valid " + this.ad.getType().value();
-            }
-
             if (this.ad.getType() == Scalar.STRING) {
-                return findLengthViolation(token);
+                return findLengthViolation((String) value);
             }
 
             return findRangeViolation(value);
         }
 
-        private boolean isAmongTheOptions(final String token, final Object value) {
-            if (this.optionTokens.isEmpty()) {
+        private boolean isAmongTheOptions(final Object value) {
+            if (!this.hasOptions) {
                 return true;
             }
 
-            for (int i = 0; i < this.optionTokens.size(); i++) {
-                final Object optionValue = this.optionValues.get(i);
-
-                if (token.equals(this.optionTokens.get(i))
-                        || value != null && optionValue != null && isSameValue(value, optionValue)) {
+            for (final Object optionValue : this.optionValues) {
+                if (optionValue != null && isSameValue(value, optionValue)) {
                     return true;
                 }
             }
@@ -307,8 +382,12 @@ final class MetatypeValidator {
         }
 
         private Object parseOption(final Option option) {
-            if (this.parser == null || option.getValue() == null) {
+            if (option == null || option.getValue() == null) {
                 return null;
+            }
+
+            if (this.parser == null) {
+                return option.getValue();
             }
 
             try {

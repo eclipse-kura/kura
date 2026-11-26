@@ -94,13 +94,35 @@ public class MetatypeValidatorTest {
     }
 
     @Test
-    public void numberOfAnotherJavaTypeWithinTheRangeIsAccepted() {
+    public void numericStringForIntegerAttributeIsRejected() {
+        givenAttribute(Tscalar.INTEGER, 0);
+        givenRange("1", "100");
+
+        whenValueIsValidated("20");
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Integer");
+    }
+
+    @Test
+    public void numberOfAnotherJavaTypeIsRejected() {
         givenAttribute(Tscalar.LONG, 0);
         givenRange("1", "10");
 
         whenValueIsValidated(7);
 
-        thenValueIsAccepted();
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Long");
+    }
+
+    @Test
+    public void integerForStringAttributeIsRejected() {
+        givenAttribute(Tscalar.STRING, 0);
+
+        whenValueIsValidated(123);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid String");
     }
 
     @Test
@@ -123,12 +145,22 @@ public class MetatypeValidatorTest {
     }
 
     @Test
-    public void booleanIsAcceptedRegardlessOfCase() {
+    public void booleanValueIsAccepted() {
+        givenAttribute(Tscalar.BOOLEAN, 0);
+
+        whenValueIsValidated(true);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void stringBooleanIsRejected() {
         givenAttribute(Tscalar.BOOLEAN, 0);
 
         whenValueIsValidated("TRUE");
 
-        thenValueIsAccepted();
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Boolean");
     }
 
     @Test
@@ -138,6 +170,26 @@ public class MetatypeValidatorTest {
         whenValueIsValidated("yes");
 
         thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+    }
+
+    @Test
+    public void charValueIsAccepted() {
+        givenAttribute(Tscalar.CHAR, 0);
+        givenRange("a", "z");
+
+        whenValueIsValidated('m');
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void singleCharacterStringForCharAttributeIsRejected() {
+        givenAttribute(Tscalar.CHAR, 0);
+
+        whenValueIsValidated("a");
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Char");
     }
 
     @Test
@@ -227,7 +279,113 @@ public class MetatypeValidatorTest {
         whenValueIsValidated(new String[] { "a", "b" });
 
         thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
-        thenErrorMessageContains("exactly one value");
+        thenErrorMessageContains("single value");
+    }
+
+    @Test
+    public void singleElementArrayForASingleValuedAttributeIsRejected() {
+        givenAttribute(Tscalar.INTEGER, 0);
+
+        whenValueIsValidated(new Integer[] { 5 });
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("single value");
+    }
+
+    @Test
+    public void scalarValueForAMultiValuedAttributeIsRejected() {
+        givenAttribute(Tscalar.INTEGER, 3);
+
+        whenValueIsValidated(5);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("multi-valued");
+    }
+
+    @Test
+    public void primitiveArrayForAMultiValuedAttributeIsRejected() {
+        givenAttribute(Tscalar.INTEGER, 3);
+
+        whenValueIsValidated(new int[] { 1, 2 });
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Integer array");
+    }
+
+    @Test
+    public void emptyArrayOfTheExpectedTypeIsAccepted() {
+        givenAttribute(Tscalar.STRING, 3);
+
+        whenValueIsValidated(new String[0]);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void emptyArrayOfTheWrongTypeIsRejected() {
+        givenAttribute(Tscalar.STRING, 3);
+
+        whenValueIsValidated(new Integer[0]);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid String array");
+    }
+
+    @Test
+    public void untypedObjectArrayForAMultiValuedAttributeIsRejected() {
+        givenAttribute(Tscalar.INTEGER, 3);
+
+        whenValueIsValidated(new Object[] { 1 });
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Integer array");
+    }
+
+    @Test
+    public void collectionForPositiveCardinalityIsRejected() {
+        givenAttribute(Tscalar.STRING, 3);
+
+        whenValueIsValidated(Arrays.asList("a"));
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("an array is expected");
+    }
+
+    @Test
+    public void collectionForNegativeCardinalityIsAccepted() {
+        givenAttribute(Tscalar.STRING, -3);
+
+        whenValueIsValidated(Arrays.asList("a", "b"));
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void collectionWithWrongElementTypeForNegativeCardinalityIsRejected() {
+        givenAttribute(Tscalar.INTEGER, -3);
+
+        whenValueIsValidated(Arrays.asList(1, "2"));
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Integer");
+    }
+
+    @Test
+    public void singleValueForCardinalityOneIsAccepted() {
+        givenAttribute(Tscalar.INTEGER, 1);
+
+        whenValueIsValidated(5);
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void singleElementArrayForCardinalityOneIsAccepted() {
+        givenAttribute(Tscalar.INTEGER, 1);
+
+        whenValueIsValidated(new Integer[] { 5 });
+
+        thenValueIsAccepted();
     }
 
     @Test
@@ -478,14 +636,53 @@ public class MetatypeValidatorTest {
     }
 
     @Test
-    public void passwordWithNullCharactersOnStringAttributeIsTreatedAsEmpty() {
-        givenAttribute(Tscalar.STRING, 0);
-        givenRequired(false);
-        givenRange("1", "10");
+    public void stringIsAcceptedForAPasswordAttribute() {
+        givenAttribute(Tscalar.PASSWORD, 0);
 
-        whenValueIsValidated(new Password((char[]) null));
+        whenValueIsValidated(SECRET);
 
         thenValueIsAccepted();
+    }
+
+    @Test
+    public void nonStringNonPasswordIsRejectedForAPasswordAttribute() {
+        givenAttribute(Tscalar.PASSWORD, 0);
+
+        whenValueIsValidated(123);
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Password");
+        thenErrorMessageDoesNotContain("123");
+    }
+
+    @Test
+    public void stringArrayIsAcceptedForAMultiValuedPasswordAttribute() {
+        givenAttribute(Tscalar.PASSWORD, 2);
+
+        whenValueIsValidated(new String[] { SECRET });
+
+        thenValueIsAccepted();
+    }
+
+    @Test
+    public void wrongArrayTypeIsRejectedForAMultiValuedPasswordAttribute() {
+        givenAttribute(Tscalar.PASSWORD, 2);
+
+        whenValueIsValidated(new Integer[] { 1 });
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid Password array");
+    }
+
+    @Test
+    public void passwordOnAStringAttributeIsRejectedAndHidden() {
+        givenAttribute(Tscalar.STRING, 0);
+
+        whenValueIsValidated(new Password(SECRET));
+
+        thenValueIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenErrorMessageContains("not a valid String");
+        thenErrorMessageDoesNotContain(SECRET);
     }
 
     @Test

@@ -29,7 +29,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class AtomicFileWriter {
+
+    private static final Logger logger = LoggerFactory.getLogger(AtomicFileWriter.class);
 
     public static final Set<PosixFilePermission> DEFAULT_PERMISSIONS = Collections
             .unmodifiableSet(PosixFilePermissions.fromString("rw-------"));
@@ -152,7 +157,16 @@ class AtomicFileWriter {
 
     private void moveDurably(final Path source, final Path destination) throws IOException {
         atomicMove(source, destination);
-        syncDirectory(destination.getParent());
+        try {
+            syncDirectory(destination.getParent());
+        } catch (IOException e) {
+            // fsync almost never fails on Linux, but when it does the result is an
+            // unreadable keystore. Lucene's IOUtils.fsync ignores IOException when syncing
+            // directories:
+            // https://github.com/apache/lucene/blob/main/lucene/core/src/java/org/apache/lucene/util/IOUtils.java
+            logger.warn("Failed to sync directory {} after replacing {}", destination.getParent(),
+                    destination.getFileName(), e);
+        }
     }
 
     private void setPermissions(final Path file) throws IOException {

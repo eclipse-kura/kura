@@ -199,13 +199,13 @@ public class AtomicFileWriteTest extends AbstractAtomicFileWriterTest {
     }
 
     @Test
-    public void reportsFailureWhenDirectorySyncFails() throws Exception {
+    public void notReportsFailureWhenDirectorySyncFails() throws Exception {
         givenTargetFile("data.bin", "old content");
         givenDirectorySyncFails();
 
         whenContentIsWritten(this.target, "new content");
 
-        thenSimulatedFailureIsThrown();
+        thenNoExceptionIsThrown();
         thenFileContains("data.bin", "new content");
         thenDirectoryContainsOnly("data.bin");
     }

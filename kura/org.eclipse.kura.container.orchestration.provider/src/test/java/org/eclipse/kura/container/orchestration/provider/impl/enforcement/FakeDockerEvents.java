@@ -100,6 +100,14 @@ class FakeDockerEvents {
         return this.closedStreams.contains(latestSubscription());
     }
 
+    boolean firstStreamWasClosed() {
+        return this.closedStreams.contains(this.subscriptions.get(0));
+    }
+
+    void publishStartOnFirstStream(String containerId) {
+        this.subscriptions.get(0).onNext(new Event("start", containerId, "nginx:latest", EVENT_TIME));
+    }
+
     void failClosingWith(IOException failure) {
         this.closeFailure = failure;
     }

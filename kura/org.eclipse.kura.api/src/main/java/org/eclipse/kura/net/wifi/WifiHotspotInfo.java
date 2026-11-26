@@ -18,9 +18,11 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
- * @deprecated since 2.9. This class is used only by the {@link org.eclipse.kura.net.NetworkAdminService} and will be
- *             removed together with it. Use the {@link org.eclipse.kura.configuration.ConfigurationService} to manage
- *             the network configuration instead.
+ * @deprecated since 2.9. This class is used only by the
+ *             {@link org.eclipse.kura.net.NetworkAdminService} and will be
+ *             removed together with it. Use the
+ *             {@link org.eclipse.kura.configuration.ConfigurationService} to
+ *             manage the network configuration instead.
  */
 @ProviderType
 @Deprecated

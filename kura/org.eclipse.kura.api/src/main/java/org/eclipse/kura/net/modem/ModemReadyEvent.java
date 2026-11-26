@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,10 @@ import org.osgi.service.event.Event;
 
 /**
  * @noextend This class is not intended to be subclassed by clients.
+ * @deprecated since 2.9
  */
 @ProviderType
+@Deprecated
 public class ModemReadyEvent extends Event {
 
     /** Topic of the ModemRemovedEvent */

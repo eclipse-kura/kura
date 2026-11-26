@@ -111,6 +111,18 @@ public class ExternalBundleValidationTest {
     }
 
     @Test
+    public void numericStringForAnIntegerAttributeIsRejected() throws Exception {
+        givenExternalBundleComponents();
+        givenIntegerValue(5);
+
+        whenValueIsUpdated(VALIDATED_PID, INT_ATTR, "7");
+
+        thenUpdateIsRejectedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenConfigurationHolds(VALIDATED_PID, INT_ATTR, 5);
+        thenLatestSnapshotHolds(VALIDATED_PID, INT_ATTR, 5);
+    }
+
+    @Test
     public void valueOutsideTheOptionsIsRejected() throws Exception {
         givenExternalBundleComponents();
         givenIntegerValue(5);

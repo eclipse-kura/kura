@@ -48,15 +48,7 @@ public class AllowlistEnforcement {
     }
 
     public synchronized void close() {
-        EnforcementSession closing = this.session.getAndSet(null);
-        if (closing == null) {
-            return;
-        }
-        try {
-            closing.close();
-        } finally {
-            EnforcementAudit.enforcementStopped();
-        }
+        closeSession();
     }
 
     public void register(String containerId, Optional<String> digest) {
@@ -74,6 +66,7 @@ public class AllowlistEnforcement {
     }
 
     private synchronized Optional<EnforcementSession> startSession(String allowlistContent, DockerClient dockerClient) {
+        closeSession();
         try {
             Allowlist allowlist = Allowlist.parse(allowlistContent);
             EnforcementSession started = EnforcementSession.start(allowlist, this.registeredDigests, this.target,
@@ -86,6 +79,18 @@ public class AllowlistEnforcement {
             logger.error("Error starting enforcement monitor, enforcement won't be active", e);
             EnforcementAudit.enforcementStartFailed();
             return Optional.empty();
+        }
+    }
+
+    private void closeSession() {
+        EnforcementSession closing = this.session.getAndSet(null);
+        if (closing == null) {
+            return;
+        }
+        try {
+            closing.close();
+        } finally {
+            EnforcementAudit.enforcementStopped();
         }
     }
 

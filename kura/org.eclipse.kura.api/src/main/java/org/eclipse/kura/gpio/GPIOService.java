@@ -42,6 +42,7 @@ public interface GPIOService {
      * @return the KuraGPIOPin instance
      * @deprecated since 2.9
      */
+    @Deprecated
     public KuraGPIOPin getPinByName(String pinName);
 
     /**
@@ -63,6 +64,7 @@ public interface GPIOService {
      * @return the KuraGPIOPin instance
      * @deprecated since 2.9
      */
+    @Deprecated
     public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger);
 
@@ -74,6 +76,7 @@ public interface GPIOService {
      * @return the KuraGPIOPin instance
      * @deprecated since 2.9
      */
+    @Deprecated
     public KuraGPIOPin getPinByTerminal(int terminal);
 
     /**
@@ -88,6 +91,7 @@ public interface GPIOService {
      * @return the KuraGPIOPin instance
      * @deprecated since 2.9
      */
+    @Deprecated
     public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger);
 
@@ -98,6 +102,7 @@ public interface GPIOService {
      *         the value is the pin name
      * @deprecated since 2.9
      */
+    @Deprecated
     public Map<Integer, String> getAvailablePins();
 
 }

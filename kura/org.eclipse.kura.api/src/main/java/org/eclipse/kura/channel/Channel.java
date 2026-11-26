@@ -96,7 +96,6 @@ public class Channel {
      * @deprecated Use
      *             {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
      */
-
     @Deprecated
     public Channel(final String name, final ChannelType type, final DataType valueType,
             final Map<String, Object> config) {
@@ -358,6 +357,7 @@ public class Channel {
      * @since 2.3
      * @deprecated since 2.9. Use {@link Channel#setScale(Number)}
      */
+    @Deprecated
     public void setScale(double scale) {
         this.valueScale = scale;
     }
@@ -383,6 +383,7 @@ public class Channel {
      * @since 2.3
      * @deprecated since 2.9. Use {@link Channel#setOffset(Number)}
      */
+    @Deprecated
     public void setOffset(double offset) {
         this.valueOffset = offset;
     }

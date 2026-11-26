@@ -84,7 +84,7 @@ public class ExecutorUtilTimeoutTest {
 
     @Test
     public void unprivilegedTimeoutExitWithoutWatchdogKillIsTimedOut() {
-        givenCommandTimeout();
+        givenCommandTimeout(COMMAND_TIMEOUT_SECONDS);
         givenWatchdogKilledProcess(false);
         givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
 
@@ -95,7 +95,7 @@ public class ExecutorUtilTimeoutTest {
 
     @Test
     public void unprivilegedAsyncTimeoutExitWithoutWatchdogKillIsTimedOut() {
-        givenCommandTimeout();
+        givenCommandTimeout(COMMAND_TIMEOUT_SECONDS);
         givenWatchdogKilledProcess(false);
         givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
 
@@ -106,6 +106,17 @@ public class ExecutorUtilTimeoutTest {
 
     @Test
     public void unprivilegedTimeoutExitWithoutCommandTimeoutIsNotTimedOut() {
+        givenWatchdogKilledProcess(false);
+        givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
+
+        whenExecutedUnprivileged();
+
+        thenTimedOutIs(false);
+    }
+
+    @Test
+    public void unprivilegedTimeoutExitWithZeroCommandTimeoutIsNotTimedOut() {
+        givenCommandTimeout(0);
         givenWatchdogKilledProcess(false);
         givenProcessExitsWith(TIMEOUT_COMMAND_EXIT_VALUE);
 
@@ -142,8 +153,8 @@ public class ExecutorUtilTimeoutTest {
         thenTimedOutIs(false);
     }
 
-    private void givenCommandTimeout() {
-        this.command.setTimeout(COMMAND_TIMEOUT_SECONDS);
+    private void givenCommandTimeout(int seconds) {
+        this.command.setTimeout(seconds);
         this.command.setSignal(LinuxSignal.SIGTERM);
     }
 

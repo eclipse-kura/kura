@@ -354,12 +354,11 @@ public class ExecutorUtil {
             env.entrySet().stream().forEach(entry -> c.add(entry.getKey() + "=" + entry.getValue()));
         }
 
-        int timeout = command.getTimeout();
-        if (timeout != -1) {
+        if (usesTimeoutCommand(command)) {
             c.add("timeout");
             c.add("-s");
             c.add(((LinuxSignal) command.getSignal()).name());
-            c.add(Integer.toString(timeout));
+            c.add(Integer.toString(command.getTimeout()));
         }
 
         if (command.isExecutedInAShell()) {

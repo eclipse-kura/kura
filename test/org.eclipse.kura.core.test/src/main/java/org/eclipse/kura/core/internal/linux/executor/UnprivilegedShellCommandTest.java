@@ -67,6 +67,24 @@ public class UnprivilegedShellCommandTest {
     }
 
     @Test
+    public void zeroTimeoutDoesNotAddTimeoutCommand() {
+        givenCommand("ls -l", false, 0);
+
+        whenExecutedUnprivileged();
+
+        thenSuRuns("ls -l");
+    }
+
+    @Test
+    public void negativeTimeoutDoesNotAddTimeoutCommand() {
+        givenCommand("ls -l", false, -2);
+
+        whenExecutedUnprivileged();
+
+        thenSuRuns("ls -l");
+    }
+
+    @Test
     public void shellCommandChainIsEntirelyCoveredByTimeout() {
         givenCommand("sleep 1 ; sleep 30", true, 5);
 

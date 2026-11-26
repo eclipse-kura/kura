@@ -31,36 +31,33 @@ import java.util.function.Supplier;
 
 class ManualScheduler {
 
+    private static final Runnable NOTHING = () -> {
+    };
+
     private final Deque<Runnable> pendingTasks = new ArrayDeque<>();
     private final List<Runnable> scheduledTasks = new ArrayList<>();
     private final List<Long> scheduledDelaysInSeconds = new ArrayList<>();
     private final List<RuntimeException> taskFailures = new ArrayList<>();
     private final ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
     private int ranTaskCount;
-    private Runnable whileAwaiting = () -> {
-    };
+    private Runnable whileAwaiting = NOTHING;
 
     ManualScheduler() {
-        doAnswer(invocation -> this.pendingTasks.add(invocation.getArgument(0))).when(this.executor)
-                .execute(any(Runnable.class));
+        doAnswer(invocation -> {
+            enqueue(invocation.getArgument(0));
+            return null;
+        }).when(this.executor).execute(any(Runnable.class));
         doAnswer(invocation -> {
             SubmittedTask task = new SubmittedTask(invocation.getArgument(0));
-            this.pendingTasks.add(task);
+            enqueue(task);
             return task;
         }).when(this.executor).submit(any(Runnable.class));
         doAnswer(invocation -> {
             TimeUnit unit = invocation.getArgument(2);
-            this.scheduledTasks.add(invocation.getArgument(0));
-            this.scheduledDelaysInSeconds.add(unit.toSeconds(invocation.getArgument(1)));
+            schedule(invocation.getArgument(0), unit.toSeconds(invocation.getArgument(1)));
             return null;
         }).when(this.executor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
-        when(this.executor.shutdownNow()).thenAnswer(invocation -> {
-            List<Runnable> droppedTasks = new ArrayList<>(this.pendingTasks);
-            droppedTasks.addAll(this.scheduledTasks);
-            this.pendingTasks.clear();
-            this.scheduledTasks.clear();
-            return droppedTasks;
-        });
+        when(this.executor.shutdownNow()).thenAnswer(invocation -> dropAllTasks());
     }
 
     Supplier<ScheduledExecutorService> factory() {
@@ -69,40 +66,77 @@ class ManualScheduler {
 
     void runPendingTasks() {
         Runnable task;
-        while ((task = this.pendingTasks.poll()) != null) {
+        while ((task = nextPendingTask()) != null) {
             runSwallowingFailures(task);
         }
     }
 
     void runScheduledTasks() {
-        List<Runnable> dueTasks = new ArrayList<>(this.scheduledTasks);
-        this.scheduledTasks.clear();
-        this.pendingTasks.addAll(dueTasks);
+        moveScheduledTasksToPending();
         runPendingTasks();
     }
 
-    void whileAwaitingASubmittedTask(Runnable action) {
+    synchronized void whileAwaitingASubmittedTask(Runnable action) {
         this.whileAwaiting = action;
     }
 
-    List<Long> scheduledDelaysInSeconds() {
-        return this.scheduledDelaysInSeconds;
+    synchronized List<Long> scheduledDelaysInSeconds() {
+        return new ArrayList<>(this.scheduledDelaysInSeconds);
     }
 
-    List<RuntimeException> taskFailures() {
-        return this.taskFailures;
+    synchronized List<RuntimeException> taskFailures() {
+        return new ArrayList<>(this.taskFailures);
     }
 
-    int ranTaskCount() {
+    synchronized int ranTaskCount() {
         return this.ranTaskCount;
     }
 
+    private synchronized void enqueue(Runnable task) {
+        this.pendingTasks.add(task);
+    }
+
+    private synchronized void schedule(Runnable task, long delayInSeconds) {
+        this.scheduledTasks.add(task);
+        this.scheduledDelaysInSeconds.add(delayInSeconds);
+    }
+
+    private synchronized List<Runnable> dropAllTasks() {
+        List<Runnable> droppedTasks = new ArrayList<>(this.pendingTasks);
+        droppedTasks.addAll(this.scheduledTasks);
+        this.pendingTasks.clear();
+        this.scheduledTasks.clear();
+        return droppedTasks;
+    }
+
+    private synchronized Runnable nextPendingTask() {
+        Runnable task = this.pendingTasks.poll();
+        if (task != null) {
+            this.ranTaskCount++;
+        }
+        return task;
+    }
+
+    private synchronized void moveScheduledTasksToPending() {
+        this.pendingTasks.addAll(this.scheduledTasks);
+        this.scheduledTasks.clear();
+    }
+
+    private synchronized Runnable takeWhileAwaiting() {
+        Runnable action = this.whileAwaiting;
+        this.whileAwaiting = NOTHING;
+        return action;
+    }
+
+    private synchronized void recordFailure(RuntimeException failure) {
+        this.taskFailures.add(failure);
+    }
+
     private void runSwallowingFailures(Runnable task) {
-        this.ranTaskCount++;
         try {
             task.run();
         } catch (RuntimeException e) {
-            this.taskFailures.add(e);
+            recordFailure(e);
         }
     }
 
@@ -130,10 +164,7 @@ class ManualScheduler {
 
         @Override
         public Void get() throws InterruptedException, ExecutionException {
-            Runnable action = ManualScheduler.this.whileAwaiting;
-            ManualScheduler.this.whileAwaiting = () -> {
-            };
-            action.run();
+            takeWhileAwaiting().run();
             runPendingTasks();
             if (!isDone()) {
                 throw new IllegalStateException("Dropped task never completes: get() would block forever");

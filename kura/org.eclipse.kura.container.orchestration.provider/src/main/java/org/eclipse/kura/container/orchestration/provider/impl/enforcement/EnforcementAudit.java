@@ -31,6 +31,9 @@ final class EnforcementAudit {
             + "Enforcement failed to start, containers are not checked against the allowlist";
     private static final String ENFORCEMENT_STOPPED = SUCCESS + "Enforcement stopped";
 
+    private static final String MONITOR_CONNECTION_FAILED = FAILURE
+            + "Enforcement monitor failed to connect, retrying in {} seconds";
+    private static final String MONITOR_CONNECTED = SUCCESS + "Enforcement monitor connected";
     private static final String MONITOR_TERMINATED = FAILURE
             + "Enforcement monitor terminated unexpectedly, restarting it in {} seconds";
     private static final String MONITOR_RESTARTED = SUCCESS + "Enforcement monitor restarted";
@@ -63,6 +66,14 @@ final class EnforcementAudit {
 
     static void enforcementStopped() {
         auditLogger.info(ENFORCEMENT_STOPPED, AuditContext.currentOrInternal());
+    }
+
+    static void monitorConnectionFailed(long retryDelaySeconds) {
+        auditLogger.warn(MONITOR_CONNECTION_FAILED, AuditContext.currentOrInternal(), retryDelaySeconds);
+    }
+
+    static void monitorConnected() {
+        auditLogger.info(MONITOR_CONNECTED, AuditContext.currentOrInternal());
     }
 
     static void monitorTerminated(long restartDelaySeconds) {

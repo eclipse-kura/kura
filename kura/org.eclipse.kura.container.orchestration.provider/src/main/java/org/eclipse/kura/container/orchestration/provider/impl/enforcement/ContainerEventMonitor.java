@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,13 @@ final class ContainerEventMonitor {
         void onContainerRemoved(String containerId);
     }
 
+    private enum Connection {
+        CONNECTING,
+        CONNECTION_FAILED,
+        CONNECTED,
+        DISCONNECTED
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(ContainerEventMonitor.class);
     private static final long RESTART_DELAY_SECONDS = 10;
     private static final String START_EVENT = "start";
@@ -49,7 +57,7 @@ final class ContainerEventMonitor {
     private final DockerClient dockerClient;
     private final ScheduledExecutorService scheduler;
     private final Listener listener;
-    private final AtomicBoolean down = new AtomicBoolean();
+    private final AtomicReference<Connection> connection = new AtomicReference<>(Connection.CONNECTING);
     private EventSubscription subscription;
     private boolean closed;
 
@@ -141,19 +149,40 @@ final class ContainerEventMonitor {
         }
 
         private void reportConnected() {
-            if (ContainerEventMonitor.this.down.compareAndSet(true, false)) {
+            switch (ContainerEventMonitor.this.connection.getAndSet(Connection.CONNECTED)) {
+                case CONNECTION_FAILED -> {
+                    logger.info("Enforcement monitor connected.");
+                    EnforcementAudit.monitorConnected();
+                }
+                case DISCONNECTED -> {
                 logger.info("Enforcement monitor restarted.");
                 EnforcementAudit.monitorRestarted();
             }
+            default -> {
+                // nothing to do
+            }
+        }
             ContainerEventMonitor.this.listener.onConnected();
         }
 
         private void reportTerminated() {
-            if (ContainerEventMonitor.this.down.compareAndSet(false, true)) {
+            Connection previous = ContainerEventMonitor.this.connection.getAndUpdate(
+                    current -> current == Connection.CONNECTING || current == Connection.CONNECTION_FAILED
+                            ? Connection.CONNECTION_FAILED
+                            : Connection.DISCONNECTED);
+            switch (previous) {
+                case CONNECTING -> {
+                    logger.warn("Enforcement monitor could not connect, retrying in {} seconds", RESTART_DELAY_SECONDS);
+                    EnforcementAudit.monitorConnectionFailed(RESTART_DELAY_SECONDS);
+                }
+                case CONNECTION_FAILED ->
+                    logger.warn("Enforcement monitor could not connect, retrying in {} seconds", RESTART_DELAY_SECONDS);
+                case CONNECTED -> {
                 logger.warn("Enforcement monitor terminated unexpectedly, restarting it in {} seconds",
                         RESTART_DELAY_SECONDS);
                 EnforcementAudit.monitorTerminated(RESTART_DELAY_SECONDS);
-            } else {
+            }
+            default ->
                 logger.warn("Enforcement monitor could not reconnect, retrying in {} seconds", RESTART_DELAY_SECONDS);
             }
             restartLater();

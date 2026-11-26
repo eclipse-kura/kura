@@ -106,11 +106,19 @@ final class EnforcementSession implements ContainerEventMonitor.Listener {
             listContainersPruningMissingDigests().forEach(descriptor -> checkContainer(descriptor.getContainerId()));
             logger.debug("Enforcement check on running containers...done");
         } catch (RuntimeException e) {
-            logger.error("Enforcement check on running containers failed, retrying in {} seconds",
-                    RETRY_DELAY_SECONDS, e);
-            EnforcementAudit.sweepFailed(RETRY_DELAY_SECONDS);
-            this.sweeps.retryLater();
+            onSweepFailure(e);
         }
+    }
+
+    private synchronized void onSweepFailure(RuntimeException e) {
+        if (this.closed) {
+            logger.debug("Enforcement check on running containers stopped: enforcement was closed", e);
+            return;
+        }
+        logger.error("Enforcement check on running containers failed, retrying in {} seconds", RETRY_DELAY_SECONDS,
+                e);
+        EnforcementAudit.sweepFailed(RETRY_DELAY_SECONDS);
+        this.sweeps.retryLater();
     }
 
     private List<ContainerInstanceDescriptor> listContainersPruningMissingDigests() {
@@ -134,11 +142,19 @@ final class EnforcementSession implements ContainerEventMonitor.Listener {
                 EnforcementAudit.containerAllowed(containerId, allowingDigests);
             }
         } catch (RuntimeException e) {
-            logger.error("Enforcement check on container {} failed, retrying in {} seconds", containerId,
-                    RETRY_DELAY_SECONDS, e);
-            EnforcementAudit.containerCheckFailed(containerId, RETRY_DELAY_SECONDS);
-            this.sweeps.retryLater();
+            onContainerCheckFailure(containerId, e);
         }
+    }
+
+    private synchronized void onContainerCheckFailure(String containerId, RuntimeException e) {
+        if (this.closed) {
+            logger.debug("Enforcement check on container {} stopped: enforcement was closed", containerId, e);
+            return;
+        }
+        logger.error("Enforcement check on container {} failed, retrying in {} seconds", containerId,
+                RETRY_DELAY_SECONDS, e);
+        EnforcementAudit.containerCheckFailed(containerId, RETRY_DELAY_SECONDS);
+        this.sweeps.retryLater();
     }
 
     private Set<String> digestsAllowing(Set<String> imageDigests) {

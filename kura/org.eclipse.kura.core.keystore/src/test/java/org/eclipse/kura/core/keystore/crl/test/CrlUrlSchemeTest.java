@@ -72,9 +72,18 @@ public class CrlUrlSchemeTest {
     }
 
     @Test
-    public void crlUrlWithUnsupportedSchemeIsRejected() throws Exception {
+    public void crlIsFetchedFromJarUrl() throws Exception {
         givenCrl();
         givenCrlPublishedInsideJar();
+
+        whenCrlIsFetched();
+
+        thenFetchedCrlIsThePublishedOne();
+    }
+
+    @Test
+    public void crlUrlWithUnknownProtocolFails() throws Exception {
+        givenUnknownProtocolUri();
 
         whenCrlIsFetched();
 
@@ -108,6 +117,10 @@ public class CrlUrlSchemeTest {
         }
 
         this.crlUri = URI.create("jar:" + jar.toURI() + "!/test.crl");
+    }
+
+    private void givenUnknownProtocolUri() {
+        this.crlUri = URI.create("unknown://localhost/test.crl");
     }
 
     private void whenCrlIsFetched() {

@@ -45,10 +45,10 @@ public @interface PKCS11KeystoreServiceImplOptions {
     @AttributeDefinition(name = "CRL Store Path", required = false, description = "The path where to store the cached CRLs. If left empty, the CRLs will be stored in a new file in the security subfolder of the Kura user configuration directory.")
     String crl_store_path();
 
-    @AttributeDefinition(name = "CRL Cache Enabled", description = "If enabled, the service will maintain a local CRL cache by periodically downloading and storing CRLs from HTTP, HTTPS and file distribution points. The distribution points specified in the trusted certificates added to keystore will be considered along with the URLs specified using the CRL URLs parameter.")
+    @AttributeDefinition(name = "CRL Cache Enabled", description = "If enabled, the service will maintain a local CRL cache by periodically downloading and storing CRLs from distribution points. The distribution points specified in the trusted certificates added to keystore will be considered along with the URLs specified using the CRL URLs parameter.")
     boolean crl_management_enabled() default true;
 
-    @AttributeDefinition(name = "CRL URLs", cardinality = 5, required = false, description = "Allows to specify a list of HTTP, HTTPS or file CRL distribution points that will be considered along with the distribution points specified in the trusted certificates added to keystore. Distribution points with any other scheme are ignored.")
+    @AttributeDefinition(name = "CRL URLs", cardinality = 5, required = false, description = "Allows to specify a list of CRL distribution point URLs that will be considered along with the distribution points specified in the trusted certificates added to keystore.")
     String crl_urls() default "";
 
     @AttributeDefinition(name = "CRL Force Update Interval", description = "Defines a time interval for forcing the update of cached CRLs, this interval will be considered in addition to CRL next update date. The minimum time interval is 30 seconds.")

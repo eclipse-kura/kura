@@ -51,7 +51,7 @@ Both KeystoreService factories can keep a local cache of Certificate Revocation 
 The following options are available:
 
 - **CRL Cache Enabled**: enables the CRL cache. The default is `true`.
-- **CRL URLs**: up to five URLs to download CRLs from. The service also downloads the CRLs of the distribution points listed in the trusted certificates of the keystore. Only `http`, `https` and `file` URLs are downloaded: distribution points with any other scheme, for example `ldap` or `ftp`, are ignored.
+- **CRL URLs**: up to five URLs to download CRLs from. The service also downloads the CRLs of the distribution points listed in the trusted certificates of the keystore.
 - **CRL Force Update Interval** and **CRL Force Update Interval Time Unit**: a cached CRL is downloaded again when its last successful download is older than this interval, even if its next update date has not passed. The default is 1 day.
 - **CRL Check Interval** and **CRL Check Interval Time Unit**: how often the cached CRLs are checked and downloaded again if needed. The default is 5 minutes. The service never checks more often than every 30 seconds.
 - **CRL Store Path**: the file where the cached CRLs are persisted. If it is empty, the `FilesystemKeystoreServiceImpl` adds a `.crl` suffix to the **Keystore Path**, and the `PKCS11KeystoreServiceImpl` uses `security/pkcs11.<pid>.crl` in the user configuration directory.

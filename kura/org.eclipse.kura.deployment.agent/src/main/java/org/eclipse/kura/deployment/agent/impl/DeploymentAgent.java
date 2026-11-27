@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -241,10 +242,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
         this.executor.submit(() -> {
             try {
-                logger.info("About to install package at URL {}", url);
+                logger.info("About to install package at URL {}", UrlCredentials.redact(url));
                 execInstall(url);
             } catch (final Exception e) {
-                logger.error("Unexpected exception installing {}", url, e);
+                logger.error("Unexpected exception installing {}", UrlCredentials.redact(url), e);
             }
         });
     }
@@ -416,10 +417,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             dp = installDeploymentPackageInternal(url);
         } catch (Exception e) {
             ex = e;
-            logger.error("Exception installing package at URL {}", url, e);
+            logger.error("Exception installing package at URL {}", UrlCredentials.redact(url), e);
         } finally {
             boolean successful = dp != null;
-            logger.info("Posting INSTALLED event for package at URL {}: {}", url,
+            logger.info("Posting INSTALLED event for package at URL {}: {}", UrlCredentials.redact(url),
                     successful ? "successful" : "unsuccessful");
             synchronized (this.instPackageUrls) {
                 this.instPackageUrls.remove(url);
@@ -524,7 +525,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private DeploymentPackage installDeploymentPackageInternal(String urlSpec)
             throws DeploymentException, IOException, GeneralSecurityException {
-        URL url = new URL(urlSpec);
+        URL url = UrlCredentials.parse(urlSpec);
         File dpFile = null;
         final boolean download = !"file".equals(url.getProtocol());
         if (download) {
@@ -581,7 +582,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             if (++redirects > MAX_REDIRECTS) {
                 throw new IOException("Too many redirects, the maximum allowed is " + MAX_REDIRECTS);
             }
-            urlConnection = openRemoteConnection(new URL(newLocation));
+            urlConnection = openRemoteConnection(UrlCredentials.parse(newLocation));
         }
 
         final long maxBytes = getFileDownloadSizeMaxBytes();
@@ -625,15 +626,35 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private HttpURLConnection openRemoteConnection(URL url) throws GeneralSecurityException, IOException {
-        URLConnection urlConnection = url.openConnection();
+        validateRemoteUrl(url);
+
+        URLConnection urlConnection = UrlCredentials.withoutUserInfo(url).openConnection();
         urlConnection.setConnectTimeout(this.connTimeout);
         urlConnection.setReadTimeout(this.readTimeout);
+        UrlCredentials.basicAuthorization(url).ifPresent(authorization -> {
+            if (!"https".equalsIgnoreCase(url.getProtocol())) {
+                logger.warn("Sending credentials over unencrypted HTTP for package URL {}",
+                        UrlCredentials.redact(url.toExternalForm()));
+            }
+            urlConnection.setRequestProperty("Authorization", authorization);
+        });
 
         if (urlConnection instanceof HttpsURLConnection) {
             ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
         }
 
         return (HttpURLConnection) urlConnection;
+    }
+
+    private static void validateRemoteUrl(URL url) throws MalformedURLException {
+        String protocol = url.getProtocol();
+        if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
+            throw new MalformedURLException("Unsupported deployment package URL protocol: " + protocol);
+        }
+        if (url.getHost() == null || url.getHost().isEmpty()) {
+            throw new MalformedURLException(
+                    "Invalid deployment package URL: missing host (reserved characters in credentials must be percent-encoded)");
+        }
     }
 
     private static boolean isRedirect(int responseCode) {

@@ -122,8 +122,12 @@ public class FileServlet extends AuditServlet {
     private final UploadGuard uploadGuard = new UploadGuard();
 
     public FileServlet() {
+        this(FrameworkUtil.getBundle(FileServlet.class).getBundleContext());
+    }
+
+    FileServlet(BundleContext bundleContext) {
         super("UI FileServlet", "Handle upload request");
-        this.bundleContext = FrameworkUtil.getBundle(FileServlet.class).getBundleContext();
+        this.bundleContext = bundleContext;
     }
 
     @Override
@@ -655,7 +659,7 @@ public class FileServlet extends AuditServlet {
             deploymentAgentService.installDeploymentPackageAsync(packageUrl);
         } catch (Exception e) {
             tracker.complete();
-            logger.error("Failed to install package at URL {}", packageUrl);
+            logger.error("Failed to install package");
             throw new ServletException("Error installing deployment package", e);
         }
 

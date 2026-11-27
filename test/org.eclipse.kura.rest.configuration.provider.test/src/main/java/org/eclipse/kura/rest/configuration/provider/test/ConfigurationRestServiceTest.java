@@ -467,6 +467,30 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldNotTakeASnapshotWhenEveryUpdateIsRejected() throws KuraException {
+        givenMockUpdateConfigurationReturnException();
+
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":15}}" + "}" + "]}");
+
+        thenResponseCodeIs(500);
+        thenSnapshotIsNotTaken();
+    }
+
+    @Test
+    public void shouldTakeASnapshotWhenAnUpdateIsApplied() throws KuraException {
+        givenMockSnapshotReturnOne(10);
+
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":15}}" + "}" + "]}");
+
+        thenRequestSucceeds();
+        thenSnapshotIsTaken();
+    }
+
+    @Test
     public void testUpdateConfigurationBooleanPropertyTrue() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
@@ -1617,6 +1641,20 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             });
         }
         when(configurationService.getSnapshot(snapshotId)).thenReturn(configs);
+    }
+
+    private void givenMockUpdateConfigurationReturnException() throws KuraException {
+        Mockito.doThrow(new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "testProp", "15", "invalid"))
+                .when(configurationService)
+                .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
+    }
+
+    private void thenSnapshotIsNotTaken() throws KuraException {
+        Mockito.verify(configurationService, Mockito.never()).snapshot();
+    }
+
+    private void thenSnapshotIsTaken() throws KuraException {
+        Mockito.verify(configurationService).snapshot();
     }
 
     private void givenMockSnapshotReturnException() throws KuraException {

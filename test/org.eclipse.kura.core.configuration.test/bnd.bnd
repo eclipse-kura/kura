@@ -2,6 +2,7 @@ Bundle-SymbolicName: ${project.artifactId}
 Bundle-Name: org.eclipse.kura.core.configuration.test
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.core.configuration
+Export-Package: org.eclipse.kura.core.configuration.testcomponent;-noimport:=true
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
 -includeresource: \
     OSGI-INF=OSGI-INF,\

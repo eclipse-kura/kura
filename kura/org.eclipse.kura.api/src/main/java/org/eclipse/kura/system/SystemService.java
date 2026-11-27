@@ -78,6 +78,10 @@ public interface SystemService {
     public static final String KEY_KURA_TMP_DIR = "kura.tmp";
     public static final String KEY_KURA_SNAPSHOTS_DIR = "kura.snapshots";
     public static final String KEY_KURA_SNAPSHOTS_COUNT = "kura.snapshots.count";
+    /**
+     * @since 3.0
+     */
+    public static final String KEY_KURA_CONFIGURATION_VALIDATION = "kura.configuration.validation";
     public static final String KEY_KURA_HAVE_NET_ADMIN = "kura.have.net.admin";
     public static final String KEY_KURA_HAVE_WEB_INTER = "kura.have.web.inter";
     public static final String KEY_KURA_STYLE_DIR = "kura.style.dir";
@@ -637,5 +641,14 @@ public interface SystemService {
      * @return the hostname address used to check the internet connection. Default value is eclipse.org
      */
     public String getInternetConnectionStatusCheckHost();
+
+    /**
+     * Returns true if strict configuration validation against component metatypes is enabled.
+     * The default is true.
+     *
+     * @since 3.0
+     * @return true if strict configuration validation is enabled
+     */
+    public boolean isConfigurationValidationEnabled();
 
 }

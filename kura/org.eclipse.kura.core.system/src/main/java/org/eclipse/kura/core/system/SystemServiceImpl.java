@@ -365,6 +365,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (System.getProperty(KEY_KURA_SNAPSHOTS_COUNT) != null) {
                 this.kuraProperties.put(KEY_KURA_SNAPSHOTS_COUNT, System.getProperty(KEY_KURA_SNAPSHOTS_COUNT));
             }
+            if (System.getProperty(KEY_KURA_CONFIGURATION_VALIDATION) != null) {
+                this.kuraProperties.put(KEY_KURA_CONFIGURATION_VALIDATION,
+                        System.getProperty(KEY_KURA_CONFIGURATION_VALIDATION));
+            }
             if (System.getProperty(KEY_KURA_HAVE_NET_ADMIN) != null) {
                 this.kuraProperties.put(KEY_KURA_HAVE_NET_ADMIN, System.getProperty(KEY_KURA_HAVE_NET_ADMIN));
             }
@@ -1569,6 +1573,22 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     @Override
     public String getInternetConnectionStatusCheckIp() {
         return getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP).orElse(DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP);
+    }
+
+    @Override
+    public boolean isConfigurationValidationEnabled() {
+        final Optional<String> propertyValue = getProperty(KEY_KURA_CONFIGURATION_VALIDATION);
+        if (propertyValue.isPresent()) {
+            final String trimmed = propertyValue.get().trim();
+            if ("false".equalsIgnoreCase(trimmed)) {
+                return false;
+            }
+            if (!"true".equalsIgnoreCase(trimmed)) {
+                logger.warn("Invalid value '{}' for property {}; defaulting to true", trimmed,
+                        KEY_KURA_CONFIGURATION_VALIDATION);
+            }
+        }
+        return true;
     }
 
     private int getIntegerPropertyValue(String propertyName, int defaultValue) {

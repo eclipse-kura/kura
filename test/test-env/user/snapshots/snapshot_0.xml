@@ -91,6 +91,9 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="device.display-name" array="false" encrypted="false" type="String">
+                <esf:value>custom</esf:value>
+            </esf:property>
+            <esf:property name="device.custom-name" array="false" encrypted="false" type="String">
                 <esf:value>Kura Emulator</esf:value>
             </esf:property>
         </esf:properties>

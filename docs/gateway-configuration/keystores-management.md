@@ -48,6 +48,8 @@ The configuration parameters are mapped to the SunPKCS11 provider parameters in 
 
 Both KeystoreService factories can keep a local cache of Certificate Revocation Lists (CRLs). The cached CRLs are returned by the `getCRLs()` and `getCRLStore()` methods of the KeystoreService API, and the HTTP Service and the SSL Manager Service use them in the revocation check of the certificates they validate.
 
+The KeystoreService acts only as a CRL cache: it downloads, stores, and exposes CRLs, while the final decision on whether and how to use the provided CRLs (for example, during certificate verification in a TLS handshake) is up to the consumer code.
+
 The following options are available:
 
 - **CRL Cache Enabled**: enables the CRL cache. The default is `true`.

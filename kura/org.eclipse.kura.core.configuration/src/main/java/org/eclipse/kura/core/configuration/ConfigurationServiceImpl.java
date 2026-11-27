@@ -227,6 +227,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.ctx = componentContext;
         this.bundleContext = componentContext.getBundleContext();
 
+        if (!isConfigurationValidationEnabled()) {
+            logger.warn("Strict configuration validation is disabled ({}=false). Invalid configurations will be "
+                    + "logged but not rejected. Enabling strict validation is strongly recommended.",
+                    SystemService.KEY_KURA_CONFIGURATION_VALIDATION);
+        }
+
         // Load the latest snapshot and push it to ConfigurationAdmin
         try {
             loadLatestSnapshotInConfigAdmin();
@@ -1515,12 +1521,31 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return mergedProperties;
     }
 
+    boolean isConfigurationValidationEnabled() {
+        return this.systemService == null || this.systemService.isConfigurationValidationEnabled();
+    }
+
     private void validateConfiguration(String pid, OCD ocd, Map<String, Object> mergedProperties,
             Map<String, Object> requestedProperties) throws KuraException {
-        if (this.activatedSelfConfigComponents.contains(pid)) {
-            MetatypeValidator.validateValues(ocd, mergedProperties);
-        } else {
-            MetatypeValidator.validate(ocd, mergedProperties, requestedProperties);
+        final List<KuraException> violations = this.activatedSelfConfigComponents.contains(pid)
+                ? MetatypeValidator.findValueViolations(ocd, mergedProperties)
+                : MetatypeValidator.findViolations(ocd, mergedProperties, requestedProperties);
+
+        if (violations.isEmpty()) {
+            return;
+        }
+
+        if (isConfigurationValidationEnabled()) {
+            throw violations.get(0);
+        }
+
+        logValidationWarnings(pid, violations);
+    }
+
+    private void logValidationWarnings(final String pid, final List<KuraException> violations) {
+        for (final KuraException violation : violations) {
+            logger.warn("Configuration validation violation for component {} (validation is disabled): {}", pid,
+                    violation.getMessage());
         }
     }
 

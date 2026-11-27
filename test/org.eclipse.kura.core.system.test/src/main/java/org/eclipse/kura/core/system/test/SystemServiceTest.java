@@ -343,4 +343,10 @@ public class SystemServiceTest {
     public void shouldGetDefaultInternetConnectionStatusCheckIp() {
         assertEquals("198.41.30.198", systemService.getInternetConnectionStatusCheckIp());
     }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldEnableConfigurationValidationByDefault() {
+        assertTrue(systemService.isConfigurationValidationEnabled());
+    }
 }

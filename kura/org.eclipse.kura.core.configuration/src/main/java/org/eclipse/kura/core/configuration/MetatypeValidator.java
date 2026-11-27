@@ -45,28 +45,65 @@ final class MetatypeValidator {
 
     static void validate(final OCD ocd, final Map<String, Object> properties,
             final Map<String, Object> requestedProperties) throws KuraException {
-        validateValues(ocd, properties);
-        validateRequiredAttributes(ocd, requestedProperties);
+        throwFirstViolation(findViolations(ocd, properties, requestedProperties));
     }
 
     static void validateValues(final OCD ocd, final Map<String, Object> properties) throws KuraException {
-        for (final AD ad : getAttributeDefinitions(ocd)) {
-            final Object value = properties.get(ad.getId());
-
-            if (value != null) {
-                validateValue(ad, value);
-            }
-        }
+        throwFirstViolation(findValueViolations(ocd, properties));
     }
 
     static void validateRequiredAttributes(final OCD ocd, final Map<String, Object> requestedProperties)
             throws KuraException {
+        throwFirstViolation(findRequiredAttributeViolations(ocd, requestedProperties));
+    }
+
+    static List<KuraException> findViolations(final OCD ocd, final Map<String, Object> properties,
+            final Map<String, Object> requestedProperties) {
+        final List<KuraException> violations = new ArrayList<>();
+        violations.addAll(findValueViolations(ocd, properties));
+        violations.addAll(findRequiredAttributeViolations(ocd, requestedProperties));
+        return violations;
+    }
+
+    static List<KuraException> findValueViolations(final OCD ocd, final Map<String, Object> properties) {
+        if (properties == null) {
+            return Collections.emptyList();
+        }
+
+        final List<KuraException> violations = new ArrayList<>();
+
+        for (final AD ad : getAttributeDefinitions(ocd)) {
+            final Object value = properties.get(ad.getId());
+
+            if (value != null) {
+                final String violation = findValueViolation(ad, value);
+
+                if (violation != null) {
+                    violations.add(new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ad.getId(),
+                            describe(ad, value), violation));
+                }
+            }
+        }
+
+        return violations;
+    }
+
+    static List<KuraException> findRequiredAttributeViolations(final OCD ocd,
+            final Map<String, Object> requestedProperties) {
+        if (requestedProperties == null) {
+            return Collections.emptyList();
+        }
+
+        final List<KuraException> violations = new ArrayList<>();
+
         for (final AD ad : getAttributeDefinitions(ocd)) {
             if (ad.isRequired() && requestedProperties.containsKey(ad.getId())
                     && requestedProperties.get(ad.getId()) == null) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, ad.getId());
+                violations.add(new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, ad.getId()));
             }
         }
+
+        return violations;
     }
 
     static void validateValue(final AD ad, final Object value) throws KuraException {
@@ -75,6 +112,12 @@ final class MetatypeValidator {
         if (violation != null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ad.getId(), describe(ad, value),
                     violation);
+        }
+    }
+
+    private static void throwFirstViolation(final List<KuraException> violations) throws KuraException {
+        if (!violations.isEmpty()) {
+            throw violations.get(0);
         }
     }
 

@@ -30,7 +30,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509CRL;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +39,7 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -68,7 +68,8 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
     private static final String DEFAULT_KEYSTORE_PASSWORD = "foo";
     private static final String DEFAULT_KEYSTORE_PID = "foo";
-    private static final long DEFAULT_MIN_RESCHEDULE_DELAY_S = 30;
+    private static final long WAIT_TIMEOUT_MS = 10_000;
+    private static final long QUIET_PERIOD_S = 3;
 
     private static int jettyPort = 8085;
 
@@ -95,9 +96,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             assertEquals(DEFAULT_KEYSTORE_PID,
                     ((KeystoreChangedEvent) fixture.expectNextEventAdminEvent(1, TimeUnit.MINUTES)).getSenderPid());
 
-            Thread.sleep(6000);
-
-            assertTrue(new File(fixture.getKeystoreFile().getAbsolutePath() + ".crl").exists());
+            assertTrue(eventuallyExists(new File(fixture.getKeystoreFile().getAbsolutePath() + ".crl")));
         }
     }
 
@@ -130,8 +129,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             assertEquals(DEFAULT_KEYSTORE_PID,
                     ((KeystoreChangedEvent) fixture.expectNextEventAdminEvent(1, TimeUnit.MINUTES)).getSenderPid());
 
-            Thread.sleep(6000);
-            assertTrue(file.exists());
+            assertTrue(eventuallyExists(file));
         }
     }
 
@@ -183,7 +181,8 @@ public class FilesystemKeystoreServiceImplCrlTest {
             fixture.update(fixture.getOptions().setCrlManagerEnabled(true)
                     .setCrlUrls(Collections.singletonList(fixture.getCrlDownloadURL("/foo.crl"))));
 
-            Thread.sleep(10000);
+            waitForSize(eventAdminEvents, 2);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(QUIET_PERIOD_S));
 
             assertEquals(1, downloads.size());
             assertEquals(2, eventAdminEvents.size());
@@ -216,7 +215,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
             assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
 
-            Thread.sleep(10000);
+            assertTrue(eventuallyExists(new File(keystoreFile.getAbsolutePath() + ".crl")));
         }
 
         try (final Fixture fixture = new Fixture(Optional.of(keystoreFile))) {
@@ -332,7 +331,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             nextDownload = fixture.nextDownloadRelativeURI();
             nextDownload.get(1, TimeUnit.MINUTES);
 
-            assertEquals(false, fixture.nextEventAdminEvent(10, TimeUnit.SECONDS).isPresent());
+            assertEquals(false, fixture.nextEventAdminEvent(QUIET_PERIOD_S, TimeUnit.SECONDS).isPresent());
 
         }
     }
@@ -372,7 +371,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             nextDownload = fixture.nextDownloadRelativeURI();
             nextDownload.get(1, TimeUnit.MINUTES);
 
-            assertEquals(false, fixture.nextEventAdminEvent(10, TimeUnit.SECONDS).isPresent());
+            assertEquals(false, fixture.nextEventAdminEvent(QUIET_PERIOD_S, TimeUnit.SECONDS).isPresent());
 
         }
     }
@@ -469,7 +468,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             fixture.activate();
 
             final X509CRL crl = ca.generateCRL(
-                    CRLCreationOptions.builder().withEndDate(Date.from(Instant.now().plusSeconds(4))).build());
+                    CRLCreationOptions.builder().withEndDate(Date.from(Instant.now().plusSeconds(8))).build());
             fixture.setCrl("/foo.crl", crl);
             fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
 
@@ -484,7 +483,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             fixture.setCrl("/foo.crl", newCrl);
 
             nextDownload = fixture.nextDownloadRelativeURI();
-            assertEquals("/foo.crl", nextDownload.get(DEFAULT_MIN_RESCHEDULE_DELAY_S + 10, TimeUnit.SECONDS));
+            assertEquals("/foo.crl", nextDownload.get(20, TimeUnit.SECONDS));
         }
     }
 
@@ -514,6 +513,24 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
     }
 
+    private static boolean eventuallyExists(final File file) throws InterruptedException {
+        final long deadline = System.currentTimeMillis() + WAIT_TIMEOUT_MS;
+
+        while (!file.exists() && System.currentTimeMillis() < deadline) {
+            Thread.sleep(100);
+        }
+
+        return file.exists();
+    }
+
+    private static void waitForSize(final List<?> list, final int size) throws InterruptedException {
+        final long deadline = System.currentTimeMillis() + WAIT_TIMEOUT_MS;
+
+        while (list.size() < size && System.currentTimeMillis() < deadline) {
+            Thread.sleep(100);
+        }
+    }
+
     private void givenDownloadHasStarted(final Fixture fixture) throws Exception {
         fixture.nextDownloadRelativeURI().get(30, TimeUnit.SECONDS);
     }
@@ -534,7 +551,8 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
     private static class Fixture implements AutoCloseable {
 
-        private final FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        private final FilesystemKeystoreServiceImpl keystoreService = new CrlTestKeystoreService(
+                CrlTestKeystoreService.SHORT_DELAYS);
         TestServer server;
         private final EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
         private final ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
@@ -544,7 +562,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
         private Optional<Consumer<String>> downloadListener = Optional.empty();
         private BlockingQueue<Event> eventAdminEventQueue = new ArrayBlockingQueue<>(20);
-        private List<Event> eventAdminEventList = new ArrayList<>();
+        private List<Event> eventAdminEventList = new CopyOnWriteArrayList<>();
 
         private final int currentPort;
         private final File keystoreFile;
@@ -632,7 +650,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
 
         public List<String> collectDownloadRelativeURIs() {
-            final List<String> result = new ArrayList<>();
+            final List<String> result = new CopyOnWriteArrayList<>();
             setDownloadListener(result::add);
             return result;
         }

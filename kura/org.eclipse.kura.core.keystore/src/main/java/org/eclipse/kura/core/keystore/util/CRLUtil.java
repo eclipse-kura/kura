@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -43,6 +44,9 @@ import org.slf4j.LoggerFactory;
 public class CRLUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(CRLUtil.class);
+
+    private static final int CONNECTION_TIMEOUT_MS = 10_000;
+    private static final int READ_TIMEOUT_MS = 30_000;
 
     private CRLUtil() {
     }
@@ -92,35 +96,45 @@ public class CRLUtil {
 
     public static CompletableFuture<X509CRL> fetchCRL(final Set<URI> uris, final ExecutorService executor) {
         final CompletableFuture<X509CRL> result = new CompletableFuture<>();
+        final Future<?> task = executor.submit(() -> runFetch(uris, result));
 
-        executor.execute(() -> {
-            for (final URI uri : uris) {
-                logger.info("fetching CRL from: {}...", uri);
-
-                try (final InputStream in = openConnection(uri)) {
-                    final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                    final X509CRL crl = (X509CRL) cf.generateCRL(in);
-                    logger.info("fetching CRL from: {}...done", uri);
-                    result.complete(crl);
-                    return;
-                } catch (final Exception e) {
-                    logger.warn("failed to fetch CRL from {}", uri, e);
-                }
-
-                if (Thread.interrupted()) {
-                    logger.warn("interrupted");
-                    result.completeExceptionally(new InterruptedException());
-                    return;
-                }
+        result.whenComplete((crl, error) -> {
+            if (result.isCancelled()) {
+                task.cancel(true);
             }
-            result.completeExceptionally(new IOException("failed to download CRL from: " + uris));
         });
 
         return result;
     }
 
-    private static final int CONNECTION_TIMEOUT_MS = 10_000;
-    private static final int READ_TIMEOUT_MS = 30_000;
+    private static void runFetch(final Set<URI> uris, final CompletableFuture<X509CRL> result) {
+        for (final URI uri : uris) {
+            if (Thread.currentThread().isInterrupted()) {
+                logger.warn("interrupted");
+                result.completeExceptionally(new InterruptedException());
+                return;
+            }
+
+            logger.info("fetching CRL from: {}...", uri);
+
+            try (final InputStream in = openConnection(uri)) {
+                final CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                final X509CRL crl = (X509CRL) cf.generateCRL(in);
+                logger.info("fetching CRL from: {}...done", uri);
+                result.complete(crl);
+                return;
+            } catch (final Exception e) {
+                logger.warn("failed to fetch CRL from {}", uri, e);
+            }
+
+            if (Thread.interrupted()) {
+                logger.warn("interrupted");
+                result.completeExceptionally(new InterruptedException());
+                return;
+            }
+        }
+        result.completeExceptionally(new IOException("failed to download CRL from: " + uris));
+    }
 
     private static InputStream openConnection(final URI uri) throws IOException {
         final URLConnection connection = uri.toURL().openConnection();
@@ -128,9 +142,9 @@ public class CRLUtil {
         connection.setConnectTimeout(CONNECTION_TIMEOUT_MS);
         connection.setReadTimeout(READ_TIMEOUT_MS);
 
-        if (connection instanceof HttpURLConnection) {
-            ((HttpURLConnection) connection).setRequestProperty("Accept", "*/*");
-            ((HttpURLConnection) connection).setRequestProperty("Connection", "Close");
+        if (connection instanceof HttpURLConnection httpConnection) {
+            httpConnection.setRequestProperty("Accept", "*/*");
+            httpConnection.setRequestProperty("Connection", "Close");
         }
 
         return connection.getInputStream();

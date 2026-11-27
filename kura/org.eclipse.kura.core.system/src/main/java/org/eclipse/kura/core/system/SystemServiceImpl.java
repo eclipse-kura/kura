@@ -1390,7 +1390,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             try {
                 return probeCpuVersionLinux();
             } catch (final Exception e) {
-                // do nothing
+                logger.debug("Unable to probe the CPU version", e);
             }
         }
 

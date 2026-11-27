@@ -74,7 +74,8 @@ public interface DeploymentAgentService {
      * 
      * 
      * @param url
-     *            The URL of the deployment package
+     *            The URL of the deployment package. If the URL embeds credentials, reserved characters (such as
+     *            {@code @}, {@code /}, {@code ?}, {@code #}) must be percent-encoded per RFC 3986.
      * @throws Exception
      *             If the installation of a deployment package at the same URL is still pending
      */
@@ -101,7 +102,8 @@ public interface DeploymentAgentService {
      * Asks if the installation of a deployment package at the given URL is pending.
      * 
      * @param url
-     *            The URL of the deployment package
+     *            The URL of the deployment package. If the URL embeds credentials, reserved characters (such as
+     *            {@code @}, {@code /}, {@code ?}, {@code #}) must be percent-encoded per RFC 3986.
      * @return true if the installation of a deployment package at URL is pending
      */
     public boolean isInstallingDeploymentPackage(String url);

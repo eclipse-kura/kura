@@ -652,6 +652,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             throw new MalformedURLException("Unsupported deployment package URL protocol: " + protocol);
         }
         if (url.getHost() == null || url.getHost().isEmpty()) {
+            if (url.getAuthority() != null && url.getAuthority().indexOf('@') >= 0) {
+                throw new MalformedURLException(
+                        "Invalid deployment package URL: percent-encode reserved characters such as '@' in credentials");
+            }
             throw new MalformedURLException("Deployment package URL must specify a host");
         }
     }

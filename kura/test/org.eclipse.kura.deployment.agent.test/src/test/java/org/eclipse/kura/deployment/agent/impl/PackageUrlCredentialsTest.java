@@ -214,9 +214,17 @@ public class PackageUrlCredentialsTest {
 
         whenInstallingFromUrl("https://user:p@ss@localhost:" + mockServer.getLocalPort() + PACKAGE_PATH);
 
-        thenDownloadFailsWith(MalformedURLException.class, "host");
+        thenDownloadFailsWith(MalformedURLException.class, "percent-encode");
         thenDownloadErrorDoesNotContain("p@ss");
         thenDownloadErrorDoesNotContain("user");
+        thenNoRequestsWereReceived();
+    }
+
+    @Test
+    public void remoteUrlWithoutHostIsRejectedWithoutConnecting() {
+        whenInstallingFromUrl("https:///packages/package1.dp");
+
+        thenDownloadFailsWith(MalformedURLException.class, "host");
         thenNoRequestsWereReceived();
     }
 
@@ -225,8 +233,17 @@ public class PackageUrlCredentialsTest {
         whenInstallingFromUrl("https://user:s3cr/3t@repo/p.dp");
 
         thenDownloadFailsWith(MalformedURLException.class, "https://***@repo/p.dp");
+        thenDownloadFailsWith(MalformedURLException.class, "percent-encode");
         thenDownloadErrorDoesNotContain("s3cr");
         thenDownloadErrorDoesNotContain("3t");
+    }
+
+    @Test
+    public void malformedUrlWithoutCredentialsDoesNotMentionCredentials() {
+        whenInstallingFromUrl("htps://repo/p.dp");
+
+        thenDownloadFailsWith(MalformedURLException.class, "htps://repo/p.dp");
+        thenDownloadErrorDoesNotContain("percent-encode");
     }
 
     @Test

@@ -29,7 +29,11 @@ final class UrlCredentials {
         try {
             return new URL(urlSpec);
         } catch (MalformedURLException e) {
-            throw new MalformedURLException("Invalid deployment package URL: " + redact(urlSpec));
+            String message = "Invalid deployment package URL: " + redact(urlSpec);
+            if (urlSpec != null && urlSpec.indexOf('@') >= 0) {
+                message += " (percent-encode reserved characters such as '@', '/', '?', '#' in credentials)";
+            }
+            throw new MalformedURLException(message);
         }
     }
 

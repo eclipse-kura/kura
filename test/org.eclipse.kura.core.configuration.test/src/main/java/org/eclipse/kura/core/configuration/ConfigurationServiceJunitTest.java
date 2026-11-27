@@ -1779,15 +1779,16 @@ public class ConfigurationServiceJunitTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertTrue("file not deleted", f0.exists());
-        assertFalse("file deleted", f1.exists());
+        assertTrue("file not deleted", f1.exists());
 
         f0.delete();
+        f1.delete();
         d1.delete();
     }
 
     @Test
     public void testGarbageCollectionOldSnapshotsZeroNoZero() throws Throwable {
-        // test scenario where 0 snapshots are configured to remain, but snapshot_0.xml is not present
+        // test scenario where 0 snapshots are configured to remain, the minimum of 2 is enforced
         final String dir = "gcosDir00";
 
         File d1 = new File(dir);
@@ -1818,15 +1819,17 @@ public class ConfigurationServiceJunitTest {
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
-        assertFalse("file deleted", f0.exists());
-        assertFalse("file deleted", f1.exists());
+        assertTrue("file not deleted", f0.exists());
+        assertTrue("file not deleted", f1.exists());
 
+        f0.delete();
+        f1.delete();
         d1.delete();
     }
 
     @Test
     public void testGarbageCollectionOldSnapshotsZeroOnly() throws Throwable {
-        // test that 0 is left, even if not newest
+        // test that 0 is left, even if not newest, and that the minimum of 2 is enforced
         final String dir = "gcosDir01";
 
         File d1 = new File(dir);
@@ -1866,15 +1869,16 @@ public class ConfigurationServiceJunitTest {
         assertTrue("file not deleted", f0.exists());
         assertFalse("file deleted", f1.exists());
         assertFalse("file deleted", f2.exists());
-        assertFalse("file deleted", f3.exists());
+        assertTrue("file not deleted", f3.exists());
 
+        f0.delete();
         f3.delete();
         d1.delete();
     }
 
     @Test
     public void testGarbageCollectionOldSnapshotsNoZero1() throws Throwable {
-        // no zero => newest is left
+        // no zero => the two newest are left, the minimum of 2 is enforced
 
         final String dir = "gcosDir";
 
@@ -1910,9 +1914,10 @@ public class ConfigurationServiceJunitTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertFalse("file deleted", f1.exists());
-        assertFalse("file deleted", f2.exists());
+        assertTrue("file not deleted", f2.exists());
         assertTrue("file not deleted", f3.exists());
 
+        f2.delete();
         f3.delete();
         d1.delete();
     }

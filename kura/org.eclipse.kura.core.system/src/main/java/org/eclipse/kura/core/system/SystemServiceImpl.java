@@ -94,6 +94,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private static final String SYS_CLASS_NET = "/sys/class/net/";
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
     private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
+    private static final int DEFAULT_KURA_SNAPSHOTS_COUNT = 10;
+    private static final int MIN_KURA_SNAPSHOTS_COUNT = 2;
     private static final String DMIDECODE_COMMAND = "dmidecode -t system";
     private static final String SPACES_REGEX = ":\\s+";
     private static final String BIN_SH = "/bin/sh";
@@ -978,7 +980,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public int getKuraSnapshotsCount() {
-        return getIntegerPropertyValue(KEY_KURA_SNAPSHOTS_COUNT, 10);
+        final int snapshotsCount = getIntegerPropertyValue(KEY_KURA_SNAPSHOTS_COUNT, DEFAULT_KURA_SNAPSHOTS_COUNT);
+
+        if (snapshotsCount < MIN_KURA_SNAPSHOTS_COUNT) {
+            logger.error("Invalid value for property {}: {}. The minimum is {}. Using the minimum.",
+                    KEY_KURA_SNAPSHOTS_COUNT, snapshotsCount, MIN_KURA_SNAPSHOTS_COUNT);
+            return MIN_KURA_SNAPSHOTS_COUNT;
+        }
+
+        return snapshotsCount;
     }
 
     @Override
@@ -1575,7 +1585,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         final Optional<String> propertyValue = getProperty(propertyName);
         if (propertyValue.isPresent() && !propertyValue.get().trim().isEmpty()) {
             try {
-                return Integer.parseInt(propertyValue.get());
+                return Integer.parseInt(propertyValue.get().trim());
             } catch (NumberFormatException e) {
                 logger.error("Cannot parse integer value for property {}: {}. Set it to default {}.", propertyName,
                         propertyValue.get(), defaultValue, e);

@@ -56,7 +56,7 @@ The following options are available:
 - **CRL Check Interval** and **CRL Check Interval Time Unit**: how often the cached CRLs are checked and downloaded again if needed. The default is 5 minutes. The service never checks more often than every 30 seconds.
 - **CRL Store Path**: the file where the cached CRLs are persisted. If it is empty, the `FilesystemKeystoreServiceImpl` adds a `.crl` suffix to the **Keystore Path**, and the `PKCS11KeystoreServiceImpl` uses `security/pkcs11.<pid>.crl` in the user configuration directory.
 - **Enable CRL Verification**: if `true`, a downloaded CRL is stored only if it is signed by the trusted certificate of its issuer in this keystore, that is the trusted certificate whose subject is the CRL issuer. The default is `true`.
-- **Reject Expired CRLs**: if `true`, a CRL whose next update date has passed is not stored when it is downloaded or added, and a cached CRL is no longer returned once it expires, so the revocation status of the certificates it covers cannot be determined until a valid CRL is downloaded. The default is `false`: an expired CRL is kept and returned until a newer one is downloaded, and the certificate validation decides how to treat it.
+- **Reject Expired CRLs**: if `true`, a CRL whose next update date has passed is not stored when it is downloaded or added, and a cached CRL is no longer returned once it expires, so the revocation status of the certificates it covers cannot be determined until a valid CRL is downloaded. The expired CRL is still kept in the local store and is only filtered out at lookup time. The default is `false`: an expired CRL is kept and returned until a newer one is downloaded, and the certificate validation decides how to treat it.
 
 A CRL is downloaded when the service starts or its configuration changes, when no CRL has been downloaded yet from the distribution point, when the cached CRL has expired or its next update date is closer than the **CRL Force Update Interval**, and when its last successful download is older than the **CRL Force Update Interval**.
 
@@ -66,3 +66,8 @@ A downloaded CRL is stored only if all the following conditions hold:
 - if the distribution point comes from the **CRL URLs** option and a CRL is already cached for it, the new CRL has the same issuer;
 - the CRL is not older than the cached CRL of the same issuer: a CRL with a lower CRL number, or with an earlier this update date, is ignored;
 - the CRL passes the checks enabled by **Enable CRL Verification** and **Reject Expired CRLs**.
+
+**System clock synchronization:** CRL expiration checks compare the CRL `nextUpdate` timestamp against the system clock. If the system clock is not synchronized:
+
+- **Clock ahead of actual time:** valid CRLs may be treated as expired. With **Reject Expired CRLs** enabled, newly downloaded CRLs are discarded and cached CRLs are not returned until the clock is synchronized; because expired cached CRLs are still kept in the local store, any still-valid cached CRL becomes available again as soon as the clock is corrected.
+- **Clock behind actual time (for example before NTP synchronization on devices without an RTC):** expired CRLs may appear valid, so **Reject Expired CRLs** will not filter them out and automatic refreshes based on `nextUpdate` may be delayed (relying on **CRL Force Update Interval** and **CRL Check Interval** instead). Once the clock is synchronized, expiration filtering and refresh scheduling adjust automatically.

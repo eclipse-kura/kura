@@ -10,6 +10,9 @@ Upon a successful installation, the new component appears in the Services list (
 
 ![](images/packageConfig.png)
 
+!!! note
+    When installing a deployment package from a remote URL protected with HTTP Basic Authentication, credentials can be embedded in the URL (e.g. `https://username:password@host/path/to/package.dp`). Reserved characters inside the username or password (such as `@`, `/`, `?`, `#`) must be percent-encoded according to RFC 3986 (for example, `@` as `%40`). Credentials are not forwarded across HTTP redirects, and HTTPS is recommended (sending credentials over plain HTTP logs a warning).
+
 ## Download Size Limit
 
 The size of the files transferred to Kura, either downloaded from a remote server (e.g. using HTTP or HTTPS) or uploaded through the Kura Gateway Administration Console, is limited by the `file.transfer.size.max` Kura property. The limit applies to:

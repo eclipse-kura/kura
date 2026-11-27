@@ -2219,6 +2219,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#allowlist-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Allowlist format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example-scenarios" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2298,6 +2309,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#lifetime-of-a-container-instance-digest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifetime of a Container Instance digest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#container-signature-verification" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2315,6 +2337,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enforcement-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enforcement behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5980,6 +6024,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#allowlist-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Allowlist format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example-scenarios" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6059,6 +6114,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#lifetime-of-a-container-instance-digest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifetime of a Container Instance digest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#container-signature-verification" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6076,6 +6142,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enforcement-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enforcement behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
   
 </li>
       
@@ -6123,19 +6211,29 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="unmanaged-containers">Unmanaged containers</h2>
 <p>Regarding the containers not managed by Eclipse Kura, the Container Orchestration service provides a security feature which enforces the containers allowed to run on the system. This feature can be enabled or disabled through the <code>Allowlist Enforcement Enabled</code> option.</p>
 <p>This mechanism leverages the concept of <em>digest</em>, which is a unique and immutable identifier for a container image: it is therefore an excellent mean to identify the image from which a container was created.</p>
-<p>Given the above, Eclipse Kura allows the user to provide a list of container image digests in the <code>Container Image Allowlist</code> field, in the form of newline-separated strings: when a container is started on the host system (whether it is launched by Eclipse Kura or by a terminal CLI), Eclipse Kura retrieves the image from which the container was created, extracts the digest and verifies that it is present in the allowlist provided during service configuration.</p>
-<p>If the image digest is present and matches the container's one, it is then allowed to run without interference. Otherwise, it is immediately stopped and deleted from the host system.</p>
-<p>A similar behaviour is performed at Eclipse Kura startup or when the enforcement is enabled at runtime: if there are already containers on the device (whether they are started or stopped) and the enforcement is activated, Eclipse Kura extracts the digests from the containers and compares them with those in the allowlist. Containers that have been created from images whose digests are in the allowlist will be left running, otherwise they will be stopped and deleted from the descriptors list.</p>
-<p>The verification is performed by intersecting the list of digests extracted by the containers and the one provided in the configuration: in this way, an empty intersection will result in a failing verification, while a non-empty one means that the image digests is equal to one of the allowlist entries.</p>
+<p>Given the above, Eclipse Kura allows the user to provide a list of container image digests in the <code>Container Image Allowlist</code> field, in the form of newline-separated strings (see <a href="#allowlist-format">Allowlist format</a>): when a container is started on the host system (whether it is launched by Eclipse Kura or by a terminal CLI), Eclipse Kura retrieves the image from which the container was created, extracts its digests and verifies that at least one of them is present in the allowlist provided during service configuration.</p>
+<p>If one of the image digests is present in the allowlist, or has been provided by a Container Instance (see <a href="#managed-containers">Managed containers</a>), the container is allowed to run without interference. Otherwise, it is forcibly removed from the host system (see <a href="#enforcement-behaviour">Enforcement behaviour</a>).</p>
+<p>A similar behaviour is performed at Eclipse Kura startup, when the enforcement is enabled at runtime and every time the Container Orchestration Service configuration changes while the enforcement is enabled: if there are already containers on the device (whether they are started or stopped), Eclipse Kura extracts the digests from the containers and compares them with those in the allowlist. Containers that have been created from images whose digests are in the allowlist are left untouched, otherwise they are removed.</p>
+<p>The verification is performed by intersecting the list of digests of the container image and the list of allowed digests (the ones provided in the configuration plus the ones provided by the Container Instances): in this way, an empty intersection will result in a failing verification, while a non-empty one means that one of the image digests is equal to one of the allowed entries.</p>
 <p><img alt="Enforcement Flow" src="../images/container-orchestration-provider-enforcement-flow.png" /></p>
+<h3 id="allowlist-format">Allowlist format</h3>
+<p>Enter one digest per line, e.g. <code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code>. Spaces and empty lines are ignored; any other character (commas included) is part of the entry. Entries are not validated: a wrong entry simply never matches.</p>
+<p>Use the image <strong>repository digest</strong>, not the image ID. Read it on the device with the command below and copy the part after <code>@</code>; a match on any of the listed digests is enough:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>image<span class="w"> </span>inspect<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{json .RepoDigests}}'</span><span class="w"> </span>&lt;image&gt;
+</code></pre></div>
+<p>A new version of an image has a new digest: update the allowlist when you update the image.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the command prints an empty list, the image cannot be allowed and its containers are always removed. This depends on the container engine: e.g. with the Docker classic image store, a locally built image has no repository digest until it is pushed to a registry.</p>
+</div>
 <h3 id="example-scenarios">Example scenarios</h3>
 <p>A user wants to leverage the container enforcement in order to let only docker containers started from an image named <code>foo_image</code> to be run on the device. To do this, they should enable the Container Enforcement by setting the <code>Allowlist Enforcement Enabled</code> to <code>true</code>, and fill the <code>Container Image Allowlist</code> field with the digest of the <code>foo_image</code> docker image (i.e.<code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code> in the example below).</p>
 <p><img alt="Container Orchestration Provider Enforcement" src="../images/container-orchestration-provider-enforcement.png" /></p>
 <h4 id="startup-of-the-enforcement-feature">Startup of the Enforcement Feature</h4>
-<p>Let's suppose that on the device there are already two containers running, one created from the <code>foo_image</code> an one from an image named <code>unwanted_image</code> with digest <code>sha256:9999999999999999999999999999999999999999999999999999999999999999</code>. Once the enforcement starts with the configuration previously described, it extracts the digests of both containers and checks if they're included in the provided allowlist: in this case, the container originating from the <code>foo_image</code> will be allowed to run, while the one created from the <code>unwanted_image</code> will be stopped and deleted, because its digest is not included in the allowlist.</p>
-<p>The same happens also for already stopped containers: if the digests is verified, they'll be left in the descriptors list in the Stopped state, otherwise they'll be deleted.</p>
+<p>Let's suppose that on the device there are already two containers running, one created from the <code>foo_image</code> an one from an image named <code>unwanted_image</code> with digest <code>sha256:9999999999999999999999999999999999999999999999999999999999999999</code>. Once the enforcement starts with the configuration previously described, it extracts the digests of both containers and checks if they're included in the provided allowlist: in this case, the container originating from the <code>foo_image</code> will be allowed to run, while the one created from the <code>unwanted_image</code> will be removed, because its digest is not included in the allowlist.</p>
+<p>The same happens also for already stopped containers: if the digest is verified, they'll be left in the descriptors list in the Stopped state, otherwise they'll be removed.</p>
 <h4 id="running-container-after-enforcement-feature-startup">Running Container After Enforcement Feature Startup</h4>
-<p>After the starting phase just described, Eclipse Kura will continuously monitor the activity of the docker engine. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the <code>foo_image</code> docker image, it will be allowed to start, otherwise it will be stopped and deleted. If the user wants to add more than one allowed image, for example one named <code>wanted_image</code> with digest <code>sha256:1111111111111111111111111111111111111111111111111111111111111111</code>), it just needs to add it to the newline-separated list.</p>
+<p>After the starting phase just described, Eclipse Kura will continuously monitor the activity of the docker engine. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the <code>foo_image</code> docker image, it will be allowed to run, otherwise it will be removed. If the user wants to add more than one allowed image, for example one named <code>wanted_image</code> with digest <code>sha256:1111111111111111111111111111111111111111111111111111111111111111</code>), it just needs to add it to the newline-separated list.</p>
 <p><img alt="Container Orchestration Provider Enforcement Multiple Digests" src="../images/container-orchestration-provider-enforcement-multiple-digests.png" /></p>
 <h2 id="managed-containers">Managed containers</h2>
 <p>As explained in the previous section, Managed Containers (i.e. <code>org.eclipse.kura.container.provider.ContainerInstance</code>s) support Container Signature validation. To do so a new API has been introduced: the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/container/signature/ContainerSignatureValidationService.java"><code>ContainerSignatureValidationService</code></a>.</p>
@@ -6157,32 +6255,58 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="container-instance-digest">Container Instance Digest</h4>
 <p>Let's suppose to have a device on which Eclipse Eclipse Kura is running with the Container Orchestration Service enabled, its Enforcement feature disabled and a Container Instance named <code>test-container</code> up and running on the system.</p>
 <p>A user wants to activate the Enforcement feature, so it enables the <code>Allowlist Enforcement Enabled</code> option in the Container Orchestration Service, but leaves the <code>Container Image Allowlist</code> option blank because it wants that no containers are started outside the framework.</p>
-<p>As the feature starts, it checks all the container running on the device, including the <code>test-container</code>, which will be stopped and deleted: this happens because the container digest is not included in the Container Orchestration Service Allowlist and the Container Instance is not providing any information through its <code>Container Image Enforcement Digest</code> option.</p>
+<p>As the feature starts, it checks all the containers on the device, including the <code>test-container</code>, which will be removed: this happens because the container digest is not included in the Container Orchestration Service Allowlist and the Container Instance is not providing any information through its <code>Container Image Enforcement Digest</code> option.</p>
 <p><img alt="Container Instance Schema Failure" src="../images/container-instance-enforcement-failure.png" /></p>
 <p>In order to allow the Container Instance, the user should provide the correct digest in the instance settings. Let's suppose that the digest of the image from which the container is created is <code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code> and that the user fills the corresponding option with it: once the Container Instance is updated, the provided digest is included in the Enforcement feature allowlist, so the container will be allowed to run without interference. This case can be summarised as:</p>
 <p><img alt="Container Instance Schema Success" src="../images/container-instance-enforcement-success.png" /></p>
-<p>Once the instance digest is added to the enforcement feature, it can be used also to authorise container run by the Command Line Interface, or other instances on Eclipse Eclipse Eclipse Kura without providing the digest option. But what happen if the Container Instance is disabled? The aim of the Container Instance Enforcement Digest is to be used as an authorization method of the instance itself: this means that its digest is added to the enforcement feature allowlist <strong>only if the instance is enabled</strong>.</p>
+<p>Once the instance digest is added to the enforcement feature, it can be used also to authorise containers run by the Command Line Interface, or by other instances on Eclipse Kura without providing the digest option. But what happens if the Container Instance is disabled? The aim of the Container Instance Enforcement Digest is to be used as an authorization method of the instance itself: this means that its digest is added to the enforcement feature allowlist <strong>only while the container of the instance exists</strong>, and the container of an instance exists only while the instance is enabled.</p>
 <p><img alt="Schema with disabled instances" src="../images/schemaWithoutInstances.png" /></p>
-<p>As it can be seen from the image, the merged <code>Enforcement Allowlist</code> box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored. If the enforcement is enabled and a container with digest <em>DIGEST Z</em> is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.</p>
-<p>Finally, everytime a <em>Container Image Enforcement Digest</em> option is modified, or the ContainerInstance is disabled or deleted, the enforcement feature will perform a check on all the already running containers. This is done because, if the digest that was previously provided has changed after an instance update, or removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be stopped and deleted.</p>
+<p>As it can be seen from the image, the merged <code>Enforcement Allowlist</code> box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored. If the enforcement is enabled and a container with digest <em>DIGEST Z</em> is started, it will then be removed, because its digest won't be included in the allowlist.</p>
+<p>Finally, every time a <em>Container Image Enforcement Digest</em> option is modified, the ContainerInstance is disabled or deleted, or the container of the instance is removed, the enforcement feature will perform a check on all the containers. This is done because, if the digest that was previously provided has changed after an instance update, or has been removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be removed.</p>
+<h4 id="lifetime-of-a-container-instance-digest">Lifetime of a Container Instance digest</h4>
+<p>The digest of a Container Instance (set in the option or obtained through <a href="#container-signature-verification">signature verification</a>) is:</p>
+<ul>
+<li><strong>added</strong> when Eclipse Kura starts the instance container, also if it is already running, and also while the enforcement is disabled;</li>
+<li><strong>removed</strong> when the instance container is removed, by Eclipse Kura (instance disabled, deleted or reconfigured) or directly (e.g. <code>docker rm</code>). All the containers are then checked again;</li>
+<li><strong>kept in memory only</strong>: after an Eclipse Kura restart, it is added again when the instance starts its container.</li>
+</ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The digests provided through Container Instances allow running also container started by the <strong>C</strong>ommand<strong>L</strong>ine<strong>I</strong>nterface or by other Container Instances in the framework, even without providing the digest.</p>
-<p>It has to be considered that, if the ContainerInstance is disabled (or its digest option changes), the enforcement feature will stop and delete the containers that are no longer matching the provided digest.</p>
-<p>The user needs to be careful, then, to rely only on the digests set in the ContainerInstances options. If the user will need to run containers from the CLI, it is preferable to use the allowlist of the Container Orchestration Service. For the Container Instances, is a good practise to provide a digest.</p>
+<p>The digests provided through Container Instances allow running also containers started by the <strong>C</strong>ommand<strong>L</strong>ine<strong>I</strong>nterface or by other Container Instances in the framework, even without providing the digest.</p>
+<p>If the ContainerInstance is disabled, deleted or reconfigured (any configuration change recreates its container), the containers that rely only on its digest can be removed, even if the digest did not change.</p>
+<p>The user needs to be careful, then, to rely only on the digests set in the ContainerInstances options. If the user will need to run containers from the CLI, it is preferable to use the allowlist of the Container Orchestration Service. For the Container Instances, it is a good practice to provide a digest.</p>
 </div>
 <h4 id="container-signature-verification">Container Signature Verification</h4>
 <p>If the <em>Container Image Enforcement Digest</em> option is not provided, Eclipse Eclipse Kura will proceed with the Signature Verification: this process tries to extract the digest of the image from which the container was started.</p>
 <p>Let's then suppose that we are back at the <a href="#container-instance-digest">beginning of the previous example</a>, with a blank Container Orchestration Service allowlist and a not given Container Instance Digest, but this time a <em>Trust Anchor</em> option is given: in this case Eclipse Eclipse Kura will start the Signature Verification Process, in order to extract the digest.</p>
-<p>If, for whatever reason, the Signature Verification fails, no digests will be added to the allowlist: if the enforcement feature is enabled, the started container will be then stopped and deleted by the Enforcement Monitor, because no digests are included in the final Enforcement Allowlist.</p>
+<p>If, for whatever reason, the Signature Verification fails, no digests will be added to the allowlist: if the enforcement feature is enabled, the started container will be then removed by the enforcement feature, because no digests are included in the final Enforcement Allowlist.</p>
 <p><img alt="Enforcement Flow With Instances And Signature Failed" src="../images/container-instance-signature-fail.png" /></p>
 <p>While, if the procedure completes correctly, the extracted digest will be added to the Enforcement Allowlist and written in the snapshot: in this way the container will pass the enforcement feature check, and the obtained digest will be stored as part of the  Container Instance's configuration just started.</p>
 <p><img alt="Enforcement Flow With Instances And Signature Success" src="../images/container-instance-signature-success.png" /></p>
 <p>If the user wants to check again the digest through the Signature Verification Service, it just needs to erase the <em>Container Image Enforcement Digest</em> option from the configuration of the Container Instance: in this way the Signature feature will be triggered again and the digest recalculated.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Even in this situation, the digest could be used to authenticate container started from the CommandLineInterface: also in this case keep in mind that if the Container Instance is disabled, stopped or updated with different digest, those CLI-based container could be stopped and deleted.</p>
+<p>Even in this situation, the digest could be used to authenticate containers started from the CommandLineInterface: also in this case keep in mind that if the Container Instance is disabled, deleted or reconfigured, or if its container is removed, those CLI-based containers could be removed.</p>
 </div>
+<h2 id="enforcement-behaviour">Enforcement behaviour</h2>
+<ul>
+<li><strong>When containers are checked</strong>: all the containers (running or stopped) are checked when the enforcement starts or its configuration changes, when the enforcement monitor (re)connects to the container engine, and when a Container Instance digest is removed. A single container is checked when it starts. Failed checks and removals are retried every 10 seconds.</li>
+<li><strong>Removal</strong>: rejected containers are force-removed (like <code>docker rm -f</code>): running containers are killed without a graceful stop. The enforcement does not prevent a container from starting: it removes it as soon as it detects it.</li>
+<li><strong>Connection loss</strong>: if the connection to the container engine is lost (e.g. the engine restarts), Eclipse Kura reconnects every 10 seconds and then checks all the containers.</li>
+<li><strong>Disabling</strong>: when the enforcement or the service is disabled, no check is performed and no container is removed. Containers started in the meantime are checked when the enforcement is enabled again.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>The enforcement activity is recorded in the audit log.</p>
+<ul>
+<li><strong>No <code>Enforcement started</code> entry</strong> after a Kura startup or a configuration change: the enforcement is not active and is not retried, e.g. because the container engine was not reachable (<code>Could not connect to docker CLI.</code> in <code>kura.log</code>). Fix the cause, then restart Eclipse Kura or set <code>Allowlist Enforcement Enabled</code> to <code>false</code> and back to <code>true</code> (saving an unchanged configuration has no effect).</li>
+<li><strong>A container is unexpectedly removed</strong>: check the <code>Enforcement rejected container</code> entry.<ul>
+<li>Digests listed: none of them is in the allowlist, check the <a href="#allowlist-format">Allowlist format</a>.</li>
+<li>Empty list <code>[]</code>: the image has no repository digest, or the container no longer existed when checked (nothing was actually removed).</li>
+<li>Preceded by <code>Enforcement digest ... unregistered</code>: the container relied on a Container Instance digest that has been removed.</li>
+</ul>
+</li>
+<li><strong>After an unclean Eclipse Kura shutdown</strong>, containers allowed only by a Container Instance digest can be removed at startup and then recreated by their instance. Add the digest to the <code>Container Image Allowlist</code> to avoid this.</li>
+</ul>
 
 
 

@@ -44,7 +44,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -487,7 +486,7 @@ public class ConfigurationServiceTest {
             }
         });
 
-        thenKuraPartialSuccessExceptionOccurred();
+        thenKuraExceptionOccurred(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
     }
 
     @Test
@@ -625,9 +624,9 @@ public class ConfigurationServiceTest {
     public void testUpdateDoesNotAlterAnUntouchedPasswordProperty() {
         givenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "pwd_untouched_pid", null, true);
 
-        whenUpdateConfiguration("pwd_untouched_pid", map(TEST_COMPONENT_PROPERTY_KEY, 42), true);
+        whenUpdateConfiguration("pwd_untouched_pid", map(TEST_COMPONENT_PROPERTY_KEY, 15), true);
 
-        thenUpdatedConfigurationPropertiesContains(map(TEST_COMPONENT_PROPERTY_KEY, 42));
+        thenUpdatedConfigurationPropertiesContains(map(TEST_COMPONENT_PROPERTY_KEY, 15));
         thenLatestSnapshotPropertyIsAPassword("pwd_untouched_pid", TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
                 TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT);
         thenNoExceptionOccurred();
@@ -1057,11 +1056,6 @@ public class ConfigurationServiceTest {
     private void thenNPExceptionOccurred() {
         assertTrue(this.exceptionOccurred.isPresent());
         assertTrue(this.exceptionOccurred.get() instanceof NullPointerException);
-    }
-
-    private void thenKuraPartialSuccessExceptionOccurred() {
-        assertTrue(this.exceptionOccurred.isPresent());
-        assertTrue(this.exceptionOccurred.get() instanceof KuraPartialSuccessException);
     }
 
     private void thenNoExceptionOccurred() {

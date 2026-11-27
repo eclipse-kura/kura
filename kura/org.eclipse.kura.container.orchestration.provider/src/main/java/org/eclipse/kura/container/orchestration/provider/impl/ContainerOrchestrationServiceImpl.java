@@ -120,6 +120,7 @@ public class ContainerOrchestrationServiceImpl
 
     public void deactivate() {
         logger.info("Bundle {} is stopping!", APP_ID);
+        this.enforcement.close();
         if (testConnection()) {
             disconnect();
         }
@@ -135,12 +136,12 @@ public class ContainerOrchestrationServiceImpl
 
             logger.info("Connecting to docker ");
 
+            this.enforcement.close();
+
             if (!this.currentConfig.isEnabled()) {
                 cleanUpDocker();
                 return;
             }
-
-            this.enforcement.close();
 
             connect();
 
@@ -807,8 +808,6 @@ public class ContainerOrchestrationServiceImpl
     }
 
     private void cleanUpDocker() {
-        this.enforcement.close();
-
         if (testConnection()) {
             this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisabled);
             disconnect();

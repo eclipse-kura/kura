@@ -363,7 +363,7 @@ public interface ConfigurationService {
      *
      * @return the ID of the snapshot it rolled back to
      * @throws KuraException
-     *             if no snapshots are available or
+     *             if no snapshots are available or if the target snapshot fails validation
      */
     public long rollback() throws KuraException;
 
@@ -373,7 +373,7 @@ public interface ConfigurationService {
      * @param id
      *            ID of the snapshot we need to rollback to
      * @throws KuraException
-     *             if the snapshot is not found
+     *             if the snapshot is not found or if the target snapshot fails validation
      */
     public void rollback(long id) throws KuraException;
 }

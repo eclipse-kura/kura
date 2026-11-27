@@ -20,6 +20,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -48,11 +50,14 @@ import org.osgi.service.component.ComponentContext;
 public class ConfigurationValidationFlagTest {
 
     private static final String PID = "org.eclipse.kura.test.ValidationFlagComponent";
+    private static final String FACTORY_PID = "org.eclipse.kura.test.ValidationFlagFactory";
+    private static final String FACTORY_INSTANCE_PID = "validationFlagFactoryInstance";
     private static final String INT_ATTR = "int.attr";
     private static final String REQUIRED_ATTR = "required.attr";
 
     private ConfigurationServiceImpl configurationService;
     private SystemService systemService;
+    private Bundle systemBundle;
     private Dictionary<String, Object> storedProperties;
     private Exception occurredException;
     private List<KuraException> foundViolations;
@@ -65,12 +70,14 @@ public class ConfigurationValidationFlagTest {
     }
 
     @Test
-    public void updateConfigurationRejectsInvalidValueWhenValidationIsEnabled() throws Exception {
+    public void updateConfigurationRejectsInvalidValueWithoutStoppingFrameworkWhenValidationIsEnabled()
+            throws Exception {
         givenConfigurationServiceWithValidation(true);
 
         whenConfigurationIsUpdated(Collections.singletonMap(INT_ATTR, 99));
 
         thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
         thenStoredPropertyIs(INT_ATTR, 5);
     }
 
@@ -81,16 +88,19 @@ public class ConfigurationValidationFlagTest {
         whenConfigurationIsUpdated(Collections.singletonMap(INT_ATTR, 99));
 
         thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
         thenStoredPropertyIs(INT_ATTR, 99);
     }
 
     @Test
-    public void updateConfigurationRejectsNullRequiredAttributeWhenValidationIsEnabled() throws Exception {
+    public void updateConfigurationRejectsNullRequiredAttributeWithoutStoppingFrameworkWhenValidationIsEnabled()
+            throws Exception {
         givenConfigurationServiceWithValidation(true);
 
         whenConfigurationIsUpdated(Collections.singletonMap(REQUIRED_ATTR, null));
 
         thenFailedWith(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
+        thenFrameworkShutdownWasNotRequested();
         thenStoredPropertyIs(REQUIRED_ATTR, "initial");
     }
 
@@ -101,7 +111,30 @@ public class ConfigurationValidationFlagTest {
         whenConfigurationIsUpdated(Collections.singletonMap(REQUIRED_ATTR, null));
 
         thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
         thenStoredPropertyIsNull(REQUIRED_ATTR);
+    }
+
+    @Test
+    public void createFactoryConfigurationRejectsInvalidValueWithoutStoppingFrameworkWhenValidationIsEnabled()
+            throws Exception {
+        givenConfigurationServiceWithValidation(true);
+
+        whenFactoryConfigurationIsCreated(Collections.singletonMap(INT_ATTR, 99));
+
+        thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
+    }
+
+    @Test
+    public void createFactoryConfigurationAppliesInvalidValueWhenValidationIsDisabled() throws Exception {
+        givenConfigurationServiceWithValidation(false);
+
+        whenFactoryConfigurationIsCreated(Collections.singletonMap(INT_ATTR, 99));
+
+        thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
+        thenStoredPropertyIs(INT_ATTR, 99);
     }
 
     @Test
@@ -111,6 +144,7 @@ public class ConfigurationValidationFlagTest {
         whenConfigurationIsValidated(Collections.singletonMap(INT_ATTR, 99));
 
         thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
     }
 
     @Test
@@ -120,6 +154,7 @@ public class ConfigurationValidationFlagTest {
         whenConfigurationIsValidated(Collections.singletonMap(INT_ATTR, 99));
 
         thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
     }
 
     @Test
@@ -137,7 +172,7 @@ public class ConfigurationValidationFlagTest {
         properties.put(INT_ATTR, 99);
         properties.put(REQUIRED_ATTR, null);
 
-        whenViolationsAreFound(buildOcd(), properties);
+        whenViolationsAreFound(buildOcd(PID), properties);
 
         thenViolationsCountIs(2);
     }
@@ -155,9 +190,11 @@ public class ConfigurationValidationFlagTest {
 
     private void setupConfigurationService(final SystemService service) throws Exception {
         this.configurationService = new ConfigurationServiceImpl();
+        this.systemBundle = mock(Bundle.class);
         this.storedProperties = new Hashtable<>();
 
         final Configuration configuration = mock(Configuration.class);
+        when(configuration.getPid()).thenReturn(FACTORY_PID + ".1");
         when(configuration.getProperties()).thenAnswer(invocation -> this.storedProperties);
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
@@ -168,9 +205,11 @@ public class ConfigurationValidationFlagTest {
 
         final ConfigurationAdmin configurationAdmin = mock(ConfigurationAdmin.class);
         when(configurationAdmin.getConfiguration(anyString(), anyString())).thenReturn(configuration);
+        when(configurationAdmin.createFactoryConfiguration(anyString(), any())).thenReturn(configuration);
 
         final BundleContext bundleContext = mock(BundleContext.class);
         when(bundleContext.getBundles()).thenReturn(new Bundle[0]);
+        when(bundleContext.getBundle(0L)).thenReturn(this.systemBundle);
 
         final ComponentContext componentContext = mock(ComponentContext.class);
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
@@ -182,14 +221,22 @@ public class ConfigurationValidationFlagTest {
             this.configurationService.activate(componentContext);
         }
 
-        final Tocd ocd = buildOcd();
-        this.configurationService.registerComponentOCD(PID, ocd, false, null);
+        this.configurationService.registerComponentOCD(PID, buildOcd(PID), false, null);
         this.configurationService.registerComponentConfiguration(PID, PID, null);
+        this.configurationService.registerComponentOCD(FACTORY_PID, buildOcd(FACTORY_PID), true, mock(Bundle.class));
     }
 
     private void whenConfigurationIsUpdated(final Map<String, Object> properties) {
         try {
             this.configurationService.updateConfiguration(PID, properties, false);
+        } catch (final Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenFactoryConfigurationIsCreated(final Map<String, Object> properties) {
+        try {
+            this.configurationService.createFactoryConfiguration(FACTORY_PID, FACTORY_INSTANCE_PID, properties, false);
         } catch (final Exception e) {
             this.occurredException = e;
         }
@@ -218,6 +265,10 @@ public class ConfigurationValidationFlagTest {
         assertEquals(expected, ((KuraException) this.occurredException).getCode());
     }
 
+    private void thenFrameworkShutdownWasNotRequested() throws Exception {
+        verify(this.systemBundle, never()).stop();
+    }
+
     private void thenStoredPropertyIs(final String key, final Object expected) {
         assertEquals(expected, this.storedProperties.get(key));
     }
@@ -230,10 +281,10 @@ public class ConfigurationValidationFlagTest {
         assertEquals(expected, this.foundViolations.size());
     }
 
-    private static Tocd buildOcd() {
+    private static Tocd buildOcd(final String id) {
         final Tocd ocd = new Tocd();
-        ocd.setId(PID);
-        ocd.setName(PID);
+        ocd.setId(id);
+        ocd.setName(id);
 
         final Tad intAd = new Tad();
         intAd.setId(INT_ATTR);

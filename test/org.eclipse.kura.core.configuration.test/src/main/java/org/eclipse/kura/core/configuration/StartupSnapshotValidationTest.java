@@ -16,12 +16,18 @@ package org.eclipse.kura.core.configuration;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.FACTORY_PID;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_ATTR;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_DEFAULT;
+import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.OPTIONAL_ATTR;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.OPTION_ATTR;
+import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.REQUIRED_PID;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.VALIDATED_PID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -30,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -40,6 +48,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 
@@ -50,21 +59,68 @@ public class StartupSnapshotValidationTest {
 
     private final List<ComponentConfiguration> snapshot = new ArrayList<>();
     private IsolatedConfigurationService isolated;
+    private Exception occurredException;
 
     @Test
-    public void invalidSnapshotValueIsReplacedByTheDefault() throws Throwable {
+    public void invalidSnapshotStopsFrameworkAndPushesNothingWhenValidationIsEnabled() throws Throwable {
         givenIsolatedConfigurationService();
+        givenSnapshotConfiguration(REQUIRED_PID, null, OPTIONAL_ATTR, "valid");
         givenSnapshotConfiguration(VALIDATED_PID, null, INT_ATTR, 11);
         givenSnapshotIsSaved();
 
         whenServiceIsActivated();
 
-        thenComponentNeverReceives(VALIDATED_PID, INT_ATTR, 11);
-        thenComponentHolds(VALIDATED_PID, INT_ATTR, INT_DEFAULT);
+        thenActivationFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasRequested();
+        thenNoConfigurationWasPushed();
     }
 
     @Test
-    public void validSnapshotValuesAreKept() throws Throwable {
+    public void invalidFactoryInstanceInSnapshotStopsFrameworkAndPushesNothingWhenValidationIsEnabled()
+            throws Throwable {
+        givenIsolatedConfigurationService();
+        givenSnapshotConfiguration(VALIDATED_PID, null, INT_ATTR, 7);
+        givenSnapshotConfiguration(FACTORY_INSTANCE_PID, FACTORY_PID, INT_ATTR, 11);
+        givenSnapshotIsSaved();
+
+        whenServiceIsActivated();
+
+        thenActivationFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasRequested();
+        thenNoConfigurationWasPushed();
+    }
+
+    @Test
+    public void invalidSnapshotStartsWithoutStoppingFrameworkWhenValidationIsDisabled() throws Throwable {
+        givenIsolatedConfigurationService();
+        givenConfigurationValidation(false);
+        givenSnapshotConfiguration(VALIDATED_PID, null, INT_ATTR, 11);
+        givenSnapshotIsSaved();
+
+        whenServiceIsActivated();
+
+        thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentHolds(VALIDATED_PID, INT_ATTR, 11);
+    }
+
+    @Test
+    public void invalidFactoryInstanceInSnapshotStartsWithoutStoppingFrameworkWhenValidationIsDisabled()
+            throws Throwable {
+        givenIsolatedConfigurationService();
+        givenConfigurationValidation(false);
+        givenSnapshotConfiguration(FACTORY_INSTANCE_PID, FACTORY_PID, INT_ATTR, 11);
+        givenSnapshotIsSaved();
+
+        whenServiceIsActivated();
+
+        thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentHolds(FACTORY_INSTANCE_PID, INT_ATTR, 11);
+    }
+
+    @Test
+    public void validSnapshotValuesAreKeptWithoutStoppingFramework() throws Throwable {
         givenIsolatedConfigurationService();
         givenSnapshotConfiguration(VALIDATED_PID, null, INT_ATTR, 7);
         givenSnapshotProperty(VALIDATED_PID, OPTION_ATTR, "second");
@@ -72,38 +128,14 @@ public class StartupSnapshotValidationTest {
 
         whenServiceIsActivated();
 
+        thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
         thenComponentHolds(VALIDATED_PID, INT_ATTR, 7);
         thenComponentHolds(VALIDATED_PID, OPTION_ATTR, "second");
     }
 
     @Test
-    public void onlyTheInvalidAttributeIsReplaced() throws Throwable {
-        givenIsolatedConfigurationService();
-        givenSnapshotConfiguration(VALIDATED_PID, null, INT_ATTR, 7);
-        givenSnapshotProperty(VALIDATED_PID, OPTION_ATTR, "third");
-        givenSnapshotIsSaved();
-
-        whenServiceIsActivated();
-
-        thenComponentNeverReceives(VALIDATED_PID, OPTION_ATTR, "third");
-        thenComponentHolds(VALIDATED_PID, OPTION_ATTR, ExternalMetatypeBundle.OPTION_DEFAULT);
-        thenComponentHolds(VALIDATED_PID, INT_ATTR, 7);
-    }
-
-    @Test
-    public void invalidValueOfAFactoryInstanceIsReplacedByTheDefault() throws Throwable {
-        givenIsolatedConfigurationService();
-        givenSnapshotConfiguration(FACTORY_INSTANCE_PID, FACTORY_PID, INT_ATTR, 11);
-        givenSnapshotIsSaved();
-
-        whenServiceIsActivated();
-
-        thenComponentNeverReceives(FACTORY_INSTANCE_PID, INT_ATTR, 11);
-        thenComponentHolds(FACTORY_INSTANCE_PID, INT_ATTR, INT_DEFAULT);
-    }
-
-    @Test
-    public void invalidValueIsReplacedWhenTheMetatypeIsRegisteredLater() throws Throwable {
+    public void invalidValueIsRejectedWithoutStoppingFrameworkWhenMetatypeIsRegisteredLater() throws Throwable {
         givenIsolatedConfigurationService();
         givenSnapshotConfiguration(LATE_PID, null, INT_ATTR, 11);
         givenSnapshotIsSaved();
@@ -111,7 +143,24 @@ public class StartupSnapshotValidationTest {
 
         whenMetatypeIsRegistered(LATE_PID);
 
-        thenComponentHolds(LATE_PID, INT_ATTR, INT_DEFAULT);
+        thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentUpdateCountIs(LATE_PID, 1);
+    }
+
+    @Test
+    public void invalidValueIsAllowedWhenMetatypeIsRegisteredLaterAndValidationIsDisabled() throws Throwable {
+        givenIsolatedConfigurationService();
+        givenConfigurationValidation(false);
+        givenSnapshotConfiguration(LATE_PID, null, INT_ATTR, 11);
+        givenSnapshotIsSaved();
+        givenServiceIsActivated();
+
+        whenMetatypeIsRegistered(LATE_PID);
+
+        thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentHolds(LATE_PID, INT_ATTR, 11);
     }
 
     @Test
@@ -123,6 +172,8 @@ public class StartupSnapshotValidationTest {
 
         whenServiceIsActivated();
 
+        thenNoExceptionOccurred();
+        thenFrameworkShutdownWasNotRequested();
         thenComponentHolds(VALIDATED_PID, INT_ATTR, 7);
     }
 
@@ -136,6 +187,10 @@ public class StartupSnapshotValidationTest {
     private void givenIsolatedConfigurationService() throws Throwable {
         this.isolated = new IsolatedConfigurationService(
                 FrameworkUtil.getBundle(StartupSnapshotValidationTest.class).getBundleContext());
+    }
+
+    private void givenConfigurationValidation(final boolean enabled) {
+        this.isolated.setConfigurationValidationEnabled(enabled);
     }
 
     private void givenMetaTypeInformationWithNullPids() {
@@ -172,14 +227,18 @@ public class StartupSnapshotValidationTest {
     }
 
     private void givenServiceIsActivated() throws Exception {
-        whenServiceIsActivated();
-    }
-
-    private void whenServiceIsActivated() throws Exception {
         this.isolated.activate();
     }
 
-    private void whenMetatypeIsRegistered(final String pid) throws Exception {
+    private void whenServiceIsActivated() {
+        try {
+            this.isolated.activate();
+        } catch (final Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenMetatypeIsRegistered(final String pid) {
         final Tad attribute = new Tad();
         attribute.setId(INT_ATTR);
         attribute.setName(INT_ATTR);
@@ -194,13 +253,45 @@ public class StartupSnapshotValidationTest {
         ocd.setId(pid);
         ocd.addAD(attribute);
 
-        this.isolated.getService().registerComponentOCD(pid, ocd, false, mock(Bundle.class));
+        try {
+            this.isolated.getService().registerComponentOCD(pid, ocd, false, mock(Bundle.class));
+        } catch (final Exception e) {
+            this.occurredException = e;
+        }
     }
 
-    private void thenComponentNeverReceives(final String pid, final String attribute, final Object value) {
-        for (final Dictionary<String, Object> update : this.isolated.getUpdates(pid)) {
-            assertFalse("ConfigurationAdmin received " + value + " for " + pid, value.equals(update.get(attribute)));
-        }
+    private void thenNoExceptionOccurred() {
+        assertNull(this.occurredException);
+    }
+
+    private void thenActivationFailedWith(final KuraErrorCode expected) {
+        assertTrue("expected ComponentException but got " + this.occurredException,
+                this.occurredException instanceof ComponentException);
+        final Throwable cause = this.occurredException.getCause();
+        assertTrue("expected KuraException cause but got " + cause, cause instanceof KuraException);
+        assertEquals(expected, ((KuraException) cause).getCode());
+    }
+
+    private void thenFailedWith(final KuraErrorCode expected) {
+        assertTrue("expected KuraException but got " + this.occurredException,
+                this.occurredException instanceof KuraException);
+        assertEquals(expected, ((KuraException) this.occurredException).getCode());
+    }
+
+    private void thenFrameworkShutdownWasRequested() throws Exception {
+        verify(this.isolated.getSystemBundle()).stop();
+    }
+
+    private void thenFrameworkShutdownWasNotRequested() throws Exception {
+        verify(this.isolated.getSystemBundle(), never()).stop();
+    }
+
+    private void thenNoConfigurationWasPushed() {
+        assertFalse("expected no configurations pushed to ConfigurationAdmin", this.isolated.hasAnyUpdates());
+    }
+
+    private void thenComponentUpdateCountIs(final String pid, final int expected) {
+        assertEquals(expected, this.isolated.getUpdates(pid).size());
     }
 
     private void thenComponentHolds(final String pid, final String attribute, final Object value) {

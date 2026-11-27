@@ -16,6 +16,7 @@ package org.eclipse.kura.core.configuration;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +43,8 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
+import org.mockito.AdditionalAnswers;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -51,6 +54,8 @@ import org.osgi.service.metatype.MetaTypeService;
 final class IsolatedConfigurationService {
 
     private final BundleContext bundleContext;
+    private final Bundle systemBundle = mock(Bundle.class);
+    private final SystemService systemService = mock(SystemService.class);
     private final ConfigurationServiceImpl service = new ConfigurationServiceImpl();
     private final ConfigurationAdmin configurationAdmin = mock(ConfigurationAdmin.class);
     private final Map<String, Configuration> configurations = new ConcurrentHashMap<>();
@@ -59,7 +64,8 @@ final class IsolatedConfigurationService {
     private final Path snapshotDirectory;
 
     IsolatedConfigurationService(final BundleContext bundleContext) throws Throwable {
-        this.bundleContext = bundleContext;
+        this.bundleContext = mock(BundleContext.class, AdditionalAnswers.delegatesTo(bundleContext));
+        doReturn(this.systemBundle).when(this.bundleContext).getBundle(0L);
         this.snapshotDirectory = Files.createTempDirectory("isolated-snapshots");
 
         ExternalMetatypeBundle.install(bundleContext);
@@ -71,10 +77,10 @@ final class IsolatedConfigurationService {
         this.service.setXmlMarshaller((Marshaller) TestUtil.getFieldValue(running, "xmlMarshaller"));
         this.service.setXmlUnmarshaller((Unmarshaller) TestUtil.getFieldValue(running, "xmlUnmarshaller"));
 
-        final SystemService systemService = mock(SystemService.class);
-        when(systemService.getKuraSnapshotsDirectory()).thenReturn(this.snapshotDirectory.toString());
-        when(systemService.getKuraSnapshotsCount()).thenReturn(10);
-        this.service.setSystemService(systemService);
+        when(this.systemService.getKuraSnapshotsDirectory()).thenReturn(this.snapshotDirectory.toString());
+        when(this.systemService.getKuraSnapshotsCount()).thenReturn(10);
+        when(this.systemService.isConfigurationValidationEnabled()).thenReturn(true);
+        this.service.setSystemService(this.systemService);
 
         mockConfigurationAdmin();
         this.service.setConfigurationAdmin(this.configurationAdmin);
@@ -82,6 +88,14 @@ final class IsolatedConfigurationService {
 
     ConfigurationServiceImpl getService() {
         return this.service;
+    }
+
+    Bundle getSystemBundle() {
+        return this.systemBundle;
+    }
+
+    void setConfigurationValidationEnabled(final boolean enabled) {
+        when(this.systemService.isConfigurationValidationEnabled()).thenReturn(enabled);
     }
 
     long saveSnapshot(final Collection<ComponentConfiguration> configurations) throws Throwable {
@@ -106,6 +120,10 @@ final class IsolatedConfigurationService {
 
     List<Dictionary<String, Object>> getUpdates(final String kuraServicePid) {
         return this.updates.getOrDefault(kuraServicePid, Collections.emptyList());
+    }
+
+    boolean hasAnyUpdates() {
+        return !this.updates.isEmpty();
     }
 
     private void mockConfigurationAdmin() throws Exception {

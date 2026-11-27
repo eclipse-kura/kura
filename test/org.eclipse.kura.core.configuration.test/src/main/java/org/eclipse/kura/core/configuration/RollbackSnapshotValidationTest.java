@@ -15,96 +15,130 @@ package org.eclipse.kura.core.configuration;
 
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.FACTORY_PID;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_ATTR;
-import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.INT_DEFAULT;
+import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.OPTIONAL_ATTR;
+import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.REQUIRED_PID;
 import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.VALIDATED_PID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.configuration.metatype.Tad;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.junit.After;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class RollbackSnapshotValidationTest {
 
-    private static final String NO_DEFAULT_PID = "org.eclipse.kura.core.configuration.test.rollback.NoDefault";
     private static final String FACTORY_INSTANCE_PID = "rollbackFactoryInstance";
 
     private IsolatedConfigurationService isolated;
     private long targetSnapshotId;
+    private Set<Long> snapshotsBeforeRollback;
     private KuraException occurredException;
 
     @Test
-    public void rollbackReplacesAnInvalidValueWithTheDefault() throws Throwable {
-        givenIsolatedConfigurationServiceStartedWith(5);
-        givenTargetSnapshotHolding(11);
+    public void rollbackRejectsInvalidSnapshotWithoutModifyingRunningConfigurationOrStoppingFramework()
+            throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5, "initial");
+        givenTargetSnapshotHolding(componentConfig(REQUIRED_PID, null, OPTIONAL_ATTR, "updated"),
+                componentConfig(VALIDATED_PID, null, INT_ATTR, 11));
+        givenSnapshotsAreRemembered();
+
+        whenRollingBackToTheTargetSnapshot();
+
+        thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentNeverReceives(VALIDATED_PID, INT_ATTR, 11);
+        thenComponentHolds(VALIDATED_PID, INT_ATTR, 5);
+        thenComponentHolds(REQUIRED_PID, OPTIONAL_ATTR, "initial");
+        thenSnapshotsAreUnchanged();
+    }
+
+    @Test
+    public void rollbackNoArgRejectsInvalidSnapshotWithoutStoppingFramework() throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5, "initial");
+        givenTargetSnapshotHolding(componentConfig(VALIDATED_PID, null, INT_ATTR, 11));
+        givenLaterSnapshotHolding(7);
+        givenSnapshotsAreRemembered();
+
+        whenRollingBackToPreviousSnapshot();
+
+        thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentNeverReceives(VALIDATED_PID, INT_ATTR, 11);
+        thenComponentHolds(VALIDATED_PID, INT_ATTR, 5);
+        thenSnapshotsAreUnchanged();
+    }
+
+    @Test
+    public void rollbackRejectsInvalidFactoryInstanceWithoutStoppingFramework() throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5, "initial");
+        givenTargetSnapshotHolding(componentConfig(FACTORY_INSTANCE_PID, FACTORY_PID, INT_ATTR, 11));
+        givenSnapshotsAreRemembered();
+
+        whenRollingBackToTheTargetSnapshot();
+
+        thenFailedWith(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentWasNeverUpdated(FACTORY_INSTANCE_PID);
+        thenSnapshotsAreUnchanged();
+    }
+
+    @Test
+    public void rollbackToAValidSnapshotIsAppliedWithoutStoppingFramework() throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5, "initial");
+        givenTargetSnapshotHolding(componentConfig(VALIDATED_PID, null, INT_ATTR, 9));
 
         whenRollingBackToTheTargetSnapshot();
 
         thenNoExceptionOccurred();
-        thenComponentNeverReceives(11);
-        thenComponentHolds(INT_DEFAULT);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentHolds(VALIDATED_PID, INT_ATTR, 9);
     }
 
     @Test
-    public void snapshotWrittenByTheRollbackHoldsTheDefault() throws Throwable {
-        givenIsolatedConfigurationServiceStartedWith(5);
-        givenTargetSnapshotHolding(11);
+    public void rollbackAppliesInvalidSnapshotWhenValidationIsDisabled() throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5, "initial");
+        givenConfigurationValidation(false);
+        givenTargetSnapshotHolding(componentConfig(VALIDATED_PID, null, INT_ATTR, 11));
         givenLaterSnapshotHolding(7);
 
         whenRollingBackToTheTargetSnapshot();
 
         thenNoExceptionOccurred();
-        thenLatestSnapshotHolds(INT_DEFAULT);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentHolds(VALIDATED_PID, INT_ATTR, 11);
+        thenLatestSnapshotHolds(VALIDATED_PID, INT_ATTR, 11);
     }
 
     @Test
-    public void rollbackToAValidSnapshotIsApplied() throws Throwable {
-        givenIsolatedConfigurationServiceStartedWith(5);
-        givenTargetSnapshotHolding(9);
+    public void rollbackAppliesInvalidFactoryInstanceWhenValidationIsDisabled() throws Throwable {
+        givenIsolatedConfigurationServiceStartedWith(5, "initial");
+        givenConfigurationValidation(false);
+        givenTargetSnapshotHolding(componentConfig(FACTORY_INSTANCE_PID, FACTORY_PID, INT_ATTR, 11));
 
         whenRollingBackToTheTargetSnapshot();
 
         thenNoExceptionOccurred();
-        thenComponentHolds(9);
-    }
-
-    @Test
-    public void rollbackRemovesAnInvalidValueWithoutADefault() throws Throwable {
-        givenIsolatedConfigurationServiceStartedWith(5);
-        givenComponentWithoutDefault();
-        givenTargetSnapshotHolding(NO_DEFAULT_PID, null, 11);
-
-        whenRollingBackToTheTargetSnapshot();
-
-        thenNoExceptionOccurred();
-        thenComponentHasNoValueFor(NO_DEFAULT_PID, INT_ATTR);
-    }
-
-    @Test
-    public void rollbackReplacesAnInvalidValueOfAFactoryInstanceWithTheDefault() throws Throwable {
-        givenIsolatedConfigurationServiceStartedWith(5);
-        givenTargetSnapshotHolding(FACTORY_INSTANCE_PID, FACTORY_PID, 11);
-
-        whenRollingBackToTheTargetSnapshot();
-
-        thenNoExceptionOccurred();
-        thenComponentHolds(FACTORY_INSTANCE_PID, INT_DEFAULT);
+        thenFrameworkShutdownWasNotRequested();
+        thenComponentHolds(FACTORY_INSTANCE_PID, INT_ATTR, 11);
     }
 
     @After
@@ -114,41 +148,29 @@ public class RollbackSnapshotValidationTest {
         }
     }
 
-    private void givenIsolatedConfigurationServiceStartedWith(final int value) throws Throwable {
+    private void givenIsolatedConfigurationServiceStartedWith(final int intValue, final String optionalValue)
+            throws Throwable {
         this.isolated = new IsolatedConfigurationService(
                 FrameworkUtil.getBundle(RollbackSnapshotValidationTest.class).getBundleContext());
-        this.isolated.saveSnapshot(snapshotHolding(VALIDATED_PID, null, value));
+        this.isolated.saveSnapshot(Arrays.asList(componentConfig(VALIDATED_PID, null, INT_ATTR, intValue),
+                componentConfig(REQUIRED_PID, null, OPTIONAL_ATTR, optionalValue)));
         this.isolated.activate();
     }
 
-    private void givenComponentWithoutDefault() throws KuraException {
-        final Tad attribute = new Tad();
-        attribute.setId(INT_ATTR);
-        attribute.setName(INT_ATTR);
-        attribute.setType(Tscalar.INTEGER);
-        attribute.setCardinality(0);
-        attribute.setRequired(false);
-        attribute.setMin("1");
-        attribute.setMax("10");
-
-        final Tocd ocd = new Tocd();
-        ocd.setId(NO_DEFAULT_PID);
-        ocd.addAD(attribute);
-
-        this.isolated.getService().registerComponentOCD(NO_DEFAULT_PID, ocd, false, mock(Bundle.class));
+    private void givenConfigurationValidation(final boolean enabled) {
+        this.isolated.setConfigurationValidationEnabled(enabled);
     }
 
-    private void givenTargetSnapshotHolding(final int value) throws Throwable {
-        givenTargetSnapshotHolding(VALIDATED_PID, null, value);
-    }
-
-    private void givenTargetSnapshotHolding(final String pid, final String factoryPid, final int value)
-            throws Throwable {
-        this.targetSnapshotId = this.isolated.saveSnapshot(snapshotHolding(pid, factoryPid, value));
+    private void givenTargetSnapshotHolding(final ComponentConfiguration... configs) throws Throwable {
+        this.targetSnapshotId = this.isolated.saveSnapshot(Arrays.asList(configs));
     }
 
     private void givenLaterSnapshotHolding(final int value) throws Throwable {
-        this.isolated.saveSnapshot(snapshotHolding(VALIDATED_PID, null, value));
+        this.isolated.saveSnapshot(Collections.singletonList(componentConfig(VALIDATED_PID, null, INT_ATTR, value)));
+    }
+
+    private void givenSnapshotsAreRemembered() throws KuraException {
+        this.snapshotsBeforeRollback = new TreeSet<>(this.isolated.getService().getSnapshots());
     }
 
     private void whenRollingBackToTheTargetSnapshot() {
@@ -159,55 +181,72 @@ public class RollbackSnapshotValidationTest {
         }
     }
 
+    private void whenRollingBackToPreviousSnapshot() {
+        try {
+            this.isolated.getService().rollback();
+        } catch (final KuraException e) {
+            this.occurredException = e;
+        }
+    }
+
     private void thenNoExceptionOccurred() {
         assertNull(this.occurredException);
     }
 
-    private void thenComponentNeverReceives(final int value) {
-        for (final Dictionary<String, Object> update : this.isolated.getUpdates(VALIDATED_PID)) {
-            assertFalse("ConfigurationAdmin received " + value, Integer.valueOf(value).equals(update.get(INT_ATTR)));
+    private void thenFailedWith(final KuraErrorCode expected) {
+        assertNotNull("expected KuraException", this.occurredException);
+        assertEquals(expected, this.occurredException.getCode());
+    }
+
+    private void thenFrameworkShutdownWasNotRequested() throws Exception {
+        verify(this.isolated.getSystemBundle(), never()).stop();
+    }
+
+    private void thenSnapshotsAreUnchanged() throws KuraException {
+        assertEquals(this.snapshotsBeforeRollback, new TreeSet<>(this.isolated.getService().getSnapshots()));
+    }
+
+    private void thenComponentNeverReceives(final String pid, final String attribute, final Object value) {
+        for (final Dictionary<String, Object> update : this.isolated.getUpdates(pid)) {
+            assertFalse("ConfigurationAdmin received " + value, value.equals(update.get(attribute)));
         }
     }
 
-    private void thenLatestSnapshotHolds(final int value) throws KuraException {
+    private void thenComponentWasNeverUpdated(final String pid) {
+        assertTrue("expected no updates for " + pid, this.isolated.getUpdates(pid).isEmpty());
+    }
+
+    private void thenLatestSnapshotHolds(final String pid, final String attribute, final Object value)
+            throws KuraException {
         final long latestId = Collections.max(this.isolated.getService().getSnapshots());
 
         for (final ComponentConfiguration configuration : this.isolated.getService().getSnapshot(latestId)) {
-            if (VALIDATED_PID.equals(configuration.getPid())) {
-                assertEquals(value, configuration.getConfigurationProperties().get(INT_ATTR));
+            if (pid.equals(configuration.getPid())) {
+                assertEquals(value, configuration.getConfigurationProperties().get(attribute));
                 return;
             }
         }
 
-        throw new AssertionError("snapshot " + latestId + " does not contain " + VALIDATED_PID);
+        throw new AssertionError("snapshot " + latestId + " does not contain " + pid);
     }
 
-    private void thenComponentHolds(final int value) {
-        thenComponentHolds(VALIDATED_PID, value);
-    }
-
-    private void thenComponentHolds(final String pid, final int value) {
+    private void thenComponentHolds(final String pid, final String attribute, final Object value) {
         final List<Dictionary<String, Object>> updates = this.isolated.getUpdates(pid);
 
-        assertEquals(value, updates.get(updates.size() - 1).get(INT_ATTR));
+        assertFalse("no configuration pushed for " + pid, updates.isEmpty());
+        assertEquals(value, updates.get(updates.size() - 1).get(attribute));
     }
 
-    private void thenComponentHasNoValueFor(final String pid, final String attribute) {
-        final List<Dictionary<String, Object>> updates = this.isolated.getUpdates(pid);
-
-        assertNull(updates.get(updates.size() - 1).get(attribute));
-    }
-
-    private static List<ComponentConfiguration> snapshotHolding(final String pid, final String factoryPid,
-            final int value) {
+    private static ComponentConfiguration componentConfig(final String pid, final String factoryPid,
+            final String attribute, final Object value) {
         final Map<String, Object> properties = new HashMap<>();
         properties.put(ConfigurationService.KURA_SERVICE_PID, pid);
-        properties.put(INT_ATTR, value);
+        properties.put(attribute, value);
 
         if (factoryPid != null) {
             properties.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
         }
 
-        return Collections.singletonList(new ComponentConfigurationImpl(pid, null, properties));
+        return new ComponentConfigurationImpl(pid, null, properties);
     }
 }

@@ -22,6 +22,8 @@ import static org.eclipse.kura.core.configuration.ExternalMetatypeBundle.VALIDAT
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -176,6 +178,30 @@ public class UpdateConfigurationResultTest {
         thenNoSnapshotWasWritten();
     }
 
+    @Test
+    public void updateConfigurationStillRejectsNullPropertiesWhenValidationIsDisabled() throws Throwable {
+        givenActivatedServiceWithInitialSnapshot();
+        givenConfigurationValidationDisabled();
+
+        whenUpdateConfigurationIsCalled(VALIDATED_PID, null);
+
+        thenKuraExceptionWasThrownWith(KuraErrorCode.INVALID_PARAMETER);
+        thenNoSnapshotWasWritten();
+        thenFrameworkShutdownWasNotRequested();
+    }
+
+    @Test
+    public void updateConfigurationStillRejectsUntrackedPidWhenValidationIsDisabled() throws Throwable {
+        givenActivatedServiceWithInitialSnapshot();
+        givenConfigurationValidationDisabled();
+
+        whenUpdateConfigurationIsCalled(UNTRACKED_PID, Collections.singletonMap("key", "value"));
+
+        thenKuraExceptionWasThrownWith(KuraErrorCode.CONFIGURATION_UPDATE);
+        thenNoSnapshotWasWritten();
+        thenFrameworkShutdownWasNotRequested();
+    }
+
     @After
     public void tearDown() throws Exception {
         if (this.isolated != null) {
@@ -192,6 +218,10 @@ public class UpdateConfigurationResultTest {
         this.isolated.getService().registerComponentConfiguration(REQUIRED_PID, REQUIRED_PID, null);
         this.isolated.getService().snapshot();
         this.snapshotsBefore = new TreeSet<>(this.isolated.getService().getSnapshots());
+    }
+
+    private void givenConfigurationValidationDisabled() {
+        this.isolated.setConfigurationValidationEnabled(false);
     }
 
     private void givenTrackedComponentWithoutOcd(final String pid) {
@@ -256,6 +286,10 @@ public class UpdateConfigurationResultTest {
     private void thenNoSnapshotWasWritten() throws KuraException {
         final Set<Long> snapshotsAfter = this.isolated.getService().getSnapshots();
         assertEquals(this.snapshotsBefore, snapshotsAfter);
+    }
+
+    private void thenFrameworkShutdownWasNotRequested() throws Exception {
+        verify(this.isolated.getSystemBundle(), never()).stop();
     }
 
     private void thenLatestSnapshotHolds(final String pid, final String key, final Object expectedValue)

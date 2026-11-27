@@ -36,7 +36,7 @@ A search box is available for the user to simplify the process of PID selection 
 
 ### Upload and Apply
 
-The **Upload and Apply** option  provides the ability to import an XML file from your computer and upload it onto the device. This function updates every service in Kura with the parameters defined in the XML file.
+The **Upload and Apply** option  provides the ability to import an XML file from your computer and upload it onto the device. This function updates every service in Kura with the parameters defined in the XML file. The values are checked against the metatype of each component, as described in [Configuration validation](../core-services/configuration-service.md#configuration-validation): a component with an invalid value is not updated and an error is reported, while the other components are updated.
 
 !!! warning
     Carefully select the file to be uploaded. An incorrect file may crash Kura and make it unresponsive.
@@ -73,6 +73,8 @@ Pressing the **Rollback** button, the Snapshot Rollback process will start, foll
 - if a **factory component is already present** in the system, **but it's not available nor selected on the snapshot**, nothing will happen on its configuration
 - if a **factory component is already present** in the system, **and it's available and selected on the snapshot**, the component configuration will be overwritten with the one in the selected snapshot
 
+The selected configurations are checked against the metatype of their components, as described in [Configuration validation](../core-services/configuration-service.md#configuration-validation). A component whose configuration in the snapshot holds an invalid value is not rolled back and keeps its current configuration, while the other selected components are rolled back.
+
 !!! warning
     Carefully select the snapshot and its PIDs to be rollbacked. Changing the configuration of some services could make Eclipse Kura unresponsive or not reachable
 
@@ -93,6 +95,8 @@ Pressing the **Apply** button, the rollback process will start. The framework wi
 - if a **factory component is not already present** in the system, **but it's available on the snapshot**, the component will be created with the configuration present in the selected snapshot
 - if a **factory component is already present** in the system, **but it's not available on the selected snapshot**, the component will be removed
 - if a **factory component is already present** in the system, **and it's available on the selected snapshot**, the component configuration will be overwritten with the one in the selected snapshot
+
+The values of the snapshot are checked against the metatype of their components, as described in [Configuration validation](../core-services/configuration-service.md#configuration-validation): when strict validation is enabled, if any component contains an invalid value the entire rollback is rejected and the running configuration is left unchanged; when `kura.configuration.validation=false` is set, violations are logged as warnings and the rollback proceeds.
 
 !!! warning
     Carefully select the snapshot to be rollbacked. Changing the configuration of the system could make Eclipse Kura unresponsive or not reachable

@@ -38,6 +38,8 @@ Example:
 
 Please note that the url can refer to a `.dp` already in the device filesystem.
 
+For remote HTTP(S) repositories protected with HTTP Basic Authentication, credentials can be embedded in the URL (`https://username:password@host/path/to/package.dp`). Reserved characters inside the username or password (such as `@`, `/`, `?`, `#`) must be percent-encoded according to RFC 3986 (for example, encode `@` as `%40`). Credentials are not forwarded across HTTP redirects; use HTTPS whenever credentials are included (sending credentials over plain HTTP logs a warning).
+
 !!! note
     If the URL refers to a remote server, the size of the downloaded deployment package is limited by the `file.transfer.size.max` Kura property (default: `26214400` bytes, i.e. 25 MB). If the package exceeds the limit, the download is aborted and the package is not installed. Deployment packages already available on the device filesystem are not subject to this limit. Refer to [Download Size Limit](../../administration/application-management.md#download-size-limit) for further details on how to change the limit.
 

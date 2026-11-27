@@ -413,17 +413,14 @@ public class ConfigurationServiceTest {
     public void testUpdateConfigurationPidPropertiesNull() {
         whenUpdateConfiguration(null, null);
 
-        thenNPExceptionOccurred();
+        thenKuraExceptionOccurred(KuraErrorCode.INVALID_PARAMETER);
     }
 
     @Test
     public void testUpdateConfigurationPidPropertiesNullProps() {
-        givenUpdateConfiguration("abcdefg", null);
+        whenUpdateConfiguration("abcdefg", null);
 
-        whenGetComponentConfiguration("abcdefg");
-
-        thenConfigurationIsNull();
-        thenNoExceptionOccurred();
+        thenKuraExceptionOccurred(KuraErrorCode.INVALID_PARAMETER);
     }
 
     @Test
@@ -522,12 +519,8 @@ public class ConfigurationServiceTest {
 
         whenUpdateConfigurations();
 
-        thenComponentConfigurationsContainPidsWithExampleProperties("ex1", "ex2", "ex3");
-        thenSnapshotsIncreasedBy(1);
-        thenLastSnapshotNotContainsProperties("ex1", this.exampleProperties);
-        thenLastSnapshotNotContainsProperties("ex2", this.exampleProperties);
-        thenLastSnapshotNotContainsProperties("ex3", this.exampleProperties);
-        thenNoExceptionOccurred();
+        thenKuraExceptionOccurred(KuraErrorCode.PARTIAL_SUCCESS);
+        thenSnapshotsIncreasedBy(0);
     }
 
     @Test

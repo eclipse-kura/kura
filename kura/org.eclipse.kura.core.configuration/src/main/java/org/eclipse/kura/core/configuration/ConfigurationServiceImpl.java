@@ -383,12 +383,24 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     @Override
     public synchronized void updateConfiguration(String pidToUpdate, Map<String, Object> propertiesToUpdate)
             throws KuraException { // don't call this method internally
+        if (pidToUpdate == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
+        }
+        if (propertiesToUpdate == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "properties cannot be null");
+        }
         updateConfiguration(pidToUpdate, propertiesToUpdate, true);
     }
 
     @Override
     public synchronized void updateConfiguration(String pidToUpdate, Map<String, Object> propertiesToUpdate,
             boolean takeSnapshot) throws KuraException { // don't call this method internally
+        if (pidToUpdate == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
+        }
+        if (propertiesToUpdate == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "properties cannot be null");
+        }
         List<ComponentConfiguration> configs = new ArrayList<>();
         ComponentConfigurationImpl cci = new ComponentConfigurationImpl(pidToUpdate, null, propertiesToUpdate);
         configs.add(cci);
@@ -412,20 +424,41 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     // Don't perform internal calls to this method
     @Override
     public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate) throws KuraException {
+        if (configsToUpdate == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "configsToUpdate cannot be null");
+        }
         updateConfigurations(configsToUpdate, true);
     }
 
     @Override
     public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate, boolean takeSnapshot)
             throws KuraException { // don't call this method internally
+        if (configsToUpdate == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "configsToUpdate cannot be null");
+        }
+        validateUpdateInputs(configsToUpdate);
+
         for (ComponentConfiguration config : configsToUpdate) {
-            if (config != null) {
-                encryptConfigurationProperties(config.getConfigurationProperties());
-            }
+            encryptConfigurationProperties(config.getConfigurationProperties());
         }
 
         // only encrypted properties are passed to internal methods
         updateConfigurationsInternal(configsToUpdate, takeSnapshot);
+    }
+
+    private static void validateUpdateInputs(final List<ComponentConfiguration> configsToUpdate) throws KuraException {
+        for (final ComponentConfiguration config : configsToUpdate) {
+            if (config == null) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "configuration cannot be null");
+            }
+            if (config.getPid() == null) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
+            }
+            if (config.getConfigurationProperties() == null) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                        "properties cannot be null for pid " + config.getPid());
+            }
+        }
     }
 
     // ----------------------------------------------------------------
@@ -866,32 +899,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private synchronized void updateConfigurationsInternal(List<ComponentConfiguration> configsToUpdate,
             boolean takeSnapshot) throws KuraException {
         List<Throwable> causes = new ArrayList<>();
+        Map<String, ComponentConfiguration> previousConfigs = new HashMap<>();
+        List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate, previousConfigs);
 
-        List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
-
-        boolean anyChangeApplied = updateComponentsInternal(configsToUpdate, configs, causes);
-
-        // this step creates any not yet existing factory configuration present in configsToUpdate
-        for (ComponentConfiguration config : configsToUpdate) {
-            String factoryPid = null;
-            final Map<String, Object> properties = config.getConfigurationProperties();
-            if (properties != null) {
-                factoryPid = (String) properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
-            }
-            if (factoryPid != null && !this.allActivatedPids.contains(config.getPid())) {
-                ConfigurationUpgrade.upgrade(config, this.bundleContext);
-                String pid = config.getPid();
-                logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
-                try {
-                    createFactoryConfigurationInternal(factoryPid, pid, properties, false);
-                    configs.add(config);
-                    anyChangeApplied = true;
-                } catch (KuraException e) {
-                    logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
-                    causes.add(e);
-                }
-            }
-        }
+        boolean anyChangeApplied = applyComponentUpdates(configsToUpdate, configs, previousConfigs, causes);
 
         if (takeSnapshot && configs != null && !configs.isEmpty() && (causes.isEmpty() || anyChangeApplied)) {
             saveSnapshot(configs);
@@ -902,32 +913,96 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private boolean updateComponentsInternal(List<ComponentConfiguration> configsToUpdate,
-            List<ComponentConfiguration> configs, List<Throwable> causes) {
+    private boolean applyComponentUpdates(List<ComponentConfiguration> configsToUpdate,
+            List<ComponentConfiguration> configs, Map<String, ComponentConfiguration> previousConfigs,
+            List<Throwable> causes) {
         boolean anyChangeApplied = false;
 
-        for (int i = 0; i < configs.size(); i++) {
-            final ComponentConfiguration config = configs.get(i);
-            for (ComponentConfiguration configToUpdate : configsToUpdate) {
-                if (config.getPid().equals(configToUpdate.getPid())) {
-                    try {
-                        updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), false);
-                        anyChangeApplied = true;
-                    } catch (KuraException e) {
-                        logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
-                        causes.add(e);
-                        restoreCurrentConfiguration(configs, i);
-                    }
-                    break;
-                }
+        for (ComponentConfiguration configToUpdate : configsToUpdate) {
+            final String pid = configToUpdate.getPid();
+            final int configIndex = indexOfPid(configs, pid);
+
+            if (this.allActivatedPids.contains(pid)) {
+                anyChangeApplied |= applyTrackedComponentUpdate(configToUpdate, configs, configIndex, previousConfigs,
+                        causes);
+            } else {
+                anyChangeApplied |= applyUntrackedComponentUpdate(configToUpdate, configs, configIndex, causes);
             }
         }
 
         return anyChangeApplied;
     }
 
-    private void restoreCurrentConfiguration(List<ComponentConfiguration> configs, int index) {
-        final ComponentConfiguration currentConfig = getComponentConfigurationInternal(configs.get(index).getPid());
+    private boolean applyTrackedComponentUpdate(ComponentConfiguration configToUpdate,
+            List<ComponentConfiguration> configs, int configIndex, Map<String, ComponentConfiguration> previousConfigs,
+            List<Throwable> causes) {
+        final String pid = configToUpdate.getPid();
+        final Map<String, Object> propertiesToApply = configIndex >= 0
+                ? configs.get(configIndex).getConfigurationProperties()
+                : configToUpdate.getConfigurationProperties();
+
+        try {
+            updateConfigurationInternal(pid, propertiesToApply, false);
+            return true;
+        } catch (KuraException e) {
+            logger.warn("Error during updateConfigurations for component {}", pid, e);
+            causes.add(e);
+            if (configIndex >= 0) {
+                restoreCurrentConfiguration(configs, configIndex, previousConfigs);
+            }
+            return false;
+        }
+    }
+
+    private boolean applyUntrackedComponentUpdate(ComponentConfiguration configToUpdate,
+            List<ComponentConfiguration> configs, int configIndex, List<Throwable> causes) {
+        final String pid = configToUpdate.getPid();
+        final Map<String, Object> properties = configToUpdate.getConfigurationProperties();
+        final Object rawFactoryPid = properties != null ? properties.get(ConfigurationAdmin.SERVICE_FACTORYPID) : null;
+        final String factoryPid = rawFactoryPid instanceof String ? (String) rawFactoryPid : null;
+
+        if (factoryPid == null) {
+            logger.warn("Cannot update configuration: ConfigurableComponent {} is NOT tracked.", pid);
+            causes.add(new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, pid));
+            return false;
+        }
+
+        ConfigurationUpgrade.upgrade(configToUpdate, this.bundleContext);
+        logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
+
+        try {
+            createFactoryConfigurationInternal(factoryPid, pid, configToUpdate.getConfigurationProperties(), false);
+            if (configIndex >= 0) {
+                configs.set(configIndex, configToUpdate);
+            } else {
+                configs.add(configToUpdate);
+            }
+            return true;
+        } catch (KuraException e) {
+            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
+            causes.add(e);
+            return false;
+        }
+    }
+
+    private static int indexOfPid(final List<ComponentConfiguration> configs, final String pid) {
+        for (int i = 0; i < configs.size(); i++) {
+            final ComponentConfiguration config = configs.get(i);
+            if (config != null && pid.equals(config.getPid())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void restoreCurrentConfiguration(List<ComponentConfiguration> configs, int index,
+            Map<String, ComponentConfiguration> previousConfigs) {
+        final String pid = configs.get(index).getPid();
+        ComponentConfiguration currentConfig = getComponentConfigurationInternal(pid);
+
+        if (currentConfig == null) {
+            currentConfig = previousConfigs.get(pid);
+        }
 
         if (currentConfig != null) {
             configs.set(index, currentConfig);
@@ -1833,20 +1908,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throws KuraException {
         logger.debug("Attempting update configuration for {}", pid);
 
-        if (!this.allActivatedPids.contains(pid)) {
-            logger.info("UpdatingConfiguration ignored as ConfigurableComponent {} is NOT tracked.", pid);
-            return;
+        if (pid == null) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         }
         if (properties == null) {
-            logger.info("UpdatingConfiguration ignored as properties for ConfigurableComponent {} are NULL.", pid);
-            return;
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "properties cannot be null");
+        }
+        if (!this.allActivatedPids.contains(pid)) {
+            logger.warn("Cannot update configuration: ConfigurableComponent {} is NOT tracked.", pid);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, pid);
         }
 
         // get the OCD from the registered ConfigurableComponents
         OCD registerdOCD = getRegisteredOCD(pid);
         if (registerdOCD == null) {
-            logger.info("UpdatingConfiguration ignored as OCD for pid {} cannot be found.", pid);
-            return;
+            logger.warn("Cannot update configuration: OCD for pid {} cannot be found.", pid);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, pid);
         }
 
         Map<String, Object> mergedProperties = mergeWithCurrentProperties(pid, registerdOCD, properties);
@@ -2057,6 +2134,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private synchronized List<ComponentConfiguration> buildCurrentConfiguration(
             List<ComponentConfiguration> configsToUpdate) throws KuraException {
+        return buildCurrentConfiguration(configsToUpdate, null);
+    }
+
+    private synchronized List<ComponentConfiguration> buildCurrentConfiguration(
+            List<ComponentConfiguration> configsToUpdate, Map<String, ComponentConfiguration> previousConfigs)
+            throws KuraException {
         List<ComponentConfiguration> result = new ArrayList<>();
 
         // Merge the current configuration of registered components with the provided configurations.
@@ -2064,6 +2147,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         List<ComponentConfiguration> currentConfigs = getComponentConfigurationsInternal();
         if (currentConfigs != null) {
             for (ComponentConfiguration currentConfig : currentConfigs) {
+                if (previousConfigs != null && currentConfig != null && currentConfig.getPid() != null) {
+                    previousConfigs.put(currentConfig.getPid(), currentConfig);
+                }
                 // either add this configuration or a new one obtained by merging its properties with the ones provided
                 ComponentConfiguration cc = currentConfig;
                 String pid = currentConfig.getPid();

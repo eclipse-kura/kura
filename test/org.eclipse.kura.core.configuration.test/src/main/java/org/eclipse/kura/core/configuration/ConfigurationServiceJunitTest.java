@@ -890,8 +890,8 @@ public class ConfigurationServiceJunitTest {
 
         boolean takeSnapshot = false;
         final List<ComponentConfiguration> configs = new ArrayList<>();
-        configs.add(null);
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
+        cfg.setPid("pid");
         Map<String, Object> props = new HashMap<>();
         cfg.setProperties(props);
         props.put("pass", new Password("pass"));

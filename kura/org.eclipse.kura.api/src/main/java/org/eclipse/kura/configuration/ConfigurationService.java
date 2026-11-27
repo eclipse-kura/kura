@@ -229,8 +229,6 @@ public interface ConfigurationService {
      * component with the specified PID and then sends an update using the
      * specified properties.
      * <br>
-     * If the component to be updated is not yet registered with the ConfigurationService,
-     * it is first registered and then it is updated with the specified properties.
      * Before updating the component, the specified properties, merged with the current
      * configuration of the Component, are validated by the Configuration Service against
      * the ObjectClassDefinition associated to the Component.
@@ -244,7 +242,10 @@ public interface ConfigurationService {
      * @param properties
      *            Properties to be used as the new Configuration for the specified Component.
      * @throws KuraException
-     *             if the properties specified do not pass the validation of the ObjectClassDefinition
+     *             if {@code pid} or {@code properties} is {@code null} ({@code INVALID_PARAMETER}),
+     *             if the component is not tracked or has no registered ObjectClassDefinition
+     *             ({@code CONFIGURATION_UPDATE}), or if the properties specified do not pass
+     *             the validation of the ObjectClassDefinition
      */
     public void updateConfiguration(String pid, Map<String, Object> properties) throws KuraException;
 
@@ -254,8 +255,6 @@ public interface ConfigurationService {
      * component with the specified PID and then send an update using the
      * specified properties.
      * <br>
-     * If the component to be updated is not yet registered with the ConfigurationService,
-     * it is first registered and then it is updated with the specified properties.
      * Before updating the component, the specified properties, merged with the current
      * configuration of the Component, are validated by the Configuration Service against
      * the ObjectClassDefinition associated to the Component.
@@ -271,7 +270,10 @@ public interface ConfigurationService {
      * @param takeSnapshot
      *            defines whether or not this configuration update should trigger a snapshot.
      * @throws KuraException
-     *             if the properties specified do not pass the validation of the ObjectClassDefinition.
+     *             if {@code pid} or {@code properties} is {@code null} ({@code INVALID_PARAMETER}),
+     *             if the component is not tracked or has no registered ObjectClassDefinition
+     *             ({@code CONFIGURATION_UPDATE}), or if the properties specified do not pass
+     *             the validation of the ObjectClassDefinition.
      *
      * @since 1.0.8
      */
@@ -284,8 +286,6 @@ public interface ConfigurationService {
      * component with the specified PID and then send an update using the
      * specified properties.
      * <br>
-     * If the component to be updated is not yet registered with the ConfigurationService,
-     * it is first registered and then it is updated with the specified properties.
      * Before updating the component, the specified properties, merged with the current
      * configuration of the Component, are validated by the Configuration Service against
      * the ObjectClassDefinition associated to the Component.
@@ -297,7 +297,9 @@ public interface ConfigurationService {
      * @param configs
      *            The list of ComponentConfiguration whose update is requested.
      * @throws KuraException
-     *             if the properties specified do not pass the validation of the ObjectClassDefinition
+     *             if {@code configs}, any entry, its PID or its properties is {@code null}
+     *             ({@code INVALID_PARAMETER}), or if one or more components cannot be updated
+     *             (untracked PID, missing ObjectClassDefinition, validation or update failure)
      */
     public void updateConfigurations(List<ComponentConfiguration> configs) throws KuraException;
 
@@ -307,8 +309,6 @@ public interface ConfigurationService {
      * component with the specified PID and then send an update using the
      * specified properties.
      * <br>
-     * If the component to be updated is not yet registered with the ConfigurationService,
-     * it is first registered and then it is updated with the specified properties.
      * Before updating the component, the specified properties, merged with the current
      * configuration of the Component, are validated by the Configuration Service against
      * the ObjectClassDefinition associated to the Component.
@@ -322,7 +322,9 @@ public interface ConfigurationService {
      * @param takeSnapshot
      *            defines whether or not this configuration update should trigger a snapshot.
      * @throws KuraException
-     *             if the properties specified do not pass the validation of the ObjectClassDefinition
+     *             if {@code configs}, any entry, its PID or its properties is {@code null}
+     *             ({@code INVALID_PARAMETER}), or if one or more components cannot be updated
+     *             (untracked PID, missing ObjectClassDefinition, validation or update failure)
      *
      * @since 1.0.8
      */

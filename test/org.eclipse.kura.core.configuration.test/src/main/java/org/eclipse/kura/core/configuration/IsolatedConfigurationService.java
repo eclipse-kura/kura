@@ -32,6 +32,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -60,6 +61,8 @@ final class IsolatedConfigurationService {
     private final ConfigurationAdmin configurationAdmin = mock(ConfigurationAdmin.class);
     private final Map<String, Configuration> configurations = new ConcurrentHashMap<>();
     private final Map<String, List<Dictionary<String, Object>>> updates = new ConcurrentHashMap<>();
+    private final Set<String> failingUpdateServicePids = ConcurrentHashMap.newKeySet();
+    private final Map<String, AtomicInteger> failingLookupAfterCalls = new ConcurrentHashMap<>();
     private final AtomicInteger factoryInstanceCounter = new AtomicInteger();
     private final Path snapshotDirectory;
 
@@ -126,6 +129,19 @@ final class IsolatedConfigurationService {
         return !this.updates.isEmpty();
     }
 
+    void failUpdatesFor(final String servicePid) {
+        this.failingUpdateServicePids.add(servicePid);
+    }
+
+    void failGetConfigurationAfterCalls(final String servicePid, final int succeedingCalls) {
+        this.failingLookupAfterCalls.put(servicePid, new AtomicInteger(succeedingCalls));
+    }
+
+    void clearFailures() {
+        this.failingUpdateServicePids.clear();
+        this.failingLookupAfterCalls.clear();
+    }
+
     private void mockConfigurationAdmin() throws Exception {
         when(this.configurationAdmin.getConfiguration(anyString(), anyString()))
                 .thenAnswer(invocation -> getConfiguration(invocation.getArgument(0), null));
@@ -142,6 +158,12 @@ final class IsolatedConfigurationService {
     }
 
     private Configuration getConfiguration(final String servicePid, final String factoryPid) throws IOException {
+        final AtomicInteger remaining = this.failingLookupAfterCalls.get(servicePid);
+
+        if (remaining != null && remaining.getAndDecrement() <= 0) {
+            throw new IOException("Simulated ConfigurationAdmin lookup failure for " + servicePid);
+        }
+
         final Configuration existing = this.configurations.get(servicePid);
 
         if (existing != null) {
@@ -158,6 +180,10 @@ final class IsolatedConfigurationService {
             return properties == null ? null : copy(properties);
         });
         doAnswer(invocation -> {
+            if (this.failingUpdateServicePids.contains(servicePid)) {
+                throw new IOException("Simulated ConfigurationAdmin update failure for " + servicePid);
+            }
+
             final Dictionary<String, Object> properties = copy(invocation.getArgument(0));
             stored.put(servicePid, properties);
 

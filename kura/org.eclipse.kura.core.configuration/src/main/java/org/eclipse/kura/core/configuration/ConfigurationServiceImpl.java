@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -72,6 +73,7 @@ import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -462,7 +464,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid " + pid + " already exists");
         }
 
-        Map<String, Object> mergedProperties = mergeWithFactoryDefaults(factoryPid, properties);
+        Map<String, Object> mergedProperties = mergeWithFactoryDefaults(factoryPid, pid, properties);
 
         mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
 
@@ -582,7 +584,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         boolean snapshotOnConfirmation = false;
         List<Throwable> causes = new ArrayList<>();
         List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
-        replaceInvalidSnapshotValues(configs);
+        validateRollbackSnapshot(configs);
 
         // remove all existing factory configurations
         for (String pid : new ArrayList<>(this.factoryPidByPid.keySet())) {
@@ -1046,7 +1048,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 props.put(ConfigurationService.KURA_SERVICE_PID, pid);
             }
 
-            replaceInvalidValues(pid, ocd, props);
+            validateComponentValues(pid, ocd, props);
 
             // merge the current properties, if any, with the defaults from metatype
             mergeWithDefaults(ocd, props);
@@ -1535,12 +1537,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return;
         }
         final Map<String, OCD> installedOCDs = findInstalledOCDs(configs);
+        validateStartupSnapshot(configs, installedOCDs);
+
         for (ComponentConfiguration config : configs) {
             if (config != null && config.getConfigurationProperties() != null) {
                 Map<String, Object> props = new HashMap<>(config.getConfigurationProperties());
                 String factoryPid = (String) props.get(ConfigurationAdmin.SERVICE_FACTORYPID);
-
-                replaceInvalidValues(config.getPid(), installedOCDs.get(getMetatypePid(config)), props);
 
                 if (factoryPid != null) {
                     String pid = config.getPid();
@@ -1628,42 +1630,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private void replaceInvalidValues(final String pid, final OCD ocd, final Map<String, Object> properties) {
-        if (ocd == null || ocd.getAD() == null) {
-            return;
-        }
-
-        Map<String, Object> defaults = null;
-
-        for (final AD ad : ocd.getAD()) {
-            final Object value = properties.get(ad.getId());
-
-            if (value == null) {
-                continue;
-            }
-
-            try {
-                MetatypeValidator.validateValue(ad, value);
-            } catch (final KuraException e) {
-                if (defaults == null) {
-                    defaults = getDefaultPropertiesOrEmpty(ocd);
-                }
-
-                final Object defaultValue = defaults.get(ad.getId());
-
-                if (defaultValue != null) {
-                    logger.error("Invalid configuration of component {}: attribute {} replaced with its default value. {}",
-                            pid, ad.getId(), e.getMessage());
-                    properties.put(ad.getId(), defaultValue);
-                } else {
-                    logger.error("Invalid configuration of component {}: attribute {} removed, it has no default value. {}",
-                            pid, ad.getId(), e.getMessage());
-                    properties.remove(ad.getId());
-                }
-            }
-        }
-    }
-
     private Map<String, Object> getDefaultPropertiesOrEmpty(final OCD ocd) {
         try {
             return getDefaultProperties(ocd);
@@ -1673,21 +1639,81 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private void replaceInvalidSnapshotValues(final Collection<ComponentConfiguration> configs) {
+    private void validateStartupSnapshot(final List<ComponentConfiguration> configs,
+            final Map<String, OCD> installedOCDs) throws KuraException {
+        final KuraException firstViolation = validateSnapshotConfigurations(configs,
+                config -> installedOCDs.get(getMetatypePid(config)));
+
+        if (firstViolation != null) {
+            logger.error("Stopping framework because the latest configuration snapshot failed strict validation");
+            stopFramework();
+            throw firstViolation;
+        }
+    }
+
+    private void validateRollbackSnapshot(final Collection<ComponentConfiguration> configs) throws KuraException {
+        final KuraException firstViolation = validateSnapshotConfigurations(configs,
+                config -> getSnapshotOCD(config.getPid(), config.getConfigurationProperties()));
+
+        if (firstViolation != null) {
+            throw firstViolation;
+        }
+    }
+
+    private KuraException validateSnapshotConfigurations(final Collection<ComponentConfiguration> configs,
+            final Function<ComponentConfiguration, OCD> ocdResolver) {
         if (configs == null) {
+            return null;
+        }
+
+        final boolean strictValidation = isConfigurationValidationEnabled();
+        KuraException firstViolation = null;
+
+        for (final ComponentConfiguration config : configs) {
+            final KuraException violation = validateSnapshotConfiguration(config, ocdResolver, strictValidation);
+            if (firstViolation == null) {
+                firstViolation = violation;
+            }
+        }
+
+        return firstViolation;
+    }
+
+    private KuraException validateSnapshotConfiguration(final ComponentConfiguration config,
+            final Function<ComponentConfiguration, OCD> ocdResolver, final boolean strictValidation) {
+        if (config == null || config.getConfigurationProperties() == null) {
+            return null;
+        }
+
+        final OCD ocd = ocdResolver.apply(config);
+        final List<KuraException> violations = MetatypeValidator.findValueViolations(ocd,
+                config.getConfigurationProperties());
+
+        if (violations.isEmpty()) {
+            return null;
+        }
+
+        if (strictValidation) {
+            logValidationErrors(config.getPid(), violations);
+            return violations.get(0);
+        }
+
+        logValidationWarnings(config.getPid(), violations);
+        return null;
+    }
+
+    private void stopFramework() {
+        if (this.bundleContext == null) {
             return;
         }
 
-        for (final ComponentConfiguration config : configs) {
-            if (config == null) {
-                continue;
+        try {
+            final Bundle systemBundle = this.bundleContext.getBundle(0);
+            if (systemBundle != null) {
+                systemBundle.stop();
             }
-
-            final Map<String, Object> properties = config.getConfigurationProperties();
-
-            if (properties != null) {
-                replaceInvalidValues(config.getPid(), getSnapshotOCD(config.getPid(), properties), properties);
-            }
+        } catch (final BundleException e) {
+            logger.error("Failed to stop OSGi framework after configuration validation failure", e);
         }
     }
 
@@ -1854,7 +1880,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         final Object factoryPid = properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
 
         if (factoryPid instanceof String && !this.allActivatedPids.contains(pid)) {
-            mergeWithFactoryDefaults((String) factoryPid, properties);
+            mergeWithFactoryDefaults((String) factoryPid, pid, properties);
             return;
         }
 
@@ -1869,7 +1895,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private Map<String, Object> mergeWithFactoryDefaults(String factoryPid, Map<String, Object> properties)
+    private Map<String, Object> mergeWithFactoryDefaults(String factoryPid, String pid, Map<String, Object> properties)
             throws KuraException {
         Map<String, Object> mergedProperties = new HashMap<>();
         if (properties != null) {
@@ -1878,7 +1904,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         OCD ocd = this.ocds.get(factoryPid);
         mergeWithDefaults(ocd, mergedProperties);
-        MetatypeValidator.validateValues(ocd, mergedProperties);
+        validateComponentValues(pid, ocd, mergedProperties);
 
         return mergedProperties;
     }
@@ -1969,6 +1995,28 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         logValidationWarnings(pid, violations);
+    }
+
+    private void validateComponentValues(final String pid, final OCD ocd, final Map<String, Object> properties)
+            throws KuraException {
+        final List<KuraException> violations = MetatypeValidator.findValueViolations(ocd, properties);
+
+        if (violations.isEmpty()) {
+            return;
+        }
+
+        if (isConfigurationValidationEnabled()) {
+            logValidationErrors(pid, violations);
+            throw violations.get(0);
+        }
+
+        logValidationWarnings(pid, violations);
+    }
+
+    private void logValidationErrors(final String pid, final List<KuraException> violations) {
+        for (final KuraException violation : violations) {
+            logger.error("Invalid configuration for component {}: {}", pid, violation.getMessage());
+        }
     }
 
     private void logValidationWarnings(final String pid, final List<KuraException> violations) {

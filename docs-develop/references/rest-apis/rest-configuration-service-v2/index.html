@@ -6646,6 +6646,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="configuration-v2-rest-apis-and-conf-v2-request-handler">Configuration V2 REST APIs and CONF-V2 Request Handler</h1>
 <p>This page describes the CONF-V2 request handler and <code>configuration/v2</code> rest APIs. Accessing the REST APIs requires to use an identity with the <code>rest.configuration</code> permission assigned.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Starting from Kura 5.6.3, the configuration of the UserAdmin persistence component (<code>org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl</code>), which contains identities and permissions, is returned and can be updated through the REST APIs only by identities holding the <code>kura.admin</code> permission; for other identities its pid is also omitted from the pid lists and from the default configuration requests. Snapshot rollback requires <code>kura.admin</code> as well. Requests received through the CONF-V2 request handler are not affected. See <a href="../../../gateway-configuration/authentication-and-authorization/#identity-and-permission-management-through-the-rest-apis">Identity and permission management through the REST APIs</a> for details and for the startup argument that restores the previous behaviour.</p>
+</div>
 <ul>
 <li><a href="#request-definitions">Request definitions</a><ul>
 <li><a href="#getsnapshots">GET/snapshots</a></li>
@@ -6853,7 +6857,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="getconfigurablecomponents">GET/configurableComponents</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents</code></li>
-<li><strong>description</strong> : Returns the list of the pids available on the system.</li>
+<li><strong>description</strong> : Returns the list of the pids available on the system. Starting from Kura 5.6.3, the UserAdmin persistence component pid is included only if the requesting identity holds the <code>kura.admin</code> permission.</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded.</li>
@@ -6873,7 +6877,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="getconfigurablecomponentspidswithfactory">GET/configurableComponents/pidsWithFactory</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/pidsWithFactory</code></li>
-<li><strong>description</strong> : Returns the list of the pids available on the system, reporting also the factory pid where applicable.</li>
+<li><strong>description</strong> : Returns the list of the pids available on the system, reporting also the factory pid where applicable. Starting from Kura 5.6.3, the UserAdmin persistence component pid is included only if the requesting identity holds the <code>kura.admin</code> permission.</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded.</li>
@@ -6893,7 +6897,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="getconfigurablecomponentsconfigurations">GET/configurableComponents/configurations</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/configurations</code></li>
-<li><strong>description</strong> : Returns all of component configurations available on the system. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. For password properties, the <code>placeholder</code> string will be returned instead of the configured password.</li>
+<li><strong>description</strong> : Returns all of component configurations available on the system. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. For password properties, the <code>placeholder</code> string will be returned instead of the configured password. Starting from Kura 5.6.3, the UserAdmin persistence component configuration is included only if the requesting identity holds the <code>kura.admin</code> permission.</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded.</li>
@@ -6913,7 +6917,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="postconfigurablecomponentsconfigurationsbypid">POST/configurableComponents/configurations/byPid</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/configurations/byPid</code></li>
-<li><strong>description</strong> : Returns a user selected set of configurations. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. For password properties, the <code>placeholder</code> string will be returned instead of the configured password.</li>
+<li><strong>description</strong> : Returns a user selected set of configurations. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. For password properties, the <code>placeholder</code> string will be returned instead of the configured password. Starting from Kura 5.6.3, the UserAdmin persistence component configuration is included only if the requesting identity holds the <code>kura.admin</code> permission.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#pidset">PidSet</a></li>
 </ul>
@@ -6943,7 +6947,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="postconfigurablecomponentsconfigurationsbypid_default">POST/configurableComponents/configurations/byPid/_default</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/configurations/byPid/_default</code></li>
-<li><strong>description</strong> : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. Password property values will be returned in plain text.</li>
+<li><strong>description</strong> : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. Password property values will be returned in plain text. Starting from Kura 5.6.3, the default configuration of the UserAdmin persistence component is returned only if the requesting identity holds the <code>kura.admin</code> permission.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#pidset">PidSet</a></li>
 </ul>
@@ -6987,6 +6991,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="#genericfailurereport">GenericFailureReport</a></li>
 </ul>
 </li>
+<li><strong>403</strong></li>
+<li><strong>description</strong> : Since Kura 5.6.3, the request includes the UserAdmin persistence component configuration and the requesting identity does not hold the <code>kura.admin</code> permission. No changes are applied to the system.</li>
 <li><strong>500</strong></li>
 <li><strong>description</strong> : In case of processing errors, the device will attempt to return a detailed error response containing a message describing the failure reason for each operation. The operation ids are the following: <code>update:$pid</code> for component update operations, where <code>$pid</code> is the pid of the instance, and <code>snapshot</code>, for the snapshot creation operation. In case of an unexpected failure, a generic error response will be returned.</li>
 <li>
@@ -7029,7 +7035,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="execsnapshots_rollback">EXEC/snapshots/_rollback</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/snapshots/_rollback</code></li>
-<li><strong>description</strong> : Rollbacks the framework to the last saved snapshot if available. If this request is used through REST API, the POST method must be used.</li>
+<li><strong>description</strong> : Rollbacks the framework to the last saved snapshot if available. If this request is used through REST API, the POST method must be used. Starting from Kura 5.6.3, this request requires the <code>kura.admin</code> permission.</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded. The result contains the id of the snapshot used for rollback.</li>
@@ -7037,6 +7043,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="#snaphsotid">SnaphsotId</a></li>
 </ul>
 </li>
+<li><strong>403</strong></li>
+<li><strong>description</strong> : Since Kura 5.6.3, the requesting identity does not hold the <code>kura.admin</code> permission.</li>
 <li><strong>500</strong></li>
 <li><strong>description</strong> : An unexpected internal error occurred.</li>
 <li><strong>response body</strong> :<ul>
@@ -7049,7 +7057,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="getsnapshotsbyid">GET/snapshots/byId</h4>
 <ul>
 <li><strong>REST API path</strong> : /services/configuration/v2/snapshots/byId</li>
-<li><strong>description</strong> : Retrieves the snapshot with the given id. Password property values will be returned in plain text.</li>
+<li><strong>description</strong> : Retrieves the snapshot with the given id. Password property values will be returned in plain text. Starting from Kura 5.6.3, the UserAdmin persistence component configuration is included only if the requesting identity holds the <code>kura.admin</code> permission.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#snaphsotid">SnaphsotId</a></li>
 </ul>
@@ -7095,7 +7103,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="execsnapshotsbyid_rollback">EXEC/snapshots/byId/_rollback</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/snapshots/byId/_rollback</code></li>
-<li><strong>description</strong> : Performs a rollback to the snapshot id specified by the user.</li>
+<li><strong>description</strong> : Performs a rollback to the snapshot id specified by the user. Starting from Kura 5.6.3, this request requires the <code>kura.admin</code> permission.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#snaphsotid">SnaphsotId</a></li>
 </ul>
@@ -7109,6 +7117,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="#genericfailurereport">GenericFailureReport</a></li>
 </ul>
 </li>
+<li><strong>403</strong></li>
+<li><strong>description</strong> : Since Kura 5.6.3, the requesting identity does not hold the <code>kura.admin</code> permission.</li>
 <li><strong>500</strong></li>
 <li><strong>description</strong> : An unexpected internal error occurred.</li>
 <li><strong>response body</strong> :<ul>

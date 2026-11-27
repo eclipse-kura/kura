@@ -11,6 +11,9 @@
 The `IdentityRestService` APIs provides methods to manage the system identities.
 Unless otherwise specified, identities with `rest.identity` permissions can access these APIs.
 
+!!! note
+    Starting from Kura 5.6.3, an identity holding the `rest.identity` permission, but not `kura.admin`, can only create, update or delete identities whose permissions are a subset of its own permissions, and can only assign permissions that it holds; requests that do not satisfy these rules are rejected with the `403 Forbidden` status. Requests received through the request handler are not affected. See [Identity and permission management through the REST APIs](../../gateway-configuration/authentication-and-authorization.md#identity-and-permission-management-through-the-rest-apis) for details and for the startup argument that restores the previous behaviour.
+
 ## POST methods
 
 #### Create User
@@ -36,6 +39,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 
 - 200 OK status
 - 400 Bad Request (Password strenght requirements not satisfied)
+- 403 Forbidden (since Kura 5.6.3, the target identity or the assigned permissions are not within the permissions of the requesting identity)
 - 500 Internal Server Error
 
 #### Get User by Name
@@ -188,6 +192,7 @@ No specific permission is required to access this resource.
 
 - 200 OK status
 - 400 Bad Request (Password strenght requirements not satisfied)
+- 403 Forbidden (since Kura 5.6.3, the target identity or the assigned permissions are not within the permissions of the requesting identity)
 - 500 Internal Server Error
 
 ## DELETE methods
@@ -208,5 +213,6 @@ No specific permission is required to access this resource.
 ##### Responses
 
 - 200 OK status
+- 403 Forbidden (since Kura 5.6.3, the permissions of the target identity are not within the permissions of the requesting identity)
 - 404 `userName` does not exist
 - 500 Internal Server Error

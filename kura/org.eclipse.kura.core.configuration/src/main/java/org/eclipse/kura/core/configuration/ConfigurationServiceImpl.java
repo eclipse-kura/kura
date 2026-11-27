@@ -1279,10 +1279,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private void garbageCollectionOldSnapshots() {
         // get the current snapshots and compared with the maximum number we
         // need to keep
-        TreeSet<Long> sids = getSnapshotsInternal();
+        final TreeSet<Long> sids = getSnapshotsInternal();
+
+        final int maxCount = Math.max(2, this.systemService.getKuraSnapshotsCount());
 
         int currCount = sids.size();
-        int maxCount = this.systemService.getKuraSnapshotsCount();
         while (currCount > maxCount && !sids.isEmpty()) { // stop if count reached or no more snapshots remain
 
             // preserve snapshot ID 0 as this will be considered the seeding

@@ -6012,8 +6012,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <ul>
 <li><strong>Enabled</strong>--activates the service when set to true</li>
 <li><strong>Container Engine Host URL</strong>--provides a string that tells the service where to find the container engine (best left to the default value).</li>
-<li><strong>Allowlist Enforcement Enabled</strong>--activates the container enforcement of the service, which let only the allowed containers to run</li>
-<li><strong>Container Image Allowlist Content</strong>--the comma-separated list of conainer's digests allowed to be run</li>
+<li><strong>Allowlist Enforcement Enabled</strong>--activates the container enforcement of the service, which lets only the allowed containers run. See <a href="../container-orchestration-image-auth/">Container Image Authenticity and Allowlist Enforcement</a> for a description of the feature.</li>
+<li><strong>Container Image Allowlist</strong>--the list of container image digests allowed to run, one digest per line (e.g. <code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code>). Entries separated by commas are not supported. See <a href="../container-orchestration-image-auth/#allowlist-format">Allowlist format</a> for details on how to obtain the correct digest.</li>
 </ul>
 <p><img alt="Container Orchestration Provider" src="../images/container-orchestration-provider.png" /></p>
 <h2 id="creating-your-first-container">Creating your first container.</h2>
@@ -6042,7 +6042,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Verify in transparency log</strong> - Sets the transparency log verification, to be used when a container image signature has been uploaded to the transparency log.</p>
 </li>
 <li>
-<p><strong>Container Image Enforcement Digest</strong> - A string representing the digest for the image that will be allowed to run by this container instance (eg: <code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code>). It is used in the <a href="../container-orchestration-image-auth/">Container Enforcement</a> service provided by the Container Orchestration Service.</p>
+<p><strong>Container Image Enforcement Digest</strong> - A string representing the digest for the image that will be allowed to run by this container instance (eg: <code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code>). It is used in the <a href="../container-orchestration-image-auth/">Container Enforcement</a> service provided by the Container Orchestration Service. The digest is allowed only while the container of this instance exists: see <a href="../container-orchestration-image-auth/#lifetime-of-a-container-instance-digest">Lifetime of a Container Instance digest</a>.</p>
 </li>
 <li>
 <p><strong>Authentication Registry URL</strong> - URL for an alternative registry to pull images from. (If the field is left blank, credentials will be applied to Docker-Hub). Please see the <a href="../container-orchestration-provider-authenticated-registries/">Authenticated Registries</a> document for more information about connecting to different popular registries.</p>

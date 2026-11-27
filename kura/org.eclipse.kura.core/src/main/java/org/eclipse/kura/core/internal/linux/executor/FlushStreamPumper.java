@@ -32,6 +32,7 @@ public class FlushStreamPumper extends StreamPumper {
     private final boolean drainAfterWriteFailure;
     private final Consumer<Exception> readFailureListener;
     private final Consumer<Exception> writeFailureListener;
+    private volatile boolean detached;
 
     public FlushStreamPumper(InputStream is, OutputStream os, boolean closeWhenExhausted,
             boolean drainAfterWriteFailure, Consumer<Exception> readFailureListener,
@@ -83,6 +84,10 @@ public class FlushStreamPumper extends StreamPumper {
         return this.finished;
     }
 
+    public void detach() {
+        this.detached = true;
+    }
+
     private int read(final byte[] buf) {
         try {
             return this.is.read(buf);
@@ -93,6 +98,9 @@ public class FlushStreamPumper extends StreamPumper {
     }
 
     private boolean write(final byte[] buf, final int length) {
+        if (this.detached) {
+            return true;
+        }
         try {
             this.os.write(buf, 0, length);
             this.os.flush();

@@ -99,6 +99,11 @@ import org.osgi.framework.Filter;
  * </ul>
  * Both properties are stored in snapshots to recreate the component instances and restore their configuration
  * at every framework restart.
+ * <br>
+ * <br>
+ * Strict configuration validation against component Meta Type definitions is controlled by the
+ * {@link org.eclipse.kura.system.SystemService#KEY_KURA_CONFIGURATION_VALIDATION} property (enabled by default).
+ * When disabled, validation violations are logged as warnings without rejecting the configuration.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */

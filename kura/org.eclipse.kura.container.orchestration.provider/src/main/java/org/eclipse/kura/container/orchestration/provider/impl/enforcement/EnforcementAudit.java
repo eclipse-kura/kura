@@ -23,61 +23,89 @@ final class EnforcementAudit {
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
-    private static final String AUDIT_SUCCESS = "{} ContainerOrchestrationService - Success - ";
-    private static final String AUDIT_FAILURE = "{} ContainerOrchestrationService - Failure - ";
+    private static final String SUCCESS = "{} ContainerOrchestrationService - Success - ";
+    private static final String FAILURE = "{} ContainerOrchestrationService - Failure - ";
 
-    private static final String ENFORCEMENT_CHECK_SUCCESS = AUDIT_SUCCESS
-            + "Enforcement allowed container {} with allowed digests {}";
-    private static final String ENFORCEMENT_CHECK_FAILURE = AUDIT_FAILURE
-            + "Enforcement rejected container {} with image digests {}, removing it";
-    private static final String ENFORCEMENT_REMOVAL_SUCCESS = AUDIT_SUCCESS
-            + "Enforcement removed rejected container {}";
-    private static final String ENFORCEMENT_DELETE_FAILURE = AUDIT_FAILURE
-            + "Enforcement failed to delete rejected container {}";
-    private static final String ENFORCEMENT_START_SUCCESS = AUDIT_SUCCESS
-            + "Enforcement started with {} allowlist entries";
-    private static final String ENFORCEMENT_START_FAILURE = AUDIT_FAILURE
+    private static final String ENFORCEMENT_STARTED = SUCCESS + "Enforcement started with {} allowlist entries";
+    private static final String ENFORCEMENT_START_FAILED = FAILURE
             + "Enforcement failed to start, containers are not checked against the allowlist";
-    private static final String ENFORCEMENT_STOP_SUCCESS = AUDIT_SUCCESS + "Enforcement stopped";
-    private static final String ENFORCEMENT_MONITOR_TERMINATED = AUDIT_FAILURE
-            + "Enforcement monitor terminated unexpectedly, started containers are no longer checked against the allowlist";
-    private static final String DIGEST_REGISTERED = AUDIT_SUCCESS + "Enforcement digest {} registered for container {}";
-    private static final String DIGEST_UNREGISTERED = AUDIT_SUCCESS
-            + "Enforcement digest {} unregistered for container {}";
+    private static final String ENFORCEMENT_STOPPED = SUCCESS + "Enforcement stopped";
+
+    private static final String MONITOR_CONNECTION_FAILED = FAILURE
+            + "Enforcement monitor failed to connect, retrying in {} seconds";
+    private static final String MONITOR_CONNECTED = SUCCESS + "Enforcement monitor connected";
+    private static final String MONITOR_TERMINATED = FAILURE
+            + "Enforcement monitor terminated unexpectedly, restarting it in {} seconds";
+    private static final String MONITOR_RESTARTED = SUCCESS + "Enforcement monitor restarted";
+
+    private static final String SWEEP_FAILED = FAILURE
+            + "Enforcement check on running containers failed, retrying in {} seconds";
+
+    private static final String CONTAINER_ALLOWED = SUCCESS + "Enforcement allowed container {} with allowed digests {}";
+    private static final String CONTAINER_REJECTED = FAILURE
+            + "Enforcement rejected container {} with image digests {}, removing it";
+    private static final String CONTAINER_REMOVED = SUCCESS + "Enforcement removed rejected container {}";
+    private static final String CONTAINER_REMOVAL_FAILED = FAILURE
+            + "Enforcement failed to delete rejected container {}, retrying in {} seconds";
+    private static final String CONTAINER_CHECK_FAILED = FAILURE
+            + "Enforcement could not check container {}, retrying in {} seconds";
+
+    private static final String DIGEST_REGISTERED = SUCCESS + "Enforcement digest {} registered for container {}";
+    private static final String DIGEST_UNREGISTERED = SUCCESS + "Enforcement digest {} unregistered for container {}";
 
     private EnforcementAudit() {
     }
 
-    static void containerAllowed(String containerId, Set<String> allowedDigests) {
-        auditLogger.info(ENFORCEMENT_CHECK_SUCCESS, AuditContext.currentOrInternal(), containerId, allowedDigests);
-    }
-
-    static void containerRejected(String containerId, Set<String> imageDigests) {
-        auditLogger.warn(ENFORCEMENT_CHECK_FAILURE, AuditContext.currentOrInternal(), containerId, imageDigests);
-    }
-
-    static void containerRemoved(String containerId) {
-        auditLogger.info(ENFORCEMENT_REMOVAL_SUCCESS, AuditContext.currentOrInternal(), containerId);
-    }
-
-    static void containerRemovalFailed(String containerId) {
-        auditLogger.warn(ENFORCEMENT_DELETE_FAILURE, AuditContext.currentOrInternal(), containerId);
-    }
-
     static void enforcementStarted(int allowlistSize) {
-        auditLogger.info(ENFORCEMENT_START_SUCCESS, AuditContext.currentOrInternal(), allowlistSize);
+        auditLogger.info(ENFORCEMENT_STARTED, AuditContext.currentOrInternal(), allowlistSize);
     }
 
     static void enforcementStartFailed() {
-        auditLogger.warn(ENFORCEMENT_START_FAILURE, AuditContext.currentOrInternal());
+        auditLogger.warn(ENFORCEMENT_START_FAILED, AuditContext.currentOrInternal());
     }
 
     static void enforcementStopped() {
-        auditLogger.info(ENFORCEMENT_STOP_SUCCESS, AuditContext.currentOrInternal());
+        auditLogger.info(ENFORCEMENT_STOPPED, AuditContext.currentOrInternal());
     }
 
-    static void monitorTerminated() {
-        auditLogger.warn(ENFORCEMENT_MONITOR_TERMINATED, AuditContext.currentOrInternal());
+    static void monitorConnectionFailed(long retryDelaySeconds) {
+        auditLogger.warn(MONITOR_CONNECTION_FAILED, AuditContext.currentOrInternal(), retryDelaySeconds);
+    }
+
+    static void monitorConnected() {
+        auditLogger.info(MONITOR_CONNECTED, AuditContext.currentOrInternal());
+    }
+
+    static void monitorTerminated(long restartDelaySeconds) {
+        auditLogger.warn(MONITOR_TERMINATED, AuditContext.currentOrInternal(), restartDelaySeconds);
+    }
+
+    static void monitorRestarted() {
+        auditLogger.info(MONITOR_RESTARTED, AuditContext.currentOrInternal());
+    }
+
+    static void sweepFailed(long retryDelaySeconds) {
+        auditLogger.warn(SWEEP_FAILED, AuditContext.currentOrInternal(), retryDelaySeconds);
+    }
+
+    static void containerAllowed(String containerId, Set<String> allowedDigests) {
+        auditLogger.info(CONTAINER_ALLOWED, AuditContext.currentOrInternal(), containerId, allowedDigests);
+    }
+
+    static void containerRejected(String containerId, Set<String> imageDigests) {
+        auditLogger.warn(CONTAINER_REJECTED, AuditContext.currentOrInternal(), containerId, imageDigests);
+    }
+
+    static void containerRemoved(String containerId) {
+        auditLogger.info(CONTAINER_REMOVED, AuditContext.currentOrInternal(), containerId);
+    }
+
+    static void containerRemovalFailed(String containerId, long retryDelaySeconds) {
+        auditLogger.warn(CONTAINER_REMOVAL_FAILED, AuditContext.currentOrInternal(), containerId, retryDelaySeconds);
+    }
+
+    static void containerCheckFailed(String containerId, long retryDelaySeconds) {
+        auditLogger.warn(CONTAINER_CHECK_FAILED, AuditContext.currentOrInternal(), containerId, retryDelaySeconds);
     }
 
     static void digestRegistered(String digest, String containerId) {

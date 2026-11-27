@@ -14,8 +14,8 @@ To use this service select the **ContainerOrchestrationService** option located 
 
 - **Enabled**--activates the service when set to true
 - **Container Engine Host URL**--provides a string that tells the service where to find the container engine (best left to the default value).
-- **Allowlist Enforcement Enabled**--activates the container enforcement of the service, which let only the allowed containers to run
-- **Container Image Allowlist Content**--the comma-separated list of conainer's digests allowed to be run
+- **Allowlist Enforcement Enabled**--activates the container enforcement of the service, which lets only the allowed containers run. See [Container Image Authenticity and Allowlist Enforcement](./container-orchestration-image-auth.md) for a description of the feature.
+- **Container Image Allowlist**--the list of container image digests allowed to run, one digest per line (e.g. `sha256:0000000000000000000000000000000000000000000000000000000000000000`). Entries separated by commas are not supported. See [Allowlist format](./container-orchestration-image-auth.md#allowlist-format) for details on how to obtain the correct digest.
 
 ![Container Orchestration Provider](./images/container-orchestration-provider.png)
 
@@ -46,7 +46,7 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Verify in transparency log** - Sets the transparency log verification, to be used when a container image signature has been uploaded to the transparency log.
 
-- **Container Image Enforcement Digest** - A string representing the digest for the image that will be allowed to run by this container instance (eg: `sha256:0000000000000000000000000000000000000000000000000000000000000000`). It is used in the [Container Enforcement](./container-orchestration-image-auth.md) service provided by the Container Orchestration Service.
+- **Container Image Enforcement Digest** - A string representing the digest for the image that will be allowed to run by this container instance (eg: `sha256:0000000000000000000000000000000000000000000000000000000000000000`). It is used in the [Container Enforcement](./container-orchestration-image-auth.md) service provided by the Container Orchestration Service. The digest is allowed only while the container of this instance exists: see [Lifetime of a Container Instance digest](./container-orchestration-image-auth.md#lifetime-of-a-container-instance-digest).
 
 - **Authentication Registry URL** - URL for an alternative registry to pull images from. (If the field is left blank, credentials will be applied to Docker-Hub). Please see the [Authenticated Registries](./container-orchestration-provider-authenticated-registries.md) document for more information about connecting to different popular registries.
 

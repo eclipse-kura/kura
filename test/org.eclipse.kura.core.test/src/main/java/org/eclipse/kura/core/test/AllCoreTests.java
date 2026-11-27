@@ -21,8 +21,12 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtilFailureReportingTest;
+import org.eclipse.kura.core.internal.linux.executor.ExecutorUtilHelperTimeoutTest;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtilTimeoutTest;
+import org.eclipse.kura.core.internal.linux.executor.PrivilegedCommandTimeoutBoundTest;
+import org.eclipse.kura.core.internal.linux.executor.ProcessGroupCommandLineTest;
 import org.eclipse.kura.core.internal.linux.executor.PumpFailureClassificationTest;
+import org.eclipse.kura.core.internal.linux.executor.UnkillableProcessWaitBoundTest;
 import org.eclipse.kura.core.internal.linux.executor.UnprivilegedShellCommandTest;
 import org.eclipse.kura.core.linux.executor.ExecutorServiceNullArgumentsTest;
 import org.eclipse.kura.data.DataService;
@@ -44,7 +48,9 @@ import io.moquette.broker.config.IConfig;
         KuraExceptionMessageTest.class, KuraBirthPayloadModemEidTest.class, ConfigurationServiceTest.class,
         NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class,
         ExecutorUtilFailureReportingTest.class, ExecutorUtilTimeoutTest.class, ExecutorServiceNullArgumentsTest.class,
-        PumpFailureClassificationTest.class, UnprivilegedShellCommandTest.class })
+        PumpFailureClassificationTest.class, UnprivilegedShellCommandTest.class, ProcessGroupCommandLineTest.class,
+        PrivilegedCommandTimeoutBoundTest.class, ExecutorUtilHelperTimeoutTest.class,
+        UnkillableProcessWaitBoundTest.class })
 public class AllCoreTests {
 
     private static final Logger logger = LoggerFactory.getLogger(AllCoreTests.class);

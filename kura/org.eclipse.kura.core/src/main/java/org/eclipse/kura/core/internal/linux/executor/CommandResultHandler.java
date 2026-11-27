@@ -88,8 +88,16 @@ public class CommandResultHandler implements ExecuteResultHandler {
         } else if (exitValue != 0) {
             logger.debug("Command {} returned error code {}", this.commandStatus.getCommand(), exitValue);
         }
+        reportAbandonedProcess();
         reportPumpFailures();
         this.callback.accept(this.commandStatus);
+    }
+
+    private void reportAbandonedProcess() {
+        if (this.executor.getWatchdog() instanceof ProcessGroupWatchdog processGroupWatchdog
+                && processGroupWatchdog.isProcessAbandoned()) {
+            appendToErrorStream("The command did not exit after it was killed, stopped waiting for it");
+        }
     }
 
     private boolean isTimedOut(int exitValue) {
@@ -101,7 +109,13 @@ public class CommandResultHandler implements ExecuteResultHandler {
     private void reportPumpFailures() {
         if (this.executor.getStreamHandler() instanceof FlushPumpStreamHandler) {
             final FlushPumpStreamHandler streamHandler = (FlushPumpStreamHandler) this.executor.getStreamHandler();
-            this.commandStatus.setOutputIncomplete(!streamHandler.getOutputFailures().isEmpty());
+            this.commandStatus
+                    .setOutputIncomplete(streamHandler.isOutputCut() || !streamHandler.getOutputFailures().isEmpty());
+            if (streamHandler.isOutputCut()) {
+                logger.warn("Stopped waiting for the output of command {}, the output may be incomplete",
+                        this.commandStatus.getCommand());
+                appendToErrorStream("Output may be incomplete: stopped waiting for the command output");
+            }
             streamHandler.getOutputFailures()
                     .forEach(e -> appendToErrorStream("Output may be incomplete: " + e.getMessage()));
             streamHandler.getInputReadFailures()

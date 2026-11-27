@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,12 +29,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
@@ -56,15 +57,28 @@ public class ExecutorUtil {
     private static final String FAILED_TO_GET_PID_MESSAGE = "Failed to get pid for command '{}'";
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
     private static final String DEFAULT_COMMAND_USERNAME = "kura";
+    private static final long DEFAULT_TIMEOUT_GRACE_MILLIS = 5000L;
+    private static final long DEFAULT_OUTPUT_DRAIN_MILLIS = 10000L;
+    private static final long HELPER_TIMEOUT_MILLIS = 10000L;
+    private static final List<String> SETSID_LOCATIONS = Arrays.asList("/usr/bin/setsid", "/bin/setsid");
+    private static final Optional<String> SETSID_PATH = findSetsid();
 
     private String commandUsername;
+    private final long timeoutGraceMillis;
+    private final long outputDrainMillis;
 
     public ExecutorUtil() {
-        this.commandUsername = DEFAULT_COMMAND_USERNAME;
+        this(DEFAULT_COMMAND_USERNAME);
     }
 
     public ExecutorUtil(String commandUsername) {
+        this(commandUsername, DEFAULT_TIMEOUT_GRACE_MILLIS, DEFAULT_OUTPUT_DRAIN_MILLIS);
+    }
+
+    protected ExecutorUtil(String commandUsername, long timeoutGraceMillis, long outputDrainMillis) {
         this.commandUsername = commandUsername;
+        this.timeoutGraceMillis = timeoutGraceMillis;
+        this.outputDrainMillis = outputDrainMillis;
     }
 
     public String getCommandUsername() {
@@ -77,22 +91,22 @@ public class ExecutorUtil {
 
     public CommandStatus executeUnprivileged(Command command) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
-        return executeSync(command, commandLine, usesTimeoutCommand(command));
+        return executeSync(command, commandLine, false, usesTimeoutCommand(command));
     }
 
     public void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
-        executeAsync(command, commandLine, callback, usesTimeoutCommand(command));
+        executeAsync(command, commandLine, callback, false, usesTimeoutCommand(command));
     }
 
     public CommandStatus executePrivileged(Command command) {
         CommandLine commandLine = buildPrivilegedCommand(command);
-        return executeSync(command, commandLine, false);
+        return executeSync(command, commandLine, true, false);
     }
 
     public void executePrivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildPrivilegedCommand(command);
-        executeAsync(command, commandLine, callback, false);
+        executeAsync(command, commandLine, callback, true, false);
     }
 
     public boolean stopUnprivileged(Pid pid, Signal signal) {
@@ -142,15 +156,9 @@ public class ExecutorUtil {
         String pidString = ((Integer) pid.getPid()).toString();
         String psCommand = "ps -p " + pidString;
         CommandLine commandLine = CommandLine.parse(psCommand);
-        Executor executor = getExecutor();
-
         final ByteArrayOutputStream out = createStream();
         final ByteArrayOutputStream err = createStream();
-        final PumpStreamHandler handler = new PumpStreamHandler(out, err);
-
-        executor.setStreamHandler(handler);
-        executor.setWorkingDirectory(TEMP_DIR);
-        executor.setExitValue(0);
+        Executor executor = configureHelperExecutor(out, err);
         int exitValue;
         try {
             exitValue = executor.execute(commandLine);
@@ -171,15 +179,9 @@ public class ExecutorUtil {
         Map<String, Pid> pids = new HashMap<>();
         CommandLine psCommandLine = new CommandLine("ps");
         psCommandLine.addArgument("-ax");
-        Executor executor = getExecutor();
-
         final ByteArrayOutputStream out = createStream();
         final ByteArrayOutputStream err = createStream();
-        final PumpStreamHandler handler = new PumpStreamHandler(out, err);
-
-        executor.setStreamHandler(handler);
-        executor.setWorkingDirectory(TEMP_DIR);
-        executor.setExitValue(0);
+        Executor executor = configureHelperExecutor(out, err);
         int exitValue = 1;
         try {
             exitValue = executor.execute(psCommandLine);
@@ -190,6 +192,17 @@ public class ExecutorUtil {
             pids = parsePids(out, commandLine);
         }
         return pids;
+    }
+
+    private Executor configureHelperExecutor(ByteArrayOutputStream out, ByteArrayOutputStream err) {
+        Executor executor = getExecutor();
+        final PumpStreamHandler handler = new PumpStreamHandler(out, err);
+        handler.setStopTimeout(HELPER_TIMEOUT_MILLIS);
+        executor.setStreamHandler(handler);
+        executor.setWatchdog(new ExecuteWatchdog(HELPER_TIMEOUT_MILLIS));
+        executor.setWorkingDirectory(TEMP_DIR);
+        executor.setExitValue(0);
+        return executor;
     }
 
     public static void requireNonNullArgument(Object argument, String name) {
@@ -235,13 +248,14 @@ public class ExecutorUtil {
         return Arrays.stream(tokens).parallel().allMatch(line::contains);
     }
 
-    private CommandStatus executeSync(Command command, CommandLine commandLine, boolean timeoutCommandUsed) {
+    private CommandStatus executeSync(Command command, CommandLine commandLine, boolean privileged,
+            boolean timeoutCommandUsed) {
         CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
 
-        Executor executor = configureExecutor(command);
+        Executor executor = configureExecutor(command, privileged);
 
         CommandResultHandler resultHandler = new CommandResultHandler(status -> {
         }, executor, timeoutCommandUsed);
@@ -250,6 +264,7 @@ public class ExecutorUtil {
         int exitStatus = 0;
         logger.debug("Executing: {}", commandLine);
         try {
+            checkExecutable(command, executor, privileged);
             Map<String, String> environment = command.getEnvironment();
             if (environment != null && !environment.isEmpty()) {
                 Map<String, String> currentEnv = EnvironmentUtils.getProcEnvironment();
@@ -268,11 +283,20 @@ public class ExecutorUtil {
         return commandStatus;
     }
 
-    private Executor configureExecutor(Command command) {
+    private Executor configureExecutor(Command command, boolean privileged) {
         Executor executor = getExecutor();
         int timeout = command.getTimeout();
-        ExecuteWatchdog watchdog = timeout <= 0 ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
-                : new ExecuteWatchdog(timeout * 1000L);
+        ProcessGroupTerminator terminator = null;
+        ExecuteWatchdog watchdog;
+        if (timeout <= 0) {
+            watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
+        } else if (privileged) {
+            terminator = new ProcessGroupTerminator(command.getSignal(), this.timeoutGraceMillis,
+                    getProcessGroupLauncher().isPresent());
+            watchdog = new ProcessGroupWatchdog(timeout * 1000L, terminator);
+        } else {
+            watchdog = new ExecuteWatchdog(timeout * 1000L);
+        }
         executor.setWatchdog(watchdog);
 
         OutputStream out = command.getOutputStream();
@@ -288,6 +312,10 @@ public class ExecutorUtil {
         } else {
             handler = new FlushPumpStreamHandler(new NullOutputStream(), new NullOutputStream(), in);
         }
+        handler.setOutputDrainTimeout(this.outputDrainMillis);
+        if (terminator != null) {
+            handler.setDeadline(timeout * 1000L, terminator);
+        }
         executor.setStreamHandler(handler);
 
         String directory = command.getDirectory();
@@ -300,23 +328,72 @@ public class ExecutorUtil {
     }
 
     protected Executor getExecutor() {
-        return new DefaultExecutor();
+        return new BoundedWaitExecutor();
+    }
+
+    protected Optional<String> getProcessGroupLauncher() {
+        return SETSID_PATH;
+    }
+
+    private static Optional<String> findSetsid() {
+        Optional<String> setsid = SETSID_LOCATIONS.stream().filter(path -> Files.isExecutable(Paths.get(path)))
+                .findFirst();
+        if (!setsid.isPresent()) {
+            logger.warn("setsid not found in {}, timed out privileged commands will be stopped without their process group",
+                    SETSID_LOCATIONS);
+        }
+        return setsid;
+    }
+
+    private void checkExecutable(Command command, Executor executor, boolean privileged) throws IOException {
+        if (!privileged || command.isExecutedInAShell() || !getProcessGroupLauncher().isPresent()) {
+            return;
+        }
+        String program = command.getCommandLine()[0];
+        List<Path> candidates = new ArrayList<>();
+        if (program.contains("/")) {
+            Path programPath = Paths.get(program);
+            File workingDir = executor.getWorkingDirectory();
+            candidates.add(programPath.isAbsolute() || workingDir == null ? programPath
+                    : workingDir.toPath().resolve(programPath));
+        } else {
+            String searchPath = getSearchPath(command);
+            for (String directory : searchPath.split(File.pathSeparator, -1)) {
+                candidates.add(Paths.get(directory.isEmpty() ? "." : directory, program));
+            }
+        }
+        if (candidates.stream().anyMatch(path -> Files.isRegularFile(path) && Files.isExecutable(path))) {
+            return;
+        }
+        boolean exists = candidates.stream().anyMatch(Files::exists);
+        throw new IOException("Cannot run program \"" + program + "\": "
+                + (exists ? "Permission denied" : "No such file or directory"));
+    }
+
+    private static String getSearchPath(Command command) {
+        Map<String, String> environment = command.getEnvironment();
+        String searchPath = environment != null ? environment.get("PATH") : null;
+        if (searchPath == null) {
+            searchPath = System.getenv("PATH");
+        }
+        return searchPath == null ? "" : searchPath;
     }
 
     private void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback,
-            boolean timeoutCommandUsed) {
+            boolean privileged, boolean timeoutCommandUsed) {
         CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
 
-        Executor executor = configureExecutor(command);
+        Executor executor = configureExecutor(command, privileged);
 
         CommandResultHandler resultHandler = new CommandResultHandler(callback, executor, timeoutCommandUsed);
         resultHandler.setStatus(commandStatus);
 
         logger.debug("Executing: {}", commandLine);
         try {
+            checkExecutable(command, executor, privileged);
             Map<String, String> environment = command.getEnvironment();
             if (environment != null && !environment.isEmpty()) {
                 Map<String, String> currentEnv = EnvironmentUtils.getProcEnvironment();
@@ -382,17 +459,18 @@ public class ExecutorUtil {
     }
 
     private CommandLine buildPrivilegedCommand(Command command) {
-        CommandLine commandLine;
+        List<String> tokens = new ArrayList<>();
+        getProcessGroupLauncher().ifPresent(tokens::add);
         if (command.isExecutedInAShell()) {
-            commandLine = new CommandLine("/bin/sh");
-            commandLine.addArgument("-c");
-            commandLine.addArgument(command.toString(), false);
+            tokens.add("/bin/sh");
+            tokens.add("-c");
+            tokens.add(command.toString());
         } else {
-            String[] tokens = command.getCommandLine();
-            commandLine = new CommandLine(tokens[0]);
-            for (int i = 1; i < tokens.length; i++) {
-                commandLine.addArgument(tokens[i], false);
-            }
+            tokens.addAll(Arrays.asList(command.getCommandLine()));
+        }
+        CommandLine commandLine = new CommandLine(tokens.get(0));
+        for (int i = 1; i < tokens.size(); i++) {
+            commandLine.addArgument(tokens.get(i), false);
         }
         return commandLine;
     }

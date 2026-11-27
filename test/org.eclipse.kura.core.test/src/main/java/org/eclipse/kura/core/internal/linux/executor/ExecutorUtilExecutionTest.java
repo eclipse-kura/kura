@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.apache.commons.exec.CommandLine;
@@ -95,6 +96,11 @@ public class ExecutorUtilExecutionTest {
             @Override
             protected Executor getExecutor() {
                 return deMock;
+            }
+
+            @Override
+            protected Optional<String> getProcessGroupLauncher() {
+                return Optional.empty();
             }
         };
         configureMock(deMock);

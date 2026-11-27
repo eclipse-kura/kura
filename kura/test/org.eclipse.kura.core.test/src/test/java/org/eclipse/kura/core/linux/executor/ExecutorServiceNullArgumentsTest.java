@@ -14,14 +14,11 @@
 package org.eclipse.kura.core.linux.executor;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 
 public class ExecutorServiceNullArgumentsTest {
@@ -88,9 +85,7 @@ public class ExecutorServiceNullArgumentsTest {
     }
 
     private void givenUnprivilegedService() {
-        SystemService systemService = mock(SystemService.class);
-        when(systemService.getCommandUser()).thenReturn("kura");
-        this.service = new UnprivilegedExecutorServiceImpl(systemService);
+        this.service = new UnprivilegedExecutorServiceImpl();
     }
 
     private void whenCalling(Runnable call) {

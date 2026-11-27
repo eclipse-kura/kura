@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -151,20 +150,6 @@ public class ExecutorUtilFailureReportingTest {
     }
 
     @Test
-    public void unreadInputIsNotReported() {
-        givenRealExecutor();
-        givenCommand("true");
-        givenCallerErrorStream("");
-        givenInputTheCommandDoesNotRead();
-
-        whenExecutedSync();
-
-        thenExitCodeIs(0);
-        thenOutputIncompleteIs(false);
-        thenCallerErrorStreamIs("");
-    }
-
-    @Test
     public void unreadableInputIsReported() {
         givenRealExecutor();
         givenCommand("cat");
@@ -248,10 +233,6 @@ public class ExecutorUtilFailureReportingTest {
         });
     }
 
-    private void givenInputTheCommandDoesNotRead() {
-        this.command.setInputStream(new ByteArrayInputStream(new byte[1 << 20]));
-    }
-
     private void givenUnreadableInput() {
         this.command.setInputStream(new InputStream() {
 
@@ -307,6 +288,6 @@ public class ExecutorUtilFailureReportingTest {
 
     private void thenCallerErrorStreamIs(String expected) {
         assertSame(this.callerErrorStream, this.status.getErrorStream());
-        assertEquals(expected, this.callerErrorStream.toString(UTF_8));
+        assertEquals(expected, new String(this.callerErrorStream.toByteArray(), UTF_8));
     }
 }

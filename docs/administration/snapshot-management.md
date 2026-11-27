@@ -96,7 +96,7 @@ Pressing the **Apply** button, the rollback process will start. The framework wi
 - if a **factory component is already present** in the system, **but it's not available on the selected snapshot**, the component will be removed
 - if a **factory component is already present** in the system, **and it's available on the selected snapshot**, the component configuration will be overwritten with the one in the selected snapshot
 
-The values of the snapshot are checked against the metatype of their components, as described in [Configuration validation](../core-services/configuration-service.md#configuration-validation): an invalid value is replaced with the metatype default, or removed if the attribute has no default, and the rest of the snapshot is restored.
+The values of the snapshot are checked against the metatype of their components, as described in [Configuration validation](../core-services/configuration-service.md#configuration-validation): when strict validation is enabled, if any component contains an invalid value the entire rollback is rejected and the running configuration is left unchanged; when `kura.configuration.validation=false` is set, violations are logged as warnings and the rollback proceeds.
 
 !!! warning
     Carefully select the snapshot to be rollbacked. Changing the configuration of the system could make Eclipse Kura unresponsive or not reachable

@@ -491,6 +491,30 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldNotTakeASnapshotWhenEveryFactoryCreationIsRejected() throws KuraException {
+        givenMockCreateFactoryConfigurationReturnException();
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/factoryComponents",
+                "{\"configs\":[{\"factoryPid\":\"factory\",\"pid\":\"foo\","
+                        + "\"properties\":{\"testProp\":{\"type\":\"INTEGER\",\"value\":15}}}]}");
+
+        thenResponseCodeIs(500);
+        thenSnapshotIsNotTaken();
+    }
+
+    @Test
+    public void shouldTakeASnapshotWhenAFactoryCreationSucceeds() throws KuraException {
+        givenMockSnapshotReturnOne(10);
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/factoryComponents",
+                "{\"configs\":[{\"factoryPid\":\"factory\",\"pid\":\"foo\","
+                        + "\"properties\":{\"testProp\":{\"type\":\"INTEGER\",\"value\":15}}}]}");
+
+        thenRequestSucceeds();
+        thenSnapshotIsTaken();
+    }
+
+    @Test
     public void testUpdateConfigurationBooleanPropertyTrue() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
@@ -1647,6 +1671,12 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         Mockito.doThrow(new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "testProp", "15", "invalid"))
                 .when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
+    }
+
+    private void givenMockCreateFactoryConfigurationReturnException() throws KuraException {
+        Mockito.doThrow(new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "testProp", "15", "invalid"))
+                .when(configurationService).createFactoryConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(),
+                        ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
     private void thenSnapshotIsNotTaken() throws KuraException {

@@ -67,6 +67,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Scalar;
+import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.upgrade.ConfigurationUpgrade;
 import org.eclipse.kura.core.configuration.util.CollectionsUtil;
@@ -78,6 +79,7 @@ import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -94,6 +96,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
@@ -114,7 +117,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private BundleTracker<Bundle> bundleTracker;
 
-    @SuppressWarnings("unused")
     private MetaTypeService metaTypeService;
     private ConfigurationAdmin configurationAdmin;
     private SystemService systemService;
@@ -452,6 +454,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid " + pid + " already exists");
         }
 
+        Map<String, Object> mergedProperties = mergeWithFactoryDefaults(factoryPid, pid, properties);
+
+        mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
+
         try {
             // Second argument in createFactoryConfiguration is a bundle location. If left
             // null the new bundle location
@@ -462,16 +468,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             String servicePid = this.configurationAdmin.createFactoryConfiguration(factoryPid, null).getPid();
 
             logger.info("Updating newly created configuration for pid {}", pid);
-
-            Map<String, Object> mergedProperties = new HashMap<>();
-            if (properties != null) {
-                mergedProperties.putAll(properties);
-            }
-
-            OCD ocd = this.ocds.get(factoryPid);
-            mergeWithDefaults(ocd, mergedProperties);
-
-            mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
 
             trackPasswordProperties(pid, mergedProperties);
 
@@ -573,6 +569,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         List<Throwable> causes = new ArrayList<>();
         final Map<String, ComponentConfiguration> snapshotConfigs = getSnapshotConfigs(id);
+        validateRollbackSnapshot(snapshotConfigs.values());
+
         final Map<String, Configuration> currentConfigs = getCurrentConfigs();
         Iterator<Entry<String, Configuration>> currentConfigsIterator = currentConfigs.entrySet().iterator();
 
@@ -676,8 +674,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 if (factoryOCD != null) {
                     try {
                         updateWithDefaultConfiguration(pid, factoryOCD);
-                    } catch (IOException e) {
-                        logger.info("Error seeding updated configuration for pid: {}", pid);
+                    } catch (IOException | KuraException e) {
+                        logger.error("Error seeding updated configuration for pid: {}", pid, e);
                     }
                 }
             }
@@ -739,7 +737,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     Map<String, Object> getDefaultProperties(OCD ocd) {
-        return ComponentUtil.getDefaultProperties(ocd, this.ctx);
+        final Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+
+        if (ocd == null || ocd.getAD() == null) {
+            return defaults;
+        }
+
+        for (final AD ad : ocd.getAD()) {
+            final Object defaultValue = defaults.get(ad.getId());
+
+            if (defaultValue == null) {
+                continue;
+            }
+
+            try {
+                MetatypeValidator.validateValue(ad, defaultValue);
+            } catch (final KuraException e) {
+                logger.error("Ignoring the default value of attribute {} of {}: {}", ad.getId(), ocd.getId(),
+                        e.getMessage());
+                defaults.remove(ad.getId());
+            }
+        }
+
+        return defaults;
     }
 
     void decryptConfigurationProperties(Map<String, Object> configProperties) {
@@ -809,6 +829,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     anyChangeApplied = true;
                 } catch (KuraException e) {
                     logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
+                    causes.add(e);
                 }
             }
         }
@@ -898,7 +919,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private ComponentConfiguration getConfigurableComponentDefaultConfiguration(String pid) {
         Tocd ocd = getOCDForPid(pid);
-        Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+        Map<String, Object> props = getDefaultProperties(ocd);
         return new ComponentConfigurationImpl(pid, ocd, props);
     }
 
@@ -938,7 +959,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
                 OCD ocd = tempCc.getDefinition();
                 if (ocd != null) {
-                    Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+                    Map<String, Object> props = getDefaultProperties(ocd);
                     cc = new ComponentConfigurationImpl(pid, (Tocd) ocd, props);
                 }
             } catch (KuraException e) {
@@ -950,7 +971,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return cc;
     }
 
-    private void updateWithDefaultConfiguration(String pid, Tocd ocd) throws IOException {
+    private void updateWithDefaultConfiguration(String pid, Tocd ocd) throws IOException, KuraException {
         String servicePid = this.servicePidByPid.get(pid);
         if (servicePid == null) {
             servicePid = pid;
@@ -966,6 +987,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             if (!props.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
                 props.put(ConfigurationService.KURA_SERVICE_PID, pid);
             }
+
+            validateComponentValues(pid, ocd, props);
 
             // merge the current properties, if any, with the defaults from metatype
             mergeWithDefaults(ocd, props);
@@ -1342,20 +1365,179 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         //
         // save away initial configuration
         List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
-        for (ComponentConfiguration config : configs) {
-            if (config != null) {
-                Map<String, Object> props = config.getConfigurationProperties();
-                if (props != null) {
-                    String factoryPid = (String) props.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+        final Map<String, OCD> installedOCDs = findInstalledOCDs(configs);
+        validateStartupSnapshot(configs, installedOCDs);
 
-                    if (factoryPid != null) {
-                        createFactoryConfigurationInternal(factoryPid, config.getPid(), props, false);
-                    } else {
-                        loadConfiguration(config, props);
-                    }
+        for (ComponentConfiguration config : configs) {
+            if (config != null && config.getConfigurationProperties() != null) {
+                Map<String, Object> props = new HashMap<>(config.getConfigurationProperties());
+                String factoryPid = (String) props.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+                if (factoryPid != null) {
+                    createFactoryConfigurationInternal(factoryPid, config.getPid(), props, false);
+                } else {
+                    loadConfiguration(config, props);
                 }
             }
         }
+    }
+
+    private static String getMetatypePid(final ComponentConfiguration config) {
+        final Object factoryPid = config.getConfigurationProperties().get(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+        return factoryPid instanceof String ? (String) factoryPid : config.getPid();
+    }
+
+    private Map<String, OCD> findInstalledOCDs(final List<ComponentConfiguration> configs) {
+        final Map<String, OCD> result = new HashMap<>();
+        final Set<String> metatypePids = configs.stream()
+                .filter(config -> config != null && config.getConfigurationProperties() != null)
+                .map(ConfigurationServiceImpl::getMetatypePid).collect(Collectors.toSet());
+        final Bundle[] bundles = this.bundleContext.getBundles();
+
+        if (metatypePids.isEmpty() || bundles == null || this.metaTypeService == null) {
+            return result;
+        }
+
+        for (final Bundle bundle : bundles) {
+            if ((bundle.getState() & (Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE)) != 0) {
+                addInstalledOCDs(bundle, metatypePids, result);
+            }
+        }
+
+        return result;
+    }
+
+    private void addInstalledOCDs(final Bundle bundle, final Set<String> metatypePids, final Map<String, OCD> result) {
+        final MetaTypeInformation information;
+
+        try {
+            information = this.metaTypeService.getMetaTypeInformation(bundle);
+        } catch (final Exception e) {
+            logger.warn("Error reading the metatype of bundle {}", bundle.getSymbolicName(), e);
+            return;
+        }
+
+        if (information == null) {
+            return;
+        }
+
+        final List<String> bundlePids = new ArrayList<>();
+        addAll(bundlePids, information.getPids());
+        addAll(bundlePids, information.getFactoryPids());
+
+        for (final String metatypePid : bundlePids) {
+            if (metatypePids.contains(metatypePid)) {
+                addInstalledOCD(bundle, metatypePid, result);
+            }
+        }
+    }
+
+    private static void addAll(final List<String> target, final String[] values) {
+        if (values != null) {
+            target.addAll(Arrays.asList(values));
+        }
+    }
+
+    private void addInstalledOCD(final Bundle bundle, final String metatypePid, final Map<String, OCD> result) {
+        try {
+            final Tmetadata metadata = ComponentUtil.readMetadata(bundle, metatypePid);
+            final OCD ocd = metadata != null ? ComponentUtil.getOCD(metadata, metatypePid) : null;
+
+            if (ocd != null) {
+                result.put(metatypePid, ocd);
+            }
+        } catch (final Exception e) {
+            logger.warn("Error reading the metatype {} of bundle {}", metatypePid, bundle.getSymbolicName(), e);
+        }
+    }
+
+    private void validateStartupSnapshot(final List<ComponentConfiguration> configs,
+            final Map<String, OCD> installedOCDs) throws KuraException {
+        final KuraException firstViolation = validateSnapshotConfigurations(configs,
+                config -> installedOCDs.get(getMetatypePid(config)));
+
+        if (firstViolation != null) {
+            logger.error("Stopping framework because the latest configuration snapshot failed strict validation");
+            stopFramework();
+            throw firstViolation;
+        }
+    }
+
+    private void validateRollbackSnapshot(final Collection<ComponentConfiguration> configs) throws KuraException {
+        final KuraException firstViolation = validateSnapshotConfigurations(configs,
+                config -> getSnapshotOCD(config.getPid(), config.getConfigurationProperties()));
+
+        if (firstViolation != null) {
+            throw firstViolation;
+        }
+    }
+
+    private KuraException validateSnapshotConfigurations(final Collection<ComponentConfiguration> configs,
+            final Function<ComponentConfiguration, OCD> ocdResolver) {
+        if (configs == null) {
+            return null;
+        }
+
+        final boolean strictValidation = isConfigurationValidationEnabled();
+        KuraException firstViolation = null;
+
+        for (final ComponentConfiguration config : configs) {
+            final KuraException violation = validateSnapshotConfiguration(config, ocdResolver, strictValidation);
+            if (firstViolation == null) {
+                firstViolation = violation;
+            }
+        }
+
+        return firstViolation;
+    }
+
+    private KuraException validateSnapshotConfiguration(final ComponentConfiguration config,
+            final Function<ComponentConfiguration, OCD> ocdResolver, final boolean strictValidation) {
+        if (config == null || config.getConfigurationProperties() == null) {
+            return null;
+        }
+
+        final OCD ocd = ocdResolver.apply(config);
+        final List<KuraException> violations = MetatypeValidator.findValueViolations(ocd,
+                config.getConfigurationProperties());
+
+        if (violations.isEmpty()) {
+            return null;
+        }
+
+        if (strictValidation) {
+            logValidationErrors(config.getPid(), violations);
+            return violations.get(0);
+        }
+
+        logValidationWarnings(config.getPid(), violations);
+        return null;
+    }
+
+    private void stopFramework() {
+        if (this.bundleContext == null) {
+            return;
+        }
+
+        try {
+            final Bundle systemBundle = this.bundleContext.getBundle(0);
+            if (systemBundle != null) {
+                systemBundle.stop();
+            }
+        } catch (final BundleException e) {
+            logger.error("Failed to stop OSGi framework after configuration validation failure", e);
+        }
+    }
+
+    private OCD getSnapshotOCD(final String pid, final Map<String, Object> properties) {
+        final Object factoryPid = properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+        if (factoryPid instanceof String) {
+            return this.ocds.get(factoryPid);
+        }
+
+        return getRegisteredOCD(pid);
     }
 
     private void loadConfiguration(ComponentConfiguration config, Map<String, Object> props) {
@@ -1481,7 +1663,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             final String pid = config.getPid();
             final Map<String, Object> properties = config.getConfigurationProperties();
 
-            if (properties == null || !this.allActivatedPids.contains(pid)) {
+            if (properties == null) {
+                continue;
+            }
+
+            final Object factoryPid = properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+            if (factoryPid instanceof String && !this.allActivatedPids.contains(pid)) {
+                mergeWithFactoryDefaults((String) factoryPid, pid, properties);
+                continue;
+            }
+
+            if (!this.allActivatedPids.contains(pid)) {
                 continue;
             }
 
@@ -1491,6 +1684,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 validateConfiguration(pid, ocd, mergeWithCurrentProperties(pid, ocd, properties), properties);
             }
         }
+    }
+
+    private Map<String, Object> mergeWithFactoryDefaults(String factoryPid, String pid, Map<String, Object> properties)
+            throws KuraException {
+        Map<String, Object> mergedProperties = new HashMap<>();
+        if (properties != null) {
+            mergedProperties.putAll(properties);
+        }
+
+        OCD ocd = this.ocds.get(factoryPid);
+        mergeWithDefaults(ocd, mergedProperties);
+        validateComponentValues(pid, ocd, mergedProperties);
+
+        return mergedProperties;
     }
 
     private Map<String, Object> mergeWithCurrentProperties(String pid, OCD ocd, Map<String, Object> properties)
@@ -1540,6 +1747,28 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         logValidationWarnings(pid, violations);
+    }
+
+    private void validateComponentValues(final String pid, final OCD ocd, final Map<String, Object> properties)
+            throws KuraException {
+        final List<KuraException> violations = MetatypeValidator.findValueViolations(ocd, properties);
+
+        if (violations.isEmpty()) {
+            return;
+        }
+
+        if (isConfigurationValidationEnabled()) {
+            logValidationErrors(pid, violations);
+            throw violations.get(0);
+        }
+
+        logValidationWarnings(pid, violations);
+    }
+
+    private void logValidationErrors(final String pid, final List<KuraException> violations) {
+        for (final KuraException violation : violations) {
+            logger.error("Invalid configuration for component {}: {}", pid, violation.getMessage());
+        }
     }
 
     private void logValidationWarnings(final String pid, final List<KuraException> violations) {
@@ -1781,7 +2010,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         Map<String, Object> defaultProperties = new HashMap<>();
         if (ocd != null) {
             try {
-                defaultProperties = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+                defaultProperties = getDefaultProperties(ocd);
             } catch (Exception e) {
                 logger.warn("Failed to get default properties for component: {}", pid, e);
             }

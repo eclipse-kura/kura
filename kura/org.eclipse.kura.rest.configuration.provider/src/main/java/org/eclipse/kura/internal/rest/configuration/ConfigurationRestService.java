@@ -215,6 +215,7 @@ public class ConfigurationRestService {
         configs.validate();
 
         final FailureHandler handler = new FailureHandler();
+        final AtomicBoolean anyCreated = new AtomicBoolean();
 
         for (final FactoryComponentConfigurationDTO config : configs.getConfigs()) {
             handler.runFallibleSubtask("create:" + config.getPid(), () -> {
@@ -223,11 +224,11 @@ public class ConfigurationRestService {
 
                 this.configurationService.createFactoryConfiguration(config.getFactoryPid(), config.getPid(),
                         castedProperties, false);
-
+                anyCreated.set(true);
             });
         }
 
-        if (configs.isTakeSnapshot()) {
+        if (configs.isTakeSnapshot() && anyCreated.get()) {
             handler.runFallibleSubtask(SNAPSHOT_SUBTASK_ID, () -> this.configurationService.snapshot());
         }
 

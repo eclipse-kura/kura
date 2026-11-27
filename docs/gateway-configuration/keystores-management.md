@@ -48,7 +48,8 @@ The configuration parameters are mapped to the SunPKCS11 provider parameters in 
 
 Both KeystoreService factories can keep a local cache of Certificate Revocation Lists (CRLs). The cached CRLs are returned by the `getCRLs()` and `getCRLStore()` methods of the KeystoreService API, and the HTTP Service and the SSL Manager Service use them in the revocation check of the certificates they validate.
 
-The KeystoreService acts only as a CRL cache: it downloads, stores, and exposes CRLs, while the final decision on whether and how to use the provided CRLs (for example, during certificate verification in a TLS handshake) is up to the consumer code.
+!!! note
+    The KeystoreService acts only as a CRL cache: it downloads, stores, and exposes CRLs, while the final decision on whether and how to use the provided CRLs (for example, during certificate verification in a TLS handshake) is up to the consumer code.
 
 The following options are available:
 
@@ -69,7 +70,8 @@ A downloaded CRL is stored only if all the following conditions hold:
 - the CRL is not older than the cached CRL of the same issuer: a CRL with a lower CRL number, or with an earlier this update date, is ignored;
 - the CRL passes the checks enabled by **Enable CRL Verification** and **Reject Expired CRLs**.
 
-**System clock synchronization:** CRL expiration checks compare the CRL `nextUpdate` timestamp against the system clock. If the system clock is not synchronized:
+!!! note "System clock synchronization"
+    CRL expiration checks compare the CRL `nextUpdate` timestamp against the system clock. If the system clock is not synchronized:
 
-- **Clock ahead of actual time:** valid CRLs may be treated as expired. With **Reject Expired CRLs** enabled, newly downloaded CRLs are discarded and cached CRLs are not returned until the clock is synchronized; because expired cached CRLs are still kept in the local store, any still-valid cached CRL becomes available again as soon as the clock is corrected.
-- **Clock behind actual time (for example before NTP synchronization on devices without an RTC):** expired CRLs may appear valid, so **Reject Expired CRLs** will not filter them out and automatic refreshes based on `nextUpdate` may be delayed (relying on **CRL Force Update Interval** and **CRL Check Interval** instead). Once the clock is synchronized, expiration filtering and refresh scheduling adjust automatically.
+    - **Clock ahead of actual time:** valid CRLs may be treated as expired. With **Reject Expired CRLs** enabled, newly downloaded CRLs are discarded and cached CRLs are not returned until the clock is synchronized; because expired cached CRLs are still kept in the local store, any still-valid cached CRL becomes available again as soon as the clock is corrected.
+    - **Clock behind actual time (for example before NTP synchronization on devices without an RTC):** expired CRLs may appear valid, so **Reject Expired CRLs** will not filter them out and automatic refreshes based on `nextUpdate` may be delayed (relying on **CRL Force Update Interval** and **CRL Check Interval** instead). Once the clock is synchronized, expiration filtering and refresh scheduling adjust automatically.

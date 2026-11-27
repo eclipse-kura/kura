@@ -30,8 +30,6 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
@@ -120,8 +118,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     protected abstract KeystoreInstance loadKeystore() throws KuraException;
 
-    protected abstract void saveKeystore(KeystoreInstance keystore)
-            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException;
+    protected abstract void saveKeystore(KeystoreInstance keystore) throws IOException, GeneralSecurityException;
 
     protected abstract String getCrlStorePath();
 

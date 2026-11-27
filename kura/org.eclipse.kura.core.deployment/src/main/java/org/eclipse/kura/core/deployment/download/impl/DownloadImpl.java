@@ -238,7 +238,7 @@ public class DownloadImpl implements ProgressListener {
                             "Failed to verify checksum with algorithm: " + hashAlgorithm);
                 }
             } catch (Exception e) {
-                deleteDeploymentPackageFile(dpFile);
+                deletePartiallyDownloadedFile(dpFile);
                 throw e;
             }
         }
@@ -304,14 +304,6 @@ public class DownloadImpl implements ProgressListener {
             Files.deleteIfExists(dpFile.toPath());
         } catch (IOException e) {
             s_logger.warn("Unable to delete the partially downloaded file {}", dpFile, e);
-        }
-    }
-
-    private static void deleteDeploymentPackageFile(final File dpFile) {
-        try {
-            Files.deleteIfExists(dpFile.toPath());
-        } catch (IOException e) {
-            s_logger.warn("Unable to delete the deployment package file {}", dpFile, e);
         }
     }
 }

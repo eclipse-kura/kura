@@ -16,6 +16,7 @@ mkdir -p /tmp/.kura/configuration
 cp "${KURA_DIR}/framework/config.ini" /tmp/.kura/configuration/
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+IgnoreUnrecognizedVMOptions"
+JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+ExitOnOutOfMemoryError"
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
 
